@@ -1,0 +1,4 @@
+# Minimal dependencies for the public Streamlit app.
+# The full root requirements.txt remains available for research and pipeline work.
+streamlit>=1.60,<2.0
+pandas>=2.3,<4.0
