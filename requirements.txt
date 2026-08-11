@@ -1,0 +1,11 @@
+pandas>=2.2,<3.0
+pyarrow>=17,<22
+duckdb>=1.1,<2.0
+matplotlib>=3.9,<4.0
+seaborn>=0.13,<1.0
+scikit-learn>=1.5,<2.0
+jupyterlab>=4.2,<5.0
+pytest>=8.3,<10.0
+streamlit>=1.38,<2.0
+plotly>=5.24,<7.0
+pdfplumber>=0.11,<1.0
