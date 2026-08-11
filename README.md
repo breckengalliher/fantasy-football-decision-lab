@@ -64,16 +64,16 @@ The sidebar also accepts a reviewed auction-value CSV. Start from
 by normalized exact player name, and unmatched model rows keep the internal
 last-season baseline.
 
-The supplied 2025 ESPN PPR cheat sheet is retained as an attributed historical
-reference in `data/external/espn_2025_ppr_auction_reference.csv`. It is not used
-as current pricing because its season, league size, roster, and quarterback
-scoring differ from the portfolio league.
+The default comparison uses ESPN's August 9, 2026 PPR Top 300. ESPN publishes
+10-team, $200 values, so the pipeline converts them to the portfolio's exact
+12-team, 180-player, $2,400 auction pool: kickers are excluded, every drafted
+player receives the $1 minimum, and the remaining dollars are allocated in
+proportion to ESPN's published prices. The independent six-point passing-TD
+model remains the primary recommendation. See
+[`espn-2026-market-source-audit.md`](espn-2026-market-source-audit.md).
 
-The default current market comparison now uses 148 published RealTime Fantasy
-Sports average auction results through July 27, 2026. Exact normalized names
-match 132 entries to the current model board. These are observed market prices,
-not league-specific fair values; the custom model remains the primary valuation.
-See [`rtsports-2026-market-source-audit.md`](rtsports-2026-market-source-audit.md).
+The prior RealTime Fantasy Sports benchmark and 2025 ESPN sheet remain retained
+as dated reference sources, but neither is loaded by default.
 
 ## Initial metrics
 

@@ -174,7 +174,9 @@ DEMO_PLAYERS = pd.DataFrame(
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 REAL_BOARD_PATH = PROJECT_ROOT / "data" / "processed" / "draft_board_2026_current.csv"
 RECENT_GAMES_PATH = PROJECT_ROOT / "data" / "processed" / "recent_games_2026.csv"
-DEFAULT_MARKET_PATH = PROJECT_ROOT / "data" / "external" / "rtsports_2026_aav.csv"
+DEFAULT_MARKET_PATH = (
+    PROJECT_ROOT / "data" / "external" / "espn_2026_ppr_12_team_auction.csv"
+)
 
 
 def add_injury_context(players: pd.DataFrame) -> pd.DataFrame:
@@ -194,9 +196,11 @@ def load_dashboard_players() -> tuple[pd.DataFrame, str]:
             frame, matched = apply_market_values(
                 frame,
                 pd.read_csv(DEFAULT_MARKET_PATH),
-                source_label="RTSports AAV (Jul 27, 2026)",
+                source_label="ESPN PPR calibrated to 12 teams (Aug 9, 2026)",
+                unmatched_value=float("nan"),
+                unmatched_source="No ESPN 12-team match",
             )
-            return frame, f"Historical model + {matched} current market matches"
+            return frame, f"Historical model + {matched} ESPN 12-team matches"
         return frame, "Historical model"
     return add_injury_context(DEMO_PLAYERS), "Illustrative fallback"
 
@@ -205,6 +209,8 @@ def apply_market_values(
     players: pd.DataFrame,
     market_values: pd.DataFrame,
     source_label: str = "Uploaded 2026 market file",
+    unmatched_value: float | None = None,
+    unmatched_source: str | None = None,
 ) -> tuple[pd.DataFrame, int]:
     """Apply reviewed player auction values using exact normalized names."""
     required = {"player", "market_value", "season"}
@@ -231,6 +237,10 @@ def apply_market_values(
     result["player_key"] = result["player"].astype(str).str.strip().str.casefold()
     incoming = market.set_index("player_key")["market_value"]
     matched = result["player_key"].isin(incoming.index)
+    if unmatched_value is not None:
+        result.loc[~matched, "market_value"] = unmatched_value
+    if unmatched_source is not None:
+        result.loc[~matched, "comparison_source"] = unmatched_source
     result.loc[matched, "market_value"] = result.loc[matched, "player_key"].map(incoming)
     result.loc[matched, "comparison_source"] = source_label
     return result.drop(columns="player_key"), int(matched.sum())

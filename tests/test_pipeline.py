@@ -6,6 +6,10 @@ import pytest
 
 from src.pipeline import allocate_auction_values, custom_fantasy_points
 from src.extract_rtsports_aav import extract_aav
+from src.extract_espn_cheatsheet import (
+    calibrate_to_12_team_league,
+    extract_top300_entries,
+)
 from dashboard.data import add_injury_context, apply_market_values
 
 
@@ -94,6 +98,20 @@ def test_rtsports_extract_is_current_and_complete():
     assert market["player"].is_unique
     assert market["market_value"].between(1, 100).all()
     assert {"QB", "RB", "WR", "TE", "DST"}.issubset(set(market["position"]))
+
+
+def test_espn_values_reconcile_to_12_team_league():
+    source_pdf = ROOT / "work" / "espn_2026_ppr_top300.pdf"
+    if not source_pdf.exists():
+        pytest.skip("Downloaded ESPN PDF is not retained in every checkout.")
+    source = extract_top300_entries(source_pdf)
+    market = calibrate_to_12_team_league(source)
+    assert len(source) == 300
+    assert len(market) == 180
+    assert market["market_value"].sum() == 2400
+    assert market["market_value"].ge(1).all()
+    assert market["position"].ne("K").all()
+    assert market["position"].eq("DST").sum() == 12
 
 
 def test_missing_injury_feed_is_never_interpreted_as_healthy():

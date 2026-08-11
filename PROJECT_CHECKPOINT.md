@@ -41,6 +41,8 @@ targets and weekly lineup decisions.
 - 148 reviewed market rows with 132 exact draft-board matches
 - Reproducible PDF-to-CSV market extractor and source audit
 - Injury-source quality assessment and explicit unavailable-data safeguards
+- Official ESPN 2026 PPR Top 300 extraction
+- ESPN-calibrated 12-team, 180-player, $2,400 comparison values
 
 ## Current limitations
 
@@ -54,5 +56,5 @@ targets and weekly lineup decisions.
 ## Resume point
 
 Connect current injury context, add consensus projection/ADP comparisons,
-complete visual polish, publish the repository to GitHub, and deploy the
-application.
+complete visual polish, and deploy the application. The repository is published
+to GitHub on the `main` branch.

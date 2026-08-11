@@ -178,14 +178,14 @@ draft_board = prepare_draft_board(PLAYERS)
 has_uploaded_market = draft_board["comparison_source"].eq(
     "Uploaded 2026 market file"
 ).any()
-has_rtsports_market = draft_board["comparison_source"].str.startswith(
-    "RTSports AAV", na=False
+has_espn_market = draft_board["comparison_source"].str.startswith(
+    "ESPN PPR calibrated", na=False
 ).any()
 comparison_name = (
     "uploaded market"
     if has_uploaded_market
-    else "RTSports 2026 AAV"
-    if has_rtsports_market
+    else "ESPN 12-team PPR value"
+    if has_espn_market
     else "2025 baseline"
 )
 
@@ -351,7 +351,7 @@ elif workspace == "Draft Target Finder":
     metric_two.metric("Allocated budget", f"${int(draft_board['model_value'].sum()):,}")
     metric_three.metric("Targets found", f"{len(filtered)}")
     metric_four.metric(
-        "Best demo edge",
+        "Best value difference",
         f"${int(filtered['auction_edge'].max())}" if not filtered.empty else "—",
     )
 
