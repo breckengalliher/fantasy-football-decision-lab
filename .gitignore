@@ -8,5 +8,7 @@ data/raw/*
 data/processed/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
+!data/processed/draft_board_2026_current.csv
+!data/processed/recent_games_2026.csv
 *.pyc
 .DS_Store

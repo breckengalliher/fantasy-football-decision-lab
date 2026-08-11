@@ -55,6 +55,10 @@ python src/pipeline.py
 streamlit run dashboard/app.py
 ```
 
+The public prototype uses the committed `draft_board_2026_current.csv` and
+`recent_games_2026.csv` as a dated 2026 snapshot. Refresh the pipeline and
+commit both files when the underlying roster, schedule, or model inputs change.
+
 On Windows, `run_dashboard.ps1` provides a convenient launcher after Python and
 the requirements are installed.
 
