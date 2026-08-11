@@ -9,12 +9,21 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
-from dashboard.data import (
-    apply_market_values,
-    load_dashboard_players,
-    player_history,
-    prepare_draft_board,
-)
+try:
+    from dashboard.data import (
+        apply_market_values,
+        load_dashboard_players,
+        player_history,
+        prepare_draft_board,
+    )
+except ModuleNotFoundError:
+    # Streamlit Community Cloud executes this file with dashboard/ first on sys.path.
+    from data import (
+        apply_market_values,
+        load_dashboard_players,
+        player_history,
+        prepare_draft_board,
+    )
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
