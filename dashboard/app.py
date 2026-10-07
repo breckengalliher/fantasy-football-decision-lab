@@ -212,6 +212,29 @@ h1,h2,h3 { letter-spacing:-.025em; }
 .usage-score strong { display:block; color:var(--navy); font-size:1.55rem; line-height:1; letter-spacing:-.03em; }
 .usage-score span { color:var(--muted); font-size:.62rem; }
 .usage-insight { border-left:4px solid var(--gold); background:#edf4e8; color:var(--ink); padding:.66rem .8rem; border-radius:9px; font-size:.75rem; line-height:1.4; margin-top:.65rem; }
+.comparison-panel-head { display:flex; align-items:flex-end; justify-content:space-between; gap:1rem; margin:.72rem 0 .65rem; }
+.comparison-panel-head h3 { margin:0; color:var(--navy); font-size:1.05rem; }
+.comparison-panel-head p { margin:.12rem 0 0; color:var(--muted); font-size:.68rem; }
+.panel-key { color:var(--muted); font-size:.62rem; white-space:nowrap; }
+.projection-board,.form-board { display:grid; gap:.58rem; }
+.projection-row,.form-row { display:grid; grid-template-columns:minmax(180px,.85fr) minmax(310px,1.55fr) 82px; align-items:center; gap:.9rem; padding:.72rem .82rem; background:var(--card); border:1px solid var(--line); border-radius:13px; }
+.projection-row.preferred,.form-row.preferred { border-color:var(--action); box-shadow:0 7px 18px rgba(0,34,68,.07); }
+.projection-lane { position:relative; height:38px; margin:0 .2rem; }
+.projection-lane-base { position:absolute; top:16px; left:0; right:0; height:7px; border-radius:999px; background:#e0e6e8; }
+.projection-lane-range { position:absolute; top:16px; height:7px; border-radius:999px; background:linear-gradient(90deg,#8b999f,#466574); }
+.projection-lane-range::before,.projection-lane-range::after { content:""; position:absolute; top:-4px; width:2px; height:15px; background:#53666f; }
+.projection-lane-range::before { left:0; }.projection-lane-range::after { right:0; }
+.projection-dot { position:absolute; top:9px; width:21px; height:21px; border:3px solid white; border-radius:50%; background:var(--navy); box-shadow:0 1px 5px rgba(0,0,0,.22); transform:translateX(-50%); }
+.projection-row.preferred .projection-dot { background:var(--action); }
+.projection-labels { display:flex; justify-content:space-between; color:var(--muted); font-size:.6rem; margin-top:25px; }
+.projection-score { text-align:right; }.projection-score strong { display:block; color:var(--navy); font-size:1.55rem; line-height:1; }.projection-score span { color:var(--muted); font-size:.62rem; }
+.panel-insight { display:flex; align-items:center; gap:.65rem; margin-top:.65rem; padding:.62rem .75rem; border-radius:10px; background:#edf4e8; color:var(--ink); font-size:.72rem; }
+.panel-insight b { color:#397f18; text-transform:uppercase; letter-spacing:.06em; font-size:.6rem; white-space:nowrap; }
+.form-weeks { display:grid; grid-template-columns:repeat(4,minmax(45px,1fr)); gap:.38rem; }
+.week-chip { text-align:center; border-radius:9px; background:#eef2f3; padding:.34rem .2rem; border:1px solid #e0e5e7; }
+.week-chip span { display:block; color:var(--muted); font-size:.55rem; text-transform:uppercase; letter-spacing:.05em; }.week-chip strong { display:block; color:var(--navy); font-size:.82rem; margin-top:.05rem; }
+.week-chip.high { background:#edf6e8; border-color:#b9d9a7; }.week-chip.low { background:#f7eee6; border-color:#e5c9ad; }
+.trend-summary { text-align:right; }.trend-summary strong { display:block; font-size:.78rem; color:var(--navy); }.trend-summary span { display:block; color:var(--muted); font-size:.6rem; margin-top:.12rem; }
 @media(max-width:1100px) {
   .context-grid { grid-template-columns:1fr; }
 }
@@ -230,6 +253,7 @@ h1,h2,h3 { letter-spacing:-.025em; }
   .driver-grid { grid-template-columns:1fr; }
   .advanced-stat-grid { grid-template-columns:1fr; }
   .usage-player { grid-template-columns:minmax(170px,.9fr) minmax(160px,1.1fr) 78px; }
+  .projection-row,.form-row { grid-template-columns:minmax(165px,.8fr) minmax(230px,1.3fr) 72px; }
 }
 @media(max-width:520px) {
   div[data-baseweb="select"] > div { flex-wrap:wrap; }
@@ -238,6 +262,10 @@ h1,h2,h3 { letter-spacing:-.025em; }
   .projection-scope { grid-template-columns:1fr; }
   .usage-player { grid-template-columns:1fr 72px; }
   .usage-track-wrap { grid-column:1/-1; grid-row:2; }
+  .comparison-panel-head { align-items:flex-start; flex-direction:column; gap:.25rem; }
+  .projection-row,.form-row { grid-template-columns:1fr 68px; gap:.55rem; }
+  .projection-lane,.form-weeks { grid-column:1/-1; grid-row:2; }
+  .panel-insight { align-items:flex-start; flex-direction:column; gap:.2rem; }
 }
 </style>
 """,
@@ -577,10 +605,8 @@ if page == "Decision Room":
                     unsafe_allow_html=True,
                 )
 
-        st.markdown('<div class="section-title">Comparison Tool</div><div class="section-copy">Explore the selected players through calibrated projection ranges, weekly production, and repeatable usage. Hover or zoom for more detail.</div>', unsafe_allow_html=True)
-        range_tab, trend_tab, usage_tab = st.tabs(["Projection range", "Weekly trend", "Usage & production"])
-        chart_colors = ["#69be28", "#002244", "#a5acaf"][:len(compare)]
-
+        st.markdown('<div class="section-title">Comparison Tool</div><div class="section-copy">Compare each player’s projection, weekly form, and repeatable usage in one place.</div>', unsafe_allow_html=True)
+        range_tab, trend_tab, usage_tab = st.tabs(["Projection", "Weekly form", "Usage"])
         detail_records = []
         for _, detail_row in compare.iterrows():
             detail_total = detail_row.get("betting_total_live")
@@ -601,26 +627,38 @@ if page == "Decision Room":
         comparison_details = pd.DataFrame(detail_records)
 
         with range_tab:
-            range_custom = []
-            for detail in detail_records:
-                range_custom.append([
-                    detail["Team"], detail["Record"], detail["Opponent"], detail["Site"], detail["Kickoff"],
-                    detail["Availability"], detail["Game total"], detail["Range"],
-                ])
-            range_fig = go.Figure(go.Scatter(
-                x=compare["median_ppr"], y=compare["player"], mode="markers+text",
-                text=compare["median_ppr"].map(lambda value: f"{value:.1f}"), textposition="top center",
-                marker=dict(size=18, color=chart_colors, line=dict(color="#ffffff", width=2)),
-                error_x=dict(type="data", symmetric=False, array=compare["ceiling_ppr"] - compare["median_ppr"], arrayminus=compare["median_ppr"] - compare["floor_ppr"], color="#69777e", thickness=4, width=8),
-                customdata=range_custom,
-                hovertemplate="<b>%{y}</b> · %{customdata[0]} %{customdata[1]}<br>Median %{x:.1f} PPR · range %{customdata[7]}<br>%{customdata[3]} vs %{customdata[2]} · %{customdata[4]}<br>Availability: %{customdata[5]}<br>Game total: %{customdata[6]}<extra></extra>",
-            ))
-            range_fig.update_layout(title=f"Week {NEXT_WEEK} P10–P90 projection range", xaxis_title="PPR points", yaxis_title="", showlegend=False)
-            range_fig.update_yaxes(autorange="reversed")
-            range_fig.update_xaxes(range=[max(0, float(compare["floor_ppr"].min()) - 3), float(compare["ceiling_ppr"].max()) + 3])
-            st.plotly_chart(polish(range_fig, 340), width="stretch", config={"displayModeBar": False})
+            range_min = max(0.0, float(compare["floor_ppr"].min()) - 2.0)
+            range_max = float(compare["ceiling_ppr"].max()) + 2.0
+            range_span = max(range_max - range_min, 1.0)
+            projection_rows = []
+            for _, range_row in compare.iterrows():
+                floor = float(range_row["floor_ppr"])
+                median = float(range_row["median_ppr"])
+                ceiling = float(range_row["ceiling_ppr"])
+                left = (floor - range_min) / range_span * 100
+                width = (ceiling - floor) / range_span * 100
+                dot = (median - range_min) / range_span * 100
+                photo = player_photo_html(range_row.get("headshot_url"), range_row["player"])
+                logo_url = team_logo_url(range_row.get("team"))
+                logo = f'<img src="{html.escape(logo_url, quote=True)}" alt="{html.escape(str(range_row["team"]), quote=True)} logo">' if logo_url else ""
+                identity = (
+                    f'<div class="usage-identity">{photo}<div><div class="usage-name">{html.escape(str(range_row["player"]))}</div>'
+                    f'<div class="usage-team">{logo}<span>{html.escape(str(range_row["team"]))} · {html.escape(str(range_row.get("position", position)))} vs {html.escape(str(range_row["next_opponent"]))}</span></div></div></div>'
+                )
+                projection_rows.append(
+                    f'<article class="projection-row{" preferred" if range_row["player"] == leader["player"] else ""}">{identity}'
+                    f'<div class="projection-lane" title="Floor is the downside estimate, projection is the median, and ceiling is the upside estimate.">'
+                    f'<div class="projection-lane-base"></div><div class="projection-lane-range" style="left:{left:.1f}%;width:{width:.1f}%"></div>'
+                    f'<div class="projection-dot" style="left:{dot:.1f}%"></div><div class="projection-labels"><span>Floor {floor:.1f}</span><span>Ceiling {ceiling:.1f}</span></div></div>'
+                    f'<div class="projection-score"><strong>{median:.1f}</strong><span>Projected PPR</span></div></article>'
+                )
             overlap = max(0.0, min(compare["ceiling_ppr"]) - max(compare["floor_ppr"]))
-            st.caption(f"All selected ranges overlap by {overlap:.1f} PPR. The median gap is {projection_spread:.1f} PPR, so the ordering should be treated as {'a lean' if projection_spread < 2.5 else 'meaningful separation'}.")
+            range_insight = f'{leader["player"]} leads by {projection_spread:.1f} PPR. The ranges overlap by {overlap:.1f}, so this is {"a close lean" if projection_spread < 2.5 else "a meaningful edge"}.'
+            st.markdown(
+                f'<div class="comparison-panel-head"><div><h3>Week {NEXT_WEEK} Projection</h3><p>Floor, median projection, and ceiling shown together.</p></div><div class="panel-key">Floor ← range → Ceiling</div></div>'
+                f'<div class="projection-board">{"".join(projection_rows)}</div><div class="panel-insight"><b>Quick read</b><span>{html.escape(range_insight)}</span></div>',
+                unsafe_allow_html=True,
+            )
 
         with trend_tab:
             weekly_name_column = "player_display_name" if "player_display_name" in WEEKLY.columns else "player_name"
@@ -631,25 +669,53 @@ if page == "Decision Room":
                 trend_history["display_ppr"] = pd.to_numeric(trend_history["fantasy_points_ppr"], errors="coerce")
                 if position == "QB" and QB_PASS_TD_POINTS != 4 and "passing_tds" in trend_history:
                     trend_history["display_ppr"] += (QB_PASS_TD_POINTS - 4) * pd.to_numeric(trend_history["passing_tds"], errors="coerce").fillna(0)
-                trend_fig = go.Figure()
-                for color, player_name in zip(chart_colors, compare["player"]):
+                form_rows = []
+                recent_leaders = []
+                displayed_weeks = sorted(pd.to_numeric(trend_history["week"], errors="coerce").dropna().astype(int).unique().tolist())
+                max_weeks = max(len(displayed_weeks), 1)
+                for _, form_player in compare.iterrows():
+                    player_name = form_player["player"]
                     player_history = trend_history.loc[trend_history[weekly_name_column].eq(player_name)].sort_values("week")
-                    hover_values = list(zip(
-                        player_history.get("opponent_team", pd.Series("—", index=player_history.index)),
-                        player_history.get("targets", pd.Series(0, index=player_history.index)),
-                        player_history.get("carries", pd.Series(0, index=player_history.index)),
-                        player_history.get("receptions", pd.Series(0, index=player_history.index)),
-                        player_history.get("receiving_yards", pd.Series(0, index=player_history.index)),
-                        player_history.get("rushing_yards", pd.Series(0, index=player_history.index)),
-                    ))
-                    trend_fig.add_trace(go.Scatter(
-                        x=player_history["week"], y=player_history["display_ppr"], mode="lines+markers", name=player_name,
-                        line=dict(color=color, width=4 if player_name == leader["player"] else 3), marker=dict(size=9), customdata=hover_values,
-                        hovertemplate="<b>%{fullData.name}</b> · Week %{x}<br>%{y:.1f} PPR vs %{customdata[0]}<br>Targets %{customdata[1]:.0f} · carries %{customdata[2]:.0f}<br>Receptions %{customdata[3]:.0f} · receiving yards %{customdata[4]:.0f}<br>Rushing yards %{customdata[5]:.0f}<extra></extra>",
-                    ))
-                trend_fig.update_layout(title="Weekly PPR production", xaxis_title="NFL week", yaxis_title="PPR points", hovermode="x unified")
-                trend_fig.update_xaxes(dtick=1)
-                st.plotly_chart(polish(trend_fig, 380), width="stretch", config={"displayModeBar": False})
+                    scores = player_history["display_ppr"].dropna().tolist()
+                    recent_average = sum(scores[-2:]) / max(len(scores[-2:]), 1)
+                    recent_leaders.append((recent_average, player_name))
+                    chips = []
+                    history_by_week = {int(game["week"]): game for _, game in player_history.iterrows()}
+                    for week_number in displayed_weeks:
+                        game = history_by_week.get(week_number)
+                        if game is None:
+                            chips.append(f'<div class="week-chip" title="No recorded game"><span>W{week_number}</span><strong>—</strong></div>')
+                            continue
+                        score = float(game["display_ppr"])
+                        chip_class = " high" if score >= 25 else " low" if score < 15 else ""
+                        opponent = game.get("opponent_team")
+                        opponent_text = f' vs {opponent}' if opponent is not None and pd.notna(opponent) else ""
+                        chips.append(f'<div class="week-chip{chip_class}" title="Week {week_number}{html.escape(opponent_text)}"><span>W{week_number}</span><strong>{score:.1f}</strong></div>')
+                    photo = player_photo_html(form_player.get("headshot_url"), player_name)
+                    logo_url = team_logo_url(form_player.get("team"))
+                    logo = f'<img src="{html.escape(logo_url, quote=True)}" alt="{html.escape(str(form_player["team"]), quote=True)} logo">' if logo_url else ""
+                    identity = (
+                        f'<div class="usage-identity">{photo}<div><div class="usage-name">{html.escape(str(player_name))}</div>'
+                        f'<div class="usage-team">{logo}<span>{html.escape(str(form_player["team"]))} · {html.escape(str(form_player.get("position", position)))}</span></div></div></div>'
+                    )
+                    if len(scores) >= 2:
+                        change = scores[-1] - scores[-2]
+                        trend_word = "Trending up" if change > 2 else "Trending down" if change < -2 else "Holding steady"
+                        trend_detail = f'{change:+.1f} from prior game'
+                    else:
+                        trend_word, trend_detail = "Early sample", "One result available"
+                    form_rows.append(
+                        f'<article class="form-row{" preferred" if player_name == leader["player"] else ""}">{identity}'
+                        f'<div class="form-weeks" style="grid-template-columns:repeat({max_weeks},minmax(45px,1fr))">{"".join(chips)}</div>'
+                        f'<div class="trend-summary"><strong>{html.escape(trend_word)}</strong><span>{html.escape(trend_detail)}</span></div></article>'
+                    )
+                recent_leaders.sort(reverse=True)
+                form_insight = f'{recent_leaders[0][1]} has the strongest two-game form at {recent_leaders[0][0]:.1f} PPR per game.'
+                st.markdown(
+                    f'<div class="comparison-panel-head"><div><h3>Weekly Form</h3><p>Every current-season result, with recent direction at a glance.</p></div><div class="panel-key">Green 25+ · Orange under 15</div></div>'
+                    f'<div class="form-board">{"".join(form_rows)}</div><div class="panel-insight"><b>Quick read</b><span>{html.escape(form_insight)}</span></div>',
+                    unsafe_allow_html=True,
+                )
 
         with usage_tab:
             metric_options = {
