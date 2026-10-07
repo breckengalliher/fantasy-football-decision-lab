@@ -38,6 +38,7 @@ st.set_page_config(page_title="Start / Sit Lab", page_icon="🏈", layout="wide"
 st.markdown(
     """
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Bungee&display=swap');
 :root { --ink:#071b2c; --muted:#5f6b73; --navy:#002244; --cream:#f3f6f7; --card:#ffffff; --line:#d7dde0; --teal:#397f18; --gold:#69be28; --wolf:#a5acaf; }
 .stApp { background:var(--cream); color:var(--ink); }
 [data-testid="stSidebar"] { background:var(--navy); }
@@ -47,7 +48,12 @@ st.markdown(
 .block-container { max-width:1440px; padding-top:1.55rem; }
 h1,h2,h3 { letter-spacing:-.025em; }
 .hero { display:flex; align-items:flex-end; justify-content:space-between; gap:2rem; padding:0; margin:0; }
-.hero h1 { margin:.2rem 0 .45rem; font-size:2.65rem; line-height:1; }
+.hero h1 { margin:.12rem 0 .18rem; font-size:2.55rem; line-height:1.02; }
+.graffiti-title { font-family:'Bungee',Impact,sans-serif; color:var(--navy); letter-spacing:.015em !important; text-transform:uppercase; text-shadow:2px 2px 0 rgba(105,190,40,.28); }
+.graffiti-title span { color:var(--gold); text-shadow:2px 2px 0 rgba(0,34,68,.22); }
+.hero-subtitle { color:#397f18; font-size:.76rem; font-weight:850; letter-spacing:.13em; text-transform:uppercase; margin-bottom:.32rem; }
+.sidebar-brand { font-family:'Bungee',Impact,sans-serif; color:#f7fafb; font-size:1.18rem; line-height:1.12; letter-spacing:.02em; margin:.15rem 0 .2rem; }
+.sidebar-brand span { color:#9ee468; }
 .hero p { color:var(--muted); margin:0; max-width:720px; }
 .eyebrow { color:#397f18; text-transform:uppercase; letter-spacing:.13em; font-size:.74rem; font-weight:800; }
 .fresh { color:var(--muted); text-align:right; font-size:.78rem; white-space:nowrap; }
@@ -167,6 +173,14 @@ h1,h2,h3 { letter-spacing:-.025em; }
 .driver-negative { color:#c45a1a; }
 .driver-final { background:#edf4e8; }
 .driver-final .driver-value { color:#397f18; font-size:.86rem; }
+.advanced-stat-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.7rem; margin-top:.65rem; }
+.advanced-stat-card { background:var(--card); border:1px solid var(--line); border-radius:11px; overflow:hidden; min-width:0; }
+.advanced-stat-head { background:#eef2f3; padding:.65rem .75rem; }
+.advanced-stat-head strong { display:block; color:var(--ink); font-size:.82rem; line-height:1.2; overflow-wrap:anywhere; }
+.advanced-stat-head span { color:var(--muted); font-size:.65rem; }
+.advanced-stat-row { display:flex; justify-content:space-between; gap:.6rem; padding:.48rem .7rem; border-top:1px solid #e7eaec; font-size:.68rem; line-height:1.25; }
+.advanced-stat-row span { color:var(--muted); }
+.advanced-stat-row b { color:var(--ink); text-align:right; }
 .context-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.85rem; width:100%; }
 .context-card { background:var(--card); border:1px solid var(--line); border-radius:14px; overflow:hidden; min-width:0; }
 .context-card h3 { margin:0; padding:.9rem 1rem; background:#ebe7dc; color:var(--ink); font-size:1.05rem; display:flex; align-items:center; gap:.6rem; }
@@ -192,6 +206,7 @@ h1,h2,h3 { letter-spacing:-.025em; }
   [data-testid="stSidebar"] { width:min(18.75rem, 88vw) !important; }
   .game-status { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .driver-grid { grid-template-columns:1fr; }
+  .advanced-stat-grid { grid-template-columns:1fr; }
 }
 @media(max-width:520px) {
   div[data-baseweb="select"] > div { flex-wrap:wrap; }
@@ -259,7 +274,7 @@ def player_photo_html(value: object, label: object) -> str:
 
 
 with st.sidebar:
-    st.markdown("## ◒ Start / Sit Lab")
+    st.markdown('<div class="sidebar-brand">START <span>/</span> SIT LAB</div>', unsafe_allow_html=True)
     st.caption("Fantasy decision tools")
     page = st.radio("View", ["Decision Room", "Player Trends", "How It Works"], label_visibility="collapsed")
 season = SEASON
@@ -274,7 +289,8 @@ with st.container(border=True):
     with header_left:
         st.markdown(
             f'<div class="hero"><div><div class="eyebrow">Week {header_week} · {season}</div>'
-            '<h1>Player Comparison Lab</h1><p>Compare up to three players and make the final lineup call.</p></div></div>',
+            '<h1 class="graffiti-title">START <span>/</span> SIT LAB</h1><div class="hero-subtitle">Player Comparison</div>'
+            '<p>Compare up to three players and make the final lineup call.</p></div></div>',
             unsafe_allow_html=True,
         )
     with header_right:
@@ -736,18 +752,35 @@ if page == "Decision Room":
             st.caption("Arrows show whether a driver nudges the outlook up, leaves it essentially unchanged, or pulls it down. They do not represent separate point totals that should be added together.")
 
             if st.toggle("View detailed statistics", key=f"advanced_projection_stats_{position}"):
-                view = compare[common + position_stats[position] + ["matchup_label", "points_allowed", "projected_ppr", "confidence"]].copy()
-                st.dataframe(view, hide_index=True, width="stretch", column_config={
-                    "player":"Player", "team":"Team", "next_opponent":"Opponent", "games_played":"GP",
-                    "season_ppr":st.column_config.NumberColumn("Season PPR/G", format="%.1f"),
-                    "recent_ppr":st.column_config.NumberColumn("Recent PPR/G", format="%.1f"),
-                    "recent_opportunities":st.column_config.NumberColumn("Last 3 opp/G", format="%.1f"),
-                    "ytd_attempts":"Pass att", "ytd_carries":"Carries", "ytd_targets":"Targets", "ytd_receptions":"Rec",
-                    "ytd_passing_yards":"Pass yds", "ytd_rushing_yards":"Rush yds", "ytd_receiving_yards":"Rec yds",
-                    "ytd_passing_tds":"Pass TD", "ytd_rushing_tds":"Rush TD", "ytd_receiving_tds":"Rec TD",
-                    "matchup_label":"Matchup", "points_allowed":st.column_config.NumberColumn("Opp. PPR allowed", format="%.1f"),
-                    "projected_ppr":st.column_config.NumberColumn("Projection", format="%.1f"), "confidence":"Confidence",
-                })
+                stat_labels = {
+                    "games_played": "Games played", "season_ppr": "Season PPR/G", "recent_ppr": "Recent PPR/G",
+                    "recent_opportunities": "Last 3 opportunities/G", "ytd_attempts": "Pass attempts", "ytd_carries": "Carries",
+                    "ytd_targets": "Targets", "ytd_receptions": "Receptions", "ytd_passing_yards": "Passing yards",
+                    "ytd_rushing_yards": "Rushing yards", "ytd_receiving_yards": "Receiving yards", "ytd_passing_tds": "Passing TDs",
+                    "ytd_rushing_tds": "Rushing TDs", "ytd_receiving_tds": "Receiving TDs", "matchup_label": "Matchup",
+                    "points_allowed": "Opponent PPR allowed", "projected_ppr": "Median projection", "confidence": "Sample confidence",
+                }
+                decimal_stats = {"season_ppr", "recent_ppr", "recent_opportunities", "points_allowed", "projected_ppr"}
+                advanced_cards = []
+                advanced_columns = ["games_played", "season_ppr", "recent_ppr", "recent_opportunities", *position_stats[position], "matchup_label", "points_allowed", "projected_ppr", "confidence"]
+                for _, stat_row in compare.iterrows():
+                    stat_rows_html = ""
+                    for stat_column in advanced_columns:
+                        stat_value = stat_row.get(stat_column)
+                        if stat_value is None or pd.isna(stat_value):
+                            display_value = "—"
+                        elif stat_column in decimal_stats:
+                            display_value = f"{float(stat_value):.1f}"
+                        elif isinstance(stat_value, (int, float)):
+                            display_value = f"{float(stat_value):.0f}"
+                        else:
+                            display_value = str(stat_value)
+                        stat_rows_html += f'<div class="advanced-stat-row"><span>{html.escape(stat_labels[stat_column])}</span><b>{html.escape(display_value)}</b></div>'
+                    advanced_cards.append(
+                        f'<article class="advanced-stat-card"><div class="advanced-stat-head"><strong>{html.escape(str(stat_row["player"]))}</strong>'
+                        f'<span>{html.escape(str(stat_row["team"]))} · {html.escape(str(stat_row["position"]))} · vs {html.escape(str(stat_row["next_opponent"]))}</span></div>{stat_rows_html}</article>'
+                    )
+                st.markdown(f'<div class="advanced-stat-grid">{"".join(advanced_cards)}</div>', unsafe_allow_html=True)
 
         with st.expander("More matchup context"):
             st.caption("Additional live information for your final decision. None of these details changes our ranking.")
