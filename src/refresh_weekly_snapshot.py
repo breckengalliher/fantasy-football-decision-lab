@@ -31,6 +31,7 @@ from dashboard.providers.sportsdataio import SportsDataIOClient, enrich_board
 from dashboard.providers.injuries import enrich_injuries, load_daily_injury_context
 from dashboard.snapshots import build_personnel_context
 from dashboard.reporting import enrich_with_reporting, load_reporting_context
+from dashboard.headshots import enrich_with_headshots, load_headshot_context
 
 
 PROCESSED = ROOT / "data" / "processed"
@@ -99,6 +100,8 @@ def main() -> None:
     board = enrich_board(board, context)
     reporting_context = load_reporting_context(board)
     board = enrich_with_reporting(board, reporting_context)
+    headshot_context = load_headshot_context()
+    board = enrich_with_headshots(board, headshot_context)
     prior_weekly = load_prior_weekly_data(season)
     scoring_boards = build_scoring_format_boards(board, weekly, prior_weekly, next_week)
     board = scoring_boards[4]
@@ -121,6 +124,7 @@ def main() -> None:
         columns=["player", "team", "source_type", "source_name", "author", "text", "url", "published_at"]
     )
     atomic_parquet(reporting_records, PROCESSED / "reporting_context_current.parquet")
+    atomic_parquet(headshot_context.records, PROCESSED / "headshot_context_current.parquet")
 
     eligible = board.loc[board["is_roster_relevant"] & board["next_opponent"].notna()]
     pool_audit = audit_player_pool(board)
@@ -148,6 +152,9 @@ def main() -> None:
         "journalism_status": reporting_context.journalism_status,
         "reporter_social_status": reporting_context.social_status,
         "reporting_records": int(len(reporting_context.records)),
+        "headshot_refreshed_at": headshot_context.checked_at,
+        "headshot_status": headshot_context.status,
+        "headshot_coverage": float(eligible["headshot_url"].notna().mean()),
         "depth_chart_players": int(len(context.depth_charts)),
         "snap_coverage": float(eligible["latest_snap_pct"].notna().mean()),
         "weather_coverage": float(eligible["weather_summary_live"].notna().mean()),

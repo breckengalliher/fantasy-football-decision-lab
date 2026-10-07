@@ -7,6 +7,7 @@ SOURCE_ATTRIBUTION = """
 - **Injuries and practice participation:** [nflverse daily injury reports](https://github.com/nflverse/nflverse-data), with [Sleeper](https://docs.sleeper.com/) used only as a once-daily fallback or disagreement check. nflverse remains authoritative when both sources provide a designation.
 - **Pregame weather, game totals and depth charts:** [SportsDataIO](https://sportsdata.io/), when the provider connection is available. The time shown in the app is when this app last retrieved the provider data—not a guarantee that every underlying report changed at that time.
 - **Narrative reporting context:** [ESPN's official NFL RSS feed](https://www.espn.com/espn/rss/nfl/news) and recent public posts returned by the [Bluesky public API](https://bsky.network/docs/category/http-reference/) from accounts whose profiles identify reporting or editorial work. Links are shown with each matched outlook. Reporting is summarized for context only and is never a model input.
+- **Player roster photos:** current active-player identifiers from [Sleeper](https://docs.sleeper.com/), displayed from Sleeper's image CDN when a photo is available. Missing photos are left blank.
 - **Model calculations and Start/Sit labels:** produced by this app from the credited source data. They are not rankings or projections supplied by nflverse, SportsDataIO, the NFL, ESPN, or the listed teams.
 
 Missing provider data is labeled unavailable or not connected; it is never silently interpreted as healthy, active, or unchanged.

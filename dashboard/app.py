@@ -54,6 +54,10 @@ h1,h2,h3 { letter-spacing:-.025em; }
 .verdict .tag { display:inline-block; background:#edf4e8; color:#397f18; border-radius:999px; padding:.28rem .52rem; letter-spacing:.12em; font-size:.67rem; font-weight:800; }
 .verdict.start .tag { background:rgba(105,190,40,.16); color:#9ee468; }
 .verdict .name { font-size:1.7rem; font-weight:750; margin:.65rem 0 .1rem; }
+.player-heading { display:flex; align-items:center; gap:.75rem; margin:.65rem 0 .1rem; min-width:0; }
+.player-heading .name { margin:0; overflow-wrap:anywhere; }
+.player-photo { width:58px; height:58px; flex:0 0 58px; border-radius:50%; background-size:cover; background-position:center top; background-repeat:no-repeat; background-color:#e8ecee; border:2px solid #d7dde0; }
+.verdict.start .player-photo { border-color:#69be28; background-color:#173854; }
 .verdict .opponent { color:var(--muted); font-size:.8rem; }
 .verdict.start .opponent { color:#c0c8cc; }
 .verdict .score { color:var(--teal); font-size:1.35rem; font-weight:750; margin-top:.8rem; }
@@ -76,7 +80,8 @@ h1,h2,h3 { letter-spacing:-.025em; }
 .warning { border-left:4px solid var(--gold); background:#eef5e9; color:#29451f; padding:.72rem .9rem; border-radius:8px; font-size:.84rem; margin:.85rem 0; }
 .context-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.85rem; width:100%; }
 .context-card { background:var(--card); border:1px solid var(--line); border-radius:14px; overflow:hidden; min-width:0; }
-.context-card h3 { margin:0; padding:.9rem 1rem; background:#ebe7dc; color:var(--ink); font-size:1.05rem; }
+.context-card h3 { margin:0; padding:.9rem 1rem; background:#ebe7dc; color:var(--ink); font-size:1.05rem; display:flex; align-items:center; gap:.6rem; }
+.context-card .player-photo { width:42px; height:42px; flex-basis:42px; border-width:1px; }
 .context-row { display:grid; grid-template-columns:minmax(112px,.78fr) minmax(0,1.22fr); gap:.7rem; padding:.67rem 1rem; border-top:1px solid #e5e8e9; align-items:start; }
 .context-label { color:var(--muted); font-size:.72rem; font-weight:800; letter-spacing:.02em; line-height:1.25; }
 .context-value { color:var(--ink); font-size:.82rem; font-weight:600; line-height:1.35; overflow-wrap:anywhere; }
@@ -149,6 +154,19 @@ def polish(fig: go.Figure, height: int = 390) -> go.Figure:
     fig.update_xaxes(gridcolor="#e3e8ea", zeroline=False)
     fig.update_yaxes(gridcolor="#e3e8ea", zeroline=False)
     return fig
+
+
+def player_photo_html(value: object, label: object) -> str:
+    """Render a safe CSS headshot that fails invisibly instead of showing a broken icon."""
+    if value is None or pd.isna(value):
+        return ""
+    url = str(value).strip()
+    if not url.startswith("https://sleepercdn.com/content/nfl/players/") or not url.endswith(".jpg"):
+        return ""
+    return (
+        f'<span class="player-photo" role="img" aria-label="{html.escape(str(label), quote=True)} roster photo" '
+        f'style="background-image:url(&quot;{html.escape(url, quote=True)}&quot;)"></span>'
+    )
 
 
 with st.sidebar:
@@ -261,8 +279,9 @@ if page == "Decision Room":
                         label = html.escape(str(source.get("source_name", "Source")))
                         safe_links.append(f'<a href="{html.escape(url, quote=True)}" target="_blank" rel="noopener noreferrer">{label}</a>')
                 reporting_links = f'<div class="reporting-sources">Reporting: {" · ".join(safe_links)}</div>' if safe_links else ""
+                photo = player_photo_html(row.get("headshot_url"), row["player"])
                 st.markdown(
-                    f'<div class="verdict {card_class}"><div class="tag">{verdict}</div><div class="name">{html.escape(str(row["player"]))}</div>'
+                    f'<div class="verdict {card_class}"><div class="tag">{verdict}</div><div class="player-heading">{photo}<div class="name">{html.escape(str(row["player"]))}</div></div>'
                     f'<div class="opponent">{html.escape(str(row["team"]))} · {html.escape(str(row["venue"]))} vs {html.escape(str(row["next_opponent"]))}</div>'
                     f'<div class="score">{row["floor_ppr"]:.1f} · {row["median_ppr"]:.1f} · {row["ceiling_ppr"]:.1f}</div>'
                     f'<div class="unit">Floor · projection · ceiling <span class="range-help" tabindex="0" aria-label="Range definition">i<span class="range-tooltip" role="tooltip">Floor is the P10 downside outcome, projection is the median estimate, and ceiling is the P90 upside outcome. About 80% of results should fall between floor and ceiling.</span></span></div><div class="outlook-label">Player outlook</div>'
@@ -367,7 +386,8 @@ if page == "Decision Room":
                 f'<div class="context-row"><div class="context-label context-help" title="{html.escape(help_text)}">{html.escape(label)}</div><div class="context-value">{html.escape(value)}</div></div>'
                 for label, value, help_text in fields
             )
-            context_cards.append(f'<article class="context-card"><h3>{html.escape(str(row["player"]))}</h3>{rows_html}</article>')
+            photo = player_photo_html(row.get("headshot_url"), row["player"])
+            context_cards.append(f'<article class="context-card"><h3>{photo}<span>{html.escape(str(row["player"]))}</span></h3>{rows_html}</article>')
         st.markdown(f'<div class="context-grid">{"".join(context_cards)}</div>', unsafe_allow_html=True)
         st.markdown('<div class="note"><b>Separation rule:</b> Start / Sit is generated only from the core projection. Decision Context is refreshed and displayed independently so users can override the model using injuries, participation, weather, game environment, personnel news, and uncertainty.</div>', unsafe_allow_html=True)
 
