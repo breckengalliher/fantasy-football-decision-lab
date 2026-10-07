@@ -71,13 +71,29 @@ def _rss_items(xml_text: str) -> list[dict[str, str]]:
         "&amp;",
         xml_text,
     )
-    root = ET.fromstring(cleaned)
-    return [{
-        "title": item.findtext("title") or "",
-        "summary": item.findtext("description") or "",
-        "link": item.findtext("link") or "",
-        "published": item.findtext("pubDate") or "",
-    } for item in root.findall(".//item")]
+    try:
+        root = ET.fromstring(cleaned)
+        return [{
+            "title": item.findtext("title") or "",
+            "summary": item.findtext("description") or "",
+            "link": item.findtext("link") or "",
+            "published": item.findtext("pubDate") or "",
+        } for item in root.findall(".//item")]
+    except ET.ParseError:
+        # A malformed character in one provider item should not discard the
+        # entire feed. Extract only the four fields the app uses.
+        def field(block: str, tag: str) -> str:
+            match = re.search(rf"<{tag}(?:\s[^>]*)?>(.*?)</{tag}>", block, re.I | re.S)
+            if not match:
+                return ""
+            return re.sub(r"^<!\[CDATA\[|\]\]>$", "", match.group(1).strip())
+
+        return [{
+            "title": field(block, "title"),
+            "summary": field(block, "description"),
+            "link": field(block, "link"),
+            "published": field(block, "pubDate"),
+        } for block in re.findall(r"<item(?:\s[^>]*)?>(.*?)</item>", cleaned, re.I | re.S)]
 
 
 def _themes(text: str) -> list[str]:
@@ -142,11 +158,9 @@ def parse_bluesky_rss(
     """Match a curated reporter's public Bluesky RSS feed to roster players."""
     entries = _rss_items(xml_text)
     player_rows = []
-    last_name_counts: dict[str, int] = {}
     for row in players.itertuples():
         full = _player_key(row.player)
         last = full.split()[-1] if full else ""
-        last_name_counts[last] = last_name_counts.get(last, 0) + 1
         player_rows.append((full, last, str(row.player), str(row.team)))
     results = []
     current = now or datetime.now(timezone.utc)
@@ -162,8 +176,7 @@ def parse_bluesky_rss(
         searchable = _player_key(text)
         for full, last, player, team in player_rows:
             full_match = full and re.search(rf"(?:^| ){re.escape(full)}(?: |$)", searchable)
-            last_match = len(last) >= 4 and last_name_counts.get(last) == 1 and re.search(rf"(?:^| ){re.escape(last)}(?: |$)", searchable)
-            if full_match or last_match:
+            if full_match:
                 results.append({
                     "player": player, "team": team, "source_type": "Reporter social",
                     "source_name": reporter, "author": handle, "text": text,

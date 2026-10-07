@@ -24,6 +24,15 @@ def test_espn_feed_matches_exact_player_name():
     assert result.loc[0, "source_type"] == "National journalism"
 
 
+def test_espn_feed_recovers_other_items_when_xml_is_malformed():
+    xml = """<rss><channel><item><title>CeeDee Lamb & practice update</title>
+    <description>Full participation</description><link>https://example.com/lamb</link>
+    <pubDate>Wed, 07 Oct 2026 12:00:00 GMT</pubDate></item><broken></channel></rss>"""
+    players = pd.DataFrame([{"player": "CeeDee Lamb", "team": "DAL"}])
+    result = parse_espn_rss(xml, players)
+    assert result["player"].tolist() == ["CeeDee Lamb"]
+
+
 def test_bluesky_keeps_recent_reporter_posts_only():
     payload = {"posts": [
         {"author": {"handle": "beat.example", "displayName": "Local Beat", "description": "Reporter covering the Dallas Cowboys"},
@@ -38,8 +47,8 @@ def test_bluesky_keeps_recent_reporter_posts_only():
     assert result.loc[0, "url"].endswith("/post/abc")
 
 
-def test_curated_reporter_rss_matches_unique_last_name():
-    xml = """<rss><channel><item><title>Lamb handled a full workload at practice</title>
+def test_curated_reporter_rss_requires_full_player_name():
+    xml = """<rss><channel><item><title>CeeDee Lamb handled a full workload at practice</title>
     <description></description><link>https://bsky.app/profile/reporter/post/abc</link>
     <pubDate>Wed, 07 Oct 2026 12:00:00 GMT</pubDate></item></channel></rss>"""
     players = pd.DataFrame([{"player": "CeeDee Lamb", "team": "DAL"}, {"player": "Nico Collins", "team": "HOU"}])
