@@ -13,6 +13,7 @@ import requests
 SLEEPER_PLAYERS_URL = "https://api.sleeper.app/v1/players/nfl?active=true"
 SLEEPER_HEADSHOT_URL = "https://sleepercdn.com/content/nfl/players/{player_id}.jpg"
 SUPPORTED_POSITIONS = {"QB", "RB", "WR", "TE"}
+TEAM_ALIASES = {"LAR": "LA"}
 
 
 @dataclass(frozen=True)
@@ -35,6 +36,7 @@ def normalize_headshots(payload: dict[str, dict[str, Any]]) -> pd.DataFrame:
             str(value).strip() for value in (player.get("first_name"), player.get("last_name")) if value
         )
         team = str(player.get("team") or "").strip().upper()
+        team = TEAM_ALIASES.get(team, team)
         position = str(player.get("position") or "").strip().upper()
         if not player_id or not name or not team or position not in SUPPORTED_POSITIONS or player.get("active") is False:
             continue

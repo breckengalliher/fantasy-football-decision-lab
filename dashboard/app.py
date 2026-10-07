@@ -16,13 +16,13 @@ try:
     from dashboard.outlooks import build_player_outlook
     from dashboard.states import empty_player_pool_message, provider_issue_message
     from dashboard.methodology_copy import DISCLAIMER_LANGUAGE, METHODOLOGY_LANGUAGE, SOURCE_ATTRIBUTION
-    from dashboard.presentation import comparison_summary, matchup_summary, role_summary, weather_summary
+    from dashboard.presentation import comparison_summary, filter_player_search, matchup_summary, role_summary, selection_availability_summary, team_logo_url, weather_summary
 except ModuleNotFoundError:
     from providers.sportsdataio import context_freshness, format_injury_context
     from outlooks import build_player_outlook
     from states import empty_player_pool_message, provider_issue_message
     from methodology_copy import DISCLAIMER_LANGUAGE, METHODOLOGY_LANGUAGE, SOURCE_ATTRIBUTION
-    from presentation import comparison_summary, matchup_summary, role_summary, weather_summary
+    from presentation import comparison_summary, filter_player_search, matchup_summary, role_summary, selection_availability_summary, team_logo_url, weather_summary
 
 try:
     from dashboard.data import current_nfl_season
@@ -86,6 +86,10 @@ h1,h2,h3 { letter-spacing:-.025em; }
 .section-copy { color:var(--muted); font-size:.87rem; margin-bottom:.65rem; }
 .note { border-left:4px solid var(--gold); background:#edf4e8; color:#183515; padding:.72rem .9rem; border-radius:8px; font-size:.84rem; margin-top:1rem; }
 .warning { border-left:4px solid var(--gold); background:#eef5e9; color:#29451f; padding:.72rem .9rem; border-radius:8px; font-size:.84rem; margin:.85rem 0; }
+.player-finder { margin:.35rem 0 .8rem; }
+.finder-copy { color:var(--muted); font-size:.78rem; margin:-.25rem 0 .55rem; }
+.selected-player-name { font-size:.94rem; font-weight:750; line-height:1.2; margin-top:.2rem; }
+.selected-player-meta { color:var(--muted); font-size:.72rem; line-height:1.3; }
 .context-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.85rem; width:100%; }
 .context-card { background:var(--card); border:1px solid var(--line); border-radius:14px; overflow:hidden; min-width:0; }
 .context-card h3 { margin:0; padding:.9rem 1rem; background:#ebe7dc; color:var(--ink); font-size:1.05rem; display:flex; align-items:center; gap:.6rem; }
@@ -245,13 +249,72 @@ if page == "Decision Room":
         c2.warning(empty_player_pool_message(position, len(excluded_qbs)))
         names = []
     else:
-        names = c2.multiselect(
-            "Players to compare",
-            pool["player"].sort_values().tolist(),
-            default=pool.head(3)["player"].tolist(),
-            max_selections=3,
-            placeholder="Choose up to three players",
-        )
+        selection_key = f"smart_search_selected_{position}"
+        valid_names = set(pool["player"].tolist())
+        if selection_key not in st.session_state:
+            st.session_state[selection_key] = pool.sort_values("projected_ppr", ascending=False).head(3)["player"].tolist()
+        st.session_state[selection_key] = [name for name in st.session_state[selection_key] if name in valid_names][:3]
+        names = list(st.session_state[selection_key])
+        with c2:
+            query = st.text_input(
+                "Find players",
+                key=f"smart_search_query_{position}",
+                placeholder="Search by player or team…",
+            )
+            st.markdown(f'<div class="finder-copy">{len(names)} of 3 selected · results include roster photos, team, opponent, availability and projection</div>', unsafe_allow_html=True)
+
+        if names:
+            st.markdown('<div class="section-copy">Selected players</div>', unsafe_allow_html=True)
+            selected_columns = st.columns(3)
+            for selected_column, name in zip(selected_columns, names):
+                selected_row = pool.loc[pool["player"].eq(name)].iloc[0]
+                with selected_column:
+                    with st.container(border=True):
+                        photo_column, info_column = st.columns([.34, .66])
+                        photo_url = selected_row.get("headshot_url")
+                        if photo_url is not None and pd.notna(photo_url):
+                            photo_column.image(str(photo_url), width=72)
+                        logo_url = team_logo_url(selected_row.get("team"))
+                        with info_column:
+                            st.markdown(f'<div class="selected-player-name">{html.escape(str(selected_row["player"]))}</div>', unsafe_allow_html=True)
+                            logo_column, team_column = st.columns([.2, .8], vertical_alignment="center")
+                            if logo_url:
+                                logo_column.image(logo_url, width=24)
+                            team_column.markdown(f'<div class="selected-player-meta">{html.escape(str(selected_row["team"]))} · {html.escape(str(selected_row["venue"]))} vs {html.escape(str(selected_row["next_opponent"]))}</div>', unsafe_allow_html=True)
+                            st.markdown(f'<div class="selected-player-meta">{float(selected_row["median_ppr"]):.1f} projected PPR</div>', unsafe_allow_html=True)
+                        if st.button("Remove", key=f"remove_{position}_{selected_row['player_id']}", width="stretch"):
+                            st.session_state[selection_key] = [value for value in names if value != name]
+                            st.rerun()
+
+        results = filter_player_search(pool.loc[~pool["player"].isin(names)], query)
+        st.markdown('<div class="section-copy">Search results</div>', unsafe_allow_html=True)
+        if results.empty:
+            st.info("No eligible players match that search. Try a full name or team abbreviation.")
+        else:
+            for _, result_row in results.iterrows():
+                with st.container(border=True):
+                    photo_column, details_column, logo_column, action_column = st.columns([.10, .56, .10, .24], vertical_alignment="center")
+                    photo_url = result_row.get("headshot_url")
+                    if photo_url is not None and pd.notna(photo_url):
+                        photo_column.image(str(photo_url), width=52)
+                    availability = selection_availability_summary(result_row)
+                    details_column.markdown(
+                        f'<b>{html.escape(str(result_row["player"]))}</b><br>'
+                        f'{html.escape(str(result_row["team"]))} · {html.escape(str(result_row["position"]))} · {html.escape(str(result_row["venue"]))} vs {html.escape(str(result_row["next_opponent"]))}<br>'
+                        f'<span class="selected-player-meta">{html.escape(availability)}</span>',
+                        unsafe_allow_html=True,
+                    )
+                    logo_url = team_logo_url(result_row.get("team"))
+                    if logo_url:
+                        logo_column.image(logo_url, width=34)
+                    if action_column.button(
+                        f"Add · {float(result_row['median_ppr']):.1f}",
+                        key=f"add_{position}_{result_row['player_id']}",
+                        disabled=len(names) >= 3,
+                        width="stretch",
+                    ):
+                        st.session_state[selection_key] = [*names, str(result_row["player"])]
+                        st.rerun()
     compare = pool.loc[pool["player"].isin(names)].sort_values("projected_ppr", ascending=False)
 
     if compare.empty:

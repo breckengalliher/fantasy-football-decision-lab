@@ -30,3 +30,10 @@ def test_enrich_headshots_requires_name_team_and_position_match():
 
     assert pd.notna(result.loc[0, "headshot_url"])
     assert pd.isna(result.loc[1, "headshot_url"])
+
+
+def test_headshots_normalize_nflverse_rams_team_alias():
+    records = normalize_headshots({
+        "1": {"player_id": "1", "full_name": "Rams Player", "team": "LAR", "position": "WR", "active": True}
+    })
+    assert records.loc[0, "team"] == "LA"
