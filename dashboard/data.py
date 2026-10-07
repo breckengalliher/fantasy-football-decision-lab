@@ -18,6 +18,7 @@ CALIBRATED_INTERVAL_OFFSETS = {
 }
 QB_RANGE_CALIBRATION_PATH = Path(__file__).resolve().parents[1] / "reports" / "qb-model-calibration.json"
 POSITION_RANGE_CALIBRATION_PATH = Path(__file__).resolve().parents[1] / "reports" / "projection-range-calibration.json"
+PLAYER_POOL_CAPS = {"QB": 32, "RB": 64, "WR": 80, "TE": 36}
 
 # Policy lock: observed touchdown scoring always receives the approved strong
 # regression. Do not add a player-level scoring-role relaxation until a reliable
@@ -458,6 +459,60 @@ def apply_verified_starter_gate(board: pd.DataFrame) -> pd.DataFrame:
         np.where(result["verified_qb_starter"], "Verified QB1 in live depth chart", "Not verified as live QB1"),
     )
     return result
+
+
+def apply_player_pool_guardrails(board: pd.DataFrame) -> pd.DataFrame:
+    """Fail closed on invalid identities and retain only fantasy-relevant depth."""
+    result = board.copy()
+    id_column = "player_id" if "player_id" in result else "player"
+    base = result.get("is_roster_relevant", pd.Series(False, index=result.index)).fillna(False).astype(bool)
+    result["base_roster_relevant"] = base
+    verified = result.get("verified_qb_starter", pd.Series(True, index=result.index)).fillna(False).astype(bool)
+    valid = (
+        result[id_column].notna()
+        & result["player"].astype("string").str.strip().ne("")
+        & result["team"].astype("string").str.strip().ne("")
+        & result["position"].isin(PLAYER_POOL_CAPS)
+        & result["next_opponent"].notna()
+        & verified
+    )
+    result["player_pool_reason"] = np.where(base & valid, "Eligible", "Missing identity, matchup, or workload")
+    candidates = result.loc[base & valid].copy()
+    candidates["_name_key"] = candidates["player"].astype(str).str.strip().str.casefold()
+    candidates = candidates.sort_values(
+        ["position", "recent_opportunities", "season_ppr", "games_played"],
+        ascending=[True, False, False, False],
+    )
+    duplicate_id = candidates.duplicated(id_column, keep="first")
+    duplicate_name = candidates.duplicated(["_name_key", "position"], keep="first")
+    duplicate_indices = candidates.index[duplicate_id | duplicate_name]
+    result.loc[duplicate_indices, "player_pool_reason"] = "Duplicate player identity"
+    candidates = candidates.loc[~(duplicate_id | duplicate_name)]
+    candidates["_pool_rank"] = candidates.groupby("position").cumcount() + 1
+    cap = candidates["position"].map(PLAYER_POOL_CAPS)
+    kept_indices = candidates.index[candidates["_pool_rank"].le(cap)]
+    depth_indices = candidates.index[candidates["_pool_rank"].gt(cap)]
+    result.loc[depth_indices, "player_pool_reason"] = "Below fantasy-relevant position depth"
+    result["is_roster_relevant"] = result.index.isin(kept_indices)
+    return result
+
+
+def audit_player_pool(board: pd.DataFrame) -> dict[str, object]:
+    """Return deterministic publication checks for the visible player pool."""
+    id_column = "player_id" if "player_id" in board else "player"
+    verified = board.get("verified_qb_starter", pd.Series(True, index=board.index)).fillna(False).astype(bool)
+    eligible = board.loc[board["is_roster_relevant"] & verified].copy()
+    eligible["_name_key"] = eligible["player"].astype(str).str.strip().str.casefold()
+    return {
+        "eligible_players": int(len(eligible)),
+        "eligible_by_position": {key: int(value) for key, value in eligible["position"].value_counts().to_dict().items()},
+        "duplicate_player_ids": int(eligible.duplicated(id_column, keep=False).sum()),
+        "duplicate_player_names_by_position": int(eligible.duplicated(["_name_key", "position"], keep=False).sum()),
+        "missing_player_names": int(eligible["player"].isna().sum()),
+        "missing_teams": int(eligible["team"].isna().sum()),
+        "missing_opponents": int(eligible["next_opponent"].isna().sum()),
+        "invalid_positions": int((~eligible["position"].isin(PLAYER_POOL_CAPS)).sum()),
+    }
 
 
 def apply_qb_scoring_mode(

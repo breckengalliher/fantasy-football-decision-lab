@@ -22,7 +22,11 @@ def test_weekly_refresh_recalculates_both_qb_scoring_formats(monkeypatch):
     monkeypatch.setattr("src.refresh_weekly_snapshot.apply_verified_starter_gate", fake_gate)
 
     boards = build_scoring_format_boards(
-        pd.DataFrame([{"player": "Quarterback"}]),
+        pd.DataFrame([{
+            "player_id": "qb", "player": "Quarterback", "position": "QB", "team": "SEA",
+            "next_opponent": "SF", "is_roster_relevant": True, "recent_opportunities": 30,
+            "season_ppr": 20, "games_played": 4,
+        }]),
         pd.DataFrame(),
         pd.DataFrame(),
         next_week=5,

@@ -23,9 +23,9 @@ except ModuleNotFoundError:
     from states import empty_player_pool_message, provider_issue_message
 
 try:
-    from dashboard.data import add_live_supplementary_context, apply_approved_projection_model, apply_verified_starter_gate, build_start_sit_board, current_nfl_season, load_live_context_data, load_live_weekly_data, load_prior_weekly_data
+    from dashboard.data import add_live_supplementary_context, apply_approved_projection_model, apply_player_pool_guardrails, apply_verified_starter_gate, build_start_sit_board, current_nfl_season, load_live_context_data, load_live_weekly_data, load_prior_weekly_data
 except ModuleNotFoundError:
-    from data import add_live_supplementary_context, apply_approved_projection_model, apply_verified_starter_gate, build_start_sit_board, current_nfl_season, load_live_context_data, load_live_weekly_data, load_prior_weekly_data
+    from data import add_live_supplementary_context, apply_approved_projection_model, apply_player_pool_guardrails, apply_verified_starter_gate, build_start_sit_board, current_nfl_season, load_live_context_data, load_live_weekly_data, load_prior_weekly_data
 
 
 COLORS = {"QB": "#00529b", "RB": "#69be28", "WR": "#4b788f", "TE": "#a5acaf"}
@@ -179,6 +179,7 @@ except Exception as error:
 PRIOR_WEEKLY = load_prior_weekly_data(season)
 BOARD = apply_approved_projection_model(BOARD, WEEKLY, PRIOR_WEEKLY, NEXT_WEEK, QB_PASS_TD_POINTS)
 BOARD = apply_verified_starter_gate(BOARD)
+BOARD = apply_player_pool_guardrails(BOARD)
 
 with st.sidebar:
     st.caption(f"SPORTSDATAIO · {PROVIDER_STATUS}")
@@ -211,7 +212,7 @@ if page == "Decision Room":
     excluded_qbs = BOARD.iloc[0:0]
     if position == "QB":
         excluded_qbs = BOARD.loc[
-            BOARD["position"].eq("QB") & BOARD["is_roster_relevant"] & ~BOARD["verified_qb_starter"]
+            BOARD["position"].eq("QB") & BOARD["base_roster_relevant"] & ~BOARD["verified_qb_starter"]
         ]
         if not excluded_qbs.empty:
             st.caption(f"{len(excluded_qbs)} QB(s) hidden because the live depth chart does not verify them as QB1.")
@@ -360,7 +361,7 @@ elif page == "Player Trends":
         & BOARD["verified_qb_starter"]
     ]
     if pool.empty:
-        hidden = int((BOARD["position"].eq("QB") & BOARD["is_roster_relevant"] & ~BOARD["verified_qb_starter"]).sum()) if selected_position == "QB" else 0
+        hidden = int((BOARD["position"].eq("QB") & BOARD["base_roster_relevant"] & ~BOARD["verified_qb_starter"]).sum()) if selected_position == "QB" else 0
         st.warning(empty_player_pool_message(selected_position, hidden))
         st.stop()
     player_name = st.selectbox("Player", pool["player"].sort_values().tolist())
