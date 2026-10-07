@@ -16,13 +16,13 @@ try:
     from dashboard.outlooks import build_player_outlook
     from dashboard.states import empty_player_pool_message, provider_issue_message
     from dashboard.methodology_copy import DISCLAIMER_LANGUAGE, METHODOLOGY_LANGUAGE, SOURCE_ATTRIBUTION
-    from dashboard.presentation import comparison_summary, filter_player_search, matchup_summary, role_summary, selection_availability_summary, team_logo_url, weather_summary
+    from dashboard.presentation import filter_player_search, matchup_summary, role_summary, selection_availability_summary, team_logo_url, weather_summary
 except ModuleNotFoundError:
     from providers.sportsdataio import context_freshness, format_injury_context
     from outlooks import build_player_outlook
     from states import empty_player_pool_message, provider_issue_message
     from methodology_copy import DISCLAIMER_LANGUAGE, METHODOLOGY_LANGUAGE, SOURCE_ATTRIBUTION
-    from presentation import comparison_summary, filter_player_search, matchup_summary, role_summary, selection_availability_summary, team_logo_url, weather_summary
+    from presentation import filter_player_search, matchup_summary, role_summary, selection_availability_summary, team_logo_url, weather_summary
 
 try:
     from dashboard.data import current_nfl_season
@@ -77,7 +77,12 @@ h1,h2,h3 { letter-spacing:-.025em; }
 .verdict.start .outlook-label { color:#9ee468; }
 .verdict .reason { color:#536166; font-size:.91rem; line-height:1.5; margin-top:.28rem; }
 .verdict.start .reason { color:#e0e6e8; }
-.at-a-glance { border-left:4px solid var(--gold); background:#edf4e8; color:#183515; padding:.78rem .95rem; border-radius:10px; margin:.25rem 0 1rem; font-size:.88rem; }
+.decision-edge { display:flex; align-items:center; justify-content:space-between; gap:1rem; background:var(--navy); color:#f7fafb; border:1px solid rgba(105,190,40,.65); border-radius:13px; padding:.82rem 1rem; margin:1rem 0 .75rem; box-shadow:0 7px 18px rgba(0,34,68,.10); }
+.decision-edge-main { min-width:0; }
+.decision-edge-label { color:#9ee468; font-size:.62rem; font-weight:850; letter-spacing:.1em; text-transform:uppercase; margin-bottom:.16rem; }
+.decision-edge-title { font-size:1rem; font-weight:780; line-height:1.25; overflow-wrap:anywhere; }
+.decision-edge-copy { color:#cbd5da; font-size:.76rem; line-height:1.35; margin-top:.18rem; }
+.decision-edge-badge { flex:0 0 auto; background:rgba(105,190,40,.16); color:#9ee468; border:1px solid rgba(158,228,104,.42); border-radius:999px; padding:.38rem .62rem; font-size:.66rem; font-weight:850; letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; }
 .broadcast-context { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.48rem; margin-top:1rem; }
 .broadcast-context-item { background:#eef2f3; color:var(--ink); padding:.58rem .65rem; border-radius:9px; min-width:0; font-size:.76rem; line-height:1.3; overflow-wrap:anywhere; }
 .broadcast-context-item span { display:block; color:var(--muted); font-size:.62rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; margin-bottom:.18rem; }
@@ -108,12 +113,8 @@ h1,h2,h3 { letter-spacing:-.025em; }
 .context-label { color:var(--muted); font-size:.72rem; font-weight:800; letter-spacing:.02em; line-height:1.25; }
 .context-value { color:var(--ink); font-size:.82rem; font-weight:600; line-height:1.35; overflow-wrap:anywhere; }
 .context-help { cursor:help; border-bottom:1px dotted currentColor; }
-div[data-testid="stMetric"] { background:var(--card); border:1px solid var(--line); padding:.8rem 1rem; border-radius:12px; }
 .stPlotlyChart { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:.2rem; }
 @media(max-width:1100px) {
-  div[data-testid="stHorizontalBlock"]:has(div[data-testid="stMetric"]) { flex-wrap:wrap; }
-  div[data-testid="stHorizontalBlock"]:has(div[data-testid="stMetric"]) > div { flex:1 1 calc(50% - .6rem); min-width:240px; }
-  div[data-testid="stMetricValue"] > div { font-size:1.65rem; white-space:normal; overflow:visible; text-overflow:clip; line-height:1.12; }
   .context-grid { grid-template-columns:1fr; }
 }
 @media(max-width:800px) {
@@ -130,9 +131,9 @@ div[data-testid="stMetric"] { background:var(--card); border:1px solid var(--lin
   .game-status { grid-template-columns:repeat(2,minmax(0,1fr)); }
 }
 @media(max-width:520px) {
-  div[data-testid="stHorizontalBlock"]:has(div[data-testid="stMetric"]) > div { flex-basis:100%; min-width:0; }
   div[data-baseweb="select"] > div { flex-wrap:wrap; }
   .game-status { grid-template-columns:1fr; }
+  .decision-edge { align-items:flex-start; flex-direction:column; }
 }
 </style>
 """,
@@ -349,18 +350,26 @@ if page == "Decision Room":
             st.info("Choose at least one available player above to begin the comparison.")
     else:
         leader = compare.iloc[0]
-        m1, m2, m3, m4 = st.columns(4)
-        m1.metric("Our Start", leader["player"])
-        m2.metric("Start projection", f"{compare['median_ppr'].max():.1f} PPR")
-        m3.metric("Projection spread", f"{compare['median_ppr'].max() - compare['median_ppr'].min():.1f} PPR")
-        m4.metric("Next week", f"Week {NEXT_WEEK}")
-
         projection_spread = float(compare["median_ppr"].max() - compare["median_ppr"].min())
-        if len(compare) > 1 and projection_spread < 2.5:
-            st.info("Close call: we still label one player Start and the others Sit, but the gap is under 2.5 PPR—far smaller than a typical weekly miss. Treat this as a lean, not a confident separation.")
+        if len(compare) == 1:
+            edge_title = f'{leader["player"]} · {float(leader["median_ppr"]):.1f} projected PPR'
+            edge_copy = "Add another player to see the projected advantage."
+            edge_badge = "1 player selected"
+        else:
+            edge_title = f'{leader["player"]} leads by {projection_spread:.1f} PPR'
+            edge_copy = "The projections are close—treat this as a lean and use the live context below to make your final call." if projection_spread < 2.5 else "We see a meaningful projected advantage, with live context below for your final decision."
+            edge_badge = "Close call" if projection_spread < 2.5 else "Clearer edge"
+        st.markdown(
+            '<div class="decision-edge">'
+            f'<div class="decision-edge-main"><div class="decision-edge-label">Week {NEXT_WEEK} decision edge</div>'
+            f'<div class="decision-edge-title">{html.escape(edge_title)}</div>'
+            f'<div class="decision-edge-copy">{html.escape(edge_copy)}</div></div>'
+            f'<div class="decision-edge-badge">{html.escape(edge_badge)}</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
 
         st.markdown('<div class="section-title">Start / Sit verdict</div><div class="section-copy">We build this ranking from current production, repeatable workload, a fading prior-season anchor, touchdown regression, and a sample-scaled matchup adjustment. The live context shown below helps you make the final call but does not change our ranking.</div>', unsafe_allow_html=True)
-        st.markdown(f'<div class="at-a-glance"><b>At a glance:</b> {html.escape(comparison_summary(compare))}</div>', unsafe_allow_html=True)
         outlook_columns = st.columns(len(compare))
         for index, (column, (_, row)) in enumerate(zip(outlook_columns, compare.iterrows())):
             with column:
