@@ -91,6 +91,11 @@ h1,h2,h3 { letter-spacing:-.025em; }
 .section-copy { color:var(--muted); font-size:.87rem; margin-bottom:.65rem; }
 .note { border-left:4px solid var(--gold); background:#edf4e8; color:#183515; padding:.72rem .9rem; border-radius:8px; font-size:.84rem; margin-top:1rem; }
 .warning { border-left:4px solid var(--gold); background:#eef5e9; color:#29451f; padding:.72rem .9rem; border-radius:8px; font-size:.84rem; margin:.85rem 0; }
+.game-status { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:.55rem; margin:.85rem 0 .45rem; }
+.game-status-item { background:var(--card); border:1px solid var(--line); border-radius:11px; padding:.68rem .78rem; min-width:0; }
+.game-status-label { color:var(--muted); font-size:.62rem; font-weight:800; letter-spacing:.07em; text-transform:uppercase; margin-bottom:.16rem; }
+.game-status-value { color:var(--ink); font-size:.8rem; font-weight:720; line-height:1.25; overflow-wrap:anywhere; }
+.game-status-note { color:var(--muted); font-size:.73rem; margin:0 0 .8rem; }
 .player-finder { margin:.35rem 0 .8rem; }
 .finder-copy { color:var(--muted); font-size:.78rem; margin:-.25rem 0 .55rem; }
 .selected-player-name { font-size:.94rem; font-weight:750; line-height:1.2; margin-top:.2rem; }
@@ -122,10 +127,12 @@ div[data-testid="stMetric"] { background:var(--card); border:1px solid var(--lin
   .verdict .name { font-size:1.45rem; }
   .range-tooltip { left:0; transform:none; width:min(250px, 75vw); }
   [data-testid="stSidebar"] { width:min(18.75rem, 88vw) !important; }
+  .game-status { grid-template-columns:repeat(2,minmax(0,1fr)); }
 }
 @media(max-width:520px) {
   div[data-testid="stHorizontalBlock"]:has(div[data-testid="stMetric"]) > div { flex-basis:100%; min-width:0; }
   div[data-baseweb="select"] > div { flex-wrap:wrap; }
+  .game-status { grid-template-columns:1fr; }
 }
 </style>
 """,
@@ -133,7 +140,7 @@ div[data-testid="stMetric"] { background:var(--card); border:1px solid var(--lin
 )
 
 
-@st.cache_data(ttl=3600, show_spinner=False)
+@st.cache_data(ttl=300, show_spinner=False)
 def get_published_snapshot(season: int, passing_td_points: int) -> tuple[pd.DataFrame, pd.DataFrame, int, str, str, str | None, str]:
     import json
 
@@ -230,12 +237,23 @@ with st.sidebar:
             st.rerun()
 
 if page == "Decision Room":
-    st.markdown('<div class="warning"><b>Before kickoff:</b> live injuries, practice, weather, and depth context are supplementary. Confirm official late-breaking status before locking a lineup.</div>', unsafe_allow_html=True)
     context_age_minutes, context_is_stale = context_freshness(PROVIDER_REFRESHED_AT)
+    context_value = "Needs confirmation" if context_is_stale else "Current"
+    context_detail = "Unavailable" if context_age_minutes is None else f"Checked {context_age_minutes} min ago"
+    high_frequency_day = datetime.now().weekday() in {0, 3, 6}
+    next_refresh_copy = "Within 30 min" if high_frequency_day else "Within 2 hours"
+    st.markdown(
+        '<div class="game-status">'
+        f'<div class="game-status-item"><div class="game-status-label">Last update</div><div class="game-status-value">{header_age_minutes} min ago</div></div>'
+        f'<div class="game-status-item"><div class="game-status-label">Injury reports</div><div class="game-status-value">Frequent cloud checks</div></div>'
+        f'<div class="game-status-item"><div class="game-status-label">Weather / depth</div><div class="game-status-value">{context_value} · {context_detail}</div></div>'
+        f'<div class="game-status-item"><div class="game-status-label">Next refresh</div><div class="game-status-value">{next_refresh_copy}</div></div>'
+        '</div>'
+        '<div class="game-status-note"><b>Before kickoff:</b> confirm official inactives and late-breaking team news before locking your lineup.</div>',
+        unsafe_allow_html=True,
+    )
     if context_is_stale:
-        st.warning("SportsDataIO weather/depth context is more than 90 minutes old or unavailable. Daily injury reports remain separate; confirm late-breaking status before kickoff.")
-    else:
-        st.caption(f"Weather/depth context checked {context_age_minutes} minute{'s' if context_age_minutes != 1 else ''} ago. Injury/practice reports refresh daily.")
+        st.warning("Weather or depth-chart context is older than expected or unavailable. Confirm the latest team status before kickoff.")
     provider_issue = provider_issue_message(PROVIDER_STATUS)
     if provider_issue:
         st.warning(provider_issue)
@@ -332,16 +350,16 @@ if page == "Decision Room":
     else:
         leader = compare.iloc[0]
         m1, m2, m3, m4 = st.columns(4)
-        m1.metric("Model Start", leader["player"])
+        m1.metric("Our Start", leader["player"])
         m2.metric("Start projection", f"{compare['median_ppr'].max():.1f} PPR")
         m3.metric("Projection spread", f"{compare['median_ppr'].max() - compare['median_ppr'].min():.1f} PPR")
         m4.metric("Next week", f"Week {NEXT_WEEK}")
 
         projection_spread = float(compare["median_ppr"].max() - compare["median_ppr"].min())
         if len(compare) > 1 and projection_spread < 2.5:
-            st.info("Close call: the model still labels Start and Sit, but the gap is under 2.5 PPR—far smaller than its typical weekly error. Treat this as a lean, not a confident separation.")
+            st.info("Close call: we still label one player Start and the others Sit, but the gap is under 2.5 PPR—far smaller than a typical weekly miss. Treat this as a lean, not a confident separation.")
 
-        st.markdown('<div class="section-title">Start / Sit verdict</div><div class="section-copy">The approved model blends current production, repeatable workload, a fading prior-season anchor, touchdown regression, and a sample-scaled matchup adjustment. Decision Context below is excluded.</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-title">Start / Sit verdict</div><div class="section-copy">We build this ranking from current production, repeatable workload, a fading prior-season anchor, touchdown regression, and a sample-scaled matchup adjustment. The live context shown below helps you make the final call but does not change our ranking.</div>', unsafe_allow_html=True)
         st.markdown(f'<div class="at-a-glance"><b>At a glance:</b> {html.escape(comparison_summary(compare))}</div>', unsafe_allow_html=True)
         outlook_columns = st.columns(len(compare))
         for index, (column, (_, row)) in enumerate(zip(outlook_columns, compare.iterrows())):
@@ -415,7 +433,7 @@ if page == "Decision Room":
             "TE": ["ytd_targets", "ytd_receptions", "ytd_receiving_yards", "ytd_receiving_tds"],
         }
         with st.expander("How this projection was built"):
-            st.markdown("**Included in the model:** current-season production, recent repeatable workload, a fading prior-season anchor, touchdown regression, and a capped matchup adjustment.")
+            st.markdown("**Included in our projection:** current-season production, recent repeatable workload, a fading prior-season anchor, touchdown regression, and a capped matchup adjustment.")
             st.caption("Practice, injuries, weather, snap share, pace, game totals, personnel changes, and journalism are displayed for your decision but do not change the projection or Start/Sit order.")
             view = compare[common + position_stats[position] + ["matchup_label", "points_allowed", "projected_ppr", "confidence"]].copy()
             st.dataframe(view, hide_index=True, width="stretch", column_config={
@@ -431,7 +449,7 @@ if page == "Decision Room":
             })
 
         with st.expander("More matchup context"):
-            st.caption("Additional live information for your final decision. None of these details changes the model ranking.")
+            st.caption("Additional live information for your final decision. None of these details changes our ranking.")
             context_cards = []
             for _, row in compare.iterrows():
                 provider_total = row.get("betting_total_live")
@@ -506,7 +524,7 @@ else:
     st.info("The scoring-role touchdown exception remains disabled until reliable red-zone or goal-line opportunity data is integrated and validated.")
     st.subheader("Sources and refresh timing")
     st.markdown(SOURCE_ATTRIBUTION)
-    st.caption(f"Season {season} data · app cache refreshes hourly · this page loaded {REFRESHED} · supplementary provider: {PROVIDER_STATUS}")
+    st.caption(f"Season {season} data · app checks for a new validated snapshot every 5 minutes · this snapshot loaded {REFRESHED} · supplementary provider: {PROVIDER_STATUS}")
     st.subheader("Responsible use")
     st.markdown(DISCLAIMER_LANGUAGE)
 

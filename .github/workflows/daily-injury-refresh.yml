@@ -2,7 +2,14 @@ name: Daily production context refresh
 
 on:
   schedule:
-    - cron: "30 18 * * *"
+    # Two-hour safety net every day. Visitors always read the latest validated
+    # snapshot and never call providers directly.
+    - cron: "15 */2 * * *"
+      timezone: "America/Chicago"
+    # Near-live checks during the main NFL windows (Monday, Thursday, Sunday).
+    - cron: "*/30 16-23 * * 1,4"
+      timezone: "America/Chicago"
+    - cron: "*/30 9-23 * * 0"
       timezone: "America/Chicago"
   workflow_dispatch:
 
