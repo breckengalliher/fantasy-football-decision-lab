@@ -375,39 +375,20 @@ if page == "Decision Room":
                     unsafe_allow_html=True,
                 )
 
-        left, right = st.columns([1.35, .85])
-        with left:
-            st.markdown('<div class="section-title">Projected outcome</div><div class="section-copy">Season production anchors the estimate; recent form and matchup make conservative adjustments.</div>', unsafe_allow_html=True)
-            colors = ["#69be28"] + ["#a5acaf"] * (len(compare) - 1)
-            fig = go.Figure(go.Bar(
-                x=compare["median_ppr"], y=compare["player"], orientation="h", marker_color=colors,
-                customdata=list(zip(compare["recent_ppr"], compare["season_ppr"], compare["next_opponent"], compare["matchup_label"], compare["confidence"])),
-                text=compare["median_ppr"].map(lambda value: f"{value:.1f}"), textposition="outside",
-                error_x=dict(type="data", symmetric=False, array=compare["ceiling_ppr"] - compare["median_ppr"], arrayminus=compare["median_ppr"] - compare["floor_ppr"], color="#5f6b73"),
-                hovertemplate="<b>%{y}</b><br>Projection %{x:.1f}<br>Recent %{customdata[0]:.1f}<br>Season %{customdata[1]:.1f}<br>vs %{customdata[2]} · %{customdata[3]}<br>%{customdata[4]} confidence<extra></extra>",
-            ))
-            fig.update_layout(title=f"Week {NEXT_WEEK} projected PPR", xaxis_title="PPR points", yaxis_title="", showlegend=False)
-            fig.update_yaxes(autorange="reversed")
-            fig.update_xaxes(range=[0, max(compare["projected_ppr"].max() * 1.22, 10)])
-            st.plotly_chart(polish(fig), width="stretch", config={"displayModeBar": False})
-        with right:
-            st.markdown('<div class="section-title">Projection coverage</div><div class="section-copy">Only “Included” factors affect the model verdict.</div>', unsafe_allow_html=True)
-            provider_connected = PROVIDER_STATUS.startswith("Connected")
-            coverage = pd.DataFrame([
-                ["YTD + recent production", "Included"],
-                ["Opponent PPR allowed", "Included · not schedule-adjusted"],
-                ["Injury + practice", "Shown live · excluded" if provider_connected else "Not connected"],
-                ["Snap participation", "Shown live · excluded"],
-                ["Weather", "Shown live · excluded" if provider_connected else "Not connected"],
-                ["Pace + game environment", "Shown live · excluded"],
-                ["Expected game points", "Sportsbook combined-score estimate · shown when available"],
-                ["OL / QB changes", "Weekly baseline active · excluded" if provider_connected else "Not connected"],
-                ["Schedule-adjusted opponent", "Shown live · excluded"],
-                ["Floor / projection / ceiling", "Shown · P10 / median / P90 · excluded"],
-            ], columns=["Factor", "Status"])
-            st.dataframe(coverage, hide_index=True, width="stretch")
+        st.markdown('<div class="section-title">Projected outcome</div><div class="section-copy">The center mark is the median projection; the whisker shows the P10-to-P90 range.</div>', unsafe_allow_html=True)
+        colors = ["#69be28"] + ["#a5acaf"] * (len(compare) - 1)
+        fig = go.Figure(go.Bar(
+            x=compare["median_ppr"], y=compare["player"], orientation="h", marker_color=colors,
+            customdata=list(zip(compare["recent_ppr"], compare["season_ppr"], compare["next_opponent"], compare["matchup_label"], compare["confidence"])),
+            text=compare["median_ppr"].map(lambda value: f"{value:.1f}"), textposition="outside",
+            error_x=dict(type="data", symmetric=False, array=compare["ceiling_ppr"] - compare["median_ppr"], arrayminus=compare["median_ppr"] - compare["floor_ppr"], color="#5f6b73"),
+            hovertemplate="<b>%{y}</b><br>Projection %{x:.1f}<br>Recent %{customdata[0]:.1f}<br>Season %{customdata[1]:.1f}<br>vs %{customdata[2]} · %{customdata[3]}<br>%{customdata[4]} confidence<extra></extra>",
+        ))
+        fig.update_layout(title=f"Week {NEXT_WEEK} projected PPR", xaxis_title="PPR points", yaxis_title="", showlegend=False)
+        fig.update_yaxes(autorange="reversed")
+        fig.update_xaxes(range=[0, max(compare["projected_ppr"].max() * 1.22, 10)])
+        st.plotly_chart(polish(fig, 330), width="stretch", config={"displayModeBar": False})
 
-        st.markdown('<div class="section-title">Why the model ranks them this way</div><div class="section-copy">Every signal used in the Start / Sit verdict, shown at the same grain.</div>', unsafe_allow_html=True)
         common = ["player", "team", "next_opponent", "games_played", "season_ppr", "recent_ppr", "recent_opportunities"]
         position_stats = {
             "QB": ["ytd_attempts", "ytd_passing_yards", "ytd_passing_tds", "ytd_rushing_yards", "ytd_rushing_tds"],
@@ -415,67 +396,51 @@ if page == "Decision Room":
             "WR": ["ytd_targets", "ytd_receptions", "ytd_receiving_yards", "ytd_receiving_tds"],
             "TE": ["ytd_targets", "ytd_receptions", "ytd_receiving_yards", "ytd_receiving_tds"],
         }
-        view = compare[common + position_stats[position] + ["matchup_label", "points_allowed", "projected_ppr", "confidence"]].copy()
-        st.dataframe(view, hide_index=True, width="stretch", column_config={
-            "player":"Player", "team":"Team", "next_opponent":"Opponent", "games_played":"GP",
-            "season_ppr":st.column_config.NumberColumn("Season PPR/G", format="%.1f"),
-            "recent_ppr":st.column_config.NumberColumn("Last 4 PPR/G", format="%.1f"),
-            "recent_opportunities":st.column_config.NumberColumn("Last 3 opp/G", format="%.1f"),
-            "ytd_attempts":"Pass att", "ytd_carries":"Carries", "ytd_targets":"Targets", "ytd_receptions":"Rec",
-            "ytd_passing_yards":"Pass yds", "ytd_rushing_yards":"Rush yds", "ytd_receiving_yards":"Rec yds",
-            "ytd_passing_tds":"Pass TD", "ytd_rushing_tds":"Rush TD", "ytd_receiving_tds":"Rec TD",
-            "matchup_label":"Matchup", "points_allowed":st.column_config.NumberColumn("Opp. PPR allowed", format="%.1f"),
-            "projected_ppr":st.column_config.NumberColumn("Projection", format="%.1f"), "confidence":"Confidence",
-        })
-        st.markdown('<div class="section-title">Live Decision Context</div><div class="section-copy">Quick pregame context to help you make the final call. These details do not change the model verdict.</div>', unsafe_allow_html=True)
-        context_cards = []
-        for _, row in compare.iterrows():
-            provider_total = row.get("betting_total_live")
-            if provider_total is None or pd.isna(provider_total):
-                provider_total = row.get("total_line")
-            expected_points = f"{float(provider_total):.1f} combined points" if provider_total is not None and pd.notna(provider_total) else "Not available"
+        with st.expander("How this projection was built"):
+            st.markdown("**Included in the model:** current-season production, recent repeatable workload, a fading prior-season anchor, touchdown regression, and a capped matchup adjustment.")
+            st.caption("Practice, injuries, weather, snap share, pace, game totals, personnel changes, and journalism are displayed for your decision but do not change the projection or Start/Sit order.")
+            view = compare[common + position_stats[position] + ["matchup_label", "points_allowed", "projected_ppr", "confidence"]].copy()
+            st.dataframe(view, hide_index=True, width="stretch", column_config={
+                "player":"Player", "team":"Team", "next_opponent":"Opponent", "games_played":"GP",
+                "season_ppr":st.column_config.NumberColumn("Season PPR/G", format="%.1f"),
+                "recent_ppr":st.column_config.NumberColumn("Last 4 PPR/G", format="%.1f"),
+                "recent_opportunities":st.column_config.NumberColumn("Last 3 opp/G", format="%.1f"),
+                "ytd_attempts":"Pass att", "ytd_carries":"Carries", "ytd_targets":"Targets", "ytd_receptions":"Rec",
+                "ytd_passing_yards":"Pass yds", "ytd_rushing_yards":"Rush yds", "ytd_receiving_yards":"Rec yds",
+                "ytd_passing_tds":"Pass TD", "ytd_rushing_tds":"Rush TD", "ytd_receiving_tds":"Rec TD",
+                "matchup_label":"Matchup", "points_allowed":st.column_config.NumberColumn("Opp. PPR allowed", format="%.1f"),
+                "projected_ppr":st.column_config.NumberColumn("Projection", format="%.1f"), "confidence":"Confidence",
+            })
 
-            weather_bits = []
-            if pd.notna(row.get("weather_summary_live")): weather_bits.append(str(row.get("weather_summary_live")))
-            if pd.notna(row.get("temperature_live")): weather_bits.append(f"{float(row.get('temperature_live')):.0f}°F")
-            if pd.notna(row.get("wind_live")): weather_bits.append(f"{float(row.get('wind_live')):.0f} mph wind")
-            weather = " · ".join(weather_bits) if weather_bits else "Not available"
-
-            usage = f"{row['latest_snap_pct']:.0%} latest · {row['recent_snap_pct']:.0%} 3-game avg" if pd.notna(row.get("latest_snap_pct")) else "Not available"
-            pace = f"{row['pace_label']} pace · {row['combined_recent_plays']:.0f} combined plays" if pd.notna(row.get("combined_recent_plays")) else "Not available"
-
-            if pd.notna(row.get("qb_changed")):
-                changes = []
-                if bool(row.get("qb_changed")): changes.append("Starting QB changed")
-                if bool(row.get("ol_changed")): changes.append("Starting OL changed")
-                personnel = " · ".join(changes) if changes else "No changes"
-            else:
-                personnel = "Not enough history" if PROVIDER_STATUS.startswith("Connected") else "Not available"
-
-            if pd.notna(row.get("schedule_adjusted_index")):
-                opponent_delta = (float(row["schedule_adjusted_index"]) - 1) * 100
-                opponent = f"{abs(opponent_delta):.0f}% {'easier' if opponent_delta > 0 else 'tougher'} than player baselines" if abs(opponent_delta) >= .5 else "Neutral vs player baselines"
-            else:
-                opponent = "Not enough data"
-
-            fields = [
-                ("Availability", format_injury_context(row, "Connected" in INJURY_SOURCE_STATUS), "Latest injury designation and practice participation"),
-                ("Snap share", usage, "Latest snap rate and recent three-game average"),
-                ("Weather", weather, "Current pregame forecast"),
-                ("Game pace", pace, "Expected play volume based on recent team pace"),
-                ("Expected game points", expected_points, "Sportsbook over/under: the expected combined score for both teams"),
-                ("QB / O-line", personnel, "Confirmed starting quarterback or offensive-line changes"),
-                ("Opponent strength", opponent, "Opponent performance adjusted for the players they previously faced"),
-                ("Outcome range", f"{row['floor_ppr']:.1f} floor · {row['median_ppr']:.1f} median · {row['ceiling_ppr']:.1f} ceiling", "P10 floor, median projection, and P90 ceiling"),
-            ]
-            rows_html = "".join(
-                f'<div class="context-row"><div class="context-label context-help" title="{html.escape(help_text)}">{html.escape(label)}</div><div class="context-value">{html.escape(value)}</div></div>'
-                for label, value, help_text in fields
-            )
-            photo = player_photo_html(row.get("headshot_url"), row["player"])
-            context_cards.append(f'<article class="context-card"><h3>{photo}<span>{html.escape(str(row["player"]))}</span></h3>{rows_html}</article>')
-        st.markdown(f'<div class="context-grid">{"".join(context_cards)}</div>', unsafe_allow_html=True)
-        st.markdown('<div class="note"><b>Separation rule:</b> Start / Sit is generated only from the core projection. Decision Context is refreshed and displayed independently so users can override the model using injuries, participation, weather, game environment, personnel news, and uncertainty.</div>', unsafe_allow_html=True)
+        with st.expander("More matchup context"):
+            st.caption("Additional live information for your final decision. None of these details changes the model ranking.")
+            context_cards = []
+            for _, row in compare.iterrows():
+                provider_total = row.get("betting_total_live")
+                if provider_total is None or pd.isna(provider_total):
+                    provider_total = row.get("total_line")
+                expected_points = f"{float(provider_total):.1f} combined points" if provider_total is not None and pd.notna(provider_total) else "Not available"
+                pace = f"{row['pace_label']} pace · {row['combined_recent_plays']:.0f} combined plays" if pd.notna(row.get("combined_recent_plays")) else "Not available"
+                if pd.notna(row.get("qb_changed")):
+                    changes = []
+                    if bool(row.get("qb_changed")): changes.append("Starting QB changed")
+                    if bool(row.get("ol_changed")): changes.append("Starting O-line changed")
+                    personnel = " · ".join(changes) if changes else "No changes"
+                else:
+                    personnel = "Not enough history" if PROVIDER_STATUS.startswith("Connected") else "Not available"
+                fields = [
+                    ("Game pace", pace, "Expected play volume based on recent team pace"),
+                    ("Expected game points", expected_points, "Sportsbook estimate for the combined score"),
+                    ("QB / O-line", personnel, "Confirmed starting quarterback or offensive-line changes"),
+                ]
+                rows_html = "".join(
+                    f'<div class="context-row"><div class="context-label context-help" title="{html.escape(help_text)}">{html.escape(label)}</div><div class="context-value">{html.escape(value)}</div></div>'
+                    for label, value, help_text in fields
+                )
+                photo = player_photo_html(row.get("headshot_url"), row["player"])
+                context_cards.append(f'<article class="context-card"><h3>{photo}<span>{html.escape(str(row["player"]))}</span></h3>{rows_html}</article>')
+            st.markdown(f'<div class="context-grid">{"".join(context_cards)}</div>', unsafe_allow_html=True)
+            st.markdown('<div class="note"><b>Separation rule:</b> Start/Sit comes only from the core projection. This additional context is here so you can make the final call.</div>', unsafe_allow_html=True)
 
 elif page == "Player Trends":
     selected_position = st.segmented_control("Position", ["QB", "RB", "WR", "TE"], default="WR")
