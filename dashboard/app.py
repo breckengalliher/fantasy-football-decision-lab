@@ -16,11 +16,13 @@ try:
     from dashboard.outlooks import build_player_outlook
     from dashboard.states import empty_player_pool_message, provider_issue_message
     from dashboard.methodology_copy import DISCLAIMER_LANGUAGE, METHODOLOGY_LANGUAGE, SOURCE_ATTRIBUTION
+    from dashboard.presentation import comparison_summary, matchup_summary, role_summary, weather_summary
 except ModuleNotFoundError:
     from providers.sportsdataio import context_freshness, format_injury_context
     from outlooks import build_player_outlook
     from states import empty_player_pool_message, provider_issue_message
     from methodology_copy import DISCLAIMER_LANGUAGE, METHODOLOGY_LANGUAGE, SOURCE_ATTRIBUTION
+    from presentation import comparison_summary, matchup_summary, role_summary, weather_summary
 
 try:
     from dashboard.data import current_nfl_season
@@ -70,6 +72,12 @@ h1,h2,h3 { letter-spacing:-.025em; }
 .verdict.start .outlook-label { color:#9ee468; }
 .verdict .reason { color:#536166; font-size:.91rem; line-height:1.5; margin-top:.28rem; }
 .verdict.start .reason { color:#e0e6e8; }
+.at-a-glance { border-left:4px solid var(--gold); background:#edf4e8; color:#183515; padding:.78rem .95rem; border-radius:10px; margin:.25rem 0 1rem; font-size:.88rem; }
+.broadcast-context { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.48rem; margin-top:1rem; }
+.broadcast-context-item { background:#eef2f3; color:var(--ink); padding:.58rem .65rem; border-radius:9px; min-width:0; font-size:.76rem; line-height:1.3; overflow-wrap:anywhere; }
+.broadcast-context-item span { display:block; color:var(--muted); font-size:.62rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; margin-bottom:.18rem; }
+.verdict.start .broadcast-context-item { background:rgba(255,255,255,.1); color:#f4f8fa; }
+.verdict.start .broadcast-context-item span { color:#9ee468; }
 .reporting-sources { margin-top:.65rem; font-size:.72rem; color:var(--muted); line-height:1.35; }
 .reporting-sources a { color:#397f18; font-weight:700; text-decoration:none; }
 .verdict.start .reporting-sources { color:#c0c8cc; }
@@ -262,10 +270,18 @@ if page == "Decision Room":
             st.info("Close call: the model still labels Start and Sit, but the gap is under 2.5 PPR—far smaller than its typical weekly error. Treat this as a lean, not a confident separation.")
 
         st.markdown('<div class="section-title">Start / Sit verdict</div><div class="section-copy">The approved model blends current production, repeatable workload, a fading prior-season anchor, touchdown regression, and a sample-scaled matchup adjustment. Decision Context below is excluded.</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="at-a-glance"><b>At a glance:</b> {html.escape(comparison_summary(compare))}</div>', unsafe_allow_html=True)
         outlook_columns = st.columns(len(compare))
         for index, (column, (_, row)) in enumerate(zip(outlook_columns, compare.iterrows())):
             with column:
-                verdict = "START" if index == 0 and len(compare) > 1 else "SIT" if len(compare) > 1 else "ONLY PLAYER"
+                if index == 0 and len(compare) > 1:
+                    verdict = "START · PREFERRED"
+                elif len(compare) > 1 and float(leader["median_ppr"] - row["median_ppr"]) < 2.5:
+                    verdict = "SIT · CLOSE ALTERNATIVE"
+                elif len(compare) > 1:
+                    verdict = "SIT · RISKIER OPTION"
+                else:
+                    verdict = "ONLY PLAYER"
                 card_class = "start" if index == 0 else "sit"
                 reason = build_player_outlook(row, index, len(compare), projection_spread, row.get("reporting_summary"))
                 try:
@@ -280,12 +296,19 @@ if page == "Decision Room":
                         safe_links.append(f'<a href="{html.escape(url, quote=True)}" target="_blank" rel="noopener noreferrer">{label}</a>')
                 reporting_links = f'<div class="reporting-sources">Reporting: {" · ".join(safe_links)}</div>' if safe_links else ""
                 photo = player_photo_html(row.get("headshot_url"), row["player"])
+                practice = format_injury_context(row, "Connected" in INJURY_SOURCE_STATUS)
+                quick_context = "".join([
+                    f'<div class="broadcast-context-item"><span>Practice</span>{html.escape(practice)}</div>',
+                    f'<div class="broadcast-context-item"><span>Matchup</span>{html.escape(matchup_summary(row))}</div>',
+                    f'<div class="broadcast-context-item"><span>Role</span>{html.escape(role_summary(row))}</div>',
+                    f'<div class="broadcast-context-item"><span>Weather</span>{html.escape(weather_summary(row))}</div>',
+                ])
                 st.markdown(
                     f'<div class="verdict {card_class}"><div class="tag">{verdict}</div><div class="player-heading">{photo}<div class="name">{html.escape(str(row["player"]))}</div></div>'
                     f'<div class="opponent">{html.escape(str(row["team"]))} · {html.escape(str(row["venue"]))} vs {html.escape(str(row["next_opponent"]))}</div>'
                     f'<div class="score">{row["floor_ppr"]:.1f} · {row["median_ppr"]:.1f} · {row["ceiling_ppr"]:.1f}</div>'
                     f'<div class="unit">Floor · projection · ceiling <span class="range-help" tabindex="0" aria-label="Range definition">i<span class="range-tooltip" role="tooltip">Floor is the P10 downside outcome, projection is the median estimate, and ceiling is the P90 upside outcome. About 80% of results should fall between floor and ceiling.</span></span></div><div class="outlook-label">Player outlook</div>'
-                    f'<div class="reason">{html.escape(reason)}</div>{reporting_links}</div>',
+                    f'<div class="reason">{html.escape(reason)}</div>{reporting_links}<div class="broadcast-context">{quick_context}</div></div>',
                     unsafe_allow_html=True,
                 )
 

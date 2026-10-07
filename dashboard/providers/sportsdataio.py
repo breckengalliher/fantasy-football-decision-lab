@@ -90,8 +90,8 @@ def format_injury_context(row: Any, provider_connected: bool = True) -> str:
     # cleared limitation read like an active restriction.
     if is_full:
         if pd.notna(status):
-            return f"{status} · Full practice"
-        return "Full practice — no limitation"
+            return f"{status} · Full participant"
+        return "Full participant"
 
     values = [status, practice, body_part]
     values = [str(value) for value in values if pd.notna(value)]

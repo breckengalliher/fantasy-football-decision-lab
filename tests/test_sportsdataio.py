@@ -67,7 +67,7 @@ def test_full_practice_is_concise_and_omits_body_part_noise():
         "injury_body_part_live": "Thigh",
         "injury_source_live": "nflverse daily injury report",
     })
-    assert rendered == "Full practice — no limitation"
+    assert rendered == "Full participant"
 
 
 def test_no_injury_record_uses_plain_language():
