@@ -266,6 +266,12 @@ def add_live_supplementary_context(
 ) -> pd.DataFrame:
     """Attach live snap and pace context without changing the model projection."""
     result = board.copy()
+    for column in (
+        "projection_current_signal", "projection_history_signal", "projection_current_weight",
+        "projection_base", "projection_td_adjustment", "projection_workload_signal",
+        "projection_matchup_factor",
+    ):
+        result[column] = np.nan
     snap_data = snaps.loc[snaps["position"].isin(["QB", "RB", "WR", "TE"])].copy()
     snap_data["player_key"] = snap_data["player"].astype(str).str.strip().str.casefold()
     snap_data = snap_data.sort_values(["player_key", "team", "week"])
@@ -715,8 +721,9 @@ def apply_approved_projection_model(
         left_on=["next_opponent", "position"], right_on=["opponent_team", "position"], how="left",
     )
     skill["approved_projection"] = skill["approved_base"] * skill["approved_matchup_factor"].fillna(1.0)
+    skill["approved_td_adjustment"] = td_regressed - skill["approved_season_ppr"]
     result = result.merge(
-        skill[[player_column, "approved_season_ppr", "approved_recent_ppr", "approved_recent_opp", "approved_weight", "approved_projection"]],
+        skill[[player_column, "approved_season_ppr", "approved_recent_ppr", "approved_recent_opp", "approved_weight", "approved_projection", "current_signal", "history_signal", "approved_base", "approved_td_adjustment", "approved_matchup_factor"]],
         on=player_column, how="left", validate="one_to_one",
     )
     skill_mask = result["position"].ne("QB") & result["approved_projection"].notna()
@@ -725,6 +732,13 @@ def apply_approved_projection_model(
     result.loc[skill_mask, "recent_opportunities"] = result.loc[skill_mask, "approved_recent_opp"]
     result.loc[skill_mask, "projected_ppr"] = result.loc[skill_mask, "approved_projection"]
     result.loc[skill_mask, "median_ppr"] = result.loc[skill_mask, "approved_projection"]
+    result.loc[skill_mask, "projection_current_signal"] = result.loc[skill_mask, "current_signal"]
+    result.loc[skill_mask, "projection_history_signal"] = result.loc[skill_mask, "history_signal"]
+    result.loc[skill_mask, "projection_current_weight"] = result.loc[skill_mask, "approved_weight"]
+    result.loc[skill_mask, "projection_base"] = result.loc[skill_mask, "approved_base"]
+    result.loc[skill_mask, "projection_td_adjustment"] = result.loc[skill_mask, "approved_td_adjustment"]
+    result.loc[skill_mask, "projection_workload_signal"] = result.loc[skill_mask, "approved_recent_opp"]
+    result.loc[skill_mask, "projection_matchup_factor"] = result.loc[skill_mask, "approved_matchup_factor"].fillna(1.0)
 
     if POSITION_RANGE_CALIBRATION_PATH.exists():
         ranges = json.loads(POSITION_RANGE_CALIBRATION_PATH.read_text(encoding="utf-8"))["offsets"]
@@ -781,6 +795,7 @@ def apply_approved_projection_model(
             [qb["qb_games"].le(2), qb["qb_games"].le(6), qb["qb_games"].le(10)],
             [.40, .60, .75], default=.90,
         ), index=qb.index)
+        qb["qb_weight"] = qb_weight
         qb["qb_base"] = qb_weight * qb["qb_current_signal"] + (1 - qb_weight) * qb["qb_history_signal"]
         qb_defense = qb_current.groupby("opponent_team", as_index=False)["qb_points"].agg(["mean", "size"]).reset_index()
         qb_defense["qb_factor"] = (qb_defense["mean"] / qb_current["qb_points"].mean()).clip(.90, 1.10)
@@ -794,14 +809,22 @@ def apply_approved_projection_model(
             qb["qb_prior_games"].fillna(0).lt(5), "Inexperienced",
             np.where(qb["qb_recent_carries"].ge(5) | qb["qb_recent_rush_yards"].ge(30), "Mobile", "Pocket"),
         )
+        qb["qb_td_adjustment"] = td_signal - observed_td_points
         result = result.merge(
-            qb[[player_column, "qb_recent_points", "approved_qb_projection", "qb_archetype_approved"]],
+            qb[[player_column, "qb_recent_points", "approved_qb_projection", "qb_archetype_approved", "qb_current_signal", "qb_history_signal", "qb_weight", "qb_base", "qb_td_adjustment", "qb_recent_attempts", "qb_factor"]],
             on=player_column, how="left", validate="one_to_one",
         )
         qb_mask = result["position"].eq("QB") & result["approved_qb_projection"].notna()
         result.loc[qb_mask, "recent_ppr"] = result.loc[qb_mask, "qb_recent_points"]
         result.loc[qb_mask, "projected_ppr"] = result.loc[qb_mask, "approved_qb_projection"]
         result.loc[qb_mask, "median_ppr"] = result.loc[qb_mask, "approved_qb_projection"]
+        result.loc[qb_mask, "projection_current_signal"] = result.loc[qb_mask, "qb_current_signal"]
+        result.loc[qb_mask, "projection_history_signal"] = result.loc[qb_mask, "qb_history_signal"]
+        result.loc[qb_mask, "projection_current_weight"] = result.loc[qb_mask, "qb_weight"]
+        result.loc[qb_mask, "projection_base"] = result.loc[qb_mask, "qb_base"]
+        result.loc[qb_mask, "projection_td_adjustment"] = result.loc[qb_mask, "qb_td_adjustment"]
+        result.loc[qb_mask, "projection_workload_signal"] = result.loc[qb_mask, "qb_recent_attempts"]
+        result.loc[qb_mask, "projection_matchup_factor"] = result.loc[qb_mask, "qb_factor"].fillna(1.0)
         if QB_RANGE_CALIBRATION_PATH.exists():
             qb_ranges = json.loads(QB_RANGE_CALIBRATION_PATH.read_text(encoding="utf-8"))["formats"][f"{passing_td_points}_point_passing_td"]["range_offsets"]
             q10_map = {row["archetype"]: row["q10"] * row["lower_scale"] for row in qb_ranges}
@@ -815,7 +838,9 @@ def apply_approved_projection_model(
     result["scoring_role_td_exception_requirement"] = SCORING_ROLE_TD_EXCEPTION_REQUIREMENT
     return result.drop(columns=[
         "approved_season_ppr", "approved_recent_ppr", "approved_recent_opp", "approved_weight", "approved_projection",
-        "qb_recent_points", "approved_qb_projection", "qb_archetype_approved",
+        "current_signal", "history_signal", "approved_base", "approved_td_adjustment", "approved_matchup_factor",
+        "qb_recent_points", "approved_qb_projection", "qb_archetype_approved", "qb_current_signal", "qb_history_signal",
+        "qb_weight", "qb_base", "qb_td_adjustment", "qb_recent_attempts", "qb_factor",
     ], errors="ignore")
 
 

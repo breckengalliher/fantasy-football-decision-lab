@@ -145,6 +145,28 @@ h1,h2,h3 { letter-spacing:-.025em; }
 .open-slot-title { color:var(--ink); font-size:.95rem; font-weight:780; margin:.3rem 0 .12rem; }
 .open-slot-copy { font-size:.72rem; line-height:1.35; max-width:210px; }
 .replacement-note { background:#edf4e8; border-left:3px solid var(--gold); color:#29451f; border-radius:8px; padding:.55rem .7rem; font-size:.76rem; margin:.35rem 0 .65rem; }
+.projection-scope { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.7rem; margin:.35rem 0 1rem; }
+.projection-scope-card { border:1px solid var(--line); border-radius:11px; padding:.75rem .85rem; background:#fbfcfc; }
+.projection-scope-card.included { border-left:4px solid var(--gold); }
+.projection-scope-card.informational { border-left:4px solid var(--wolf); }
+.projection-scope-card strong { display:block; color:var(--ink); font-size:.78rem; margin-bottom:.25rem; }
+.projection-scope-card span { color:var(--muted); font-size:.71rem; line-height:1.35; }
+.driver-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.7rem; }
+.driver-card { border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--card); min-width:0; }
+.driver-card-head { background:var(--navy); color:white; padding:.7rem .8rem; }
+.driver-card-head strong { display:block; font-size:.88rem; line-height:1.2; }
+.driver-card-head span { color:#c0c8cc; font-size:.67rem; }
+.driver-row { padding:.62rem .75rem; border-top:1px solid #e7eaec; }
+.driver-row-top { display:flex; align-items:center; justify-content:space-between; gap:.5rem; }
+.driver-label { color:var(--ink); font-size:.7rem; font-weight:800; }
+.driver-value { color:var(--ink); font-size:.7rem; font-weight:800; white-space:nowrap; }
+.driver-explanation { color:var(--muted); font-size:.65rem; line-height:1.32; margin-top:.18rem; }
+.driver-direction { display:inline-flex; align-items:center; justify-content:center; width:1rem; font-weight:900; margin-right:.16rem; }
+.driver-positive { color:#397f18; }
+.driver-neutral { color:#7a878d; }
+.driver-negative { color:#c45a1a; }
+.driver-final { background:#edf4e8; }
+.driver-final .driver-value { color:#397f18; font-size:.86rem; }
 .context-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.85rem; width:100%; }
 .context-card { background:var(--card); border:1px solid var(--line); border-radius:14px; overflow:hidden; min-width:0; }
 .context-card h3 { margin:0; padding:.9rem 1rem; background:#ebe7dc; color:var(--ink); font-size:1.05rem; display:flex; align-items:center; gap:.6rem; }
@@ -169,11 +191,13 @@ h1,h2,h3 { letter-spacing:-.025em; }
   .range-tooltip { left:0; transform:none; width:min(250px, 75vw); }
   [data-testid="stSidebar"] { width:min(18.75rem, 88vw) !important; }
   .game-status { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .driver-grid { grid-template-columns:1fr; }
 }
 @media(max-width:520px) {
   div[data-baseweb="select"] > div { flex-wrap:wrap; }
   .game-status { grid-template-columns:1fr; }
   .decision-edge { align-items:flex-start; flex-direction:column; }
+  .projection-scope { grid-template-columns:1fr; }
 }
 </style>
 """,
@@ -631,21 +655,99 @@ if page == "Decision Room":
             "WR": ["ytd_targets", "ytd_receptions", "ytd_receiving_yards", "ytd_receiving_tds"],
             "TE": ["ytd_targets", "ytd_receptions", "ytd_receiving_yards", "ytd_receiving_tds"],
         }
-        with st.expander("How this projection was built"):
-            st.markdown("**Included in our projection:** current-season production, recent repeatable workload, a fading prior-season anchor, touchdown regression, and a capped matchup adjustment.")
-            st.caption("Practice, injuries, weather, snap share, pace, game totals, personnel changes, and journalism are displayed for your decision but do not change the projection or Start/Sit order.")
-            view = compare[common + position_stats[position] + ["matchup_label", "points_allowed", "projected_ppr", "confidence"]].copy()
-            st.dataframe(view, hide_index=True, width="stretch", column_config={
-                "player":"Player", "team":"Team", "next_opponent":"Opponent", "games_played":"GP",
-                "season_ppr":st.column_config.NumberColumn("Season PPR/G", format="%.1f"),
-                "recent_ppr":st.column_config.NumberColumn("Last 4 PPR/G", format="%.1f"),
-                "recent_opportunities":st.column_config.NumberColumn("Last 3 opp/G", format="%.1f"),
-                "ytd_attempts":"Pass att", "ytd_carries":"Carries", "ytd_targets":"Targets", "ytd_receptions":"Rec",
-                "ytd_passing_yards":"Pass yds", "ytd_rushing_yards":"Rush yds", "ytd_receiving_yards":"Rec yds",
-                "ytd_passing_tds":"Pass TD", "ytd_rushing_tds":"Rush TD", "ytd_receiving_tds":"Rec TD",
-                "matchup_label":"Matchup", "points_allowed":st.column_config.NumberColumn("Opp. PPR allowed", format="%.1f"),
-                "projected_ppr":st.column_config.NumberColumn("Projection", format="%.1f"), "confidence":"Confidence",
-            })
+        with st.expander("Projection Breakdown"):
+            st.markdown(
+                '<div class="projection-scope">'
+                '<div class="projection-scope-card included"><strong>Included in our calculation</strong><span>Current-season production, repeatable workload, fading prior-season influence, touchdown regression, and a capped matchup adjustment.</span></div>'
+                '<div class="projection-scope-card informational"><strong>Informational only</strong><span>Injuries, practice, weather, snap share, pace, betting totals, personnel changes, and journalism help your decision but never change our ranking.</span></div>'
+                '</div>',
+                unsafe_allow_html=True,
+            )
+
+            def driver_direction(delta: float) -> tuple[str, str]:
+                if delta > .25:
+                    return "↑", "driver-positive"
+                if delta < -.25:
+                    return "↓", "driver-negative"
+                return "—", "driver-neutral"
+
+            driver_cards = []
+            for _, driver_row in compare.iterrows():
+                games = max(1, int(driver_row.get("games_played", 1)))
+                if position == "QB":
+                    ytd_opportunities = float(driver_row.get("ytd_attempts", 0) or 0) + float(driver_row.get("ytd_carries", 0) or 0)
+                    workload_copy = "Recent passing and rushing workload supports the current signal."
+                elif position == "RB":
+                    ytd_opportunities = float(driver_row.get("ytd_carries", 0) or 0) + float(driver_row.get("ytd_targets", 0) or 0)
+                    workload_copy = "Recent carry and target volume supports the projection."
+                else:
+                    ytd_opportunities = float(driver_row.get("ytd_targets", 0) or 0)
+                    workload_copy = "Recent target volume supports the projection."
+                opportunity_delta = float(driver_row.get("recent_opportunities", 0) or 0) - ytd_opportunities / games
+
+                exact_weight = driver_row.get("projection_current_weight")
+                if exact_weight is None or pd.isna(exact_weight):
+                    current_weight = .40 if games <= 2 else .60 if games <= 6 else .75 if games <= 10 else .90
+                else:
+                    current_weight = float(exact_weight)
+                history_remaining = max(0.0, 1 - current_weight)
+                current_signal = driver_row.get("projection_current_signal")
+                history_signal = driver_row.get("projection_history_signal")
+                base_signal = driver_row.get("projection_base")
+                history_delta = 0.0
+                if all(value is not None and pd.notna(value) for value in (current_signal, history_signal, base_signal)):
+                    history_delta = float(base_signal) - float(current_signal)
+
+                td_adjustment = driver_row.get("projection_td_adjustment")
+                has_exact_td = td_adjustment is not None and pd.notna(td_adjustment)
+                td_delta = float(td_adjustment) if has_exact_td else 0.0
+
+                matchup_factor = driver_row.get("projection_matchup_factor")
+                if matchup_factor is None or pd.isna(matchup_factor):
+                    matchup_factor = 1.03 if str(driver_row.get("matchup_label")) == "Favorable" else .97 if str(driver_row.get("matchup_label")) == "Tough" else 1.0
+                matchup_base = float(base_signal) if base_signal is not None and pd.notna(base_signal) else float(driver_row["median_ppr"]) / max(float(matchup_factor), .01)
+                matchup_delta = matchup_base * (float(matchup_factor) - 1)
+
+                rows = [
+                    ("Current-season production", f'{float(driver_row["season_ppr"]):.1f} PPR/G', 0.0, "The current season establishes the starting production baseline."),
+                    ("Recent repeatable workload", f'{float(driver_row["recent_opportunities"]):.1f} opp/G', opportunity_delta, workload_copy),
+                    ("Prior-season influence", f'{history_remaining:.0%} remains', history_delta, "Early-season sample keeps some prior-season influence; it fades as current games accumulate."),
+                    ("Touchdown regression", f'{td_delta:+.1f} PPR' if has_exact_td else "Applied", td_delta, "Touchdown production is regressed toward a sustainable opportunity-based rate."),
+                    ("Matchup adjustment", f'{matchup_delta:+.1f} PPR', matchup_delta, f'The {driver_row["next_opponent"]} adjustment is evidence-scaled and capped.'),
+                ]
+                driver_rows_html = ""
+                for label, value, delta, explanation in rows:
+                    symbol, direction_class = driver_direction(delta)
+                    driver_rows_html += (
+                        f'<div class="driver-row"><div class="driver-row-top"><span class="driver-label">{html.escape(label)}</span>'
+                        f'<span class="driver-value"><span class="driver-direction {direction_class}">{symbol}</span>{html.escape(value)}</span></div>'
+                        f'<div class="driver-explanation">{html.escape(explanation)}</div></div>'
+                    )
+                driver_rows_html += (
+                    f'<div class="driver-row driver-final"><div class="driver-row-top"><span class="driver-label">Final median projection</span>'
+                    f'<span class="driver-value">{float(driver_row["median_ppr"]):.1f} PPR</span></div>'
+                    f'<div class="driver-explanation">Our central estimate before the game is played.</div></div>'
+                )
+                driver_cards.append(
+                    f'<article class="driver-card"><div class="driver-card-head"><strong>{html.escape(str(driver_row["player"]))}</strong>'
+                    f'<span>{html.escape(str(driver_row["team"]))} · {html.escape(str(driver_row["position"]))} · vs {html.escape(str(driver_row["next_opponent"]))}</span></div>{driver_rows_html}</article>'
+                )
+            st.markdown(f'<div class="driver-grid">{"".join(driver_cards)}</div>', unsafe_allow_html=True)
+            st.caption("Arrows show whether a driver nudges the outlook up, leaves it essentially unchanged, or pulls it down. They do not represent separate point totals that should be added together.")
+
+            if st.toggle("View detailed statistics", key=f"advanced_projection_stats_{position}"):
+                view = compare[common + position_stats[position] + ["matchup_label", "points_allowed", "projected_ppr", "confidence"]].copy()
+                st.dataframe(view, hide_index=True, width="stretch", column_config={
+                    "player":"Player", "team":"Team", "next_opponent":"Opponent", "games_played":"GP",
+                    "season_ppr":st.column_config.NumberColumn("Season PPR/G", format="%.1f"),
+                    "recent_ppr":st.column_config.NumberColumn("Recent PPR/G", format="%.1f"),
+                    "recent_opportunities":st.column_config.NumberColumn("Last 3 opp/G", format="%.1f"),
+                    "ytd_attempts":"Pass att", "ytd_carries":"Carries", "ytd_targets":"Targets", "ytd_receptions":"Rec",
+                    "ytd_passing_yards":"Pass yds", "ytd_rushing_yards":"Rush yds", "ytd_receiving_yards":"Rec yds",
+                    "ytd_passing_tds":"Pass TD", "ytd_rushing_tds":"Rush TD", "ytd_receiving_tds":"Rec TD",
+                    "matchup_label":"Matchup", "points_allowed":st.column_config.NumberColumn("Opp. PPR allowed", format="%.1f"),
+                    "projected_ppr":st.column_config.NumberColumn("Projection", format="%.1f"), "confidence":"Confidence",
+                })
 
         with st.expander("More matchup context"):
             st.caption("Additional live information for your final decision. None of these details changes our ranking.")
