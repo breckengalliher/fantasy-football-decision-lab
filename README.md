@@ -18,6 +18,7 @@ The decision room compares up to three players at the same position and shows:
 - the upcoming opponent's PPR allowed to the position;
 - an explainable projected outcome and confidence label.
 - neutral written outlooks for every selected player.
+- narrative-only player reporting from ESPN's NFL feed and recent public Bluesky reporter posts, with source links and no effect on projections.
 
 The system issues a Start or Sit verdict using only the documented core model.
 Injuries, participation, weather, game environment, betting totals, personnel
@@ -98,6 +99,12 @@ The SportsDataIO key is read only from the protected GitHub Actions repository
 secret named `SPORTSDATAIO_API_KEY`. The public Streamlit process reads only
 these committed snapshots and never calls an upstream provider on behalf of a
 visitor.
+
+The same cloud refresh collects a limited set of recent journalism and public
+reporter posts for roster-relevant players. It stores short theme-based
+summaries and source links inside the published snapshot. This reporting layer
+is appended only after projections and verdicts are finalized; it cannot change
+any projection, range, ranking, or Start/Sit label.
 
 ## Always-on hosting
 

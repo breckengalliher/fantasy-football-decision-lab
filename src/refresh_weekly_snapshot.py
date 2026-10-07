@@ -30,6 +30,7 @@ from dashboard.data import (
 from dashboard.providers.sportsdataio import SportsDataIOClient, enrich_board
 from dashboard.providers.injuries import enrich_injuries, load_daily_injury_context
 from dashboard.snapshots import build_personnel_context
+from dashboard.reporting import enrich_with_reporting, load_reporting_context
 
 
 PROCESSED = ROOT / "data" / "processed"
@@ -96,6 +97,8 @@ def main() -> None:
         raise RuntimeError("SPORTSDATAIO_API_KEY is not configured.")
     context = SportsDataIOClient(key).weekly_context(season, next_week)
     board = enrich_board(board, context)
+    reporting_context = load_reporting_context(board)
+    board = enrich_with_reporting(board, reporting_context)
     prior_weekly = load_prior_weekly_data(season)
     scoring_boards = build_scoring_format_boards(board, weekly, prior_weekly, next_week)
     board = scoring_boards[4]
@@ -114,6 +117,10 @@ def main() -> None:
     atomic_parquet(context.depth_charts, previous_path)
     atomic_parquet(player_context, PROCESSED / "personnel_players_current.parquet")
     atomic_parquet(team_context, PROCESSED / "personnel_teams_current.parquet")
+    reporting_records = reporting_context.records if not reporting_context.records.empty else pd.DataFrame(
+        columns=["player", "team", "source_type", "source_name", "author", "text", "url", "published_at"]
+    )
+    atomic_parquet(reporting_records, PROCESSED / "reporting_context_current.parquet")
 
     eligible = board.loc[board["is_roster_relevant"] & board["next_opponent"].notna()]
     pool_audit = audit_player_pool(board)
@@ -137,6 +144,10 @@ def main() -> None:
         "injury_refreshed_at": injury_context.checked_at,
         "sportsdataio_status": f"Connected · {context.refreshed_at[:16].replace('T', ' ')} UTC",
         "sportsdataio_refreshed_at": context.refreshed_at,
+        "reporting_refreshed_at": reporting_context.checked_at,
+        "journalism_status": reporting_context.journalism_status,
+        "reporter_social_status": reporting_context.social_status,
+        "reporting_records": int(len(reporting_context.records)),
         "depth_chart_players": int(len(context.depth_charts)),
         "snap_coverage": float(eligible["latest_snap_pct"].notna().mean()),
         "weather_coverage": float(eligible["weather_summary_live"].notna().mean()),

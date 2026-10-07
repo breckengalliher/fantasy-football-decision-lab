@@ -21,3 +21,4 @@ data/processed/*
 !data/processed/personnel_players_current.parquet
 !data/processed/personnel_teams_current.parquet
 !data/processed/sportsdataio_depth_current.parquet
+!data/processed/reporting_context_current.parquet

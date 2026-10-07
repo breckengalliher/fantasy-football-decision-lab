@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import html
+import json
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -65,6 +66,10 @@ h1,h2,h3 { letter-spacing:-.025em; }
 .verdict.start .outlook-label { color:#9ee468; }
 .verdict .reason { color:#536166; font-size:.91rem; line-height:1.5; margin-top:.28rem; }
 .verdict.start .reason { color:#e0e6e8; }
+.reporting-sources { margin-top:.65rem; font-size:.72rem; color:var(--muted); line-height:1.35; }
+.reporting-sources a { color:#397f18; font-weight:700; text-decoration:none; }
+.verdict.start .reporting-sources { color:#c0c8cc; }
+.verdict.start .reporting-sources a { color:#9ee468; }
 .section-title { font-size:1.16rem; font-weight:750; margin:1.2rem 0 .1rem; }
 .section-copy { color:var(--muted); font-size:.87rem; margin-bottom:.65rem; }
 .note { border-left:4px solid var(--gold); background:#edf4e8; color:#183515; padding:.72rem .9rem; border-radius:8px; font-size:.84rem; margin-top:1rem; }
@@ -244,13 +249,24 @@ if page == "Decision Room":
             with column:
                 verdict = "START" if index == 0 and len(compare) > 1 else "SIT" if len(compare) > 1 else "ONLY PLAYER"
                 card_class = "start" if index == 0 else "sit"
-                reason = build_player_outlook(row, index, len(compare), projection_spread)
+                reason = build_player_outlook(row, index, len(compare), projection_spread, row.get("reporting_summary"))
+                try:
+                    reporting_sources = json.loads(str(row.get("reporting_sources_json", "[]")))
+                except (TypeError, ValueError, json.JSONDecodeError):
+                    reporting_sources = []
+                safe_links = []
+                for source in reporting_sources[:3]:
+                    url = str(source.get("url", ""))
+                    if url.startswith("https://"):
+                        label = html.escape(str(source.get("source_name", "Source")))
+                        safe_links.append(f'<a href="{html.escape(url, quote=True)}" target="_blank" rel="noopener noreferrer">{label}</a>')
+                reporting_links = f'<div class="reporting-sources">Reporting: {" · ".join(safe_links)}</div>' if safe_links else ""
                 st.markdown(
                     f'<div class="verdict {card_class}"><div class="tag">{verdict}</div><div class="name">{html.escape(str(row["player"]))}</div>'
                     f'<div class="opponent">{html.escape(str(row["team"]))} · {html.escape(str(row["venue"]))} vs {html.escape(str(row["next_opponent"]))}</div>'
                     f'<div class="score">{row["floor_ppr"]:.1f} · {row["median_ppr"]:.1f} · {row["ceiling_ppr"]:.1f}</div>'
                     f'<div class="unit">Floor · projection · ceiling <span class="range-help" tabindex="0" aria-label="Range definition">i<span class="range-tooltip" role="tooltip">Floor is the P10 downside outcome, projection is the median estimate, and ceiling is the P90 upside outcome. About 80% of results should fall between floor and ceiling.</span></span></div><div class="outlook-label">Player outlook</div>'
-                    f'<div class="reason">{html.escape(reason)}</div></div>',
+                    f'<div class="reason">{html.escape(reason)}</div>{reporting_links}</div>',
                     unsafe_allow_html=True,
                 )
 
