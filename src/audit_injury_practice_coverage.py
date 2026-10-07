@@ -14,8 +14,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from dashboard.data import build_start_sit_board, current_nfl_season, load_live_weekly_data
-from dashboard.providers.sportsdataio import SportsDataIOClient
-from src.refresh_weekly_snapshot import api_key
+from dashboard.providers.injuries import load_daily_injury_context
 
 
 def coverage_observation(
@@ -72,11 +71,12 @@ def main() -> None:
     eligible = board.loc[board["is_roster_relevant"] & board["next_opponent"].notna(), ["player", "team"]].copy()
     eligible["player_key"] = eligible["player"].str.strip().str.casefold()
 
-    key = api_key()
-    if not key:
-        raise RuntimeError("SPORTSDATAIO_API_KEY is not configured.")
-    context = SportsDataIOClient(key).weekly_context(season, next_week)
-    observation = coverage_observation(eligible, context.injuries, context.refreshed_at)
+    context = load_daily_injury_context(season, next_week)
+    observation = coverage_observation(eligible, context.records, context.checked_at)
+    observation["source_status"] = {
+        "nflverse": context.nflverse_status,
+        "sleeper": context.sleeper_status,
+    }
 
     path = ROOT / "reports" / f"injury-practice-coverage-{season}-week-{next_week}.json"
     if path.exists():

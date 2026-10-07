@@ -4,7 +4,8 @@ SOURCE_ATTRIBUTION = """
 **Data sources**
 
 - **Player results, schedules, snap counts, team play volume, game lines and schedule data:** [nflverse public data releases](https://github.com/nflverse/nflverse-data). nflverse republishes and standardizes NFL data; it is not affiliated with the NFL.
-- **Injuries, practice participation, pregame weather and depth charts:** [SportsDataIO](https://sportsdata.io/), when the provider connection is available. The time shown in the app is when this app last retrieved the provider data—not a guarantee that every underlying report changed at that time.
+- **Injuries and practice participation:** [nflverse daily injury reports](https://github.com/nflverse/nflverse-data), with [Sleeper](https://docs.sleeper.com/) used only as a once-daily fallback or disagreement check. nflverse remains authoritative when both sources provide a designation.
+- **Pregame weather, game totals and depth charts:** [SportsDataIO](https://sportsdata.io/), when the provider connection is available. The time shown in the app is when this app last retrieved the provider data—not a guarantee that every underlying report changed at that time.
 - **Model calculations and Start/Sit labels:** produced by this app from the credited source data. They are not rankings or projections supplied by nflverse, SportsDataIO, the NFL, ESPN, or the listed teams.
 
 Missing provider data is labeled unavailable or not connected; it is never silently interpreted as healthy, active, or unchanged.

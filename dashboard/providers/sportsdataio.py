@@ -88,11 +88,17 @@ def format_injury_context(row: Any, provider_connected: bool = True) -> str:
         updated = _usable(row.get("injury_updated_live"))
         if pd.notna(updated):
             text += f" · updated {updated}"
+        source = _usable(row.get("injury_source_live"))
+        if pd.notna(source):
+            text += f" · {source}"
+        conflict = row.get("injury_conflict_live", False)
+        if pd.notna(conflict) and bool(conflict):
+            text += " · sources disagree"
         return text
     record = row.get("injury_record_live")
     if pd.notna(record) and bool(record):
         return "Provider record present · status unavailable"
-    return "No provider record" if provider_connected else "Source not connected"
+    return "No injury-report record" if provider_connected else "Injury sources unavailable"
 
 
 class SportsDataIOClient:
@@ -113,7 +119,6 @@ class SportsDataIOClient:
 
     def weekly_context(self, season: int, week: int) -> SportsDataIOContext:
         season_code = f"{season}REG"
-        injuries = self._get(f"stats/json/Injuries/{season_code}/{week}")
         games = self._get(f"scores/json/ScoresByWeek/{season_code}/{week}")
         depth = self._get("scores/json/DepthChartsAll")
         teams = self._get("scores/json/Teams")
@@ -123,7 +128,7 @@ class SportsDataIOClient:
             if item.get("TeamID") is not None and item.get("Key")
         }
         return SportsDataIOContext(
-            injuries=normalize_injuries(injuries),
+            injuries=pd.DataFrame(),
             games=normalize_games(games),
             depth_charts=normalize_depth_charts(depth, team_map),
             refreshed_at=datetime.now(timezone.utc).isoformat(),
@@ -221,8 +226,6 @@ def enrich_board(board: pd.DataFrame, context: SportsDataIOContext) -> pd.DataFr
     """Join provider context without modifying any projection columns."""
     result = board.copy()
     result["player_key"] = result["player"].map(_key)
-    if not context.injuries.empty:
-        result = result.merge(context.injuries, on=["player_key", "team"], how="left")
     if not context.depth_charts.empty:
         result = result.merge(context.depth_charts, on=["player_key", "team"], how="left")
     if not context.games.empty:

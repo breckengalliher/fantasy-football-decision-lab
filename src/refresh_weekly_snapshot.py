@@ -28,6 +28,7 @@ from dashboard.data import (
     load_prior_weekly_data,
 )
 from dashboard.providers.sportsdataio import SportsDataIOClient, enrich_board
+from dashboard.providers.injuries import enrich_injuries, load_daily_injury_context
 from dashboard.snapshots import build_personnel_context
 
 
@@ -87,6 +88,8 @@ def main() -> None:
     board, next_week = build_start_sit_board(weekly, schedules, season)
     snaps, teams = load_live_context_data(season)
     board = add_live_supplementary_context(board, snaps, teams)
+    injury_context = load_daily_injury_context(season, next_week)
+    board = enrich_injuries(board, injury_context)
 
     key = api_key()
     if not key:
@@ -125,7 +128,11 @@ def main() -> None:
         "refreshed_at": datetime.now(timezone.utc).isoformat(),
         "eligible_players": int(len(eligible)),
         "player_pool_audit": pool_audit,
-        "injury_records": int(len(context.injuries)),
+        "injury_records": int(len(injury_context.records)),
+        "injury_source_status": {
+            "nflverse": injury_context.nflverse_status,
+            "sleeper": injury_context.sleeper_status,
+        },
         "depth_chart_players": int(len(context.depth_charts)),
         "snap_coverage": float(eligible["latest_snap_pct"].notna().mean()),
         "weather_coverage": float(eligible["weather_summary_live"].notna().mean()),

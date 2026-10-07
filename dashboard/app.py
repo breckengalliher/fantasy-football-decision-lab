@@ -13,12 +13,14 @@ import streamlit as st
 
 try:
     from dashboard.providers.sportsdataio import SportsDataIOClient, context_freshness, enrich_board, format_injury_context
+    from dashboard.providers.injuries import enrich_injuries, load_daily_injury_context
     from dashboard.snapshots import load_personnel_snapshot
     from dashboard.outlooks import build_player_outlook
     from dashboard.states import empty_player_pool_message, provider_issue_message
     from dashboard.methodology_copy import DISCLAIMER_LANGUAGE, METHODOLOGY_LANGUAGE, SOURCE_ATTRIBUTION
 except ModuleNotFoundError:
     from providers.sportsdataio import SportsDataIOClient, context_freshness, enrich_board, format_injury_context
+    from providers.injuries import enrich_injuries, load_daily_injury_context
     from snapshots import load_personnel_snapshot
     from outlooks import build_player_outlook
     from states import empty_player_pool_message, provider_issue_message
@@ -111,12 +113,19 @@ def provider_key() -> str:
         return ""
 
 
+@st.cache_data(ttl=86400, show_spinner=False)
+def get_daily_injuries(season: int, week: int):
+    return load_daily_injury_context(season, week)
+
+
 @st.cache_data(ttl=3600, show_spinner=False)
-def get_live_board(season: int, sportsdataio_key: str = "") -> tuple[pd.DataFrame, pd.DataFrame, int, str, str, str | None]:
+def get_live_board(season: int, sportsdataio_key: str = "") -> tuple[pd.DataFrame, pd.DataFrame, int, str, str, str | None, str]:
     weekly, schedules = load_live_weekly_data(season)
     board, next_week = build_start_sit_board(weekly, schedules, season)
     snaps, team_stats = load_live_context_data(season)
     board = add_live_supplementary_context(board, snaps, team_stats)
+    injury_context = get_daily_injuries(season, next_week)
+    board = enrich_injuries(board, injury_context)
     provider_status = "Not connected"
     provider_refreshed_at = None
     if sportsdataio_key:
@@ -131,7 +140,8 @@ def get_live_board(season: int, sportsdataio_key: str = "") -> tuple[pd.DataFram
         except Exception as error:
             provider_status = f"Connection error · {type(error).__name__}"
     refreshed = datetime.now(timezone.utc).strftime("%b %d, %Y · %H:%M UTC")
-    return board, weekly, next_week, refreshed, provider_status, provider_refreshed_at
+    injury_status = f"NFLVERSE · {injury_context.nflverse_status} | SLEEPER · {injury_context.sleeper_status}"
+    return board, weekly, next_week, refreshed, provider_status, provider_refreshed_at, injury_status
 
 
 def polish(fig: go.Figure, height: int = 390) -> go.Figure:
@@ -163,14 +173,14 @@ with st.sidebar:
     st.divider()
     st.markdown("**LIVE DATA**")
     st.caption("Weekly player results and schedule are pulled from nflverse and cached for one hour.")
-    st.caption("SportsDataIO supplies optional injury, practice, weather, and depth-chart context.")
+    st.caption("nflverse supplies daily injury/practice reports; Sleeper is a daily fallback. SportsDataIO supplies weather, totals, and depth charts.")
     if st.button("Refresh now", width="stretch"):
         st.cache_data.clear()
         st.rerun()
 
 try:
     with st.spinner("Updating weekly stats and matchups…"):
-        BOARD, WEEKLY, NEXT_WEEK, REFRESHED, PROVIDER_STATUS, PROVIDER_REFRESHED_AT = get_live_board(season, provider_key())
+        BOARD, WEEKLY, NEXT_WEEK, REFRESHED, PROVIDER_STATUS, PROVIDER_REFRESHED_AT, INJURY_SOURCE_STATUS = get_live_board(season, provider_key())
 except Exception as error:
     st.error("The weekly player dataset could not be loaded, so projections are temporarily unavailable.")
     st.info("Check your connection, then use **Refresh now**. The app will not show cached estimates as if they were current.")
@@ -185,6 +195,7 @@ BOARD = apply_player_pool_guardrails(BOARD)
 
 with st.sidebar:
     st.caption(f"SPORTSDATAIO · {PROVIDER_STATUS}")
+    st.caption(INJURY_SOURCE_STATUS)
 
 st.markdown(
     f'<div class="hero"><div><div class="eyebrow">{season} season · Week {NEXT_WEEK}</div>'
@@ -197,9 +208,9 @@ if page == "Decision Room":
     st.markdown('<div class="warning"><b>Before kickoff:</b> live injuries, practice, weather, and depth context are supplementary. Confirm official late-breaking status before locking a lineup.</div>', unsafe_allow_html=True)
     context_age_minutes, context_is_stale = context_freshness(PROVIDER_REFRESHED_AT)
     if context_is_stale:
-        st.warning("Live injury and practice context is more than 90 minutes old or unavailable. Use **Refresh now** before setting a lineup.")
+        st.warning("SportsDataIO weather/depth context is more than 90 minutes old or unavailable. Daily injury reports remain separate; confirm late-breaking status before kickoff.")
     else:
-        st.caption(f"Live injury and practice context checked {context_age_minutes} minute{'s' if context_age_minutes != 1 else ''} ago.")
+        st.caption(f"Weather/depth context checked {context_age_minutes} minute{'s' if context_age_minutes != 1 else ''} ago. Injury/practice reports refresh daily.")
     provider_issue = provider_issue_message(PROVIDER_STATUS)
     if provider_issue:
         st.warning(provider_issue)
@@ -320,7 +331,7 @@ if page == "Decision Room":
             item = {"Factor": factor}
             for _, row in compare.iterrows():
                 if factor == "Injury / practice":
-                    value = format_injury_context(row, PROVIDER_STATUS.startswith("Connected"))
+                    value = format_injury_context(row, "Connected" in INJURY_SOURCE_STATUS)
                 elif factor == "Betting total":
                     provider_total = row.get("betting_total_live")
                     value = f"{float(provider_total):.1f}" if provider_total is not None and pd.notna(provider_total) else f"{row['total_line']:.1f}" if "total_line" in row and pd.notna(row["total_line"]) else "Source not connected"

@@ -52,16 +52,18 @@ The app reads the current `player_stats` and `schedules` releases from
 [nflverse](https://github.com/nflverse/nflverse-data) and caches them for one
 hour. The UI includes a manual refresh action.
 
-The core nflverse layer includes live snaps, pace, available game totals,
-schedule-adjusted opponent context, and outcome ranges. Injuries, practice
-status, pregame weather, and depth charts become available when SportsDataIO is
-connected. Breaking news and week-over-week personnel-change detection remain
-explicit limitations rather than being silently treated as neutral.
+The core nflverse layer includes player results, schedules, snaps, pace,
+schedule-adjusted opponent context, and daily injury/practice reports. Sleeper
+provides a once-daily fallback designation when nflverse has no designation and
+is also used to flag source disagreements. Pregame weather, available game
+totals, and depth charts become available when SportsDataIO is connected.
+Breaking news remains an explicit limitation rather than being silently treated
+as neutral.
 
 ### Optional SportsDataIO context
 
-The app includes an optional SportsDataIO adapter for current injuries, practice
-status, pregame weather, game totals, and depth-chart context. Copy
+The app includes an optional SportsDataIO adapter for pregame weather, game
+totals, and depth-chart context. Copy
 `.streamlit/secrets.toml.example` to `.streamlit/secrets.toml`, then store your
 private NFL API key there:
 
