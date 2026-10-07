@@ -80,7 +80,8 @@ div[data-testid="stMetric"] { background:var(--card); border:1px solid var(--lin
   section.main, [data-testid="stMain"], [data-testid="stMainBlockContainer"], .block-container { width:100% !important; max-width:100vw !important; min-width:0 !important; box-sizing:border-box; }
   .block-container { padding:1rem .85rem 2rem; }
   .hero{display:block}.fresh{text-align:left;margin-top:.7rem}.hero h1{font-size:2.05rem}
-  .hero, .hero > div, .hero p, .warning, .section-copy, .note { width:100% !important; max-width:100% !important; min-width:0 !important; box-sizing:border-box; white-space:normal; overflow-wrap:anywhere; }
+  .hero, .warning, .section-copy, .note { width:calc(100vw - 1.7rem) !important; max-width:calc(100vw - 1.7rem) !important; }
+  .hero > div, .hero p { width:100% !important; max-width:100% !important; min-width:0 !important; box-sizing:border-box; white-space:normal; overflow-wrap:anywhere; }
   .verdict { min-height:0; padding:1rem; }
   .verdict .name { font-size:1.45rem; }
   .range-tooltip { left:0; transform:none; width:min(250px, 75vw); }
