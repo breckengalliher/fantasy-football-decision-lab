@@ -12,3 +12,5 @@ data/processed/*
 !data/processed/recent_games_2026.csv
 *.pyc
 .DS_Store
+.streamlit/secrets.toml
+reports/start_sit_backtest/prediction_rows.parquet

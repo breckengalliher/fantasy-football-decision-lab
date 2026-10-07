@@ -1,650 +1,333 @@
-"""Fantasy Football Decision Lab — Streamlit dashboard scaffold."""
+"""Live weekly fantasy-football Start/Sit Lab."""
 
 from __future__ import annotations
 
 import html
-import json
+import os
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
+import plotly.graph_objects as go
 import streamlit as st
 
 try:
-    from dashboard.data import (
-        apply_market_values,
-        load_dashboard_players,
-        player_history,
-        prepare_draft_board,
-    )
+    from dashboard.providers.sportsdataio import SportsDataIOClient, enrich_board
+    from dashboard.snapshots import load_personnel_snapshot
+    from dashboard.outlooks import build_player_outlook
 except ModuleNotFoundError:
-    # Streamlit Community Cloud executes this file with dashboard/ first on sys.path.
-    from data import (
-        apply_market_values,
-        load_dashboard_players,
-        player_history,
-        prepare_draft_board,
-    )
+    from providers.sportsdataio import SportsDataIOClient, enrich_board
+    from snapshots import load_personnel_snapshot
+    from outlooks import build_player_outlook
+
+try:
+    from dashboard.data import add_live_supplementary_context, build_start_sit_board, current_nfl_season, load_live_context_data, load_live_weekly_data
+except ModuleNotFoundError:
+    from data import add_live_supplementary_context, build_start_sit_board, current_nfl_season, load_live_context_data, load_live_weekly_data
 
 
+COLORS = {"QB": "#00529b", "RB": "#69be28", "WR": "#4b788f", "TE": "#a5acaf"}
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-LEAGUE_CONFIG = json.loads((PROJECT_ROOT / "config" / "league.json").read_text())
-PLAYERS, DATA_STATUS = load_dashboard_players()
+SEASON = current_nfl_season()
 
-st.set_page_config(
-    page_title="Fantasy Football Decision Lab",
-    page_icon="🏈",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
-
+st.set_page_config(page_title="Start / Sit Lab", page_icon="🏈", layout="wide", initial_sidebar_state="expanded")
 st.markdown(
     """
 <style>
-    :root {
-        --ink: #14212b;
-        --muted: #5d6b78;
-        --navy: #17324d;
-        --blue: #2468a2;
-        --gold: #d39a2c;
-        --paper: #f5f7f9;
-        --line: #dce3e8;
-    }
-    .stApp { background: var(--paper); color: var(--ink); }
-    [data-testid="stSidebar"] { background: #10283d; }
-    [data-testid="stSidebar"] * { color: #f5f8fa; }
-    .hero {
-        padding: 1.5rem 1.65rem;
-        border-radius: 18px;
-        background: linear-gradient(125deg, #10283d 0%, #1d5379 72%, #d39a2c 150%);
-        color: white;
-        margin-bottom: 1rem;
-        box-shadow: 0 12px 30px rgba(20,33,43,.12);
-    }
-    .hero h1 { margin: 0; font-size: 2.15rem; letter-spacing: -.03em; }
-    .hero p { margin: .45rem 0 0; color: #dce7ef; max-width: 800px; }
-    .status {
-        display: inline-block;
-        padding: .28rem .62rem;
-        border-radius: 999px;
-        background: #fff3d2;
-        color: #7a5310;
-        font-size: .78rem;
-        font-weight: 700;
-        margin-bottom: .65rem;
-    }
-    .section-title { margin: 1.1rem 0 .35rem; font-weight: 750; font-size: 1.25rem; }
-    .section-copy { color: var(--muted); margin-bottom: .9rem; }
-    .rank-row {
-        display: grid;
-        grid-template-columns: 170px 1fr 60px;
-        align-items: center;
-        gap: .7rem;
-        margin: .5rem 0;
-    }
-    .rank-track { height: 12px; border-radius: 99px; background: #e4e9ed; overflow: hidden; }
-    .rank-fill { height: 100%; border-radius: 99px; background: #2468a2; }
-    .rank-fill.gold { background: #d39a2c; }
-    .signal {
-        border: 1px solid var(--line);
-        border-radius: 14px;
-        padding: .85rem 1rem;
-        background: white;
-        min-height: 98px;
-    }
-    .signal strong { font-size: 1.25rem; }
-    .muted { color: var(--muted); }
-    .source-note {
-        margin-top: 1rem;
-        padding: .75rem 1rem;
-        background: #eef3f6;
-        border-left: 4px solid #2468a2;
-        color: #42515e;
-        font-size: .88rem;
-    }
-    div[data-testid="stMetric"] {
-        background: white;
-        border: 1px solid var(--line);
-        padding: .75rem 1rem;
-        border-radius: 14px;
-    }
+:root { --ink:#071b2c; --muted:#5f6b73; --navy:#002244; --cream:#f3f6f7; --card:#ffffff; --line:#d7dde0; --teal:#397f18; --gold:#69be28; --wolf:#a5acaf; }
+.stApp { background:var(--cream); color:var(--ink); }
+[data-testid="stSidebar"] { background:var(--navy); }
+[data-testid="stSidebar"] * { color:#f7fafb; }
+[data-testid="stSidebar"] [data-baseweb="select"] * { color:var(--ink) !important; }
+[data-testid="stSidebar"] button[kind="secondary"] * { color:var(--ink) !important; }
+.block-container { max-width:1440px; padding-top:1.55rem; }
+h1,h2,h3 { letter-spacing:-.025em; }
+.hero { display:flex; align-items:flex-end; justify-content:space-between; gap:2rem; border-bottom:1px solid #cfd5cf; padding-bottom:1.15rem; margin-bottom:1.2rem; }
+.hero h1 { margin:.2rem 0 .45rem; font-size:2.65rem; line-height:1; }
+.hero p { color:var(--muted); margin:0; max-width:720px; }
+.eyebrow { color:#397f18; text-transform:uppercase; letter-spacing:.13em; font-size:.74rem; font-weight:800; }
+.fresh { color:var(--muted); text-align:right; font-size:.78rem; white-space:nowrap; }
+.verdict { background:var(--card); color:var(--ink); border:1px solid var(--line); border-radius:16px; padding:1.3rem 1.45rem; min-height:280px; }
+.verdict.start { background:var(--navy); color:white; border-color:var(--gold); box-shadow:0 12px 28px rgba(0,34,68,.18); }
+.verdict .tag { display:inline-block; background:#edf4e8; color:#397f18; border-radius:999px; padding:.28rem .52rem; letter-spacing:.12em; font-size:.67rem; font-weight:800; }
+.verdict.start .tag { background:rgba(105,190,40,.16); color:#9ee468; }
+.verdict .name { font-size:1.7rem; font-weight:750; margin:.65rem 0 .1rem; }
+.verdict .opponent { color:var(--muted); font-size:.8rem; }
+.verdict.start .opponent { color:#c0c8cc; }
+.verdict .score { color:var(--teal); font-size:1.35rem; font-weight:750; margin-top:.8rem; }
+.verdict.start .score { color:#9ee468; }
+.verdict .outlook-label { color:var(--muted); text-transform:uppercase; letter-spacing:.1em; font-size:.65rem; font-weight:800; margin-top:1rem; }
+.verdict.start .outlook-label { color:#9ee468; }
+.verdict .reason { color:#536166; font-size:.91rem; line-height:1.5; margin-top:.28rem; }
+.verdict.start .reason { color:#e0e6e8; }
+.section-title { font-size:1.16rem; font-weight:750; margin:1.2rem 0 .1rem; }
+.section-copy { color:var(--muted); font-size:.87rem; margin-bottom:.65rem; }
+.note { border-left:4px solid var(--gold); background:#edf4e8; color:#183515; padding:.72rem .9rem; border-radius:8px; font-size:.84rem; margin-top:1rem; }
+.warning { border-left:4px solid var(--gold); background:#eef5e9; color:#29451f; padding:.72rem .9rem; border-radius:8px; font-size:.84rem; margin:.85rem 0; }
+div[data-testid="stMetric"] { background:var(--card); border:1px solid var(--line); padding:.8rem 1rem; border-radius:12px; }
+.stPlotlyChart { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:.2rem; }
+@media(max-width:800px) { .hero{display:block}.fresh{text-align:left;margin-top:.7rem}.hero h1{font-size:2.05rem} }
 </style>
 """,
     unsafe_allow_html=True,
 )
 
 
-def metric_bar(label: str, value: float, maximum: float, gold: bool = False) -> str:
-    width = max(0.0, min(100.0, 100 * value / maximum))
-    fill_class = "rank-fill gold" if gold else "rank-fill"
-    return (
-        '<div class="rank-row">'
-        f"<span>{html.escape(label)}</span>"
-        f'<div class="rank-track"><div class="{fill_class}" style="width:{width:.1f}%"></div></div>'
-        f"<strong>{value:.1f}</strong>"
-        "</div>"
+def provider_key() -> str:
+    key = os.getenv("SPORTSDATAIO_API_KEY", "").strip()
+    if key:
+        return key
+    try:
+        return str(st.secrets.get("SPORTSDATAIO_API_KEY", "")).strip()
+    except (FileNotFoundError, KeyError):
+        return ""
+
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def get_live_board(season: int, sportsdataio_key: str = "") -> tuple[pd.DataFrame, pd.DataFrame, int, str, str]:
+    weekly, schedules = load_live_weekly_data(season)
+    board, next_week = build_start_sit_board(weekly, schedules, season)
+    snaps, team_stats = load_live_context_data(season)
+    board = add_live_supplementary_context(board, snaps, team_stats)
+    provider_status = "Not connected"
+    if sportsdataio_key:
+        try:
+            context = SportsDataIOClient(sportsdataio_key).weekly_context(season, next_week)
+            board = enrich_board(board, context)
+            _, team_context = load_personnel_snapshot(PROJECT_ROOT)
+            if not team_context.empty:
+                board = board.merge(team_context, on="team", how="left")
+            provider_status = f"Connected · {context.refreshed_at[:16].replace('T', ' ')} UTC"
+        except Exception as error:
+            provider_status = f"Connection error · {type(error).__name__}"
+    refreshed = datetime.now(timezone.utc).strftime("%b %d, %Y · %H:%M UTC")
+    return board, weekly, next_week, refreshed, provider_status
+
+
+def polish(fig: go.Figure, height: int = 390) -> go.Figure:
+    fig.update_layout(
+        height=height,
+        margin=dict(l=18, r=18, t=52, b=20),
+        paper_bgcolor="#ffffff",
+        plot_bgcolor="#ffffff",
+        font=dict(family="Arial", color="#33434f", size=12),
+        title_font=dict(size=16, color="#071b2c"),
+        hoverlabel=dict(bgcolor="#002244", font_color="white"),
+        legend_title_text="",
     )
+    fig.update_xaxes(gridcolor="#e3e8ea", zeroline=False)
+    fig.update_yaxes(gridcolor="#e3e8ea", zeroline=False)
+    return fig
 
 
 with st.sidebar:
-    st.title("Decision Lab")
-    st.caption("2026 draft decision application")
-    workspace = st.radio(
-        "Workspace",
-        [
-            "Overview",
-            "Draft Target Finder",
-            "Weekly Start / Sit",
-            "Player Explorer",
-            "Methodology",
-        ],
-        label_visibility="collapsed",
-    )
+    st.markdown("## ◒ Player Comparison Lab")
+    st.caption("Live, explainable matchup analysis")
+    page = st.radio("View", ["Decision Room", "Player Trends", "How It Works"], label_visibility="collapsed")
     st.divider()
-    st.subheader("League profile")
-    st.write("12 teams · Full PPR · $200 auction")
-    st.write("6-point passing TDs")
-    st.write("1 QB · 2 RB · 2 WR · 1 TE · 2 FLEX")
-    st.write("1 DST · 6 bench · No kicker")
+    season = st.selectbox("Season", [SEASON, SEASON - 1], index=0)
+    st.markdown("**SCORING**")
+    st.caption("Full PPR · 4-pt passing TD")
     st.divider()
-    st.caption("DATA STATUS")
-    if DATA_STATUS.startswith("Historical model"):
-        st.success("2026 roster + model connected")
-        st.caption("2023–2025 nflverse results, weighted toward 2025.")
-        if "market matches" in DATA_STATUS:
-            st.caption(DATA_STATUS.split(" + ", 1)[1].capitalize() + ".")
-    else:
-        st.warning("Illustrative fallback", icon="⚠️")
-        st.caption("Run the pipeline to connect historical player results.")
-    st.divider()
-    st.caption("OPTIONAL MARKET DATA")
-    market_upload = st.file_uploader(
-        "Import reviewed auction values",
-        type=["csv"],
-        help="CSV columns required: player, market_value, season. Season must be 2026.",
-    )
-    if market_upload is not None:
-        try:
-            PLAYERS, matched_players = apply_market_values(
-                PLAYERS, pd.read_csv(market_upload)
-            )
-            st.success(f"Matched {matched_players} market values")
-        except (ValueError, pd.errors.ParserError) as error:
-            st.error(str(error))
+    st.markdown("**LIVE DATA**")
+    st.caption("Weekly player results and schedule are pulled from nflverse and cached for one hour.")
+    st.caption("SportsDataIO supplies optional injury, practice, weather, and depth-chart context.")
+    if st.button("Refresh now", width="stretch"):
+        st.cache_data.clear()
+        st.rerun()
+
+try:
+    with st.spinner("Updating weekly stats and matchups…"):
+        BOARD, WEEKLY, NEXT_WEEK, REFRESHED, PROVIDER_STATUS = get_live_board(season, provider_key())
+except Exception as error:
+    st.error("Live stats could not be loaded. Check the network connection and try Refresh now.")
+    st.caption(f"Technical detail: {error}")
+    st.stop()
+
+with st.sidebar:
+    st.caption(f"SPORTSDATAIO · {PROVIDER_STATUS}")
 
 st.markdown(
-    """
-<div class="hero">
-    <span class="status">HISTORICAL MODEL</span>
-    <h1>Fantasy Football Decision Lab</h1>
-    <p>Turn custom league scoring, opportunity, replacement value, and matchup context into
-    clearer auction and weekly lineup decisions.</p>
-</div>
-""",
+    f'<div class="hero"><div><div class="eyebrow">{season} season · Week {NEXT_WEEK}</div>'
+    '<h1>Player Comparison Lab</h1><p>Compare production, matchup context, and projected outcome ranges. You make the lineup decision.</p></div>'
+    f'<div class="fresh">UPDATED<br>{html.escape(REFRESHED)}</div></div>',
     unsafe_allow_html=True,
 )
 
-draft_board = prepare_draft_board(PLAYERS)
-has_uploaded_market = draft_board["comparison_source"].eq(
-    "Uploaded 2026 market file"
-).any()
-has_espn_market = draft_board["comparison_source"].str.startswith(
-    "ESPN PPR calibrated", na=False
-).any()
-comparison_name = (
-    "uploaded market"
-    if has_uploaded_market
-    else "ESPN 12-team PPR value"
-    if has_espn_market
-    else "2025 baseline"
-)
-
-if workspace == "Overview":
-    value_targets = draft_board.loc[draft_board["auction_edge"].gt(3)].copy()
-    top_value = draft_board.iloc[0]
-    safest_player = PLAYERS.loc[PLAYERS["projected_points"].notna()].sort_values(
-        ["risk_score", "projected_points"], ascending=[True, False]
-    ).iloc[0]
-    risk_watch = PLAYERS.loc[PLAYERS["projected_points"].notna()].sort_values(
-        ["risk_score", "model_value"], ascending=[False, False]
-    ).iloc[0]
-
-    st.markdown('<div class="section-title">2026 decision snapshot</div>', unsafe_allow_html=True)
-    st.markdown(
-        '<div class="section-copy">Start with the highest-signal decisions, then open a workspace for deeper analysis.</div>',
-        unsafe_allow_html=True,
-    )
-
-    metric_one, metric_two, metric_three, metric_four = st.columns(4)
-    metric_one.metric("Draft targets", len(value_targets))
-    metric_two.metric("Largest value difference", f"+${int(top_value['auction_edge'])}")
-    metric_three.metric("Allocated league budget", f"${int(draft_board['model_value'].sum()):,}")
-    metric_four.metric("Data status", DATA_STATUS)
-
-    st.subheader("Today’s decision board")
-    insight_one, insight_two, insight_three = st.columns(3)
-    with insight_one:
-        st.markdown(
-            f"""
-            <div class="signal">
-                <span class="muted">BEST VALUE</span><br/>
-                <strong>{html.escape(top_value["player"])}</strong><br/>
-                ${top_value["model_value"]} league value · ${top_value["market_value"]} {comparison_name} ·
-                <b>+${top_value["auction_edge"]}</b>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-    with insight_two:
-        st.markdown(
-            f"""
-            <div class="signal">
-                <span class="muted">STRONGEST FLOOR PROFILE</span><br/>
-                <strong>{html.escape(safest_player["player"])}</strong><br/>
-                {safest_player["floor"]:.0f}-point floor · {safest_player["confidence"]} confidence ·
-                {safest_player["risk_score"]}/100 risk
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-    with insight_three:
-        st.markdown(
-            f"""
-            <div class="signal">
-                <span class="muted">RISK WATCH</span><br/>
-                <strong>{html.escape(risk_watch["player"])}</strong><br/>
-                {risk_watch["risk_score"]}/100 risk · ${risk_watch["model_value"]} league value ·
-                {risk_watch["confidence"]} confidence
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-    left, right = st.columns([1.15, 1])
-    with left:
-        st.subheader(f"Top differences vs {comparison_name}")
-        edge_rows = draft_board.loc[draft_board["auction_edge"].gt(0)].head(6)
-        edge_html = "".join(
-            metric_bar(
-                f"{row.player} · {row.position}",
-                float(row.auction_edge),
-                max(float(edge_rows["auction_edge"].max()), 1),
-                gold=index == 0,
-            )
-            for index, row in enumerate(edge_rows.itertuples())
-        )
-        st.markdown(edge_html, unsafe_allow_html=True)
-        st.caption(
-            "Custom league value minus the displayed comparison. Uploaded 2026 "
-            "market data is optional and never determines the league value."
-        )
-    with right:
-        st.subheader("Value by position")
-        position_summary = (
-            draft_board.groupby("position", as_index=False)
-            .agg(
-                average_edge=("auction_edge", "mean"),
-                top_edge=("auction_edge", "max"),
-                players=("player", "count"),
-            )
-            .sort_values("average_edge", ascending=False)
-        )
-        position_html = "".join(
-            metric_bar(
-                row.position,
-                float(max(row.average_edge, 0)),
-                max(float(position_summary["average_edge"].clip(lower=0).max()), 1),
-                gold=index == 0,
-            )
-            for index, row in enumerate(position_summary.itertuples())
-        )
-        st.markdown(position_html, unsafe_allow_html=True)
-        st.caption("Average model-versus-baseline edge by position.")
-
-    st.subheader("Open a workspace")
-    action_one, action_two, action_three = st.columns(3)
-    action_one.info(
-        "**Draft Target Finder**\n\nFilter the auction board and identify price-sensitive targets."
-    )
-    action_two.info(
-        "**Weekly Start / Sit**\n\nCompare projected output, matchup, floor, ceiling, and risk."
-    )
-    action_three.info(
-        "**Player Explorer**\n\nInspect the advanced statistics behind each recommendation."
-    )
-
-    st.subheader("Highest-priority targets")
-    st.dataframe(
-        value_targets[
-            [
-                "player",
-                "position",
-                "team",
-                "model_value",
-                "market_value",
-                "auction_edge",
-                "projected_points",
-                "confidence",
-            ]
-        ].head(5),
-        hide_index=True,
-        width="stretch",
-    )
-
-elif workspace == "Draft Target Finder":
-    st.markdown('<div class="section-title">Build an auction shortlist</div>', unsafe_allow_html=True)
-    st.markdown(
-        f'<div class="section-copy">Rank custom league values and compare them with the {comparison_name}.</div>',
-        unsafe_allow_html=True,
-    )
-
-    filter_one, filter_two, filter_three = st.columns([1.4, 1, 1])
-    with filter_one:
-        selected_positions = st.multiselect(
-            "Positions",
-            ["QB", "RB", "WR", "TE", "DST"],
-            default=["QB", "RB", "WR", "TE", "DST"],
-        )
-    with filter_two:
-        maximum_price = st.slider(f"Maximum {comparison_name} value", 0, 70, 70)
-    with filter_three:
-        minimum_edge = st.slider("Minimum value difference", -10, 15, 0)
-
-    filtered = draft_board.loc[
-        draft_board["position"].isin(selected_positions)
-        & draft_board["market_value"].le(maximum_price)
-        & draft_board["auction_edge"].ge(minimum_edge)
-    ].copy()
-
-    metric_one, metric_two, metric_three, metric_four = st.columns(4)
-    metric_one.metric("League budget", "$2,400")
-    metric_two.metric("Allocated budget", f"${int(draft_board['model_value'].sum()):,}")
-    metric_three.metric("Targets found", f"{len(filtered)}")
-    metric_four.metric(
-        "Best value difference",
-        f"${int(filtered['auction_edge'].max())}" if not filtered.empty else "—",
-    )
-
-    left, right = st.columns([1.1, 1])
-    with left:
-        st.subheader(f"Highest differences vs {comparison_name}")
-        if filtered.empty:
-            st.info("No players match the current filters.")
-        else:
-            bars = "".join(
-                metric_bar(
-                    f"{row.player} · {row.position}",
-                    float(max(row.auction_edge, 0)),
-                    max(float(filtered["auction_edge"].max()), 1),
-                    gold=index == 0,
-                )
-                for index, row in enumerate(filtered.head(6).itertuples())
-            )
-            st.markdown(bars, unsafe_allow_html=True)
-    with right:
-        st.subheader("Draft signal")
-        if filtered.empty:
-            st.info("Broaden the filters to see a recommendation.")
-        else:
-            leader = filtered.iloc[0]
-            st.markdown(
-                f"""
-                <div class="signal">
-                    <span class="muted">Top model target</span><br/>
-                    <strong>{html.escape(leader["player"])}</strong><br/>
-                    League ${leader["model_value"]} · Comparison ${leader["market_value"]} ·
-                    <b>+${leader["auction_edge"]} edge</b>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-            st.caption(
-                "Why: favorable value-over-replacement profile, opportunity score, "
-                "and comparison difference. The league value is calculated independently."
-            )
-
-    st.subheader("Auction board")
-    display_columns = [
-        "player",
-        "position",
-        "team",
-        "projected_points",
-        "floor",
-        "ceiling",
-        "model_value",
-        "market_value",
-        "auction_edge",
-        "comparison_source",
-        "value_signal",
-        "confidence",
-        "roster_status",
-        "depth_label",
-    ]
-    st.dataframe(
-        filtered[display_columns],
-        hide_index=True,
-        width="stretch",
-        column_config={
-            "player": "Player",
-            "position": "Pos",
-            "team": "Team",
-            "projected_points": st.column_config.NumberColumn("Proj. PPR", format="%.1f"),
-            "model_value": st.column_config.NumberColumn("League $", format="$%d"),
-            "market_value": st.column_config.NumberColumn("Comparison $", format="$%.2f"),
-            "auction_edge": st.column_config.NumberColumn("Difference", format="$%d"),
-        },
-    )
-
-elif workspace == "Weekly Start / Sit":
-    st.markdown('<div class="section-title">Compare weekly lineup options</div>', unsafe_allow_html=True)
-    st.markdown(
-        '<div class="section-copy">Balance median projection, floor, ceiling, matchup, and confidence.</div>',
-        unsafe_allow_html=True,
-    )
-    st.warning(
-        "Injury availability is not included in these recommendations. "
-        "Confirm current team reports before setting a lineup.",
-        icon="⚠️",
-    )
-    eligible_names = PLAYERS.loc[
-        PLAYERS["position"].ne("DST") & PLAYERS["weekly_projection"].notna(), "player"
-    ].tolist()
-    selected_names = st.multiselect(
+if page == "Decision Room":
+    st.markdown('<div class="warning"><b>Before kickoff:</b> live injuries, practice, weather, and depth context are supplementary. Confirm official late-breaking status before locking a lineup.</div>', unsafe_allow_html=True)
+    c1, c2 = st.columns([.62, 1.38])
+    position = c1.segmented_control("Position", ["QB", "RB", "WR", "TE"], default="WR")
+    pool = BOARD.loc[BOARD["position"].eq(position) & BOARD["next_opponent"].notna() & BOARD["is_roster_relevant"]].copy()
+    names = c2.multiselect(
         "Players to compare",
-        eligible_names,
-        default=eligible_names[:3],
-        max_selections=4,
+        pool["player"].sort_values().tolist(),
+        default=pool.head(3)["player"].tolist(),
+        max_selections=3,
+        placeholder="Choose up to three players",
     )
-    comparison = PLAYERS.loc[PLAYERS["player"].isin(selected_names)].copy()
+    compare = pool.loc[pool["player"].isin(names)].sort_values("projected_ppr", ascending=False)
 
-    if comparison.empty:
-        st.info("Select at least one player.")
+    if compare.empty:
+        st.info("Choose at least one player to begin.")
     else:
-        recommended = comparison.sort_values(
-            ["weekly_projection", "risk_score"], ascending=[False, True]
-        ).iloc[0]
-        metric_one, metric_two, metric_three = st.columns(3)
-        metric_one.metric("Recommended start", recommended["player"])
-        metric_two.metric("Projected PPR", f"{recommended['weekly_projection']:.1f}")
-        metric_three.metric("Matchup", recommended["matchup"])
+        leader = compare.iloc[0]
+        m1, m2, m3, m4 = st.columns(4)
+        m1.metric("Model Start", leader["player"])
+        m2.metric("Start projection", f"{compare['median_ppr'].max():.1f} PPR")
+        m3.metric("Projection spread", f"{compare['median_ppr'].max() - compare['median_ppr'].min():.1f} PPR")
+        m4.metric("Next week", f"Week {NEXT_WEEK}")
 
-        left, right = st.columns([1.1, 1])
-        with left:
-            st.subheader("Weekly projection")
-            bars = "".join(
-                metric_bar(
-                    f"{row.player} · vs {row.opponent}",
-                    float(row.weekly_projection),
-                    max(float(comparison["weekly_projection"].max()), 1),
-                    gold=row.player == recommended["player"],
+        projection_spread = float(compare["median_ppr"].max() - compare["median_ppr"].min())
+        if len(compare) > 1 and projection_spread < 2.5:
+            st.info("Close call: the model still labels Start and Sit, but the gap is under 2.5 PPR—far smaller than its typical weekly error. Treat this as a lean, not a confident separation.")
+
+        st.markdown('<div class="section-title">Start / Sit verdict</div><div class="section-copy">The verdict uses 90% YTD PPR/G, 10% last-four PPR/G, and a capped opponent-PPR adjustment. Decision Context below is excluded.</div>', unsafe_allow_html=True)
+        outlook_columns = st.columns(len(compare))
+        for index, (column, (_, row)) in enumerate(zip(outlook_columns, compare.iterrows())):
+            with column:
+                verdict = "START" if index == 0 and len(compare) > 1 else "SIT" if len(compare) > 1 else "ONLY PLAYER"
+                card_class = "start" if index == 0 else "sit"
+                reason = build_player_outlook(row, index, len(compare), projection_spread)
+                st.markdown(
+                    f'<div class="verdict {card_class}"><div class="tag">{verdict}</div><div class="name">{html.escape(str(row["player"]))}</div>'
+                    f'<div class="opponent">{html.escape(str(row["team"]))} · {html.escape(str(row["venue"]))} vs {html.escape(str(row["next_opponent"]))}</div>'
+                    f'<div class="score">{row["floor_ppr"]:.1f} · {row["median_ppr"]:.1f} · {row["ceiling_ppr"]:.1f}</div>'
+                    f'<div class="unit">Floor · projection · ceiling</div><div class="outlook-label">Player outlook</div>'
+                    f'<div class="reason">{html.escape(reason)}</div></div>',
+                    unsafe_allow_html=True,
                 )
-                for row in comparison.sort_values("weekly_projection", ascending=False).itertuples()
-            )
-            st.markdown(bars, unsafe_allow_html=True)
+
+        left, right = st.columns([1.35, .85])
+        with left:
+            st.markdown('<div class="section-title">Projected outcome</div><div class="section-copy">Season production anchors the estimate; recent form and matchup make conservative adjustments.</div>', unsafe_allow_html=True)
+            colors = ["#69be28"] + ["#a5acaf"] * (len(compare) - 1)
+            fig = go.Figure(go.Bar(
+                x=compare["median_ppr"], y=compare["player"], orientation="h", marker_color=colors,
+                customdata=list(zip(compare["recent_ppr"], compare["season_ppr"], compare["next_opponent"], compare["matchup_label"], compare["confidence"])),
+                text=compare["median_ppr"].map(lambda value: f"{value:.1f}"), textposition="outside",
+                error_x=dict(type="data", symmetric=False, array=compare["ceiling_ppr"] - compare["median_ppr"], arrayminus=compare["median_ppr"] - compare["floor_ppr"], color="#5f6b73"),
+                hovertemplate="<b>%{y}</b><br>Projection %{x:.1f}<br>Recent %{customdata[0]:.1f}<br>Season %{customdata[1]:.1f}<br>vs %{customdata[2]} · %{customdata[3]}<br>%{customdata[4]} confidence<extra></extra>",
+            ))
+            fig.update_layout(title=f"Week {NEXT_WEEK} projected PPR", xaxis_title="PPR points", yaxis_title="", showlegend=False)
+            fig.update_yaxes(autorange="reversed")
+            fig.update_xaxes(range=[0, max(compare["projected_ppr"].max() * 1.22, 10)])
+            st.plotly_chart(polish(fig), width="stretch", config={"displayModeBar": False})
         with right:
-            st.subheader("Decision context")
-            st.write(
-                f"**{recommended['player']}** leads the demo comparison because the "
-                f"{recommended['weekly_projection']:.1f}-point median projection is paired "
-                f"with a {recommended['matchup'].lower()} matchup and "
-                f"{recommended['confidence'].lower()} confidence."
-            )
-            st.caption(
-                "Injury status is unavailable because no reviewed 2026 feed is connected. "
-                "Confidence reflects model coverage and role stability, not health."
-            )
+            st.markdown('<div class="section-title">Projection coverage</div><div class="section-copy">Only “Included” factors affect the model verdict.</div>', unsafe_allow_html=True)
+            provider_connected = PROVIDER_STATUS.startswith("Connected")
+            coverage = pd.DataFrame([
+                ["YTD + recent production", "Included"],
+                ["Opponent PPR allowed", "Included · not schedule-adjusted"],
+                ["Injury + practice", "Shown live · excluded" if provider_connected else "Not connected"],
+                ["Snap participation", "Shown live · excluded"],
+                ["Weather", "Shown live · excluded" if provider_connected else "Not connected"],
+                ["Pace + game environment", "Shown live · excluded"],
+                ["Betting total", "Shown when available"],
+                ["OL / QB changes", "Weekly baseline active · excluded" if provider_connected else "Not connected"],
+                ["Schedule-adjusted opponent", "Shown live · excluded"],
+                ["Floor / median / ceiling", "Shown · excluded"],
+            ], columns=["Factor", "Status"])
+            st.dataframe(coverage, hide_index=True, width="stretch")
 
-        st.dataframe(
-            comparison[
-                [
-                    "player",
-                    "position",
-                    "team",
-                    "opponent",
-                    "weekly_projection",
-                    "floor",
-                    "ceiling",
-                    "matchup",
-                    "confidence",
-                    "risk_score",
-                    "injury_status",
-                    "depth_label",
-                ]
-            ].sort_values("weekly_projection", ascending=False),
-            hide_index=True,
-            width="stretch",
-            column_config={
-                "risk_score": st.column_config.NumberColumn(
-                    "Model risk (excludes injuries)", format="%d"
-                ),
-                "injury_status": st.column_config.TextColumn("Injury data"),
-            },
-        )
+        st.markdown('<div class="section-title">Why the model ranks them this way</div><div class="section-copy">Every signal used in the Start / Sit verdict, shown at the same grain.</div>', unsafe_allow_html=True)
+        common = ["player", "team", "next_opponent", "games_played", "season_ppr", "recent_ppr", "recent_opportunities"]
+        position_stats = {
+            "QB": ["ytd_attempts", "ytd_passing_yards", "ytd_passing_tds", "ytd_rushing_yards", "ytd_rushing_tds"],
+            "RB": ["ytd_carries", "ytd_targets", "ytd_rushing_yards", "ytd_receiving_yards", "ytd_rushing_tds", "ytd_receiving_tds"],
+            "WR": ["ytd_targets", "ytd_receptions", "ytd_receiving_yards", "ytd_receiving_tds"],
+            "TE": ["ytd_targets", "ytd_receptions", "ytd_receiving_yards", "ytd_receiving_tds"],
+        }
+        view = compare[common + position_stats[position] + ["matchup_label", "points_allowed", "projected_ppr", "confidence"]].copy()
+        st.dataframe(view, hide_index=True, width="stretch", column_config={
+            "player":"Player", "team":"Team", "next_opponent":"Opponent", "games_played":"GP",
+            "season_ppr":st.column_config.NumberColumn("Season PPR/G", format="%.1f"),
+            "recent_ppr":st.column_config.NumberColumn("Last 4 PPR/G", format="%.1f"),
+            "recent_opportunities":st.column_config.NumberColumn("Last 3 opp/G", format="%.1f"),
+            "ytd_attempts":"Pass att", "ytd_carries":"Carries", "ytd_targets":"Targets", "ytd_receptions":"Rec",
+            "ytd_passing_yards":"Pass yds", "ytd_rushing_yards":"Rush yds", "ytd_receiving_yards":"Rec yds",
+            "ytd_passing_tds":"Pass TD", "ytd_rushing_tds":"Rush TD", "ytd_receiving_tds":"Rec TD",
+            "matchup_label":"Matchup", "points_allowed":st.column_config.NumberColumn("Opp. PPR allowed", format="%.1f"),
+            "projected_ppr":st.column_config.NumberColumn("Projection", format="%.1f"), "confidence":"Confidence",
+        })
+        st.markdown('<div class="section-title">Live Decision Context</div><div class="section-copy">Supplementary evidence for the user. None of these fields changes the Start / Sit verdict.</div>', unsafe_allow_html=True)
+        context_rows = []
+        for factor in ["Injury / practice", "Snap / route participation", "Weather", "Pace / scoring environment", "Betting total", "OL / QB changes", "Schedule-adjusted opponent", "Floor · median · ceiling"]:
+            item = {"Factor": factor}
+            for _, row in compare.iterrows():
+                if factor == "Injury / practice":
+                    values = [row.get("injury_status_live"), row.get("practice_status_live"), row.get("injury_body_part_live")]
+                    values = [str(value) for value in values if value is not None and pd.notna(value)]
+                    value = " · ".join(values) if values else "No provider record" if PROVIDER_STATUS.startswith("Connected") else "Source not connected"
+                    if values and pd.notna(row.get("injury_updated_live")): value += f" · updated {row.get('injury_updated_live')}"
+                elif factor == "Betting total":
+                    provider_total = row.get("betting_total_live")
+                    value = f"{float(provider_total):.1f}" if provider_total is not None and pd.notna(provider_total) else f"{row['total_line']:.1f}" if "total_line" in row and pd.notna(row["total_line"]) else "Source not connected"
+                elif factor == "Weather":
+                    weather_bits = []
+                    if pd.notna(row.get("weather_summary_live")): weather_bits.append(str(row.get("weather_summary_live")))
+                    if pd.notna(row.get("temperature_live")): weather_bits.append(f"{float(row.get('temperature_live')):.0f}°F")
+                    if pd.notna(row.get("wind_live")): weather_bits.append(f"{float(row.get('wind_live')):.0f} mph wind")
+                    value = " · ".join(weather_bits) if weather_bits else "Pregame source not connected"
+                    if weather_bits and pd.notna(row.get("game_updated_live")): value += f" · as of {row.get('game_updated_live')}"
+                elif factor == "Snap / route participation":
+                    value = f"{row['latest_snap_pct']:.0%} latest · {row['recent_snap_pct']:.0%} last 3" if pd.notna(row.get("latest_snap_pct")) else "Snap feed unmatched"
+                elif factor == "Pace / scoring environment":
+                    value = f"{row['pace_label']} · {row['combined_recent_plays']:.1f} combined plays" if pd.notna(row.get("combined_recent_plays")) else "Pace feed unavailable"
+                elif factor == "Schedule-adjusted opponent":
+                    value = f"{(row['schedule_adjusted_index'] - 1) * 100:+.0f}% vs player baselines" if pd.notna(row.get("schedule_adjusted_index")) else "Insufficient sample"
+                elif factor == "OL / QB changes":
+                    if pd.notna(row.get("qb_changed")):
+                        changes = []
+                        if bool(row.get("qb_changed")): changes.append("Starting QB changed")
+                        if bool(row.get("ol_changed")): changes.append("Starting OL changed")
+                        value = " · ".join(changes) if changes else "No starter change vs prior snapshot"
+                    else:
+                        value = "Baseline snapshot only" if PROVIDER_STATUS.startswith("Connected") else "Source not connected"
+                elif factor == "Floor · median · ceiling":
+                    value = f"{row['floor_ppr']:.1f} · {row['median_ppr']:.1f} · {row['ceiling_ppr']:.1f}"
+                else:
+                    value = "Source not connected"
+                item[str(row["player"])] = value
+            context_rows.append(item)
+        st.dataframe(pd.DataFrame(context_rows), hide_index=True, width="stretch")
+        st.markdown('<div class="note"><b>Separation rule:</b> Start / Sit is generated only from the core projection. Decision Context is refreshed and displayed independently so users can override the model using injuries, participation, weather, game environment, personnel news, and uncertainty.</div>', unsafe_allow_html=True)
 
-elif workspace == "Player Explorer":
-    st.markdown('<div class="section-title">Inspect a player’s role and risk</div>', unsafe_allow_html=True)
-    st.markdown(
-        '<div class="section-copy">Move from headline value to the advanced statistics behind it.</div>',
-        unsafe_allow_html=True,
-    )
-    explorable = PLAYERS.loc[PLAYERS["weekly_projection"].notna()]
-    selected_player = st.selectbox("Player", explorable["player"].tolist())
-    player = explorable.loc[explorable["player"].eq(selected_player)].iloc[0]
-    history = player_history(selected_player, explorable)
-
-    metric_one, metric_two, metric_three, metric_four = st.columns(4)
-    metric_one.metric("Custom league value", f"${player['model_value']}")
-    metric_two.metric("Projected PPR", f"{player['projected_points']:.1f}")
-    metric_three.metric("Floor / ceiling", f"{player['floor']:.0f} / {player['ceiling']:.0f}")
-    metric_four.metric("Confidence", player["confidence"])
-    st.caption(
-        f"2026 depth chart: **{player.get('depth_label', 'Unavailable')}** "
-        f"({player.get('depth_position', '—')}) · Injury data: "
-        f"**{player.get('injury_status', 'Unavailable')}**"
-    )
-    st.info(
-        "The risk score below excludes current injuries. Verify official team "
-        "availability before acting on this projection."
-    )
-
-    left, right = st.columns([1, 1])
-    with left:
-        st.subheader("Profile scores")
-        profile_html = "".join(
-            [
-                metric_bar("Opportunity", float(player["opportunity_score"]), 100, gold=True),
-                metric_bar("Efficiency", float(player["efficiency_score"]), 100),
-                metric_bar("Risk", float(player["risk_score"]), 100),
-            ]
-        )
-        st.markdown(profile_html, unsafe_allow_html=True)
-    with right:
-        st.subheader("Role indicators")
-        role_table = pd.DataFrame(
-            {
-                "Metric": ["Target share", "Air-yard share", "Red-zone share"],
-                "Value": [
-                    player["target_share"],
-                    player["air_yard_share"],
-                    player["red_zone_share"],
-                ],
-            }
-        )
-        st.table(role_table.style.format({"Value": "{:.1%}"}))
-
-    st.subheader("Previous five appearances")
-    st.dataframe(
-        history,
-        hide_index=True,
-        width="stretch",
-        column_config={
-            "ppr_points": st.column_config.NumberColumn("PPR points", format="%.1f"),
-            "target_share": st.column_config.NumberColumn("Target share", format="%.1%%"),
-            "air_yard_share": st.column_config.NumberColumn("Air-yard share", format="%.1%%"),
-        },
-    )
+elif page == "Player Trends":
+    selected_position = st.segmented_control("Position", ["QB", "RB", "WR", "TE"], default="WR")
+    pool = BOARD.loc[BOARD["position"].eq(selected_position) & BOARD["next_opponent"].notna() & BOARD["is_roster_relevant"]]
+    player_name = st.selectbox("Player", pool["player"].sort_values().tolist())
+    player = pool.loc[pool["player"].eq(player_name)].iloc[0]
+    id_column = "player_id" if "player_id" in BOARD.columns and "player_id" in WEEKLY.columns else None
+    name_column = "player_display_name" if "player_display_name" in WEEKLY.columns else "player_name"
+    history = WEEKLY.loc[WEEKLY[name_column].eq(player_name)].sort_values("week")
+    f1, f2, f3, f4 = st.columns(4)
+    f1.metric("Week projection", f"{player['projected_ppr']:.1f}")
+    f2.metric("Last four", f"{player['recent_ppr']:.1f}")
+    f3.metric("Season", f"{player['season_ppr']:.1f}")
+    f4.metric("Next opponent", player["next_opponent"])
+    fig = go.Figure()
+    fig.add_trace(go.Bar(x=history["week"], y=history["fantasy_points_ppr"], name="Weekly PPR", marker_color=COLORS[selected_position], hovertemplate="Week %{x}<br>%{y:.1f} PPR<extra></extra>"))
+    fig.add_hline(y=player["season_ppr"], line_dash="dash", line_color="#5f6b73", annotation_text="Season avg", annotation_position="top left")
+    fig.add_hline(y=player["projected_ppr"], line_dash="dot", line_color="#69be28", annotation_text=f"Week {NEXT_WEEK} projection", annotation_position="top right")
+    fig.update_layout(title=f"{player_name} · weekly production", xaxis_title="Week", yaxis_title="PPR points", showlegend=False)
+    st.plotly_chart(polish(fig, 440), width="stretch", config={"displayModeBar": False})
+    st.markdown(f'<div class="note"><b>Matchup:</b> {player["next_opponent"]} has allowed {player["points_allowed"]:.1f} PPR per {selected_position} performance in this dataset, a {player["matchup_label"].lower()} index for the position.</div>', unsafe_allow_html=True)
 
 else:
-    st.markdown('<div class="section-title">Transparent by design</div>', unsafe_allow_html=True)
-    st.markdown(
-        '<div class="section-copy">The portfolio should show how every recommendation was produced and where it can fail.</div>',
-        unsafe_allow_html=True,
-    )
-    metric_one, metric_two, metric_three = st.columns(3)
-    metric_one.metric("Historical seasons", "2021–2025")
-    metric_two.metric("2025 final-test MAE", "4.623")
-    metric_three.metric("Simple baseline MAE", "4.607")
-
-    st.subheader("Dashboard data flow")
-    st.code(
-        "nflverse + rankings + ADP\n"
-        "          ↓\n"
-        "quality checks + player IDs\n"
-        "          ↓\n"
-        "position-specific projections\n"
-        "          ↓\n"
-        "replacement level + auction values\n"
-        "          ↓\n"
-        "draft, start/sit, and player views",
-        language="text",
-    )
-    st.subheader("Modeling principles")
-    st.markdown(
-        """
-        - Time-aware validation prevents future information from entering predictions.
-        - Five-game windows use previous appearances, including played games with zero opportunity.
-        - MAE remains the primary error metric; RMSE shows sensitivity to large misses.
-        - The 2025 holdout did not confirm that the combined WR model beat the simple PPR baseline.
-        - Dashboard confidence communicates data coverage and role uncertainty, not certainty.
-        """
-    )
-    st.subheader("Planned live-data status")
-    st.table(
-        pd.DataFrame(
-            [
-                ["Historical player statistics", "Connected", "nflverse"],
-                ["2026 historical-model board", "Connected", "2023–2025 weighted model"],
-                ["2026 rosters and schedules", "Connected", "nflverse"],
-                ["2026 D/ST projections", "Connected", "2023–2025 nflverse team stats"],
-                ["2026 offensive depth charts", "Connected", "nflverse / ESPN"],
-                ["2026 injury reports", "Unavailable", "nflverse feed ended after 2024"],
-                ["2026 expert rankings", "Next", "nflverse / FantasyPros"],
-                ["2026 PPR ADP", "Next", "FantasyPros"],
-                ["Auction market benchmark", "Connected", "RealTime Fantasy Sports"],
-            ],
-            columns=["Dataset", "Status", "Planned source"],
-        )
-    )
-
-st.markdown(
-    """
-<div class="source-note">
-<b>Model basis:</b> 2026 values are estimates from 2023–2025 nflverse
-regular-season performance, weighted toward 2025. They are not expert consensus
-projections. Teams and Week 1 opponents use the nflverse roster and schedule
-releases refreshed Jul 23, 2026. D/ST estimates use 2023–2025 team statistics;
-offensive players without qualifying history remain $1 placeholders. Current
-injuries are not included because no reviewed 2026 injury feed is connected.
-</div>
-""",
-    unsafe_allow_html=True,
-)
+    st.subheader("A transparent Start / Sit model plus independent context")
+    st.write("The app generates a Start / Sit verdict from a narrow core model, then shows separate live context for the user:")
+    a, b, c = st.columns(3)
+    a.info("**1 · Current production**\n\nSeason PPR per game supplies the stable baseline.")
+    b.info("**2 · Recent form**\n\nThe most recent four appearances receive more weight.")
+    c.info("**3 · Matchup**\n\nOpponent PPR allowed nudges the estimate, with a strict cap. The user makes the final choice.")
+    st.subheader("Limits that matter")
+    st.markdown("""
+- It is a decision aid, not a sportsbook-grade projection or guarantee.
+- Injury status, practice participation, weather, betting totals, and depth-chart news are not yet included.
+- Early-season opponent rankings use small samples, so the confidence label stays lower.
+- PPR allowed is calculated from individual player-week outcomes, which is useful but not a complete defensive model.
+- The current formula favors transparency and weekly stability over complexity.
+""")
+    st.subheader("Source and refresh")
+    st.write(f"Player stats and schedules: nflverse public releases. Data loaded for {season}; app cache refreshes hourly. Last refresh: {REFRESHED}.")

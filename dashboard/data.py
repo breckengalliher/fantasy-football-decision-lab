@@ -2,9 +2,20 @@
 
 from __future__ import annotations
 
+from datetime import date
+import numpy as np
 import pandas as pd
 from pathlib import Path
 
+RECENT_PPR_WEIGHT = 0.10
+SEASON_PPR_WEIGHT = 0.90
+MATCHUP_STRENGTH = 0.25
+CALIBRATED_INTERVAL_OFFSETS = {
+    "QB": (-6.74, 6.17),
+    "RB": (-5.69, 5.65),
+    "WR": (-6.07, 4.95),
+    "TE": (-4.15, 4.31),
+}
 
 DEMO_PLAYERS = pd.DataFrame(
     [
@@ -177,6 +188,228 @@ RECENT_GAMES_PATH = PROJECT_ROOT / "data" / "processed" / "recent_games_2026.csv
 DEFAULT_MARKET_PATH = (
     PROJECT_ROOT / "data" / "external" / "espn_2026_ppr_12_team_auction.csv"
 )
+
+PLAYER_STATS_URL = (
+    "https://github.com/nflverse/nflverse-data/releases/download/stats_player/"
+    "stats_player_week_{season}.parquet"
+)
+SCHEDULES_URL = (
+    "https://github.com/nflverse/nflverse-data/releases/download/schedules/games.csv"
+)
+SNAP_COUNTS_URL = (
+    "https://github.com/nflverse/nflverse-data/releases/download/snap_counts/"
+    "snap_counts_{season}.parquet"
+)
+TEAM_STATS_URL = (
+    "https://github.com/nflverse/nflverse-data/releases/download/stats_team/"
+    "stats_team_week_{season}.parquet"
+)
+
+
+def current_nfl_season(today: date | None = None) -> int:
+    """Return the season in progress; the NFL season changes in September."""
+    today = today or date.today()
+    return today.year if today.month >= 9 else today.year - 1
+
+
+def load_live_weekly_data(season: int | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Load current weekly player stats and schedules from nflverse releases."""
+    season = season or current_nfl_season()
+    stats = pd.read_parquet(PLAYER_STATS_URL.format(season=season))
+    games = pd.read_csv(SCHEDULES_URL, low_memory=False)
+    stats = stats.loc[stats["season"].eq(season)].copy()
+    games = games.loc[games["season"].eq(season)].copy()
+    if "season_type" in stats:
+        stats = stats.loc[stats["season_type"].eq("REG")]
+    if "game_type" in games:
+        games = games.loc[games["game_type"].eq("REG")]
+    if stats.empty:
+        raise ValueError(f"nflverse has no weekly player data for {season} yet.")
+    return stats, games
+
+
+def load_live_context_data(season: int) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Load nflverse participation and team-volume context for the selected season."""
+    snaps = pd.read_parquet(SNAP_COUNTS_URL.format(season=season))
+    team_stats = pd.read_parquet(TEAM_STATS_URL.format(season=season))
+    return snaps, team_stats
+
+
+def add_live_supplementary_context(
+    board: pd.DataFrame, snaps: pd.DataFrame, team_stats: pd.DataFrame
+) -> pd.DataFrame:
+    """Attach live snap and pace context without changing the model projection."""
+    result = board.copy()
+    snap_data = snaps.loc[snaps["position"].isin(["QB", "RB", "WR", "TE"])].copy()
+    snap_data["player_key"] = snap_data["player"].astype(str).str.strip().str.casefold()
+    snap_data = snap_data.sort_values(["player_key", "team", "week"])
+    snap_data["recent_snap_pct"] = snap_data.groupby(["player_key", "team"])["offense_pct"].transform(
+        lambda values: values.rolling(3, min_periods=1).mean()
+    )
+    latest_snaps = snap_data.groupby(["player_key", "team"], as_index=False).tail(1)
+    latest_snaps = latest_snaps[["player_key", "team", "week", "offense_pct", "recent_snap_pct"]].rename(
+        columns={"week": "snap_week", "offense_pct": "latest_snap_pct"}
+    )
+    result["player_key"] = result["player"].astype(str).str.strip().str.casefold()
+    result = result.merge(latest_snaps, on=["player_key", "team"], how="left").drop(columns="player_key")
+
+    teams = team_stats.copy()
+    if "season_type" in teams:
+        teams = teams.loc[teams["season_type"].eq("REG")]
+    for column in ["attempts", "carries", "sacks_suffered"]:
+        teams[column] = pd.to_numeric(teams.get(column, 0), errors="coerce").fillna(0)
+    teams["offensive_plays"] = teams["attempts"] + teams["carries"] + teams["sacks_suffered"]
+    teams = teams.sort_values(["team", "week"])
+    teams["recent_plays"] = teams.groupby("team")["offensive_plays"].transform(
+        lambda values: values.rolling(3, min_periods=1).mean()
+    )
+    latest_teams = teams.groupby("team", as_index=False).tail(1)[["team", "recent_plays"]]
+    result = result.merge(latest_teams.rename(columns={"recent_plays": "team_recent_plays"}), on="team", how="left")
+    result = result.merge(
+        latest_teams.rename(columns={"team": "next_opponent", "recent_plays": "opponent_recent_plays"}),
+        on="next_opponent",
+        how="left",
+    )
+    result["combined_recent_plays"] = result["team_recent_plays"] + result["opponent_recent_plays"]
+    league_game_plays = 2 * latest_teams["recent_plays"].mean()
+    result["pace_index"] = result["combined_recent_plays"] / league_game_plays
+    result["pace_label"] = pd.cut(
+        result["pace_index"],
+        bins=[-np.inf, .97, 1.03, np.inf],
+        labels=["Slower", "Neutral", "Faster"],
+    )
+    return result
+
+
+def _position_fantasy_points(frame: pd.DataFrame) -> pd.Series:
+    if "fantasy_points_ppr" in frame:
+        return pd.to_numeric(frame["fantasy_points_ppr"], errors="coerce")
+    columns = {
+        "receptions": 1.0,
+        "receiving_yards": 0.1,
+        "receiving_tds": 6.0,
+        "rushing_yards": 0.1,
+        "rushing_tds": 6.0,
+        "passing_yards": 0.04,
+        "passing_tds": 4.0,
+        "interceptions": -2.0,
+        "rushing_fumbles_lost": -2.0,
+        "receiving_fumbles_lost": -2.0,
+    }
+    result = pd.Series(0.0, index=frame.index)
+    for column, weight in columns.items():
+        if column in frame:
+            result += pd.to_numeric(frame[column], errors="coerce").fillna(0) * weight
+    return result
+
+
+def build_start_sit_board(
+    weekly: pd.DataFrame, schedules: pd.DataFrame, season: int
+) -> tuple[pd.DataFrame, int]:
+    """Create transparent current-form, matchup, and projection signals."""
+    data = weekly.copy()
+    data["fantasy_points_ppr"] = _position_fantasy_points(data)
+    data = data.loc[data["position"].isin(["QB", "RB", "WR", "TE"])]
+    data = data.loc[data["fantasy_points_ppr"].notna()]
+    completed_week = int(data["week"].max())
+
+    player_col = "player_display_name" if "player_display_name" in data else "player_name"
+    id_col = "player_id" if "player_id" in data else player_col
+    team_col = "recent_team" if "recent_team" in data else "team"
+    data = data.sort_values([id_col, "week"])
+    data["recent_ppr"] = data.groupby(id_col)["fantasy_points_ppr"].transform(
+        lambda values: values.rolling(4, min_periods=1).mean()
+    )
+    data["season_ppr"] = data.groupby(id_col)["fantasy_points_ppr"].transform("mean")
+    data["games_played"] = data.groupby(id_col)["fantasy_points_ppr"].transform("count")
+    data["historical_floor"] = data.groupby(id_col)["fantasy_points_ppr"].transform(
+        lambda values: values.quantile(.20)
+    )
+    data["historical_median"] = data.groupby(id_col)["fantasy_points_ppr"].transform("median")
+    data["historical_ceiling"] = data.groupby(id_col)["fantasy_points_ppr"].transform(
+        lambda values: values.quantile(.80)
+    )
+    for column in ["carries", "targets", "attempts", "passing_yards", "rushing_yards", "receiving_yards", "receptions", "passing_tds", "rushing_tds", "receiving_tds"]:
+        if column not in data:
+            data[column] = 0.0
+        data[column] = pd.to_numeric(data[column], errors="coerce").fillna(0)
+        data[f"ytd_{column}"] = data.groupby(id_col)[column].transform("sum")
+    data["opportunities"] = np.select(
+        [data["position"].eq("QB")],
+        [data["attempts"] + data["carries"]],
+        default=data["carries"] + data["targets"],
+    )
+    data["recent_opportunities"] = data.groupby(id_col)["opportunities"].transform(
+        lambda values: values.rolling(3, min_periods=1).mean()
+    )
+    data["performance_residual"] = data["fantasy_points_ppr"] - data["season_ppr"]
+
+    defense = (
+        data.groupby(["opponent_team", "position"], as_index=False)
+        .agg(points_allowed=("fantasy_points_ppr", "mean"), samples=("fantasy_points_ppr", "size"))
+    )
+    league = data.groupby("position", as_index=False)["fantasy_points_ppr"].mean().rename(
+        columns={"fantasy_points_ppr": "league_position_ppr"}
+    )
+    defense = defense.merge(league, on="position", how="left")
+    defense["matchup_index"] = (defense["points_allowed"] / defense["league_position_ppr"]).clip(.85, 1.15)
+    adjusted_defense = (
+        data.groupby(["opponent_team", "position"], as_index=False)["performance_residual"]
+        .mean()
+        .rename(columns={"performance_residual": "schedule_adjusted_residual"})
+    )
+    defense = defense.merge(adjusted_defense, on=["opponent_team", "position"], how="left")
+    defense["schedule_adjusted_index"] = (
+        1 + defense["schedule_adjusted_residual"] / defense["league_position_ppr"]
+    ).clip(.80, 1.20)
+
+    future = schedules.loc[schedules["week"].gt(completed_week)].sort_values("week")
+    next_week = int(future["week"].min()) if not future.empty else completed_week
+    next_games = future.loc[future["week"].eq(next_week)]
+    game_context = [column for column in ["total_line", "spread_line", "gameday", "weekday", "gametime", "location", "roof", "surface", "temp", "wind"] if column in next_games]
+    home = next_games[["home_team", "away_team"] + game_context].rename(columns={"home_team": team_col, "away_team": "next_opponent"})
+    away = next_games[["away_team", "home_team"] + game_context].rename(columns={"away_team": team_col, "home_team": "next_opponent"})
+    home["venue"] = "Home"
+    away["venue"] = "Away"
+    opponents = pd.concat([home, away], ignore_index=True)
+
+    latest = data.groupby(id_col, as_index=False).tail(1).copy()
+    latest = latest.merge(opponents, on=team_col, how="left")
+    latest = latest.merge(
+        defense.rename(columns={"opponent_team": "next_opponent"}),
+        on=["next_opponent", "position"],
+        how="left",
+    )
+    latest["matchup_index"] = latest["matchup_index"].fillna(1.0)
+    latest["form_blend"] = RECENT_PPR_WEIGHT * latest["recent_ppr"] + SEASON_PPR_WEIGHT * latest["season_ppr"]
+    latest["projected_ppr"] = latest["form_blend"] * (1 + MATCHUP_STRENGTH * (latest["matchup_index"] - 1))
+    floor_offset = latest["position"].map({key: value[0] for key, value in CALIBRATED_INTERVAL_OFFSETS.items()})
+    ceiling_offset = latest["position"].map({key: value[1] for key, value in CALIBRATED_INTERVAL_OFFSETS.items()})
+    latest["floor_ppr"] = (latest["projected_ppr"] + floor_offset).clip(lower=0)
+    latest["median_ppr"] = latest["projected_ppr"]
+    latest["ceiling_ppr"] = latest["projected_ppr"] + ceiling_offset
+    latest["trend"] = latest["recent_ppr"] - latest["season_ppr"]
+    latest["matchup_label"] = pd.cut(
+        latest["matchup_index"],
+        bins=[-np.inf, .94, 1.06, np.inf],
+        labels=["Tough", "Neutral", "Favorable"],
+    )
+    latest["confidence"] = np.select(
+        [latest["games_played"].ge(5) & latest["samples"].fillna(0).ge(20), latest["games_played"].ge(3)],
+        ["High", "Medium"],
+        default="Low",
+    )
+    relevance_floor = latest["position"].map({"QB": 12.0, "RB": 5.0, "WR": 3.0, "TE": 2.0})
+    latest["is_roster_relevant"] = (
+        latest[id_col].notna()
+        & latest["games_played"].ge(2)
+        & latest["recent_opportunities"].ge(relevance_floor)
+        & latest["fantasy_points_ppr"].notna()
+    )
+    latest = latest.rename(columns={player_col: "player", team_col: "team"})
+    keep = [id_col, "player", "position", "team", "next_opponent", "venue", "games_played", "season_ppr", "recent_ppr", "trend", "recent_opportunities", "ytd_attempts", "ytd_carries", "ytd_targets", "ytd_passing_yards", "ytd_rushing_yards", "ytd_receiving_yards", "ytd_receptions", "ytd_passing_tds", "ytd_rushing_tds", "ytd_receiving_tds", "points_allowed", "matchup_index", "matchup_label", "schedule_adjusted_residual", "schedule_adjusted_index", "projected_ppr", "floor_ppr", "median_ppr", "ceiling_ppr", "confidence", "is_roster_relevant"] + game_context
+    keep = list(dict.fromkeys(column for column in keep if column in latest.columns))
+    return latest[keep].sort_values("projected_ppr", ascending=False), next_week
 
 
 def add_injury_context(players: pd.DataFrame) -> pd.DataFrame:

@@ -1,0 +1,81 @@
+{
+  "seasons": [
+    2021,
+    2022,
+    2023,
+    2024
+  ],
+  "predictions": 12667,
+  "all_season_best": {
+    "recent_weight": 0.1,
+    "matchup_strength": 0.25,
+    "mae": 5.506720698714218,
+    "rmse": 7.183460855186776,
+    "bias": -0.06255316432368102,
+    "correlation": 0.5127591117727954
+  },
+  "training_best": {
+    "recent_weight": 0.1,
+    "matchup_strength": 0.25,
+    "mae": 5.504312880405541,
+    "rmse": 7.173149931977252,
+    "bias": -0.175440128567243,
+    "correlation": 0.5113921521349929
+  },
+  "holdout_season": 2024,
+  "holdout_predictions": 3135,
+  "holdout_calibrated": {
+    "recent_weight": 0.1,
+    "matchup_strength": 0.25,
+    "mae": 5.514041695243181,
+    "rmse": 7.214720808051976,
+    "bias": 0.2806808207384026,
+    "correlation": 0.5185282546655514
+  },
+  "holdout_previous": {
+    "recent_weight": 0.65,
+    "matchup_strength": 0.25,
+    "mae": 5.6039238950655434,
+    "rmse": 7.309427112539559,
+    "bias": 0.033818724508271496,
+    "correlation": 0.508790904088733
+  },
+  "mae_difference_95_ci": {
+    "point": -0.08988219982236272,
+    "low": -0.13412353446106834,
+    "high": -0.04652024561228867
+  },
+  "pairwise_accuracy_calibrated": 0.6673117607462256,
+  "pairwise_accuracy_previous": 0.6632007885373593,
+  "interval_20_80_holdout_coverage": 0.5990430622009569,
+  "intervals": [
+    {
+      "position": "QB",
+      "floor_offset": -6.737224390953062,
+      "median_offset": -0.48563840149370296,
+      "ceiling_offset": 6.16998963246465,
+      "samples": 1324
+    },
+    {
+      "position": "RB",
+      "floor_offset": -5.692182686668763,
+      "median_offset": -1.0436938206880324,
+      "ceiling_offset": 5.652791928057508,
+      "samples": 2510
+    },
+    {
+      "position": "TE",
+      "floor_offset": -4.149224769095059,
+      "median_offset": -0.7924875000000036,
+      "ceiling_offset": 4.3110968413028985,
+      "samples": 1857
+    },
+    {
+      "position": "WR",
+      "floor_offset": -6.0686103269818865,
+      "median_offset": -1.5868651216348013,
+      "ceiling_offset": 4.949583333333333,
+      "samples": 3841
+    }
+  ]
+}
