@@ -73,10 +73,13 @@ div[data-testid="stMetric"] { background:var(--card); border:1px solid var(--lin
 @media(max-width:1100px) {
   div[data-testid="stHorizontalBlock"]:has(div[data-testid="stMetric"]) { flex-wrap:wrap; }
   div[data-testid="stHorizontalBlock"]:has(div[data-testid="stMetric"]) > div { flex:1 1 calc(50% - .6rem); min-width:240px; }
+  div[data-testid="stMetricValue"] > div { font-size:1.65rem; white-space:normal; overflow:visible; text-overflow:clip; line-height:1.12; }
 }
 @media(max-width:800px) {
+  html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] { max-width:100vw; overflow-x:hidden; }
   .block-container { padding:1rem .85rem 2rem; }
   .hero{display:block}.fresh{text-align:left;margin-top:.7rem}.hero h1{font-size:2.05rem}
+  .hero p, .warning, .section-copy, .note { max-width:100%; white-space:normal; overflow-wrap:anywhere; }
   .verdict { min-height:0; padding:1rem; }
   .verdict .name { font-size:1.45rem; }
   .range-tooltip { left:0; transform:none; width:min(250px, 75vw); }
