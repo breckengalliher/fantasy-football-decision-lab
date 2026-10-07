@@ -46,11 +46,14 @@ st.markdown(
 [data-testid="stSidebar"] button[kind="secondary"] * { color:var(--ink) !important; }
 .block-container { max-width:1440px; padding-top:1.55rem; }
 h1,h2,h3 { letter-spacing:-.025em; }
-.hero { display:flex; align-items:flex-end; justify-content:space-between; gap:2rem; border-bottom:1px solid #cfd5cf; padding-bottom:1.15rem; margin-bottom:1.2rem; }
+.hero { display:flex; align-items:flex-end; justify-content:space-between; gap:2rem; padding:0; margin:0; }
 .hero h1 { margin:.2rem 0 .45rem; font-size:2.65rem; line-height:1; }
 .hero p { color:var(--muted); margin:0; max-width:720px; }
 .eyebrow { color:#397f18; text-transform:uppercase; letter-spacing:.13em; font-size:.74rem; font-weight:800; }
 .fresh { color:var(--muted); text-align:right; font-size:.78rem; white-space:nowrap; }
+.app-header { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:1rem 1.15rem; margin-bottom:1rem; }
+.header-status { display:flex; justify-content:flex-end; align-items:center; gap:.38rem; color:var(--muted); font-size:.76rem; margin-top:.35rem; }
+.status-dot { display:inline-block; width:.48rem; height:.48rem; border-radius:50%; background:var(--gold); }
 .verdict { background:var(--card); color:var(--ink); border:1px solid var(--line); border-radius:16px; padding:1.3rem 1.45rem; min-height:280px; }
 .verdict.start { background:var(--navy); color:white; border-color:var(--gold); box-shadow:0 12px 28px rgba(0,34,68,.18); }
 .verdict .tag { display:inline-block; background:#edf4e8; color:#397f18; border-radius:999px; padding:.28rem .52rem; letter-spacing:.12em; font-size:.67rem; font-weight:800; }
@@ -61,6 +64,8 @@ h1,h2,h3 { letter-spacing:-.025em; }
 .player-photo { width:58px; height:58px; flex:0 0 58px; border-radius:50%; background-size:cover; background-position:center top; background-repeat:no-repeat; background-color:#e8ecee; border:2px solid #d7dde0; }
 .verdict.start .player-photo { border-color:#69be28; background-color:#173854; }
 .verdict .opponent { color:var(--muted); font-size:.8rem; }
+.team-line { display:flex; align-items:center; gap:.42rem; flex-wrap:wrap; }
+.team-logo { width:1.35rem; height:1.35rem; object-fit:contain; flex:0 0 1.35rem; }
 .verdict.start .opponent { color:#c0c8cc; }
 .verdict .score { color:var(--teal); font-size:1.35rem; font-weight:750; margin-top:.8rem; }
 .verdict.start .score { color:#9ee468; }
@@ -182,22 +187,28 @@ def player_photo_html(value: object, label: object) -> str:
 
 
 with st.sidebar:
-    st.markdown("## ◒ Player Comparison Lab")
-    st.caption("Live, explainable matchup analysis")
+    st.markdown("## ◒ Start / Sit Lab")
+    st.caption("Fantasy decision tools")
     page = st.radio("View", ["Decision Room", "Player Trends", "How It Works"], label_visibility="collapsed")
-    st.divider()
-    season = st.selectbox("Season", [SEASON], index=0)
-    st.markdown("**SCORING**")
-    qb_td_label = st.radio("QB passing TD", ["4 points", "6 points"], horizontal=True)
-    QB_PASS_TD_POINTS = int(qb_td_label.split()[0])
-    st.caption(f"Full PPR · {QB_PASS_TD_POINTS}-pt passing TD")
-    st.divider()
-    st.markdown("**LIVE DATA**")
-    st.caption("Validated cloud snapshots supply every public view; visitors never call upstream providers.")
-    st.caption("The cloud scheduler refreshes weekly projections and daily injury/practice context.")
-    if st.button("Refresh now", width="stretch"):
-        st.cache_data.clear()
-        st.rerun()
+season = SEASON
+
+header_metadata = json.loads((PROJECT_ROOT / "data" / "processed" / "live_refresh_metadata.json").read_text(encoding="utf-8"))
+header_week = int(header_metadata.get("next_week", 0))
+header_checked = datetime.fromisoformat(str(header_metadata.get("refreshed_at", datetime.now(timezone.utc).isoformat())).replace("Z", "+00:00"))
+header_age_minutes = max(0, int((datetime.now(timezone.utc) - header_checked.astimezone(timezone.utc)).total_seconds() // 60))
+
+with st.container(border=True):
+    header_left, header_right = st.columns([1.55, .75], vertical_alignment="center")
+    with header_left:
+        st.markdown(
+            f'<div class="hero"><div><div class="eyebrow">Week {header_week} · {season}</div>'
+            '<h1>Player Comparison Lab</h1><p>Compare up to three players and make the final lineup call.</p></div></div>',
+            unsafe_allow_html=True,
+        )
+    with header_right:
+        qb_td_label = st.radio("Full PPR · QB passing TD", ["4 points", "6 points"], horizontal=True)
+        QB_PASS_TD_POINTS = int(qb_td_label.split()[0])
+        st.markdown(f'<div class="header-status"><span class="status-dot"></span>Data current · updated {header_age_minutes} minutes ago</div>', unsafe_allow_html=True)
 
 try:
     with st.spinner("Updating weekly stats and matchups…"):
@@ -210,15 +221,13 @@ except Exception as error:
     st.stop()
 
 with st.sidebar:
-    st.caption(f"SPORTSDATAIO · {PROVIDER_STATUS}")
-    st.caption(INJURY_SOURCE_STATUS)
-
-st.markdown(
-    f'<div class="hero"><div><div class="eyebrow">{season} season · Week {NEXT_WEEK}</div>'
-    '<h1>Player Comparison Lab</h1><p>Compare production, matchup context, and projected outcome ranges. You make the lineup decision.</p></div>'
-    f'<div class="fresh">UPDATED<br>{html.escape(REFRESHED)}</div></div>',
-    unsafe_allow_html=True,
-)
+    with st.expander("● Data status"):
+        st.caption(f"Weekly stats · {REFRESHED}")
+        st.caption(f"SportsDataIO · {PROVIDER_STATUS}")
+        st.caption(INJURY_SOURCE_STATUS)
+        if st.button("Check for latest update", width="stretch"):
+            st.cache_data.clear()
+            st.rerun()
 
 if page == "Decision Room":
     st.markdown('<div class="warning"><b>Before kickoff:</b> live injuries, practice, weather, and depth context are supplementary. Confirm official late-breaking status before locking a lineup.</div>', unsafe_allow_html=True)
@@ -359,6 +368,15 @@ if page == "Decision Room":
                         safe_links.append(f'<a href="{html.escape(url, quote=True)}" target="_blank" rel="noopener noreferrer">{label}</a>')
                 reporting_links = f'<div class="reporting-sources">Reporting: {" · ".join(safe_links)}</div>' if safe_links else ""
                 photo = player_photo_html(row.get("headshot_url"), row["player"])
+                logo_url = team_logo_url(row.get("team"))
+                logo = f'<img class="team-logo" src="{html.escape(logo_url, quote=True)}" alt="{html.escape(str(row["team"]), quote=True)} logo">' if logo_url else ""
+                schedule_bits = [str(row.get("team")), str(row.get("position"))]
+                if pd.notna(row.get("weekday")):
+                    schedule_bits.append(str(row.get("weekday")))
+                if pd.notna(row.get("gametime")):
+                    schedule_bits.append(str(row.get("gametime")))
+                schedule_bits.append(f'{row.get("venue")} vs {row.get("next_opponent")}')
+                player_details = " · ".join(schedule_bits)
                 practice = format_injury_context(row, "Connected" in INJURY_SOURCE_STATUS)
                 quick_context = "".join([
                     f'<div class="broadcast-context-item"><span>Practice</span>{html.escape(practice)}</div>',
@@ -368,7 +386,7 @@ if page == "Decision Room":
                 ])
                 st.markdown(
                     f'<div class="verdict {card_class}"><div class="tag">{verdict}</div><div class="player-heading">{photo}<div class="name">{html.escape(str(row["player"]))}</div></div>'
-                    f'<div class="opponent">{html.escape(str(row["team"]))} · {html.escape(str(row["venue"]))} vs {html.escape(str(row["next_opponent"]))}</div>'
+                    f'<div class="opponent team-line">{logo}<span>{html.escape(player_details)}</span></div>'
                     f'<div class="score">{row["floor_ppr"]:.1f} · {row["median_ppr"]:.1f} · {row["ceiling_ppr"]:.1f}</div>'
                     f'<div class="unit">Floor · projection · ceiling <span class="range-help" tabindex="0" aria-label="Range definition">i<span class="range-tooltip" role="tooltip">Floor is the P10 downside outcome, projection is the median estimate, and ceiling is the P90 upside outcome. About 80% of results should fall between floor and ceiling.</span></span></div><div class="outlook-label">Player outlook</div>'
                     f'<div class="reason">{html.escape(reason)}</div>{reporting_links}<div class="broadcast-context">{quick_context}</div></div>',

@@ -14,7 +14,7 @@ def build_player_outlook(
     spread: float,
     reporting_summary: str | None = None,
 ) -> str:
-    """Explain the frozen model result, optionally adding narrative-only reporting."""
+    """Explain our frozen projection in an individualized editorial voice."""
     name = str(row["player"])
     first_name = name.split()[0]
     season = float(row["season_ppr"])
@@ -25,28 +25,28 @@ def build_player_outlook(
     close = total > 1 and spread < 2.5
 
     if total == 1:
-        opening = f"{first_name} is the only player in this comparison, so there isn't a true Start/Sit choice yet."
+        opening = f"We only have {first_name} in this comparison, so add another player before treating this as a true Start/Sit call."
     elif rank == 0 and close:
-        opening = f"{first_name} gets the Start label, but only by a slim margin. This is a lean—not a must-start verdict."
+        opening = f"We predict {first_name} as the start, but only by a slim margin. Based on the gap, this is a lean—not a must-start call."
     elif rank == 0:
-        opening = f"{first_name} is the model's preferred start in this group."
+        opening = f"We predict {first_name} as the preferred start in this group."
     elif close:
-        opening = f"{first_name} lands on the Sit side, but the projections are close enough that this is far from an easy bench call."
+        opening = f"We have {first_name} on the Sit side, but our projections are close enough that this is far from an easy bench call."
     else:
-        opening = f"{first_name} is the Sit in this comparison because the other option carries the stronger core projection."
+        opening = f"We would sit {first_name} in this comparison because the other option carries the stronger projection."
 
     if trend >= 2:
-        form = f"He has been running hotter lately at {recent:.1f} PPR per game, though recent form receives only a small weight."
+        form = f"Based on his recent {recent:.1f} PPR average, he is running hotter than his season baseline, though we keep that short stretch in perspective."
     elif trend <= -2:
-        form = f"His last four have cooled to {recent:.1f} PPR per game, but the model does not overreact to that short stretch."
+        form = f"His last four have cooled to {recent:.1f} PPR per game, but we do not overreact to one short stretch."
     else:
-        form = f"His recent production ({recent:.1f}) is close to his {season:.1f} season average, so the outlook is fairly steady."
+        form = f"Based on his {recent:.1f} recent average versus {season:.1f} for the season, we see a fairly steady outlook."
 
     matchup_text = {
-        "favorable": f"The matchup with {opponent} gives him a small bump, but that adjustment is intentionally capped.",
-        "tough": f"The matchup with {opponent} trims the estimate slightly, not enough to erase his established production.",
-    }.get(matchup, f"The matchup with {opponent} is treated as neutral and does not move the projection much.")
+        "favorable": f"We give him a small bump against {opponent}, while keeping that matchup adjustment intentionally modest.",
+        "tough": f"We trim the estimate slightly against {opponent}, but not enough to erase his established production.",
+    }.get(matchup, f"We view the matchup with {opponent} as neutral, so it does not move our projection much.")
     model_outlook = " ".join([opening, form, matchup_text])
     if reporting_summary and reporting_summary.strip():
-        return f"{model_outlook} Around the team: {reporting_summary.strip()}"
+        return f"{model_outlook} What we're hearing around the team: {reporting_summary.strip()}"
     return model_outlook
