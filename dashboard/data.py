@@ -643,9 +643,80 @@ def apply_approved_projection_model(
 
     # Apply the separately approved QB scoring-format model and empirical ranges.
     result = apply_qb_scoring_mode(result, current, passing_td_points)
+    qb_current = current.loc[current["position"].eq("QB")].sort_values([player_column, "week"]).copy()
+    qb_prior = prior.loc[prior["position"].eq("QB")].copy()
+    if not qb_current.empty:
+        for frame in (qb_current, qb_prior):
+            frame["qb_points"] = frame["base_ppr"] + (passing_td_points - 4) * frame["passing_tds"]
+            frame["turnovers"] = frame["passing_interceptions"] + frame["fumbles_lost_total"]
+        qb = qb_current.groupby(player_column, as_index=False).agg(
+            qb_games=("qb_points", "size"), qb_season=("qb_points", "mean"),
+            qb_pass_tds=("passing_tds", "sum"), qb_attempts=("attempts", "sum"),
+            qb_turnovers=("turnovers", "sum"),
+        )
+        qb_recent = qb_current.groupby(player_column, as_index=False).tail(3).groupby(player_column, as_index=False).agg(
+            qb_recent_attempts=("attempts", "mean"), qb_recent_carries=("carries", "mean"),
+            qb_recent_rush_yards=("rushing_yards", "mean"), qb_recent_points=("qb_points", "mean"),
+        )
+        qb = qb.merge(qb_recent, on=player_column)
+        qb_anchor = qb_prior.groupby(player_column, as_index=False).agg(
+            qb_prior_games=("qb_points", "size"), qb_prior_points=("qb_points", "mean"),
+            qb_prior_tds=("passing_tds", "sum"), qb_prior_attempts=("attempts", "sum"),
+            qb_prior_turnovers=("turnovers", "sum"),
+        )
+        qb_anchor["qb_prior_td_rate"] = qb_anchor["qb_prior_tds"] / qb_anchor["qb_prior_attempts"].replace(0, np.nan)
+        qb_anchor["qb_prior_turnover_rate"] = qb_anchor["qb_prior_turnovers"] / qb_anchor["qb_prior_attempts"].replace(0, np.nan)
+        qb = qb.merge(qb_anchor, on=player_column, how="left")
+        observed_td_points = passing_td_points * qb["qb_pass_tds"] / qb["qb_games"]
+        observed_turnover_penalty = -2 * qb["qb_turnovers"] / qb["qb_games"]
+        core = qb["qb_season"] - observed_td_points - observed_turnover_penalty
+        league_td_rate = qb_current["passing_tds"].sum() / qb_current["attempts"].sum()
+        league_turnover_rate = qb_current["turnovers"].sum() / qb_current["attempts"].sum()
+        td_rate = .50 * qb["qb_prior_td_rate"].fillna(league_td_rate) + .50 * league_td_rate
+        turnover_rate = .50 * qb["qb_prior_turnover_rate"].fillna(league_turnover_rate) + .50 * league_turnover_rate
+        td_signal = .25 * observed_td_points + .75 * passing_td_points * qb["qb_recent_attempts"] * td_rate
+        turnover_signal = .50 * observed_turnover_penalty + .50 * -2 * qb["qb_recent_attempts"] * turnover_rate
+        qb["qb_current_signal"] = core + td_signal + turnover_signal
+        league_points_per_attempt = qb_current["qb_points"].sum() / qb_current["attempts"].sum()
+        role_anchor = qb["qb_recent_attempts"] * league_points_per_attempt
+        qb["qb_history_signal"] = qb["qb_prior_points"].where(qb["qb_prior_games"].ge(5), role_anchor)
+        qb_weight = pd.Series(np.select(
+            [qb["qb_games"].le(2), qb["qb_games"].le(6), qb["qb_games"].le(10)],
+            [.40, .60, .75], default=.90,
+        ), index=qb.index)
+        qb["qb_base"] = qb_weight * qb["qb_current_signal"] + (1 - qb_weight) * qb["qb_history_signal"]
+        qb_defense = qb_current.groupby("opponent_team", as_index=False)["qb_points"].agg(["mean", "size"]).reset_index()
+        qb_defense["qb_factor"] = (qb_defense["mean"] / qb_current["qb_points"].mean()).clip(.90, 1.10)
+        if next_week < 5:
+            qb_defense["qb_factor"] = 1 + (qb_defense["qb_factor"] - 1) * (qb_defense["size"] / 16).clip(upper=1)
+        qb = qb.merge(result[[player_column, "next_opponent"]], on=player_column, how="left").merge(
+            qb_defense[["opponent_team", "qb_factor"]], left_on="next_opponent", right_on="opponent_team", how="left"
+        )
+        qb["approved_qb_projection"] = qb["qb_base"] * qb["qb_factor"].fillna(1.0)
+        qb["qb_archetype_approved"] = np.where(
+            qb["qb_prior_games"].fillna(0).lt(5), "Inexperienced",
+            np.where(qb["qb_recent_carries"].ge(5) | qb["qb_recent_rush_yards"].ge(30), "Mobile", "Pocket"),
+        )
+        result = result.merge(
+            qb[[player_column, "qb_recent_points", "approved_qb_projection", "qb_archetype_approved"]],
+            on=player_column, how="left", validate="one_to_one",
+        )
+        qb_mask = result["position"].eq("QB") & result["approved_qb_projection"].notna()
+        result.loc[qb_mask, "recent_ppr"] = result.loc[qb_mask, "qb_recent_points"]
+        result.loc[qb_mask, "projected_ppr"] = result.loc[qb_mask, "approved_qb_projection"]
+        result.loc[qb_mask, "median_ppr"] = result.loc[qb_mask, "approved_qb_projection"]
+        if QB_RANGE_CALIBRATION_PATH.exists():
+            qb_ranges = json.loads(QB_RANGE_CALIBRATION_PATH.read_text(encoding="utf-8"))["formats"][f"{passing_td_points}_point_passing_td"]["range_offsets"]
+            q10_map = {row["archetype"]: row["q10"] * row["lower_scale"] for row in qb_ranges}
+            q90_map = {row["archetype"]: row["q90"] * row["upper_scale"] for row in qb_ranges}
+            lower = result.loc[qb_mask, "qb_archetype_approved"].map(q10_map)
+            upper = result.loc[qb_mask, "qb_archetype_approved"].map(q90_map)
+            result.loc[qb_mask, "floor_ppr"] = (result.loc[qb_mask, "median_ppr"] + lower).clip(lower=0)
+            result.loc[qb_mask, "ceiling_ppr"] = result.loc[qb_mask, "median_ppr"] + upper
     result["projection_model"] = "Approved round-three live model"
     return result.drop(columns=[
-        "approved_season_ppr", "approved_recent_ppr", "approved_recent_opp", "approved_weight", "approved_projection"
+        "approved_season_ppr", "approved_recent_ppr", "approved_recent_opp", "approved_weight", "approved_projection",
+        "qb_recent_points", "approved_qb_projection", "qb_archetype_approved",
     ], errors="ignore")
 
 
