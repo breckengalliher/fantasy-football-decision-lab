@@ -9,7 +9,10 @@ from typing import Any
 import pandas as pd
 import requests
 
-from dashboard.providers.sportsdataio import canonical_injury_status
+try:
+    from dashboard.providers.sportsdataio import canonical_injury_status
+except ModuleNotFoundError:
+    from providers.sportsdataio import canonical_injury_status
 
 NFLVERSE_INJURIES = "https://github.com/nflverse/nflverse-data/releases/download/injuries/injuries_{season}.parquet"
 SLEEPER_PLAYERS = "https://api.sleeper.app/v1/players/nfl?active=true"
