@@ -14,6 +14,7 @@ def build_player_outlook(
     total: int,
     spread: float,
     reporting_summary: str | None = None,
+    compact: bool = False,
 ) -> str:
     """Explain our frozen projection in an individualized editorial voice."""
     name = str(row["player"])
@@ -65,7 +66,9 @@ def build_player_outlook(
         "favorable": f"We give him a small bump against {opponent}, while keeping that matchup adjustment intentionally modest.",
         "tough": f"We trim the estimate slightly against {opponent}, but not enough to erase his established production.",
     }.get(matchup, f"We view the matchup with {opponent} as neutral, so it does not move our projection much.")
-    model_outlook = " ".join([opening, form, matchup_text])
+    model_outlook = " ".join([opening, form] if compact else [opening, form, matchup_text])
+    if compact:
+        return model_outlook
     if reporting_summary and reporting_summary.strip():
         return f"{model_outlook} What we're hearing around the team: {reporting_summary.strip()}"
     return model_outlook

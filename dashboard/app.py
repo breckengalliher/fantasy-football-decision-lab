@@ -54,7 +54,7 @@ h1,h2,h3 { letter-spacing:-.025em; }
 .app-header { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:1rem 1.15rem; margin-bottom:1rem; }
 .header-status { display:flex; justify-content:flex-end; align-items:center; gap:.38rem; color:var(--muted); font-size:.76rem; margin-top:.35rem; }
 .status-dot { display:inline-block; width:.48rem; height:.48rem; border-radius:50%; background:var(--gold); }
-.verdict { background:var(--card); color:var(--ink); border:1px solid var(--line); border-radius:16px; padding:1.3rem 1.45rem; min-height:280px; }
+.verdict { background:#fbfcfc; color:var(--ink); border:1px solid #dfe4e6; border-radius:16px; padding:1.15rem 1.25rem; min-height:0; }
 .verdict.start { background:var(--navy); color:white; border-color:var(--gold); box-shadow:0 12px 28px rgba(0,34,68,.18); }
 .verdict .tag { display:inline-block; background:#edf4e8; color:#397f18; border-radius:999px; padding:.28rem .52rem; letter-spacing:.12em; font-size:.67rem; font-weight:800; }
 .verdict.start .tag { background:rgba(105,190,40,.16); color:#9ee468; }
@@ -67,15 +67,26 @@ h1,h2,h3 { letter-spacing:-.025em; }
 .team-line { display:flex; align-items:center; gap:.42rem; flex-wrap:wrap; }
 .team-logo { width:1.35rem; height:1.35rem; object-fit:contain; flex:0 0 1.35rem; }
 .verdict.start .opponent { color:#c0c8cc; }
-.verdict .score { color:var(--teal); font-size:1.35rem; font-weight:750; margin-top:.8rem; }
-.verdict.start .score { color:#9ee468; }
-.verdict .unit { display:flex; align-items:center; gap:.34rem; flex-wrap:wrap; }
+.projection-primary { display:flex; align-items:flex-end; gap:.42rem; margin-top:.72rem; }
+.projection-primary strong { color:var(--teal); font-size:2.15rem; line-height:.95; letter-spacing:-.04em; }
+.projection-primary span { color:var(--muted); font-size:.68rem; font-weight:750; padding-bottom:.16rem; }
+.verdict.start .projection-primary strong { color:#9ee468; }
+.verdict.start .projection-primary span { color:#c0c8cc; }
+.range-track { position:relative; height:5px; border-radius:999px; background:#d9e0e3; margin:.68rem .15rem .38rem; }
+.range-track::before { content:""; position:absolute; inset:0; border-radius:inherit; background:linear-gradient(90deg,#a5acaf,#69be28); opacity:.75; }
+.range-marker { position:absolute; top:50%; width:11px; height:11px; border-radius:50%; background:var(--navy); border:2px solid white; transform:translate(-50%,-50%); box-shadow:0 0 0 1px rgba(0,34,68,.25); }
+.verdict.start .range-track { background:rgba(255,255,255,.18); }
+.verdict.start .range-marker { background:#9ee468; border-color:var(--navy); }
+.range-labels { display:flex; justify-content:space-between; color:var(--muted); font-size:.65rem; }
+.verdict.start .range-labels { color:#c0c8cc; }
+.confidence-label { margin-left:auto; border-radius:999px; padding:.27rem .48rem; font-size:.61rem; font-weight:850; letter-spacing:.04em; text-transform:uppercase; background:#edf4e8; color:#397f18; }
+.verdict.start .confidence-label { background:rgba(105,190,40,.16); color:#9ee468; }
 .range-help { position:relative; display:inline-flex; align-items:center; justify-content:center; width:1.05rem; height:1.05rem; border:1px solid currentColor; border-radius:50%; font-size:.68rem; font-weight:800; cursor:help; opacity:.82; }
 .range-tooltip { visibility:hidden; opacity:0; position:absolute; z-index:20; left:50%; bottom:calc(100% + .5rem); transform:translateX(-50%); width:250px; padding:.55rem .65rem; border-radius:8px; background:#071b2c; color:#f7fafb; font-size:.74rem; font-weight:500; line-height:1.35; text-align:left; box-shadow:0 8px 22px rgba(0,0,0,.22); transition:opacity .12s ease; }
 .range-help:hover .range-tooltip, .range-help:focus .range-tooltip, .range-help:focus-within .range-tooltip { visibility:visible; opacity:1; }
 .verdict .outlook-label { color:var(--muted); text-transform:uppercase; letter-spacing:.1em; font-size:.65rem; font-weight:800; margin-top:1rem; }
 .verdict.start .outlook-label { color:#9ee468; }
-.verdict .reason { color:#536166; font-size:.91rem; line-height:1.5; margin-top:.28rem; }
+.verdict .reason { color:#536166; font-size:.86rem; line-height:1.45; margin-top:.28rem; min-height:5em; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
 .verdict.start .reason { color:#e0e6e8; }
 .decision-edge { display:flex; align-items:center; justify-content:space-between; gap:1rem; background:var(--navy); color:#f7fafb; border:1px solid rgba(105,190,40,.65); border-radius:13px; padding:.82rem 1rem; margin:1rem 0 .75rem; box-shadow:0 7px 18px rgba(0,34,68,.10); }
 .decision-edge-main { min-width:0; }
@@ -83,11 +94,16 @@ h1,h2,h3 { letter-spacing:-.025em; }
 .decision-edge-title { font-size:1rem; font-weight:780; line-height:1.25; overflow-wrap:anywhere; }
 .decision-edge-copy { color:#cbd5da; font-size:.76rem; line-height:1.35; margin-top:.18rem; }
 .decision-edge-badge { flex:0 0 auto; background:rgba(105,190,40,.16); color:#9ee468; border:1px solid rgba(158,228,104,.42); border-radius:999px; padding:.38rem .62rem; font-size:.66rem; font-weight:850; letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; }
-.broadcast-context { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.48rem; margin-top:1rem; }
-.broadcast-context-item { background:#eef2f3; color:var(--ink); padding:.58rem .65rem; border-radius:9px; min-width:0; font-size:.76rem; line-height:1.3; overflow-wrap:anywhere; }
-.broadcast-context-item span { display:block; color:var(--muted); font-size:.62rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; margin-bottom:.18rem; }
+.broadcast-context { display:grid; grid-template-columns:1fr; gap:.3rem; margin-top:.78rem; }
+.broadcast-context-item { display:flex; align-items:flex-start; gap:.42rem; background:transparent; color:var(--ink); padding:.34rem 0; border-top:1px solid #e7eaec; min-width:0; font-size:.72rem; line-height:1.28; overflow-wrap:anywhere; }
+.broadcast-context-item span { color:var(--muted); min-width:5.25rem; font-size:.62rem; font-weight:800; letter-spacing:.04em; text-transform:uppercase; }
+.broadcast-context-item.context-alert { color:#a33a13; font-weight:750; }
 .verdict.start .broadcast-context-item { background:rgba(255,255,255,.1); color:#f4f8fa; }
+.verdict.start .broadcast-context-item { background:transparent; border-top-color:rgba(255,255,255,.13); }
 .verdict.start .broadcast-context-item span { color:#9ee468; }
+.game-detail-line { color:var(--muted); font-size:.7rem; line-height:1.35; margin-top:.4rem; }
+.verdict.start .game-detail-line { color:#c0c8cc; }
+.relative-sit-note { color:var(--muted); font-size:.68rem; line-height:1.35; margin-top:.62rem; font-style:italic; }
 .reporting-sources { margin-top:.65rem; font-size:.72rem; color:var(--muted); line-height:1.35; }
 .reporting-sources a { color:#397f18; font-weight:700; text-decoration:none; }
 .verdict.start .reporting-sources { color:#c0c8cc; }
@@ -409,6 +425,8 @@ if page == "Decision Room":
 
         st.markdown('<div class="section-title">Start / Sit verdict</div><div class="section-copy">We build this ranking from current production, repeatable workload, a fading prior-season anchor, touchdown regression, and a sample-scaled matchup adjustment. The live context shown below helps you make the final call but does not change our ranking.</div>', unsafe_allow_html=True)
         outlook_columns = st.columns(len(compare))
+        top_gap = 0.0 if len(compare) == 1 else float(compare.iloc[0]["median_ppr"] - compare.iloc[1]["median_ppr"])
+        edge_confidence = "Solo view" if len(compare) == 1 else "Lean" if top_gap < 2.5 else "Moderate edge" if top_gap < 5 else "Strong edge"
         for index, (column, (_, row)) in enumerate(zip(outlook_columns, compare.iterrows())):
             with column:
                 if index == 0 and len(compare) > 1:
@@ -420,7 +438,8 @@ if page == "Decision Room":
                 else:
                     verdict = "ONLY PLAYER"
                 card_class = "start" if index == 0 else "sit"
-                reason = build_player_outlook(row, index, len(compare), projection_spread, row.get("reporting_summary"))
+                reason = build_player_outlook(row, index, len(compare), projection_spread, compact=True)
+                full_reason = build_player_outlook(row, index, len(compare), projection_spread, row.get("reporting_summary"))
                 try:
                     reporting_sources = json.loads(str(row.get("reporting_sources_json", "[]")))
                 except (TypeError, ValueError, json.JSONDecodeError):
@@ -435,28 +454,47 @@ if page == "Decision Room":
                 photo = player_photo_html(row.get("headshot_url"), row["player"])
                 logo_url = team_logo_url(row.get("team"))
                 logo = f'<img class="team-logo" src="{html.escape(logo_url, quote=True)}" alt="{html.escape(str(row["team"]), quote=True)} logo">' if logo_url else ""
-                schedule_bits = [str(row.get("team")), str(row.get("position"))]
-                if pd.notna(row.get("weekday")):
-                    schedule_bits.append(str(row.get("weekday")))
-                if pd.notna(row.get("gametime")):
-                    schedule_bits.append(str(row.get("gametime")))
-                schedule_bits.append(f'{row.get("venue")} vs {row.get("next_opponent")}')
-                player_details = " · ".join(schedule_bits)
+                player_details = f'{row.get("team")} · {row.get("position")}'
+                game_details = []
+                team_record = row.get("team_record")
+                if team_record is not None and pd.notna(team_record) and str(team_record).strip():
+                    game_details.append(f'{row.get("team")} {team_record}')
+                game_details.append(f'{row.get("venue")} vs {row.get("next_opponent")}')
+                kickoff = " · ".join(str(row.get(value)) for value in ("weekday", "gametime") if row.get(value) is not None and pd.notna(row.get(value)))
+                if kickoff:
+                    game_details.append(kickoff)
+                betting_total = row.get("betting_total_live")
+                if betting_total is None or pd.isna(betting_total):
+                    betting_total = row.get("total_line")
+                if betting_total is not None and pd.notna(betting_total):
+                    game_details.append(f'{float(betting_total):.1f}-point game total')
                 practice = format_injury_context(row, "Connected" in INJURY_SOURCE_STATUS)
+                practice_alert = any(term in practice.casefold() for term in ("questionable", "doubtful", "out", "inactive", "ir", "did not practice"))
                 quick_context = "".join([
-                    f'<div class="broadcast-context-item"><span>Practice</span>{html.escape(practice)}</div>',
-                    f'<div class="broadcast-context-item"><span>Matchup</span>{html.escape(matchup_summary(row))}</div>',
-                    f'<div class="broadcast-context-item"><span>Role</span>{html.escape(role_summary(row))}</div>',
-                    f'<div class="broadcast-context-item"><span>Weather</span>{html.escape(weather_summary(row))}</div>',
+                    f'<div class="broadcast-context-item{" context-alert" if practice_alert else ""}"><span>● Practice</span>{html.escape(practice)}</div>',
+                    f'<div class="broadcast-context-item"><span>◆ Matchup</span>{html.escape(matchup_summary(row))}</div>',
+                    f'<div class="broadcast-context-item"><span>↗ Role</span>{html.escape(role_summary(row))}</div>',
+                    f'<div class="broadcast-context-item"><span>☁ Weather</span>{html.escape(weather_summary(row))}</div>',
                 ])
+                floor = float(row["floor_ppr"])
+                median = float(row["median_ppr"])
+                ceiling = float(row["ceiling_ppr"])
+                median_position = max(5.0, min(95.0, 100 * (median - floor) / max(ceiling - floor, .1)))
+                relative_note = "Sit is relative to the players in this comparison—not an automatic bench recommendation." if index > 0 and len(compare) > 1 else ""
                 st.markdown(
-                    f'<div class="verdict {card_class}"><div class="tag">{verdict}</div><div class="player-heading">{photo}<div class="name">{html.escape(str(row["player"]))}</div></div>'
+                    f'<div class="verdict {card_class}"><div style="display:flex;align-items:center;gap:.45rem"><div class="tag">{verdict}</div><div class="confidence-label">{edge_confidence}</div></div><div class="player-heading">{photo}<div class="name">{html.escape(str(row["player"]))}</div></div>'
                     f'<div class="opponent team-line">{logo}<span>{html.escape(player_details)}</span></div>'
-                    f'<div class="score">{row["floor_ppr"]:.1f} · {row["median_ppr"]:.1f} · {row["ceiling_ppr"]:.1f}</div>'
-                    f'<div class="unit">Floor · projection · ceiling <span class="range-help" tabindex="0" aria-label="Range definition">i<span class="range-tooltip" role="tooltip">Floor is the P10 downside outcome, projection is the median estimate, and ceiling is the P90 upside outcome. About 80% of results should fall between floor and ceiling.</span></span></div><div class="outlook-label">Player outlook</div>'
-                    f'<div class="reason">{html.escape(reason)}</div>{reporting_links}<div class="broadcast-context">{quick_context}</div></div>',
+                    f'<div class="game-detail-line">{html.escape(" · ".join(game_details))}</div>'
+                    f'<div class="projection-primary"><strong>{median:.1f}</strong><span>projected PPR <span class="range-help" tabindex="0" aria-label="Range definition">i<span class="range-tooltip" role="tooltip">Floor is the P10 downside outcome, projection is the median estimate, and ceiling is the P90 upside outcome. About 80% of results should fall between floor and ceiling.</span></span></span></div>'
+                    f'<div class="range-track"><span class="range-marker" style="left:{median_position:.1f}%"></span></div><div class="range-labels"><span>Floor {floor:.1f}</span><span>Ceiling {ceiling:.1f}</span></div>'
+                    f'<div class="outlook-label">Player outlook</div><div class="reason">{html.escape(reason)}</div><div class="broadcast-context">{quick_context}</div>'
+                    f'{f"<div class=\"relative-sit-note\">{html.escape(relative_note)}</div>" if relative_note else ""}</div>',
                     unsafe_allow_html=True,
                 )
+                with st.expander(f"Full outlook · {str(row['player']).split()[0]}"):
+                    st.write(full_reason)
+                    if reporting_links:
+                        st.markdown(reporting_links, unsafe_allow_html=True)
 
         st.markdown('<div class="section-title">Projected outcome</div><div class="section-copy">The center mark is the median projection; the whisker shows the P10-to-P90 range.</div>', unsafe_allow_html=True)
         colors = ["#69be28"] + ["#a5acaf"] * (len(compare) - 1)

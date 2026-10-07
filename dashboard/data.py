@@ -402,8 +402,35 @@ def build_start_sit_board(
     away["venue"] = "Away"
     opponents = pd.concat([home, away], ignore_index=True)
 
+    team_records = pd.DataFrame(columns=[team_col, "team_record"])
+    if {"home_score", "away_score"}.issubset(schedules.columns):
+        played = schedules.loc[
+            schedules["week"].le(completed_week)
+            & schedules["home_score"].notna()
+            & schedules["away_score"].notna()
+        ].copy()
+        if not played.empty:
+            home_records = pd.DataFrame({
+                team_col: played["home_team"],
+                "wins": (played["home_score"] > played["away_score"]).astype(int),
+                "losses": (played["home_score"] < played["away_score"]).astype(int),
+                "ties": (played["home_score"] == played["away_score"]).astype(int),
+            })
+            away_records = pd.DataFrame({
+                team_col: played["away_team"],
+                "wins": (played["away_score"] > played["home_score"]).astype(int),
+                "losses": (played["away_score"] < played["home_score"]).astype(int),
+                "ties": (played["away_score"] == played["home_score"]).astype(int),
+            })
+            team_records = pd.concat([home_records, away_records], ignore_index=True).groupby(team_col, as_index=False)[["wins", "losses", "ties"]].sum()
+            team_records["team_record"] = team_records.apply(
+                lambda row: f'{int(row["wins"])}-{int(row["losses"])}' + (f'-{int(row["ties"])}' if row["ties"] else ""), axis=1
+            )
+            team_records = team_records[[team_col, "team_record"]]
+
     latest = data.groupby(id_col, as_index=False).tail(1).copy()
     latest = latest.merge(opponents, on=team_col, how="left")
+    latest = latest.merge(team_records, on=team_col, how="left")
     latest = latest.merge(
         defense.rename(columns={"opponent_team": "next_opponent"}),
         on=["next_opponent", "position"],
@@ -436,7 +463,7 @@ def build_start_sit_board(
         & latest["fantasy_points_ppr"].notna()
     )
     latest = latest.rename(columns={player_col: "player", team_col: "team"})
-    keep = [id_col, "player", "position", "team", "next_opponent", "venue", "games_played", "season_ppr", "recent_ppr", "last_two_ppr", "trend", "recent_opportunities", "ytd_attempts", "ytd_carries", "ytd_targets", "ytd_passing_yards", "ytd_rushing_yards", "ytd_receiving_yards", "ytd_receptions", "ytd_passing_tds", "ytd_rushing_tds", "ytd_receiving_tds", "points_allowed", "matchup_index", "matchup_label", "schedule_adjusted_residual", "schedule_adjusted_index", "projected_ppr", "floor_ppr", "median_ppr", "ceiling_ppr", "confidence", "is_roster_relevant"] + game_context
+    keep = [id_col, "player", "position", "team", "team_record", "next_opponent", "venue", "games_played", "season_ppr", "recent_ppr", "last_two_ppr", "trend", "recent_opportunities", "ytd_attempts", "ytd_carries", "ytd_targets", "ytd_passing_yards", "ytd_rushing_yards", "ytd_receiving_yards", "ytd_receptions", "ytd_passing_tds", "ytd_rushing_tds", "ytd_receiving_tds", "points_allowed", "matchup_index", "matchup_label", "schedule_adjusted_residual", "schedule_adjusted_index", "projected_ppr", "floor_ppr", "median_ppr", "ceiling_ppr", "confidence", "is_roster_relevant"] + game_context
     keep = list(dict.fromkeys(column for column in keep if column in latest.columns))
     return latest[keep].sort_values("projected_ppr", ascending=False), next_week
 
