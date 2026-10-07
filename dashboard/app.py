@@ -512,19 +512,117 @@ if page == "Decision Room":
                     unsafe_allow_html=True,
                 )
 
-        st.markdown('<div class="section-title">Projected outcome</div><div class="section-copy">The center mark is the median projection; the whisker shows the P10-to-P90 range.</div>', unsafe_allow_html=True)
-        colors = ["#69be28"] + ["#a5acaf"] * (len(compare) - 1)
-        fig = go.Figure(go.Bar(
-            x=compare["median_ppr"], y=compare["player"], orientation="h", marker_color=colors,
-            customdata=list(zip(compare["recent_ppr"], compare["season_ppr"], compare["next_opponent"], compare["matchup_label"], compare["confidence"])),
-            text=compare["median_ppr"].map(lambda value: f"{value:.1f}"), textposition="outside",
-            error_x=dict(type="data", symmetric=False, array=compare["ceiling_ppr"] - compare["median_ppr"], arrayminus=compare["median_ppr"] - compare["floor_ppr"], color="#5f6b73"),
-            hovertemplate="<b>%{y}</b><br>Projection %{x:.1f}<br>Recent %{customdata[0]:.1f}<br>Season %{customdata[1]:.1f}<br>vs %{customdata[2]} · %{customdata[3]}<br>%{customdata[4]} confidence<extra></extra>",
-        ))
-        fig.update_layout(title=f"Week {NEXT_WEEK} projected PPR", xaxis_title="PPR points", yaxis_title="", showlegend=False)
-        fig.update_yaxes(autorange="reversed")
-        fig.update_xaxes(range=[0, max(compare["projected_ppr"].max() * 1.22, 10)])
-        st.plotly_chart(polish(fig, 330), width="stretch", config={"displayModeBar": False})
+        st.markdown('<div class="section-title">Comparison Tool</div><div class="section-copy">Explore the selected players through calibrated projection ranges, weekly production, and repeatable usage. Hover or zoom for more detail.</div>', unsafe_allow_html=True)
+        range_tab, trend_tab, usage_tab = st.tabs(["Projection range", "Weekly trend", "Usage & production"])
+        chart_colors = ["#69be28", "#002244", "#a5acaf"][:len(compare)]
+
+        detail_records = []
+        for _, detail_row in compare.iterrows():
+            detail_total = detail_row.get("betting_total_live")
+            if detail_total is None or pd.isna(detail_total):
+                detail_total = detail_row.get("total_line")
+            detail_records.append({
+                "Player": detail_row["player"],
+                "Team": detail_row["team"],
+                "Record": detail_row.get("team_record") if pd.notna(detail_row.get("team_record")) else "—",
+                "Opponent": detail_row["next_opponent"],
+                "Site": detail_row["venue"],
+                "Kickoff": " · ".join(str(detail_row.get(value)) for value in ("weekday", "gametime") if detail_row.get(value) is not None and pd.notna(detail_row.get(value))),
+                "Availability": selection_availability_summary(detail_row),
+                "Game total": f"{float(detail_total):.1f}" if detail_total is not None and pd.notna(detail_total) else "—",
+                "Projection": float(detail_row["median_ppr"]),
+                "Range": f'{float(detail_row["floor_ppr"]):.1f}–{float(detail_row["ceiling_ppr"]):.1f}',
+            })
+        comparison_details = pd.DataFrame(detail_records)
+
+        with range_tab:
+            range_custom = []
+            for detail in detail_records:
+                range_custom.append([
+                    detail["Team"], detail["Record"], detail["Opponent"], detail["Site"], detail["Kickoff"],
+                    detail["Availability"], detail["Game total"], detail["Range"],
+                ])
+            range_fig = go.Figure(go.Scatter(
+                x=compare["median_ppr"], y=compare["player"], mode="markers+text",
+                text=compare["median_ppr"].map(lambda value: f"{value:.1f}"), textposition="top center",
+                marker=dict(size=18, color=chart_colors, line=dict(color="#ffffff", width=2)),
+                error_x=dict(type="data", symmetric=False, array=compare["ceiling_ppr"] - compare["median_ppr"], arrayminus=compare["median_ppr"] - compare["floor_ppr"], color="#69777e", thickness=4, width=8),
+                customdata=range_custom,
+                hovertemplate="<b>%{y}</b> · %{customdata[0]} %{customdata[1]}<br>Median %{x:.1f} PPR · range %{customdata[7]}<br>%{customdata[3]} vs %{customdata[2]} · %{customdata[4]}<br>Availability: %{customdata[5]}<br>Game total: %{customdata[6]}<extra></extra>",
+            ))
+            range_fig.update_layout(title=f"Week {NEXT_WEEK} P10–P90 projection range", xaxis_title="PPR points", yaxis_title="", showlegend=False)
+            range_fig.update_yaxes(autorange="reversed")
+            range_fig.update_xaxes(range=[max(0, float(compare["floor_ppr"].min()) - 3), float(compare["ceiling_ppr"].max()) + 3])
+            st.plotly_chart(polish(range_fig, 340), width="stretch", config={"displayModeBar": True, "displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+            overlap = max(0.0, min(compare["ceiling_ppr"]) - max(compare["floor_ppr"]))
+            st.caption(f"All selected ranges overlap by {overlap:.1f} PPR. The median gap is {projection_spread:.1f} PPR, so the ordering should be treated as {'a lean' if projection_spread < 2.5 else 'meaningful separation'}.")
+
+        with trend_tab:
+            weekly_name_column = "player_display_name" if "player_display_name" in WEEKLY.columns else "player_name"
+            trend_history = WEEKLY.loc[WEEKLY[weekly_name_column].isin(compare["player"])].copy()
+            if trend_history.empty:
+                st.info("Weekly production history is temporarily unavailable for these players.")
+            else:
+                trend_history["display_ppr"] = pd.to_numeric(trend_history["fantasy_points_ppr"], errors="coerce")
+                if position == "QB" and QB_PASS_TD_POINTS != 4 and "passing_tds" in trend_history:
+                    trend_history["display_ppr"] += (QB_PASS_TD_POINTS - 4) * pd.to_numeric(trend_history["passing_tds"], errors="coerce").fillna(0)
+                trend_fig = go.Figure()
+                for color, player_name in zip(chart_colors, compare["player"]):
+                    player_history = trend_history.loc[trend_history[weekly_name_column].eq(player_name)].sort_values("week")
+                    hover_values = list(zip(
+                        player_history.get("opponent_team", pd.Series("—", index=player_history.index)),
+                        player_history.get("targets", pd.Series(0, index=player_history.index)),
+                        player_history.get("carries", pd.Series(0, index=player_history.index)),
+                        player_history.get("receptions", pd.Series(0, index=player_history.index)),
+                        player_history.get("receiving_yards", pd.Series(0, index=player_history.index)),
+                        player_history.get("rushing_yards", pd.Series(0, index=player_history.index)),
+                    ))
+                    trend_fig.add_trace(go.Scatter(
+                        x=player_history["week"], y=player_history["display_ppr"], mode="lines+markers", name=player_name,
+                        line=dict(color=color, width=4 if player_name == leader["player"] else 3), marker=dict(size=9), customdata=hover_values,
+                        hovertemplate="<b>%{fullData.name}</b> · Week %{x}<br>%{y:.1f} PPR vs %{customdata[0]}<br>Targets %{customdata[1]:.0f} · carries %{customdata[2]:.0f}<br>Receptions %{customdata[3]:.0f} · receiving yards %{customdata[4]:.0f}<br>Rushing yards %{customdata[5]:.0f}<extra></extra>",
+                    ))
+                trend_fig.update_layout(title="Weekly PPR production", xaxis_title="NFL week", yaxis_title="PPR points", hovermode="x unified")
+                trend_fig.update_xaxes(dtick=1)
+                st.plotly_chart(polish(trend_fig, 380), width="stretch", config={"displayModeBar": True, "displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+
+        with usage_tab:
+            metric_options = {
+                "QB": {"Pass attempts": "ytd_attempts", "Passing yards": "ytd_passing_yards", "Passing TDs": "ytd_passing_tds", "Carries": "ytd_carries", "Rushing yards": "ytd_rushing_yards"},
+                "RB": {"Carries": "ytd_carries", "Targets": "ytd_targets", "Rushing yards": "ytd_rushing_yards", "Receiving yards": "ytd_receiving_yards", "Total touchdowns": "ytd_total_tds"},
+                "WR": {"Targets": "ytd_targets", "Receptions": "ytd_receptions", "Receiving yards": "ytd_receiving_yards", "Receiving TDs": "ytd_receiving_tds", "Snap share": "latest_snap_pct"},
+                "TE": {"Targets": "ytd_targets", "Receptions": "ytd_receptions", "Receiving yards": "ytd_receiving_yards", "Receiving TDs": "ytd_receiving_tds", "Snap share": "latest_snap_pct"},
+            }[position]
+            usage_left, usage_right = st.columns([1, 1])
+            usage_label = usage_left.selectbox("Statistic", list(metric_options), key=f"comparison_usage_metric_{position}")
+            usage_mode = usage_right.radio("Display", ["Per game", "Season total"], horizontal=True, key=f"comparison_usage_mode_{position}")
+            usage_column = metric_options[usage_label]
+            usage_values = compare.copy()
+            if usage_column == "ytd_total_tds":
+                usage_values[usage_column] = usage_values.get("ytd_rushing_tds", 0) + usage_values.get("ytd_receiving_tds", 0)
+            values = pd.to_numeric(usage_values.get(usage_column, pd.Series(0, index=usage_values.index)), errors="coerce").fillna(0)
+            is_share = usage_column == "latest_snap_pct"
+            if is_share:
+                values = values * 100
+                usage_mode = "Latest week"
+            elif usage_mode == "Per game":
+                values = values / pd.to_numeric(usage_values["games_played"], errors="coerce").clip(lower=1)
+            usage_fig = go.Figure(go.Bar(
+                x=values, y=usage_values["player"], orientation="h", marker_color=chart_colors,
+                text=values.map(lambda value: f"{value:.1f}{'%' if is_share else ''}"), textposition="outside",
+                customdata=list(zip(usage_values["team"], usage_values["next_opponent"], usage_values["games_played"])),
+                hovertemplate=f"<b>%{{y}}</b> · %{{customdata[0]}}<br>{usage_label}: %{{x:.1f}}{'%' if is_share else ''}<br>%{{customdata[2]}} games played · next vs %{{customdata[1]}}<extra></extra>",
+            ))
+            usage_fig.update_layout(title=f"{usage_label} · {usage_mode.lower()}", xaxis_title=f"{usage_label}{' (%)' if is_share else ''}", yaxis_title="", showlegend=False)
+            usage_fig.update_yaxes(autorange="reversed")
+            usage_fig.update_xaxes(range=[0, max(float(values.max()) * 1.22, 1)])
+            st.plotly_chart(polish(usage_fig, 330), width="stretch", config={"displayModeBar": True, "displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+
+        with st.expander("Player & team details"):
+            st.dataframe(comparison_details, hide_index=True, width="stretch", column_config={
+                "Projection": st.column_config.NumberColumn("Median PPR", format="%.1f"),
+                "Game total": "Game total",
+            })
 
         common = ["player", "team", "next_opponent", "games_played", "season_ppr", "recent_ppr", "recent_opportunities"]
         position_stats = {
