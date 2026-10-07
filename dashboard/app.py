@@ -759,16 +759,18 @@ if page == "Decision Room":
                     "ytd_targets": "Targets", "ytd_receptions": "Receptions", "ytd_passing_yards": "Passing yards",
                     "ytd_rushing_yards": "Rushing yards", "ytd_receiving_yards": "Receiving yards", "ytd_passing_tds": "Passing TDs",
                     "ytd_rushing_tds": "Rushing TDs", "ytd_receiving_tds": "Receiving TDs", "matchup_label": "Matchup",
-                    "points_allowed": "Opponent PPR allowed", "projected_ppr": "Median projection", "confidence": "Sample confidence",
+                    "schedule_adjusted_index": "Schedule-adjusted matchup", "projected_ppr": "Median projection", "confidence": "Sample confidence",
                 }
-                decimal_stats = {"season_ppr", "recent_ppr", "recent_opportunities", "points_allowed", "projected_ppr"}
+                decimal_stats = {"season_ppr", "recent_ppr", "recent_opportunities", "projected_ppr"}
                 advanced_cards = []
-                advanced_columns = ["games_played", "season_ppr", "recent_ppr", "recent_opportunities", *position_stats[position], "matchup_label", "points_allowed", "projected_ppr", "confidence"]
+                advanced_columns = ["games_played", "season_ppr", "recent_ppr", "recent_opportunities", *position_stats[position], "matchup_label", "schedule_adjusted_index", "projected_ppr", "confidence"]
                 for _, stat_row in compare.iterrows():
                     stat_rows_html = ""
                     for stat_column in advanced_columns:
                         stat_value = stat_row.get(stat_column)
-                        if stat_value is None or pd.isna(stat_value):
+                        if stat_column == "schedule_adjusted_index":
+                            display_value = matchup_summary(stat_row)
+                        elif stat_value is None or pd.isna(stat_value):
                             display_value = "—"
                         elif stat_column in decimal_stats:
                             display_value = f"{float(stat_value):.1f}"
