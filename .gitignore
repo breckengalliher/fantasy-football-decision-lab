@@ -10,6 +10,15 @@ data/processed/*
 !data/processed/.gitkeep
 !data/processed/draft_board_2026_current.csv
 !data/processed/recent_games_2026.csv
+!data/processed/daily_injury_context_current.parquet
+!data/processed/daily_injury_context_metadata.json
+!data/processed/live_refresh_metadata.json
+!data/processed/live_start_sit_board_4pt_current.parquet
+!data/processed/live_start_sit_board_6pt_current.parquet
+!data/processed/live_start_sit_board_current.parquet
+!data/processed/personnel_players_current.parquet
+!data/processed/personnel_teams_current.parquet
+!data/processed/sportsdataio_depth_current.parquet
 *.pyc
 .DS_Store
 .streamlit/secrets.toml

@@ -5,6 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
+from pathlib import Path
+import json
 
 import pandas as pd
 import requests
@@ -128,3 +130,27 @@ def enrich_injuries(board: pd.DataFrame, context: InjuryContext) -> pd.DataFrame
         result = result.merge(context.records, on=["player_key", "team"], how="left")
     result["injury_checked_at"] = context.checked_at
     return result.drop(columns="player_key")
+
+
+def load_persisted_injury_context(root: Path, season: int, week: int, max_age_hours: int = 36) -> InjuryContext | None:
+    """Load the cloud-published snapshot only when it matches and is fresh."""
+    parquet = root / "data" / "processed" / "daily_injury_context_current.parquet"
+    metadata_path = root / "data" / "processed" / "daily_injury_context_metadata.json"
+    if not parquet.exists() or not metadata_path.exists():
+        return None
+    try:
+        metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+        checked = datetime.fromisoformat(str(metadata["checked_at"]).replace("Z", "+00:00"))
+        if checked.tzinfo is None:
+            checked = checked.replace(tzinfo=timezone.utc)
+        age_hours = (datetime.now(timezone.utc) - checked.astimezone(timezone.utc)).total_seconds() / 3600
+        if metadata.get("season") != season or metadata.get("week") != week or age_hours > max_age_hours:
+            return None
+        return InjuryContext(
+            pd.read_parquet(parquet),
+            metadata["checked_at"],
+            metadata["nflverse_status"],
+            metadata["sleeper_status"],
+        )
+    except (OSError, ValueError, KeyError, json.JSONDecodeError):
+        return None

@@ -1,0 +1,47 @@
+name: Daily injury context refresh
+
+on:
+  schedule:
+    - cron: "30 18 * * *"
+      timezone: "America/Chicago"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: production-data-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: dashboard/requirements.txt
+      - run: pip install -r dashboard/requirements.txt pytest
+      - name: Build validated daily injury snapshot
+        run: python src/refresh_daily_injury_snapshot.py
+      - name: Run injury-source tests
+        run: python -m pytest tests/test_injury_sources.py tests/test_sportsdataio.py -q
+      - name: Publish refreshed snapshot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f data/processed/daily_injury_context_current.parquet data/processed/daily_injury_context_metadata.json
+          git diff --cached --quiet || git commit -m "Refresh daily injury context [skip ci]"
+          git push
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: daily-injury-context
+          path: |
+            data/processed/daily_injury_context_current.parquet
+            data/processed/daily_injury_context_metadata.json
+          if-no-files-found: warn
+          retention-days: 14

@@ -13,14 +13,14 @@ import streamlit as st
 
 try:
     from dashboard.providers.sportsdataio import SportsDataIOClient, context_freshness, enrich_board, format_injury_context
-    from dashboard.providers.injuries import enrich_injuries, load_daily_injury_context
+    from dashboard.providers.injuries import enrich_injuries, load_daily_injury_context, load_persisted_injury_context
     from dashboard.snapshots import load_personnel_snapshot
     from dashboard.outlooks import build_player_outlook
     from dashboard.states import empty_player_pool_message, provider_issue_message
     from dashboard.methodology_copy import DISCLAIMER_LANGUAGE, METHODOLOGY_LANGUAGE, SOURCE_ATTRIBUTION
 except ModuleNotFoundError:
     from providers.sportsdataio import SportsDataIOClient, context_freshness, enrich_board, format_injury_context
-    from providers.injuries import enrich_injuries, load_daily_injury_context
+    from providers.injuries import enrich_injuries, load_daily_injury_context, load_persisted_injury_context
     from snapshots import load_personnel_snapshot
     from outlooks import build_player_outlook
     from states import empty_player_pool_message, provider_issue_message
@@ -115,7 +115,7 @@ def provider_key() -> str:
 
 @st.cache_data(ttl=86400, show_spinner=False)
 def get_daily_injuries(season: int, week: int):
-    return load_daily_injury_context(season, week)
+    return load_persisted_injury_context(PROJECT_ROOT, season, week) or load_daily_injury_context(season, week)
 
 
 @st.cache_data(ttl=3600, show_spinner=False)

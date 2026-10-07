@@ -1,0 +1,54 @@
+name: Weekly production refresh
+
+on:
+  schedule:
+    - cron: "0 6 * * 2"
+      timezone: "America/Chicago"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: production-data-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SPORTSDATAIO_API_KEY: ${{ secrets.SPORTSDATAIO_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: dashboard/requirements.txt
+      - run: pip install -r dashboard/requirements.txt pytest
+      - name: Require protected provider secret
+        shell: bash
+        run: test -n "$SPORTSDATAIO_API_KEY"
+      - name: Build validated 4-point and 6-point snapshots
+        run: python src/refresh_weekly_snapshot.py
+      - name: Run complete test suite
+        run: python -m pytest tests -q
+      - name: Publish validated production snapshots
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f data/processed/live_refresh_metadata.json data/processed/live_start_sit_board_current.parquet data/processed/live_start_sit_board_4pt_current.parquet data/processed/live_start_sit_board_6pt_current.parquet data/processed/personnel_players_current.parquet data/processed/personnel_teams_current.parquet data/processed/sportsdataio_depth_current.parquet
+          git diff --cached --quiet || git commit -m "Refresh weekly production data [skip ci]"
+          git push
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: weekly-production-snapshots
+          path: |
+            data/processed/live_refresh_metadata.json
+            data/processed/live_start_sit_board_current.parquet
+            data/processed/live_start_sit_board_4pt_current.parquet
+            data/processed/live_start_sit_board_6pt_current.parquet
+          if-no-files-found: warn
+          retention-days: 28

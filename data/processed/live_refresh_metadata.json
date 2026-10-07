@@ -1,0 +1,46 @@
+{
+  "season": 2026,
+  "completed_week": 4,
+  "next_week": 5,
+  "refreshed_at": "2026-10-07T18:07:20.913725+00:00",
+  "eligible_players": 203,
+  "player_pool_audit": {
+    "eligible_players": 203,
+    "eligible_by_position": {
+      "WR": 80,
+      "RB": 58,
+      "TE": 36,
+      "QB": 29
+    },
+    "duplicate_player_ids": 0,
+    "duplicate_player_names_by_position": 0,
+    "missing_player_names": 0,
+    "missing_teams": 0,
+    "missing_opponents": 0,
+    "invalid_positions": 0
+  },
+  "injury_records": 282,
+  "injury_source_status": {
+    "nflverse": "Connected \u00b7 19 Week 5 records",
+    "sleeper": "Connected \u00b7 271 designated players"
+  },
+  "depth_chart_players": 1858,
+  "snap_coverage": 0.9261083743842364,
+  "weather_coverage": 0.9359605911330049,
+  "betting_total_coverage": 0.9655172413793104,
+  "depth_chart_coverage": 0.9064039408866995,
+  "verified_qb_starters": 31,
+  "unverified_relevant_qbs": 8,
+  "projection_model": "Approved round-three live model",
+  "scoring_role_td_exception_enabled": false,
+  "scoring_role_td_exception_requirement": "verified red-zone or goal-line opportunity data",
+  "default_qb_passing_td_points": 4,
+  "refreshed_qb_passing_td_formats": [
+    4,
+    6
+  ],
+  "scoring_format_snapshots": {
+    "4": "live_start_sit_board_4pt_current.parquet",
+    "6": "live_start_sit_board_6pt_current.parquet"
+  }
+}

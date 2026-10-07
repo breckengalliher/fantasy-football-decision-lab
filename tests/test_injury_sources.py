@@ -1,6 +1,9 @@
+import json
+from datetime import datetime, timezone
+
 import pandas as pd
 
-from dashboard.providers.injuries import combine_injury_sources, normalize_nflverse_injuries, normalize_sleeper_players
+from dashboard.providers.injuries import InjuryContext, combine_injury_sources, load_persisted_injury_context, normalize_nflverse_injuries, normalize_sleeper_players
 
 
 def test_nflverse_normalization_keeps_report_and_practice_fields():
@@ -48,3 +51,16 @@ def test_stale_or_unsupported_sleeper_labels_are_rejected():
         "2": {"full_name": "Unsupported Player", "team": "SEA", "injury_status": "NA", "news_updated": 1000},
     }
     assert normalize_sleeper_players(payload, now_ms=10 * 86_400_000).empty
+
+
+def test_cloud_published_snapshot_must_match_season_and_week(tmp_path):
+    processed = tmp_path / "data" / "processed"
+    processed.mkdir(parents=True)
+    pd.DataFrame([{"player_key": "alpha", "team": "SEA"}]).to_parquet(processed / "daily_injury_context_current.parquet")
+    metadata = {
+        "season": 2026, "week": 5, "checked_at": datetime.now(timezone.utc).isoformat(),
+        "nflverse_status": "Connected", "sleeper_status": "Connected",
+    }
+    (processed / "daily_injury_context_metadata.json").write_text(json.dumps(metadata), encoding="utf-8")
+    assert isinstance(load_persisted_injury_context(tmp_path, 2026, 5), InjuryContext)
+    assert load_persisted_injury_context(tmp_path, 2026, 6) is None

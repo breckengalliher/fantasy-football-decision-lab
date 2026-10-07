@@ -85,6 +85,17 @@ streamlit run dashboard/app.py
 On Windows, `run_dashboard.ps1` launches the app after the dependencies are
 installed.
 
+## Production refreshes
+
+GitHub Actions owns the production schedule. `daily-injury-refresh.yml`
+publishes the validated nflverse/Sleeper injury snapshot every day at 6:30 PM
+America/Chicago. `weekly-production-refresh.yml` rebuilds and validates both QB
+scoring formats every Tuesday at 6:00 AM America/Chicago. Both workflows can be
+run manually, serialize through one production-refresh concurrency group, retain
+downloadable artifacts, and commit validated snapshots so Streamlit redeploys.
+The SportsDataIO key is read only from the protected GitHub Actions repository
+secret named `SPORTSDATAIO_API_KEY`.
+
 ## Project structure
 
 ```text
