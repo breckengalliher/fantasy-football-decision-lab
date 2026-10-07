@@ -16,11 +16,13 @@ try:
     from dashboard.snapshots import load_personnel_snapshot
     from dashboard.outlooks import build_player_outlook
     from dashboard.states import empty_player_pool_message, provider_issue_message
+    from dashboard.methodology_copy import DISCLAIMER_LANGUAGE, METHODOLOGY_LANGUAGE, SOURCE_ATTRIBUTION
 except ModuleNotFoundError:
     from providers.sportsdataio import SportsDataIOClient, context_freshness, enrich_board, format_injury_context
     from snapshots import load_personnel_snapshot
     from outlooks import build_player_outlook
     from states import empty_player_pool_message, provider_issue_message
+    from methodology_copy import DISCLAIMER_LANGUAGE, METHODOLOGY_LANGUAGE, SOURCE_ATTRIBUTION
 
 try:
     from dashboard.data import add_live_supplementary_context, apply_approved_projection_model, apply_player_pool_guardrails, apply_verified_starter_gate, build_start_sit_board, current_nfl_season, load_live_context_data, load_live_weekly_data, load_prior_weekly_data
@@ -393,19 +395,17 @@ elif page == "Player Trends":
         st.info("Opponent matchup history is unavailable for this player; no matchup claim is shown.")
 
 else:
-    st.subheader("A transparent Start / Sit model plus independent context")
-    st.write("The app generates a Start / Sit verdict from a narrow core model, then shows separate live context for the user:")
-    a, b, c = st.columns(3)
-    a.info("**1 · Current production**\n\nSeason PPR per game supplies the stable baseline.")
-    b.info("**2 · Recent form**\n\nThe most recent four appearances receive more weight.")
-    c.info("**3 · Matchup**\n\nOpponent PPR allowed nudges the estimate, with a strict cap. The user makes the final choice.")
-    st.subheader("Limits that matter")
-    st.markdown("""
-- It is a decision aid, not a sportsbook-grade projection or guarantee.
-- Injury status, practice participation, weather, betting totals, and depth-chart news are not yet included.
-- Early-season opponent rankings use small samples, so the confidence label stays lower.
-- PPR allowed is calculated from individual player-week outcomes, which is useful but not a complete defensive model.
-- The current formula favors transparency and weekly stability over complexity.
-""")
-    st.subheader("Source and refresh")
-    st.write(f"Player stats and schedules: nflverse public releases. Data loaded for {season}; app cache refreshes hourly. Last refresh: {REFRESHED}.")
+    st.subheader("How the Start / Sit Lab works")
+    st.markdown(METHODOLOGY_LANGUAGE)
+    st.info("The scoring-role touchdown exception remains disabled until reliable red-zone or goal-line opportunity data is integrated and validated.")
+    st.subheader("Sources and refresh timing")
+    st.markdown(SOURCE_ATTRIBUTION)
+    st.caption(f"Season {season} data · app cache refreshes hourly · this page loaded {REFRESHED} · supplementary provider: {PROVIDER_STATUS}")
+    st.subheader("Responsible use")
+    st.markdown(DISCLAIMER_LANGUAGE)
+
+st.divider()
+with st.expander("Sources, methodology & important disclaimer"):
+    st.markdown(SOURCE_ATTRIBUTION)
+    st.markdown(METHODOLOGY_LANGUAGE)
+    st.markdown(DISCLAIMER_LANGUAGE)
