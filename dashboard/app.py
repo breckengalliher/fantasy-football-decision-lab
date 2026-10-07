@@ -327,9 +327,9 @@ if page == "Decision Room":
                 changes = []
                 if bool(row.get("qb_changed")): changes.append("Starting QB changed")
                 if bool(row.get("ol_changed")): changes.append("Starting OL changed")
-                personnel = " · ".join(changes) if changes else "No confirmed starter change"
+                personnel = " · ".join(changes) if changes else "No changes"
             else:
-                personnel = "Not enough snapshot history yet" if PROVIDER_STATUS.startswith("Connected") else "Not available"
+                personnel = "Not enough history" if PROVIDER_STATUS.startswith("Connected") else "Not available"
 
             if pd.notna(row.get("schedule_adjusted_index")):
                 opponent_delta = (float(row["schedule_adjusted_index"]) - 1) * 100
