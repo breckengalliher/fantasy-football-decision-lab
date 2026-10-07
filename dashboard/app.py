@@ -86,7 +86,7 @@ h1,h2,h3 { letter-spacing:-.025em; }
 .range-help:hover .range-tooltip, .range-help:focus .range-tooltip, .range-help:focus-within .range-tooltip { visibility:visible; opacity:1; }
 .verdict .outlook-label { color:var(--muted); text-transform:uppercase; letter-spacing:.1em; font-size:.65rem; font-weight:800; margin-top:1rem; }
 .verdict.start .outlook-label { color:#9ee468; }
-.verdict .reason { color:#536166; font-size:.86rem; line-height:1.45; margin-top:.28rem; min-height:5em; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.verdict .reason { color:#536166; font-size:.84rem; line-height:1.42; margin-top:.28rem; min-height:2.4em; }
 .verdict.start .reason { color:#e0e6e8; }
 .decision-edge { display:flex; align-items:center; justify-content:space-between; gap:1rem; background:var(--navy); color:#f7fafb; border:1px solid rgba(105,190,40,.65); border-radius:13px; padding:.82rem 1rem; margin:1rem 0 .75rem; box-shadow:0 7px 18px rgba(0,34,68,.10); }
 .decision-edge-main { min-width:0; }
@@ -438,8 +438,17 @@ if page == "Decision Room":
                 else:
                     verdict = "ONLY PLAYER"
                 card_class = "start" if index == 0 else "sit"
-                reason = build_player_outlook(row, index, len(compare), projection_spread, compact=True)
                 full_reason = build_player_outlook(row, index, len(compare), projection_spread, row.get("reporting_summary"))
+                if len(compare) == 1:
+                    reason = "Add another player to turn this into a true Start/Sit comparison."
+                elif index == 0 and top_gap < 2.5:
+                    reason = "Our preferred start, but only by a slim margin."
+                elif index == 0:
+                    reason = "Our preferred start with the strongest projection in this group."
+                elif float(leader["median_ppr"] - row["median_ppr"]) < 2.5:
+                    reason = "A close alternative with a nearly identical projection."
+                else:
+                    reason = "The riskier option relative to the other players in this comparison."
                 try:
                     reporting_sources = json.loads(str(row.get("reporting_sources_json", "[]")))
                 except (TypeError, ValueError, json.JSONDecodeError):
@@ -491,7 +500,7 @@ if page == "Decision Room":
                     f'{f"<div class=\"relative-sit-note\">{html.escape(relative_note)}</div>" if relative_note else ""}</div>',
                     unsafe_allow_html=True,
                 )
-                with st.expander(f"Full outlook · {str(row['player']).split()[0]}"):
+                with st.expander(f"Expand player outlook · {str(row['player']).split()[0]}"):
                     st.write(full_reason)
                     if reporting_links:
                         st.markdown(reporting_links, unsafe_allow_html=True)
