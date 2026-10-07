@@ -1,4 +1,4 @@
-"""Live weekly fantasy-football Start/Sit Lab."""
+"""Live weekly fantasy-football The Sunday Decision Lab."""
 
 from __future__ import annotations
 
@@ -34,7 +34,7 @@ COLORS = {"QB": "#00529b", "RB": "#69be28", "WR": "#4b788f", "TE": "#a5acaf"}
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SEASON = current_nfl_season()
 
-st.set_page_config(page_title="Start / Sit Lab", page_icon="🏈", layout="wide", initial_sidebar_state="auto")
+st.set_page_config(page_title="The Sunday Decision Lab", page_icon="🏈", layout="wide", initial_sidebar_state="auto")
 st.markdown(
     """
 <style>
@@ -327,8 +327,8 @@ def player_photo_html(value: object, label: object) -> str:
 
 
 with st.sidebar:
-    st.markdown('<div class="sidebar-brand">START <span>/</span> SIT LAB</div>', unsafe_allow_html=True)
-    st.caption("Fantasy decision tools")
+    st.markdown('<div class="sidebar-brand">THE SUNDAY <span>DECISION</span> LAB</div>', unsafe_allow_html=True)
+    st.caption("Your weekly lineup call")
     page = st.radio("View", ["Decision Room", "Player Trends", "How It Works"], label_visibility="collapsed")
 season = SEASON
 
@@ -342,7 +342,7 @@ with st.container(border=True):
     with header_left:
         st.markdown(
             f'<div class="hero"><div><div class="eyebrow">Week {header_week} · {season}</div>'
-            '<h1 class="graffiti-title">START <span>/</span> SIT LAB</h1><div class="hero-subtitle">Player Comparison</div>'
+            '<h1 class="graffiti-title">THE SUNDAY <span>DECISION</span> LAB</h1><div class="hero-subtitle">Player Comparison</div>'
             '<p>Compare up to three players and make the final lineup call.</p></div></div>',
             unsafe_allow_html=True,
         )
@@ -989,7 +989,7 @@ elif page == "Player Trends":
         st.info("Opponent matchup history is unavailable for this player; no matchup claim is shown.")
 
 else:
-    st.subheader("How the Start / Sit Lab works")
+    st.subheader("How The Sunday Decision Lab works")
     st.markdown(METHODOLOGY_LANGUAGE)
     st.info("The scoring-role touchdown exception remains disabled until reliable red-zone or goal-line opportunity data is integrated and validated.")
     st.subheader("Sources and refresh timing")

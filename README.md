@@ -1,4 +1,4 @@
-# Start / Sit Lab
+# The Sunday Decision Lab
 
 A live fantasy-football evidence app for comparing weekly lineup options.
 It updates current-season player results and schedules from nflverse, then combines
