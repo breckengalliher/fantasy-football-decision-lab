@@ -104,6 +104,13 @@ h1,h2,h3 { letter-spacing:-.025em; }
 .game-detail-line { color:var(--muted); font-size:.7rem; line-height:1.35; margin-top:.4rem; }
 .verdict.start .game-detail-line { color:#c0c8cc; }
 .relative-sit-note { color:var(--muted); font-size:.68rem; line-height:1.35; margin-top:.62rem; font-style:italic; }
+.card-outlook-details { border-top:1px solid #e3e8ea; margin-top:.72rem; padding-top:.22rem; }
+.card-outlook-details summary { color:var(--navy); cursor:pointer; font-size:.74rem; font-weight:800; padding:.5rem .1rem .28rem; list-style-position:inside; }
+.card-outlook-details summary:hover { color:#397f18; }
+.card-outlook-full { color:#536166; font-size:.79rem; line-height:1.5; padding:.42rem .2rem .15rem; }
+.verdict.start .card-outlook-details { border-top-color:rgba(255,255,255,.16); }
+.verdict.start .card-outlook-details summary { color:#9ee468; }
+.verdict.start .card-outlook-full { color:#e0e6e8; }
 .reporting-sources { margin-top:.65rem; font-size:.72rem; color:var(--muted); line-height:1.35; }
 .reporting-sources a { color:#397f18; font-weight:700; text-decoration:none; }
 .verdict.start .reporting-sources { color:#c0c8cc; }
@@ -490,6 +497,10 @@ if page == "Decision Room":
                 ceiling = float(row["ceiling_ppr"])
                 median_position = max(5.0, min(95.0, 100 * (median - floor) / max(ceiling - floor, .1)))
                 relative_note = "Sit is relative to the players in this comparison—not an automatic bench recommendation." if index > 0 and len(compare) > 1 else ""
+                outlook_details = (
+                    f'<details class="card-outlook-details"><summary>Expand player outlook</summary><div class="card-outlook-full">'
+                    f'{html.escape(full_reason)}{reporting_links}</div></details>'
+                )
                 st.markdown(
                     f'<div class="verdict {card_class}"><div style="display:flex;align-items:center;gap:.45rem"><div class="tag">{verdict}</div><div class="confidence-label">{edge_confidence}</div></div><div class="player-heading">{photo}<div class="name">{html.escape(str(row["player"]))}</div></div>'
                     f'<div class="opponent team-line">{logo}<span>{html.escape(player_details)}</span></div>'
@@ -497,13 +508,9 @@ if page == "Decision Room":
                     f'<div class="projection-primary"><strong>{median:.1f}</strong><span>projected PPR <span class="range-help" tabindex="0" aria-label="Range definition">i<span class="range-tooltip" role="tooltip">Floor is the P10 downside outcome, projection is the median estimate, and ceiling is the P90 upside outcome. About 80% of results should fall between floor and ceiling.</span></span></span></div>'
                     f'<div class="range-track"><span class="range-marker" style="left:{median_position:.1f}%"></span></div><div class="range-labels"><span>Floor {floor:.1f}</span><span>Ceiling {ceiling:.1f}</span></div>'
                     f'<div class="outlook-label">Player outlook</div><div class="reason">{html.escape(reason)}</div><div class="broadcast-context">{quick_context}</div>'
-                    f'{f"<div class=\"relative-sit-note\">{html.escape(relative_note)}</div>" if relative_note else ""}</div>',
+                    f'{f"<div class=\"relative-sit-note\">{html.escape(relative_note)}</div>" if relative_note else ""}{outlook_details}</div>',
                     unsafe_allow_html=True,
                 )
-                with st.expander(f"Expand player outlook · {str(row['player']).split()[0]}"):
-                    st.write(full_reason)
-                    if reporting_links:
-                        st.markdown(reporting_links, unsafe_allow_html=True)
 
         st.markdown('<div class="section-title">Projected outcome</div><div class="section-copy">The center mark is the median projection; the whisker shows the P10-to-P90 range.</div>', unsafe_allow_html=True)
         colors = ["#69be28"] + ["#a5acaf"] * (len(compare) - 1)
