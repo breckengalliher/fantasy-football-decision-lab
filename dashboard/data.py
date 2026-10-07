@@ -346,6 +346,9 @@ def build_start_sit_board(
     data["recent_ppr"] = data.groupby(id_col)["fantasy_points_ppr"].transform(
         lambda values: values.rolling(4, min_periods=1).mean()
     )
+    data["last_two_ppr"] = data.groupby(id_col)["fantasy_points_ppr"].transform(
+        lambda values: values.rolling(2, min_periods=1).mean()
+    )
     data["season_ppr"] = data.groupby(id_col)["fantasy_points_ppr"].transform("mean")
     data["games_played"] = data.groupby(id_col)["fantasy_points_ppr"].transform("count")
     data["historical_floor"] = data.groupby(id_col)["fantasy_points_ppr"].transform(
@@ -433,7 +436,7 @@ def build_start_sit_board(
         & latest["fantasy_points_ppr"].notna()
     )
     latest = latest.rename(columns={player_col: "player", team_col: "team"})
-    keep = [id_col, "player", "position", "team", "next_opponent", "venue", "games_played", "season_ppr", "recent_ppr", "trend", "recent_opportunities", "ytd_attempts", "ytd_carries", "ytd_targets", "ytd_passing_yards", "ytd_rushing_yards", "ytd_receiving_yards", "ytd_receptions", "ytd_passing_tds", "ytd_rushing_tds", "ytd_receiving_tds", "points_allowed", "matchup_index", "matchup_label", "schedule_adjusted_residual", "schedule_adjusted_index", "projected_ppr", "floor_ppr", "median_ppr", "ceiling_ppr", "confidence", "is_roster_relevant"] + game_context
+    keep = [id_col, "player", "position", "team", "next_opponent", "venue", "games_played", "season_ppr", "recent_ppr", "last_two_ppr", "trend", "recent_opportunities", "ytd_attempts", "ytd_carries", "ytd_targets", "ytd_passing_yards", "ytd_rushing_yards", "ytd_receiving_yards", "ytd_receptions", "ytd_passing_tds", "ytd_rushing_tds", "ytd_receiving_tds", "points_allowed", "matchup_index", "matchup_label", "schedule_adjusted_residual", "schedule_adjusted_index", "projected_ppr", "floor_ppr", "median_ppr", "ceiling_ppr", "confidence", "is_roster_relevant"] + game_context
     keep = list(dict.fromkeys(column for column in keep if column in latest.columns))
     return latest[keep].sort_values("projected_ppr", ascending=False), next_week
 

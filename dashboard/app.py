@@ -105,6 +105,23 @@ h1,h2,h3 { letter-spacing:-.025em; }
 .finder-copy { color:var(--muted); font-size:.78rem; margin:-.25rem 0 .55rem; }
 .selected-player-name { font-size:.94rem; font-weight:750; line-height:1.2; margin-top:.2rem; }
 .selected-player-meta { color:var(--muted); font-size:.72rem; line-height:1.3; }
+.compare-slot-kicker { color:#397f18; font-size:.61rem; font-weight:850; letter-spacing:.09em; text-transform:uppercase; margin-bottom:.55rem; }
+.compare-slot-top { display:flex; align-items:center; gap:.68rem; min-height:62px; }
+.compare-slot-main { min-width:0; }
+.compare-slot-name { color:var(--ink); font-size:1rem; font-weight:800; line-height:1.16; overflow-wrap:anywhere; }
+.compare-slot-team { display:flex; align-items:center; gap:.34rem; color:var(--muted); font-size:.72rem; margin-top:.22rem; }
+.compare-slot-team img { width:1.15rem; height:1.15rem; object-fit:contain; }
+.compare-slot-game { color:var(--muted); font-size:.72rem; line-height:1.3; margin-top:.52rem; }
+.compare-slot-footer { display:flex; align-items:center; justify-content:space-between; gap:.5rem; border-top:1px solid #e4e8ea; margin-top:.65rem; padding-top:.58rem; }
+.compare-slot-projection { color:var(--navy); font-size:.82rem; font-weight:800; }
+.availability-pill { border-radius:999px; padding:.24rem .46rem; font-size:.63rem; font-weight:800; line-height:1.15; text-align:right; }
+.availability-ok { background:#edf4e8; color:#397f18; }
+.availability-alert { background:#fff0e6; color:#a33a13; border:1px solid #efb79f; }
+.open-slot { min-height:166px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; border:2px dashed #bdc8cd; border-radius:11px; color:var(--muted); padding:1rem; }
+.open-slot-number { color:#397f18; font-size:.62rem; font-weight:850; letter-spacing:.09em; text-transform:uppercase; }
+.open-slot-title { color:var(--ink); font-size:.95rem; font-weight:780; margin:.3rem 0 .12rem; }
+.open-slot-copy { font-size:.72rem; line-height:1.35; max-width:210px; }
+.replacement-note { background:#edf4e8; border-left:3px solid var(--gold); color:#29451f; border-radius:8px; padding:.55rem .7rem; font-size:.76rem; margin:.35rem 0 .65rem; }
 .context-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.85rem; width:100%; }
 .context-card { background:var(--card); border:1px solid var(--line); border-radius:14px; overflow:hidden; min-width:0; }
 .context-card h3 { margin:0; padding:.9rem 1rem; background:#ebe7dc; color:var(--ink); font-size:1.05rem; display:flex; align-items:center; gap:.6rem; }
@@ -258,8 +275,7 @@ if page == "Decision Room":
     provider_issue = provider_issue_message(PROVIDER_STATUS)
     if provider_issue:
         st.warning(provider_issue)
-    c1, c2 = st.columns([.62, 1.38])
-    position = c1.segmented_control("Position", ["QB", "RB", "WR", "TE"], default="WR")
+    position = st.segmented_control("Position", ["QB", "RB", "WR", "TE"], default="WR")
     pool = BOARD.loc[
         BOARD["position"].eq(position)
         & BOARD["next_opponent"].notna()
@@ -274,75 +290,97 @@ if page == "Decision Room":
         if not excluded_qbs.empty:
             st.caption(f"{len(excluded_qbs)} QB(s) hidden because the live depth chart does not verify them as QB1.")
     if pool.empty:
-        c2.warning(empty_player_pool_message(position, len(excluded_qbs)))
+        st.warning(empty_player_pool_message(position, len(excluded_qbs)))
         names = []
     else:
         selection_key = f"smart_search_selected_{position}"
+        replacement_key = f"smart_search_replace_{position}"
         valid_names = set(pool["player"].tolist())
         if selection_key not in st.session_state:
             st.session_state[selection_key] = pool.sort_values("projected_ppr", ascending=False).head(3)["player"].tolist()
         st.session_state[selection_key] = [name for name in st.session_state[selection_key] if name in valid_names][:3]
+        if replacement_key not in st.session_state:
+            st.session_state[replacement_key] = None
         names = list(st.session_state[selection_key])
-        with c2:
-            query = st.text_input(
-                "Find players",
-                key=f"smart_search_query_{position}",
-                placeholder="Search by player or team…",
-            )
-            st.markdown(f'<div class="finder-copy">{len(names)} of 3 selected · results include roster photos, team, opponent, availability and projection</div>', unsafe_allow_html=True)
+        replacement_index = st.session_state[replacement_key]
+        if replacement_index is not None and (replacement_index < 0 or replacement_index >= len(names)):
+            replacement_index = None
+            st.session_state[replacement_key] = None
 
-        if names:
-            st.markdown('<div class="section-copy">Selected players</div>', unsafe_allow_html=True)
-            selected_columns = st.columns(3)
-            for selected_column, name in zip(selected_columns, names):
-                selected_row = pool.loc[pool["player"].eq(name)].iloc[0]
-                with selected_column:
-                    with st.container(border=True):
-                        photo_column, info_column = st.columns([.34, .66])
-                        photo_url = selected_row.get("headshot_url")
-                        if photo_url is not None and pd.notna(photo_url):
-                            photo_column.image(str(photo_url), width=72)
-                        logo_url = team_logo_url(selected_row.get("team"))
-                        with info_column:
-                            st.markdown(f'<div class="selected-player-name">{html.escape(str(selected_row["player"]))}</div>', unsafe_allow_html=True)
-                            logo_column, team_column = st.columns([.2, .8], vertical_alignment="center")
-                            if logo_url:
-                                logo_column.image(logo_url, width=24)
-                            team_column.markdown(f'<div class="selected-player-meta">{html.escape(str(selected_row["team"]))} · {html.escape(str(selected_row["venue"]))} vs {html.escape(str(selected_row["next_opponent"]))}</div>', unsafe_allow_html=True)
-                            st.markdown(f'<div class="selected-player-meta">{float(selected_row["median_ppr"]):.1f} projected PPR</div>', unsafe_allow_html=True)
-                        if st.button("Remove", key=f"remove_{position}_{selected_row['player_id']}", width="stretch"):
-                            st.session_state[selection_key] = [value for value in names if value != name]
-                            st.rerun()
-
-        results = filter_player_search(pool.loc[~pool["player"].isin(names)], query)
-        st.markdown('<div class="section-copy">Search results</div>', unsafe_allow_html=True)
-        if results.empty:
-            st.info("No eligible players match that search. Try a full name or team abbreviation.")
-        else:
-            for _, result_row in results.iterrows():
+        st.markdown(f'<div class="section-copy">Comparison lineup · {len(names)} of 3 slots filled</div>', unsafe_allow_html=True)
+        slot_columns = st.columns(3)
+        for slot_index, slot_column in enumerate(slot_columns):
+            with slot_column:
                 with st.container(border=True):
-                    photo_column, details_column, logo_column, action_column = st.columns([.10, .56, .10, .24], vertical_alignment="center")
-                    photo_url = result_row.get("headshot_url")
-                    if photo_url is not None and pd.notna(photo_url):
-                        photo_column.image(str(photo_url), width=52)
-                    availability = selection_availability_summary(result_row)
-                    details_column.markdown(
-                        f'<b>{html.escape(str(result_row["player"]))}</b><br>'
-                        f'{html.escape(str(result_row["team"]))} · {html.escape(str(result_row["position"]))} · {html.escape(str(result_row["venue"]))} vs {html.escape(str(result_row["next_opponent"]))}<br>'
-                        f'<span class="selected-player-meta">{html.escape(availability)}</span>',
-                        unsafe_allow_html=True,
-                    )
-                    logo_url = team_logo_url(result_row.get("team"))
-                    if logo_url:
-                        logo_column.image(logo_url, width=34)
-                    if action_column.button(
-                        f"Add · {float(result_row['median_ppr']):.1f}",
-                        key=f"add_{position}_{result_row['player_id']}",
-                        disabled=len(names) >= 3,
-                        width="stretch",
-                    ):
-                        st.session_state[selection_key] = [*names, str(result_row["player"])]
-                        st.rerun()
+                    if slot_index < len(names):
+                        selected_row = pool.loc[pool["player"].eq(names[slot_index])].iloc[0]
+                        availability = selection_availability_summary(selected_row)
+                        availability_class = "availability-alert" if any(term in availability.casefold() for term in ("questionable", "doubtful", "out", "inactive", "ir", "did not practice")) else "availability-ok"
+                        photo = player_photo_html(selected_row.get("headshot_url"), selected_row["player"])
+                        logo_url = team_logo_url(selected_row.get("team"))
+                        logo = f'<img src="{html.escape(logo_url, quote=True)}" alt="{html.escape(str(selected_row["team"]), quote=True)} logo">' if logo_url else ""
+                        kickoff = " · ".join(str(value) for value in (selected_row.get("weekday"), selected_row.get("gametime")) if value is not None and pd.notna(value))
+                        st.markdown(
+                            f'<div class="compare-slot-kicker">Player {slot_index + 1}</div>'
+                            f'<div class="compare-slot-top">{photo}<div class="compare-slot-main"><div class="compare-slot-name">{html.escape(str(selected_row["player"]))}</div>'
+                            f'<div class="compare-slot-team">{logo}<span>{html.escape(str(selected_row["team"]))} · {html.escape(str(selected_row["position"]))}</span></div></div></div>'
+                            f'<div class="compare-slot-game">{html.escape(str(selected_row["venue"]))} vs {html.escape(str(selected_row["next_opponent"]))}{" · " + html.escape(kickoff) if kickoff else ""}</div>'
+                            f'<div class="compare-slot-footer"><span class="compare-slot-projection">{float(selected_row["median_ppr"]):.1f} projected PPR</span><span class="availability-pill {availability_class}">{html.escape(availability)}</span></div>',
+                            unsafe_allow_html=True,
+                        )
+                        remove_column, replace_column = st.columns(2)
+                        if remove_column.button("Remove", key=f"remove_{position}_{selected_row['player_id']}", width="stretch"):
+                            st.session_state[selection_key] = [value for value in names if value != names[slot_index]]
+                            st.session_state[replacement_key] = None
+                            st.rerun()
+                        replace_label = "Replacing…" if replacement_index == slot_index else "Replace"
+                        if replace_column.button(replace_label, key=f"replace_{position}_{selected_row['player_id']}", width="stretch"):
+                            st.session_state[replacement_key] = None if replacement_index == slot_index else slot_index
+                            st.rerun()
+                    else:
+                        st.markdown(
+                            f'<div class="open-slot"><div class="open-slot-number">Player {slot_index + 1}</div><div class="open-slot-title">Open comparison slot</div><div class="open-slot-copy">Choose a player from the search panel below.</div></div>',
+                            unsafe_allow_html=True,
+                        )
+
+        panel_label = "Replace a player" if replacement_index is not None else "Find a player"
+        with st.expander(panel_label, expanded=len(names) < 3 or replacement_index is not None):
+            if len(names) >= 3 and replacement_index is None:
+                st.markdown('<div class="replacement-note">All three comparison slots are filled. Select <b>Replace</b> on any player card to swap someone in without removing them first.</div>', unsafe_allow_html=True)
+            else:
+                if replacement_index is not None:
+                    st.markdown(f'<div class="replacement-note">Replacing <b>{html.escape(names[replacement_index])}</b>. Choose a player below to complete the swap.</div>', unsafe_allow_html=True)
+                query = st.text_input("Search eligible players", key=f"smart_search_query_{position}", placeholder="Search by player or team…")
+                results = filter_player_search(pool.loc[~pool["player"].isin(names)], query)
+                if results.empty:
+                    st.info("No eligible players match that search. Try a full name or team abbreviation.")
+                else:
+                    for _, result_row in results.iterrows():
+                        with st.container(border=True):
+                            photo_column, details_column, logo_column, action_column = st.columns([.10, .56, .10, .24], vertical_alignment="center")
+                            photo_url = result_row.get("headshot_url")
+                            if photo_url is not None and pd.notna(photo_url):
+                                photo_column.image(str(photo_url), width=52)
+                            availability = selection_availability_summary(result_row)
+                            availability_prefix = "⚠ " if any(term in availability.casefold() for term in ("questionable", "doubtful", "out", "inactive", "ir", "did not practice")) else ""
+                            details_column.markdown(
+                                f'<b>{html.escape(str(result_row["player"]))}</b><br>'
+                                f'{html.escape(str(result_row["team"]))} · {html.escape(str(result_row["position"]))} · {html.escape(str(result_row["venue"]))} vs {html.escape(str(result_row["next_opponent"]))}<br>'
+                                f'<span class="selected-player-meta">{availability_prefix}{html.escape(availability)}</span>', unsafe_allow_html=True,
+                            )
+                            logo_url = team_logo_url(result_row.get("team"))
+                            if logo_url:
+                                logo_column.image(logo_url, width=34)
+                            action_label = f"Replace · {float(result_row['median_ppr']):.1f}" if replacement_index is not None else f"Add · {float(result_row['median_ppr']):.1f}"
+                            if action_column.button(action_label, key=f"choose_{position}_{result_row['player_id']}_{replacement_index}", width="stretch"):
+                                if replacement_index is None:
+                                    st.session_state[selection_key] = [*names, str(result_row["player"])]
+                                else:
+                                    updated_names = list(names)
+                                    updated_names[replacement_index] = str(result_row["player"])
+                                    st.session_state[selection_key] = updated_names
+                                    st.session_state[replacement_key] = None
+                                st.rerun()
     compare = pool.loc[pool["player"].isin(names)].sort_values("projected_ppr", ascending=False)
 
     if compare.empty:
