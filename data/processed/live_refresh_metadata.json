@@ -2,7 +2,7 @@
   "season": 2026,
   "completed_week": 4,
   "next_week": 5,
-  "refreshed_at": "2026-10-07T18:10:49.541918+00:00",
+  "refreshed_at": "2026-10-07T18:14:47.843017+00:00",
   "eligible_players": 203,
   "player_pool_audit": {
     "eligible_players": 203,
@@ -24,6 +24,9 @@
     "nflverse": "Connected \u00b7 19 Week 5 records",
     "sleeper": "Connected \u00b7 271 designated players"
   },
+  "injury_refreshed_at": "2026-10-07T18:14:45.054575+00:00",
+  "sportsdataio_status": "Connected \u00b7 2026-10-07 18:14 UTC",
+  "sportsdataio_refreshed_at": "2026-10-07T18:14:46.057544+00:00",
   "depth_chart_players": 1860,
   "snap_coverage": 0.9261083743842364,
   "weather_coverage": 0.9359605911330049,

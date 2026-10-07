@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import html
-import os
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -12,24 +11,20 @@ import plotly.graph_objects as go
 import streamlit as st
 
 try:
-    from dashboard.providers.sportsdataio import SportsDataIOClient, context_freshness, enrich_board, format_injury_context
-    from dashboard.providers.injuries import enrich_injuries, load_daily_injury_context, load_persisted_injury_context
-    from dashboard.snapshots import load_personnel_snapshot
+    from dashboard.providers.sportsdataio import context_freshness, format_injury_context
     from dashboard.outlooks import build_player_outlook
     from dashboard.states import empty_player_pool_message, provider_issue_message
     from dashboard.methodology_copy import DISCLAIMER_LANGUAGE, METHODOLOGY_LANGUAGE, SOURCE_ATTRIBUTION
 except ModuleNotFoundError:
-    from providers.sportsdataio import SportsDataIOClient, context_freshness, enrich_board, format_injury_context
-    from providers.injuries import enrich_injuries, load_daily_injury_context, load_persisted_injury_context
-    from snapshots import load_personnel_snapshot
+    from providers.sportsdataio import context_freshness, format_injury_context
     from outlooks import build_player_outlook
     from states import empty_player_pool_message, provider_issue_message
     from methodology_copy import DISCLAIMER_LANGUAGE, METHODOLOGY_LANGUAGE, SOURCE_ATTRIBUTION
 
 try:
-    from dashboard.data import add_live_supplementary_context, apply_approved_projection_model, apply_player_pool_guardrails, apply_verified_starter_gate, build_start_sit_board, current_nfl_season, load_live_context_data, load_live_weekly_data, load_prior_weekly_data
+    from dashboard.data import current_nfl_season
 except ModuleNotFoundError:
-    from data import add_live_supplementary_context, apply_approved_projection_model, apply_player_pool_guardrails, apply_verified_starter_gate, build_start_sit_board, current_nfl_season, load_live_context_data, load_live_weekly_data, load_prior_weekly_data
+    from data import current_nfl_season
 
 
 COLORS = {"QB": "#00529b", "RB": "#69be28", "WR": "#4b788f", "TE": "#a5acaf"}
@@ -103,45 +98,28 @@ div[data-testid="stMetric"] { background:var(--card); border:1px solid var(--lin
 )
 
 
-def provider_key() -> str:
-    key = os.getenv("SPORTSDATAIO_API_KEY", "").strip()
-    if key:
-        return key
-    try:
-        return str(st.secrets.get("SPORTSDATAIO_API_KEY", "")).strip()
-    except (FileNotFoundError, KeyError):
-        return ""
-
-
-@st.cache_data(ttl=86400, show_spinner=False)
-def get_daily_injuries(season: int, week: int):
-    return load_persisted_injury_context(PROJECT_ROOT, season, week) or load_daily_injury_context(season, week)
-
-
 @st.cache_data(ttl=3600, show_spinner=False)
-def get_live_board(season: int, sportsdataio_key: str = "") -> tuple[pd.DataFrame, pd.DataFrame, int, str, str, str | None, str]:
-    weekly, schedules = load_live_weekly_data(season)
-    board, next_week = build_start_sit_board(weekly, schedules, season)
-    snaps, team_stats = load_live_context_data(season)
-    board = add_live_supplementary_context(board, snaps, team_stats)
-    injury_context = get_daily_injuries(season, next_week)
-    board = enrich_injuries(board, injury_context)
-    provider_status = "Not connected"
-    provider_refreshed_at = None
-    if sportsdataio_key:
-        try:
-            context = SportsDataIOClient(sportsdataio_key).weekly_context(season, next_week)
-            board = enrich_board(board, context)
-            _, team_context = load_personnel_snapshot(PROJECT_ROOT)
-            if not team_context.empty:
-                board = board.merge(team_context, on="team", how="left")
-            provider_status = f"Connected · {context.refreshed_at[:16].replace('T', ' ')} UTC"
-            provider_refreshed_at = context.refreshed_at
-        except Exception as error:
-            provider_status = f"Connection error · {type(error).__name__}"
-    refreshed = datetime.now(timezone.utc).strftime("%b %d, %Y · %H:%M UTC")
-    injury_status = f"NFLVERSE · {injury_context.nflverse_status} | SLEEPER · {injury_context.sleeper_status}"
-    return board, weekly, next_week, refreshed, provider_status, provider_refreshed_at, injury_status
+def get_published_snapshot(season: int, passing_td_points: int) -> tuple[pd.DataFrame, pd.DataFrame, int, str, str, str | None, str]:
+    import json
+
+    processed = PROJECT_ROOT / "data" / "processed"
+    metadata_path = processed / "live_refresh_metadata.json"
+    board_path = processed / f"live_start_sit_board_{passing_td_points}pt_current.parquet"
+    weekly_path = processed / "live_weekly_current.parquet"
+    if not metadata_path.exists() or not board_path.exists() or not weekly_path.exists():
+        raise FileNotFoundError("A validated production snapshot has not been published.")
+    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    if int(metadata.get("season", -1)) != season or passing_td_points not in metadata.get("refreshed_qb_passing_td_formats", []):
+        raise ValueError("The published snapshot does not match this season or scoring format.")
+    board = pd.read_parquet(board_path)
+    weekly = pd.read_parquet(weekly_path)
+    provider_status = str(metadata.get("sportsdataio_status", "Snapshot unavailable"))
+    provider_refreshed_at = metadata.get("sportsdataio_refreshed_at")
+    injury_sources = metadata.get("injury_source_status", {})
+    injury_status = f"NFLVERSE · {injury_sources.get('nflverse', 'Unavailable')} | SLEEPER · {injury_sources.get('sleeper', 'Unavailable')}"
+    checked_at = metadata.get("refreshed_at", datetime.now(timezone.utc).isoformat())
+    refreshed = datetime.fromisoformat(str(checked_at).replace("Z", "+00:00")).strftime("%b %d, %Y · %H:%M UTC")
+    return board, weekly, int(metadata["next_week"]), refreshed, provider_status, provider_refreshed_at, injury_status
 
 
 def polish(fig: go.Figure, height: int = 390) -> go.Figure:
@@ -165,33 +143,28 @@ with st.sidebar:
     st.caption("Live, explainable matchup analysis")
     page = st.radio("View", ["Decision Room", "Player Trends", "How It Works"], label_visibility="collapsed")
     st.divider()
-    season = st.selectbox("Season", [SEASON, SEASON - 1], index=0)
+    season = st.selectbox("Season", [SEASON], index=0)
     st.markdown("**SCORING**")
     qb_td_label = st.radio("QB passing TD", ["4 points", "6 points"], horizontal=True)
     QB_PASS_TD_POINTS = int(qb_td_label.split()[0])
     st.caption(f"Full PPR · {QB_PASS_TD_POINTS}-pt passing TD")
     st.divider()
     st.markdown("**LIVE DATA**")
-    st.caption("Weekly player results and schedule are pulled from nflverse and cached for one hour.")
-    st.caption("nflverse supplies daily injury/practice reports; Sleeper is a daily fallback. SportsDataIO supplies weather, totals, and depth charts.")
+    st.caption("Validated cloud snapshots supply every public view; visitors never call upstream providers.")
+    st.caption("The cloud scheduler refreshes weekly projections and daily injury/practice context.")
     if st.button("Refresh now", width="stretch"):
         st.cache_data.clear()
         st.rerun()
 
 try:
     with st.spinner("Updating weekly stats and matchups…"):
-        BOARD, WEEKLY, NEXT_WEEK, REFRESHED, PROVIDER_STATUS, PROVIDER_REFRESHED_AT, INJURY_SOURCE_STATUS = get_live_board(season, provider_key())
+        BOARD, WEEKLY, NEXT_WEEK, REFRESHED, PROVIDER_STATUS, PROVIDER_REFRESHED_AT, INJURY_SOURCE_STATUS = get_published_snapshot(season, QB_PASS_TD_POINTS)
 except Exception as error:
     st.error("The weekly player dataset could not be loaded, so projections are temporarily unavailable.")
     st.info("Check your connection, then use **Refresh now**. The app will not show cached estimates as if they were current.")
     with st.expander("Technical details"):
         st.code(f"{type(error).__name__}: {error}")
     st.stop()
-
-PRIOR_WEEKLY = load_prior_weekly_data(season)
-BOARD = apply_approved_projection_model(BOARD, WEEKLY, PRIOR_WEEKLY, NEXT_WEEK, QB_PASS_TD_POINTS)
-BOARD = apply_verified_starter_gate(BOARD)
-BOARD = apply_player_pool_guardrails(BOARD)
 
 with st.sidebar:
     st.caption(f"SPORTSDATAIO · {PROVIDER_STATUS}")

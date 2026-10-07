@@ -105,6 +105,7 @@ def main() -> None:
     player_context, team_context = build_personnel_context(context.depth_charts, previous)
     PROCESSED.mkdir(parents=True, exist_ok=True)
     atomic_parquet(board, PROCESSED / "live_start_sit_board_current.parquet")
+    atomic_parquet(weekly, PROCESSED / "live_weekly_current.parquet")
     for passing_td_points, scoring_board in scoring_boards.items():
         atomic_parquet(
             scoring_board,
@@ -133,6 +134,9 @@ def main() -> None:
             "nflverse": injury_context.nflverse_status,
             "sleeper": injury_context.sleeper_status,
         },
+        "injury_refreshed_at": injury_context.checked_at,
+        "sportsdataio_status": f"Connected · {context.refreshed_at[:16].replace('T', ' ')} UTC",
+        "sportsdataio_refreshed_at": context.refreshed_at,
         "depth_chart_players": int(len(context.depth_charts)),
         "snap_coverage": float(eligible["latest_snap_pct"].notna().mean()),
         "weather_coverage": float(eligible["weather_summary_live"].notna().mean()),

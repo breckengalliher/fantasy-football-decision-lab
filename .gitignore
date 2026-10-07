@@ -16,6 +16,7 @@ data/processed/*
 !data/processed/live_start_sit_board_4pt_current.parquet
 !data/processed/live_start_sit_board_6pt_current.parquet
 !data/processed/live_start_sit_board_current.parquet
+!data/processed/live_weekly_current.parquet
 !data/processed/personnel_players_current.parquet
 !data/processed/personnel_teams_current.parquet
 !data/processed/sportsdataio_depth_current.parquet

@@ -6,12 +6,14 @@ import json
 import sys
 from pathlib import Path
 
+import pandas as pd
+
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from dashboard.data import build_start_sit_board, current_nfl_season, load_live_weekly_data
-from dashboard.providers.injuries import load_daily_injury_context
+from dashboard.providers.injuries import enrich_injuries, load_daily_injury_context
 
 
 def main() -> None:
@@ -39,6 +41,37 @@ def main() -> None:
     temporary_metadata = metadata_path.with_suffix(".json.tmp")
     temporary_metadata.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
     temporary_metadata.replace(metadata_path)
+    injury_columns = [
+        "injury_record_live", "injury_status_live", "practice_status_live",
+        "injury_body_part_live", "injury_note_live", "injury_updated_live",
+        "injury_source_live", "injury_conflict_live", "injury_checked_at",
+    ]
+    for filename in (
+        "live_start_sit_board_current.parquet",
+        "live_start_sit_board_4pt_current.parquet",
+        "live_start_sit_board_6pt_current.parquet",
+    ):
+        path = processed / filename
+        if not path.exists():
+            raise FileNotFoundError(f"Published weekly snapshot is missing: {filename}")
+        board = pd.read_parquet(path).drop(columns=injury_columns, errors="ignore")
+        refreshed_board = enrich_injuries(board, context)
+        temporary = path.with_suffix(".parquet.tmp")
+        refreshed_board.to_parquet(temporary, index=False)
+        temporary.replace(path)
+    weekly_metadata_path = processed / "live_refresh_metadata.json"
+    if not weekly_metadata_path.exists():
+        raise FileNotFoundError("Published weekly refresh metadata is missing.")
+    weekly_metadata = json.loads(weekly_metadata_path.read_text(encoding="utf-8"))
+    weekly_metadata["injury_records"] = int(len(context.records))
+    weekly_metadata["injury_source_status"] = {
+        "nflverse": context.nflverse_status,
+        "sleeper": context.sleeper_status,
+    }
+    weekly_metadata["injury_refreshed_at"] = context.checked_at
+    temporary_weekly_metadata = weekly_metadata_path.with_suffix(".json.tmp")
+    temporary_weekly_metadata.write_text(json.dumps(weekly_metadata, indent=2), encoding="utf-8")
+    temporary_weekly_metadata.replace(weekly_metadata_path)
     print(json.dumps(metadata))
 
 
