@@ -30,7 +30,7 @@ COLORS = {"QB": "#00529b", "RB": "#69be28", "WR": "#4b788f", "TE": "#a5acaf"}
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SEASON = current_nfl_season()
 
-st.set_page_config(page_title="Start / Sit Lab", page_icon="🏈", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="Start / Sit Lab", page_icon="🏈", layout="wide", initial_sidebar_state="auto")
 st.markdown(
     """
 <style>
@@ -70,7 +70,22 @@ h1,h2,h3 { letter-spacing:-.025em; }
 .warning { border-left:4px solid var(--gold); background:#eef5e9; color:#29451f; padding:.72rem .9rem; border-radius:8px; font-size:.84rem; margin:.85rem 0; }
 div[data-testid="stMetric"] { background:var(--card); border:1px solid var(--line); padding:.8rem 1rem; border-radius:12px; }
 .stPlotlyChart { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:.2rem; }
-@media(max-width:800px) { .hero{display:block}.fresh{text-align:left;margin-top:.7rem}.hero h1{font-size:2.05rem} }
+@media(max-width:1100px) {
+  div[data-testid="stHorizontalBlock"]:has(div[data-testid="stMetric"]) { flex-wrap:wrap; }
+  div[data-testid="stHorizontalBlock"]:has(div[data-testid="stMetric"]) > div { flex:1 1 calc(50% - .6rem); min-width:240px; }
+}
+@media(max-width:800px) {
+  .block-container { padding:1rem .85rem 2rem; }
+  .hero{display:block}.fresh{text-align:left;margin-top:.7rem}.hero h1{font-size:2.05rem}
+  .verdict { min-height:0; padding:1rem; }
+  .verdict .name { font-size:1.45rem; }
+  .range-tooltip { left:0; transform:none; width:min(250px, 75vw); }
+  [data-testid="stSidebar"] { width:min(18.75rem, 88vw) !important; }
+}
+@media(max-width:520px) {
+  div[data-testid="stHorizontalBlock"]:has(div[data-testid="stMetric"]) > div { flex-basis:100%; min-width:0; }
+  div[data-baseweb="select"] > div { flex-wrap:wrap; }
+}
 </style>
 """,
     unsafe_allow_html=True,
