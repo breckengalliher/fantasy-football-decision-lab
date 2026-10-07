@@ -4,9 +4,17 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
+JOURNALISM_AFFECTS_PROJECTION = False
 
-def build_player_outlook(row: Mapping, rank: int, total: int, spread: float) -> str:
-    """Turn core model inputs into conversational, non-supplementary commentary."""
+
+def build_player_outlook(
+    row: Mapping,
+    rank: int,
+    total: int,
+    spread: float,
+    reporting_summary: str | None = None,
+) -> str:
+    """Explain the frozen model result, optionally adding narrative-only reporting."""
     name = str(row["player"])
     first_name = name.split()[0]
     season = float(row["season_ppr"])
@@ -38,4 +46,7 @@ def build_player_outlook(row: Mapping, rank: int, total: int, spread: float) -> 
         "favorable": f"The matchup with {opponent} gives him a small bump, but that adjustment is intentionally capped.",
         "tough": f"The matchup with {opponent} trims the estimate slightly, not enough to erase his established production.",
     }.get(matchup, f"The matchup with {opponent} is treated as neutral and does not move the projection much.")
-    return " ".join([opening, form, matchup_text])
+    model_outlook = " ".join([opening, form, matchup_text])
+    if reporting_summary and reporting_summary.strip():
+        return f"{model_outlook} Around the team: {reporting_summary.strip()}"
+    return model_outlook

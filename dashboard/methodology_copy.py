@@ -21,6 +21,8 @@ The app ranks only the players selected in the same comparison. “Start” mean
 - **Ranges:** Floor, projection and ceiling are calibrated P10, median and P90 outcomes. They describe model uncertainty, not minimums or maximums; roughly 10% of outcomes may fall below the floor and 10% above the ceiling if calibration continues to hold.
 
 Injuries and practice participation, snap/route participation, weather, expected pace and scoring environment, betting totals, offensive-line or quarterback changes, schedule-adjusted opponent strength, and the displayed outcome range are **Decision Context only**. They are shown to help the user make the final call but do not alter the Start/Sit ranking.
+
+Journalism and verified reporter commentary are also **narrative only**. They may be summarized in the Player Outlook to explain role expectations or uncertainty, but they never change the projection, outcome range, player ranking, or Start/Sit label.
 """
 
 DISCLAIMER_LANGUAGE = """

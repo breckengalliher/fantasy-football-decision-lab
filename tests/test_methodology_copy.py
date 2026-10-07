@@ -13,6 +13,8 @@ def test_methodology_preserves_context_separation_and_relative_verdict():
     assert "Decision Context only" in METHODOLOGY_LANGUAGE
     assert "do not alter the Start/Sit ranking" in METHODOLOGY_LANGUAGE
     assert "P10, median and P90" in METHODOLOGY_LANGUAGE
+    assert "narrative only" in METHODOLOGY_LANGUAGE
+    assert "never change the projection" in METHODOLOGY_LANGUAGE
 
 
 def test_disclaimer_covers_freshness_and_final_responsibility():
