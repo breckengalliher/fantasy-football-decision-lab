@@ -12,11 +12,11 @@ import plotly.graph_objects as go
 import streamlit as st
 
 try:
-    from dashboard.providers.sportsdataio import SportsDataIOClient, context_freshness, enrich_board
+    from dashboard.providers.sportsdataio import SportsDataIOClient, context_freshness, enrich_board, format_injury_context
     from dashboard.snapshots import load_personnel_snapshot
     from dashboard.outlooks import build_player_outlook
 except ModuleNotFoundError:
-    from providers.sportsdataio import SportsDataIOClient, context_freshness, enrich_board
+    from providers.sportsdataio import SportsDataIOClient, context_freshness, enrich_board, format_injury_context
     from snapshots import load_personnel_snapshot
     from outlooks import build_player_outlook
 
@@ -284,15 +284,7 @@ if page == "Decision Room":
             item = {"Factor": factor}
             for _, row in compare.iterrows():
                 if factor == "Injury / practice":
-                    values = [row.get("injury_status_live"), row.get("practice_status_live"), row.get("injury_body_part_live")]
-                    values = [str(value) for value in values if value is not None and pd.notna(value)]
-                    if values:
-                        value = " · ".join(values)
-                    elif pd.notna(row.get("injury_record_live")) and bool(row.get("injury_record_live")):
-                        value = "Provider record present · status unavailable"
-                    else:
-                        value = "No provider record" if PROVIDER_STATUS.startswith("Connected") else "Source not connected"
-                    if values and pd.notna(row.get("injury_updated_live")): value += f" · updated {row.get('injury_updated_live')}"
+                    value = format_injury_context(row, PROVIDER_STATUS.startswith("Connected"))
                 elif factor == "Betting total":
                     provider_total = row.get("betting_total_live")
                     value = f"{float(provider_total):.1f}" if provider_total is not None and pd.notna(provider_total) else f"{row['total_line']:.1f}" if "total_line" in row and pd.notna(row["total_line"]) else "Source not connected"

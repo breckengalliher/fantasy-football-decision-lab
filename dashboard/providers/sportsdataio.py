@@ -60,6 +60,41 @@ def _usable(value: Any) -> Any:
     return value
 
 
+def canonical_injury_status(value: Any) -> Any:
+    """Normalize provider variants to the five user-facing availability labels."""
+    value = _usable(value)
+    if pd.isna(value):
+        return pd.NA
+    raw = str(value).strip()
+    key = raw.casefold().replace("_", " ").replace("-", " ")
+    aliases = {
+        "q": "Questionable", "questionable": "Questionable",
+        "d": "Doubtful", "doubtful": "Doubtful",
+        "o": "Out", "out": "Out",
+        "ir": "IR", "injured reserve": "IR", "reserve/injured": "IR", "reserve injured": "IR",
+        "inactive": "Inactive", "inactives": "Inactive",
+        "pup": "PUP", "physically unable to perform": "PUP",
+    }
+    return aliases.get(key, raw)
+
+
+def format_injury_context(row: Any, provider_connected: bool = True) -> str:
+    """Render injury context in a stable status/practice/body-part order."""
+    status = canonical_injury_status(row.get("injury_status_live"))
+    values = [status, _usable(row.get("practice_status_live")), _usable(row.get("injury_body_part_live"))]
+    values = [str(value) for value in values if pd.notna(value)]
+    if values:
+        text = " · ".join(values)
+        updated = _usable(row.get("injury_updated_live"))
+        if pd.notna(updated):
+            text += f" · updated {updated}"
+        return text
+    record = row.get("injury_record_live")
+    if pd.notna(record) and bool(record):
+        return "Provider record present · status unavailable"
+    return "No provider record" if provider_connected else "Source not connected"
+
+
 class SportsDataIOClient:
     def __init__(self, api_key: str, timeout: int = 20) -> None:
         if not api_key.strip():
@@ -107,7 +142,7 @@ def normalize_injuries(payload: Iterable[dict[str, Any]]) -> pd.DataFrame:
                 "player_key": _key(name),
                 "team": str(team),
                 "injury_record_live": True,
-                "injury_status_live": _usable(_first(item, "Status", "InjuryStatus")),
+                "injury_status_live": canonical_injury_status(_first(item, "Status", "InjuryStatus")),
                 "practice_status_live": _usable(_first(item, "Practice", "PracticeStatus")),
                 "injury_body_part_live": _usable(_first(item, "BodyPart", "InjuredBodyPart")),
                 "injury_note_live": _usable(_first(item, "Notes", "Note")),
