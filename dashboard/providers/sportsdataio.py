@@ -11,6 +11,7 @@ import requests
 
 
 BASE_URL = "https://api.sportsdata.io/v3/nfl"
+CONTEXT_STALE_AFTER_MINUTES = 90
 
 
 @dataclass(frozen=True)
@@ -19,6 +20,25 @@ class SportsDataIOContext:
     games: pd.DataFrame
     depth_charts: pd.DataFrame
     refreshed_at: str
+
+
+def context_freshness(
+    refreshed_at: str | None,
+    now: datetime | None = None,
+    stale_after_minutes: int = CONTEXT_STALE_AFTER_MINUTES,
+) -> tuple[int | None, bool]:
+    """Return whole-minute age and whether live decision context is stale."""
+    if not refreshed_at:
+        return None, True
+    try:
+        checked = datetime.fromisoformat(str(refreshed_at).replace("Z", "+00:00"))
+    except ValueError:
+        return None, True
+    if checked.tzinfo is None:
+        checked = checked.replace(tzinfo=timezone.utc)
+    current = now or datetime.now(timezone.utc)
+    age_minutes = max(0, int((current - checked.astimezone(timezone.utc)).total_seconds() // 60))
+    return age_minutes, age_minutes > stale_after_minutes
 
 
 def _first(record: dict[str, Any], *names: str) -> Any:

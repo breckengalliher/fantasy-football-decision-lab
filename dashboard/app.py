@@ -12,11 +12,11 @@ import plotly.graph_objects as go
 import streamlit as st
 
 try:
-    from dashboard.providers.sportsdataio import SportsDataIOClient, enrich_board
+    from dashboard.providers.sportsdataio import SportsDataIOClient, context_freshness, enrich_board
     from dashboard.snapshots import load_personnel_snapshot
     from dashboard.outlooks import build_player_outlook
 except ModuleNotFoundError:
-    from providers.sportsdataio import SportsDataIOClient, enrich_board
+    from providers.sportsdataio import SportsDataIOClient, context_freshness, enrich_board
     from snapshots import load_personnel_snapshot
     from outlooks import build_player_outlook
 
@@ -88,12 +88,13 @@ def provider_key() -> str:
 
 
 @st.cache_data(ttl=3600, show_spinner=False)
-def get_live_board(season: int, sportsdataio_key: str = "") -> tuple[pd.DataFrame, pd.DataFrame, int, str, str]:
+def get_live_board(season: int, sportsdataio_key: str = "") -> tuple[pd.DataFrame, pd.DataFrame, int, str, str, str | None]:
     weekly, schedules = load_live_weekly_data(season)
     board, next_week = build_start_sit_board(weekly, schedules, season)
     snaps, team_stats = load_live_context_data(season)
     board = add_live_supplementary_context(board, snaps, team_stats)
     provider_status = "Not connected"
+    provider_refreshed_at = None
     if sportsdataio_key:
         try:
             context = SportsDataIOClient(sportsdataio_key).weekly_context(season, next_week)
@@ -102,10 +103,11 @@ def get_live_board(season: int, sportsdataio_key: str = "") -> tuple[pd.DataFram
             if not team_context.empty:
                 board = board.merge(team_context, on="team", how="left")
             provider_status = f"Connected · {context.refreshed_at[:16].replace('T', ' ')} UTC"
+            provider_refreshed_at = context.refreshed_at
         except Exception as error:
             provider_status = f"Connection error · {type(error).__name__}"
     refreshed = datetime.now(timezone.utc).strftime("%b %d, %Y · %H:%M UTC")
-    return board, weekly, next_week, refreshed, provider_status
+    return board, weekly, next_week, refreshed, provider_status, provider_refreshed_at
 
 
 def polish(fig: go.Figure, height: int = 390) -> go.Figure:
@@ -144,7 +146,7 @@ with st.sidebar:
 
 try:
     with st.spinner("Updating weekly stats and matchups…"):
-        BOARD, WEEKLY, NEXT_WEEK, REFRESHED, PROVIDER_STATUS = get_live_board(season, provider_key())
+        BOARD, WEEKLY, NEXT_WEEK, REFRESHED, PROVIDER_STATUS, PROVIDER_REFRESHED_AT = get_live_board(season, provider_key())
 except Exception as error:
     st.error("Live stats could not be loaded. Check the network connection and try Refresh now.")
     st.caption(f"Technical detail: {error}")
@@ -166,6 +168,11 @@ st.markdown(
 
 if page == "Decision Room":
     st.markdown('<div class="warning"><b>Before kickoff:</b> live injuries, practice, weather, and depth context are supplementary. Confirm official late-breaking status before locking a lineup.</div>', unsafe_allow_html=True)
+    context_age_minutes, context_is_stale = context_freshness(PROVIDER_REFRESHED_AT)
+    if context_is_stale:
+        st.warning("Live injury and practice context is more than 90 minutes old or unavailable. Use **Refresh now** before setting a lineup.")
+    else:
+        st.caption(f"Live injury and practice context checked {context_age_minutes} minute{'s' if context_age_minutes != 1 else ''} ago.")
     c1, c2 = st.columns([.62, 1.38])
     position = c1.segmented_control("Position", ["QB", "RB", "WR", "TE"], default="WR")
     pool = BOARD.loc[

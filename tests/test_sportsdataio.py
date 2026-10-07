@@ -1,4 +1,13 @@
-from dashboard.providers.sportsdataio import normalize_depth_charts, normalize_games, normalize_injuries
+from datetime import datetime, timezone
+
+from dashboard.providers.sportsdataio import context_freshness, normalize_depth_charts, normalize_games, normalize_injuries
+
+
+def test_context_freshness_flags_old_or_missing_data():
+    now = datetime(2026, 10, 11, 17, 0, tzinfo=timezone.utc)
+    assert context_freshness("2026-10-11T16:00:00+00:00", now) == (60, False)
+    assert context_freshness("2026-10-11T15:29:00+00:00", now) == (91, True)
+    assert context_freshness(None, now) == (None, True)
 
 
 def test_injury_payload_is_normalized_without_guessing_missing_fields():
