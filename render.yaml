@@ -4,6 +4,8 @@ services:
     runtime: docker
     plan: 0.5c-512mb
     branch: main
-    autoDeployTrigger: commit
+    # Data-only commits are read from the validated cloud snapshot URL, so they
+    # no longer need to restart the web service. Deploy application code manually.
+    autoDeployTrigger: off
     healthCheckPath: /_stcore/health
     maxShutdownDelaySeconds: 30

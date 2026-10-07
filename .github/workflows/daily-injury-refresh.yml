@@ -1,15 +1,31 @@
-name: Daily production context refresh
+name: Game-day live context refresh
 
 on:
   schedule:
-    # Two-hour safety net every day. Visitors always read the latest validated
-    # snapshot and never call providers directly.
-    - cron: "15 */2 * * *"
+    # Practice-report windows, Wednesday through Friday.
+    - cron: "0 12,16,19 * * 3-5"
       timezone: "America/Chicago"
-    # Near-live checks during the main NFL windows (Monday, Thursday, Sunday).
-    - cron: "*/30 16-23 * * 1,4"
+    # Thursday night: 4:30–7:30 PM.
+    - cron: "0,30 16-19 * * 4"
       timezone: "America/Chicago"
-    - cron: "*/30 9-23 * * 0"
+    # Sunday early inactives: every 15 minutes from 10:00 AM through noon.
+    - cron: "*/15 10-11 * * 0"
+      timezone: "America/Chicago"
+    - cron: "0 12 * * 0"
+      timezone: "America/Chicago"
+    # Sunday late window and Sunday Night Football.
+    - cron: "30 13 * * 0"
+      timezone: "America/Chicago"
+    - cron: "0,30 14-15 * * 0"
+      timezone: "America/Chicago"
+    - cron: "30 17,18 * * 0"
+      timezone: "America/Chicago"
+    # Monday night: 4:30–7:00 PM.
+    - cron: "30 16 * * 1"
+      timezone: "America/Chicago"
+    - cron: "0,30 17-18 * * 1"
+      timezone: "America/Chicago"
+    - cron: "0 19 * * 1"
       timezone: "America/Chicago"
   workflow_dispatch:
 
@@ -37,8 +53,8 @@ jobs:
       - name: Require protected provider secret
         shell: bash
         run: test -n "$SPORTSDATAIO_API_KEY"
-      - name: Build complete validated production snapshots
-        run: python src/refresh_weekly_snapshot.py
+      - name: Refresh volatile context without recalculating projections
+        run: python src/refresh_live_context.py
       - name: Run source and refresh tests
         run: python -m pytest tests/test_injury_sources.py tests/test_sportsdataio.py tests/test_reporting.py tests/test_headshots.py tests/test_weekly_refresh.py tests/test_player_pool.py -q
       - name: Publish refreshed snapshot
@@ -51,7 +67,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: daily-production-context
+          name: game-day-live-context
           path: |
             data/processed/live_refresh_metadata.json
             data/processed/live_weekly_current.parquet

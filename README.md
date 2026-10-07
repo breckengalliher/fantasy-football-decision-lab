@@ -88,13 +88,17 @@ installed.
 
 ## Production refreshes
 
-GitHub Actions owns the production schedule. `daily-injury-refresh.yml`
-publishes the complete validated context and projection snapshot bundle every
-day at 6:30 PM America/Chicago. `weekly-production-refresh.yml` performs the
-full post-week rebuild and complete test suite every Tuesday at 6:00 AM
-America/Chicago. Both workflows can be
+GitHub Actions owns the production schedule. `general-context-refresh.yml`
+updates injuries, depth charts, weather, game context, reporting and roster
+photos at 6:00 AM and 5:00 PM Central. `daily-injury-refresh.yml` performs
+lightweight injury, availability, weather and depth-chart checks during
+practice-report and game-day windows without recalculating projections.
+`weekly-production-refresh.yml` performs the full post-week projection rebuild
+and complete test suite every Tuesday at 6:00 AM America/Chicago. The workflows can be
 run manually, serialize through one production-refresh concurrency group, retain
-downloadable artifacts, and commit validated snapshots so Streamlit redeploys.
+downloadable artifacts, and publish validated snapshots to the repository's
+raw cloud endpoint. The app checks that endpoint every five minutes, so a
+data-only update does not need to restart the Render service.
 The SportsDataIO key is read only from the protected GitHub Actions repository
 secret named `SPORTSDATAIO_API_KEY`. The public Streamlit process reads only
 these committed snapshots and never calls an upstream provider on behalf of a
@@ -111,7 +115,8 @@ any projection, range, ranking, or Start/Sit label.
 Community Cloud remains the preview deployment. Continuous availability uses
 the paid Render web service defined in `render.yaml`, built from the repository
 `Dockerfile`. Render checks Streamlit's `/_stcore/health` endpoint and
-automatically deploys each validated snapshot commit from `main`.
+is deployed when application code changes; data-only snapshot commits do not
+restart the service.
 
 The web container contains only the public application and committed snapshot
 files. It does not receive `SPORTSDATAIO_API_KEY` and cannot call production

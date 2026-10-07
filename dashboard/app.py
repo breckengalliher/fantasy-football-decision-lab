@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
+import base64
 import html
 import json
+import os
+from io import BytesIO
 from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
 import plotly.graph_objects as go
+import requests
 import streamlit as st
 
 try:
@@ -33,21 +37,27 @@ except ModuleNotFoundError:
 COLORS = {"QB": "#00529b", "RB": "#69be28", "WR": "#4b788f", "TE": "#a5acaf"}
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SEASON = current_nfl_season()
+BRAND_LOGO = PROJECT_ROOT / "dashboard" / "assets" / "sunday-decision-lab-logo.png"
+BRAND_ICON = PROJECT_ROOT / "dashboard" / "assets" / "sunday-decision-lab-icon.png"
+SNAPSHOT_BASE_URL = os.getenv(
+    "SNAPSHOT_BASE_URL",
+    "https://raw.githubusercontent.com/breckengalliher/fantasy-football-decision-lab/main/data/processed",
+).rstrip("/")
 
-st.set_page_config(page_title="The Sunday Decision Lab", page_icon="🏈", layout="wide", initial_sidebar_state="auto")
+st.set_page_config(page_title="The Sunday Decision Lab", page_icon=str(BRAND_ICON), layout="wide", initial_sidebar_state="auto")
 st.markdown(
     """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Bungee&display=swap');
-:root { --ink:#071b2c; --muted:#1b2730; --navy:#002244; --cream:#f3f6f7; --card:#ffffff; --line:#d7dde0; --teal:#397f18; --gold:#69be28; --wolf:#a5acaf; }
-.stApp { background:var(--cream); color:var(--ink); }
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Bungee&family=Inter:wght@400;600;700;800&display=swap');
+:root { --ink:#071b2c; --muted:#1b2730; --navy:#002244; --cream:#f3f6f7; --card:#ffffff; --line:#d7dde0; --teal:#397f18; --gold:#69be28; --action:#69be28; --wolf:#a5acaf; }
+.stApp { background:var(--cream); color:var(--ink); font-family:'Inter',Arial,sans-serif; }
 [data-testid="stMain"] [data-testid="stCaptionContainer"] { color:var(--ink); }
 [data-testid="stSidebar"] { background:var(--navy); }
 [data-testid="stSidebar"] * { color:#f7fafb; }
 [data-testid="stSidebar"] [data-baseweb="select"] * { color:var(--ink) !important; }
 [data-testid="stSidebar"] button[kind="secondary"] * { color:var(--ink) !important; }
 .block-container { max-width:1440px; padding-top:1.55rem; }
-h1,h2,h3 { letter-spacing:-.025em; }
+h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spacing:-.01em; font-weight:800; }
 .hero { display:flex; align-items:flex-end; justify-content:space-between; gap:2rem; padding:0; margin:0; }
 .hero h1 { margin:.12rem 0 .18rem; font-size:2.55rem; line-height:1.02; }
 .graffiti-title { font-family:'Bungee',Impact,sans-serif; color:var(--navy); letter-spacing:.015em !important; text-transform:uppercase; text-shadow:2px 2px 0 rgba(105,190,40,.28); }
@@ -55,11 +65,19 @@ h1,h2,h3 { letter-spacing:-.025em; }
 .hero-subtitle { color:#397f18; font-size:.76rem; font-weight:850; letter-spacing:.13em; text-transform:uppercase; margin-bottom:.32rem; }
 .sidebar-brand { font-family:'Bungee',Impact,sans-serif; color:#f7fafb; font-size:1.18rem; line-height:1.12; letter-spacing:.02em; margin:.15rem 0 .2rem; }
 .sidebar-brand span { color:#9ee468; }
+.sidebar-logo { text-align:center; margin:.1rem 0 .35rem; }
+.sidebar-logo img { width:88px; height:88px; border-radius:22px; object-fit:cover; }
+.header-logo { display:block; width:min(360px,100%); height:auto; margin:0; mix-blend-mode:multiply; }
 .hero p { color:var(--muted); margin:0; max-width:720px; }
 .eyebrow { color:#397f18; text-transform:uppercase; letter-spacing:.13em; font-size:.74rem; font-weight:800; }
 .fresh { color:var(--muted); text-align:right; font-size:.78rem; white-space:nowrap; }
 .app-header { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:1rem 1.15rem; margin-bottom:1rem; }
-.header-status { display:flex; justify-content:flex-end; align-items:center; gap:.38rem; color:var(--muted); font-size:.76rem; margin-top:.35rem; }
+.header-status { display:flex; justify-content:flex-start; align-items:center; gap:.38rem; color:var(--muted); font-size:.72rem; margin-top:.2rem; }
+.header-details { max-width:620px; padding:.25rem 0; }
+.header-details .eyebrow { margin-bottom:.3rem; }
+.header-details .hero-subtitle { font-family:'Barlow Condensed','Arial Narrow',sans-serif; color:var(--navy); font-size:1.42rem; letter-spacing:.035em; margin-bottom:.2rem; }
+.header-details p { color:var(--muted); margin:.15rem 0 .65rem; font-size:.9rem; line-height:1.45; }
+.settings-kicker { color:#397f18; font-size:.64rem; font-weight:850; letter-spacing:.1em; text-transform:uppercase; }
 .status-dot { display:inline-block; width:.48rem; height:.48rem; border-radius:50%; background:var(--gold); }
 .verdict { background:#fbfcfc; color:var(--ink); border:1px solid #dfe4e6; border-radius:16px; padding:1.15rem 1.25rem; min-height:0; }
 .verdict.start { background:var(--navy); color:white; border-color:var(--gold); box-shadow:0 12px 28px rgba(0,34,68,.18); }
@@ -182,19 +200,47 @@ h1,h2,h3 { letter-spacing:-.025em; }
 .advanced-stat-row { display:flex; justify-content:space-between; gap:.6rem; padding:.48rem .7rem; border-top:1px solid #e7eaec; font-size:.68rem; line-height:1.25; }
 .advanced-stat-row span { color:var(--muted); }
 .advanced-stat-row b { color:var(--ink); text-align:right; }
+.detail-card-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.75rem; margin:.2rem 0 .35rem; }
+.detail-card { background:var(--card); border:1px solid var(--line); border-radius:13px; overflow:hidden; min-width:0; }
+.detail-card-head { display:flex; align-items:center; gap:.58rem; padding:.72rem .78rem; background:#eef2f3; border-bottom:3px solid var(--navy); }
+.detail-card-head .player-photo { width:44px; height:44px; flex-basis:44px; border-width:1px; }
+.detail-card-name { color:var(--navy); font-family:'Barlow Condensed','Arial Narrow',sans-serif; font-size:1.02rem; font-weight:800; line-height:1.05; overflow-wrap:anywhere; }
+.detail-card-team { display:flex; align-items:center; gap:.3rem; color:var(--muted); font-size:.64rem; margin-top:.16rem; }
+.detail-card-team img { width:1rem; height:1rem; object-fit:contain; }
+.detail-card-status { margin-left:auto; border-radius:999px; padding:.25rem .42rem; background:#edf4e8; color:#397f18; font-size:.58rem; font-weight:800; text-align:center; line-height:1.15; }
+.detail-card-status.alert { background:#fff0e6; color:#a33a13; }
+.detail-card-body { padding:.35rem .78rem .72rem; }
+.detail-card-row { display:flex; justify-content:space-between; align-items:flex-start; gap:.65rem; padding:.42rem 0; border-bottom:1px solid #e8ecee; font-size:.68rem; line-height:1.3; }
+.detail-card-row:last-child { border-bottom:0; }
+.detail-card-row span { color:var(--muted); font-weight:700; }
+.detail-card-row b { color:var(--ink); text-align:right; font-weight:750; }
+.detail-card-projection { display:grid; grid-template-columns:1fr auto; gap:.5rem; align-items:end; margin-top:.65rem; padding:.62rem .68rem; border-radius:9px; background:var(--navy); }
+.detail-card-projection span { color:#c7d2d8; font-size:.59rem; text-transform:uppercase; letter-spacing:.06em; }
+.detail-card-projection strong { color:#9ee468; font-size:1.35rem; line-height:1; }
+.detail-card-projection small { display:block; color:#f7fafb; font-size:.62rem; margin-top:.15rem; }
 .context-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.85rem; width:100%; }
-.context-card { background:var(--card); border:1px solid var(--line); border-radius:14px; overflow:hidden; min-width:0; }
-.context-card h3 { margin:0; padding:.9rem 1rem; background:#ebe7dc; color:var(--ink); font-size:1.05rem; display:flex; align-items:center; gap:.6rem; }
-.context-card .player-photo { width:42px; height:42px; flex-basis:42px; border-width:1px; }
-.context-row { display:grid; grid-template-columns:minmax(112px,.78fr) minmax(0,1.22fr); gap:.7rem; padding:.67rem 1rem; border-top:1px solid #e5e8e9; align-items:start; }
-.context-label { color:var(--muted); font-size:.72rem; font-weight:800; letter-spacing:.02em; line-height:1.25; }
-.context-value { color:var(--ink); font-size:.82rem; font-weight:600; line-height:1.35; overflow-wrap:anywhere; }
-.context-help { cursor:help; border-bottom:1px dotted currentColor; }
+.context-card { background:var(--card); border:1px solid var(--line); border-radius:14px; overflow:hidden; min-width:0; box-shadow:0 7px 18px rgba(0,34,68,.055); }
+.context-card-head { display:flex; align-items:center; gap:.62rem; padding:.72rem .78rem; background:var(--navy); border-bottom:3px solid var(--gold); }
+.context-card-head .player-photo { width:46px; height:46px; flex:0 0 46px; border-width:1px; border-color:#8da0aa; background-color:#173854; }
+.context-card-name { color:white; font-family:'Barlow Condensed','Arial Narrow',sans-serif; font-size:1.08rem; font-weight:800; line-height:1.08; overflow-wrap:anywhere; }
+.context-card-game { display:flex; align-items:center; gap:.3rem; color:#c7d2d8; font-size:.62rem; margin-top:.17rem; }
+.context-card-game img { width:1rem; height:1rem; object-fit:contain; }
+.context-card-body { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.48rem; padding:.68rem; }
+.context-item { background:#f4f7f8; border:1px solid #e1e7e9; border-radius:9px; padding:.52rem .58rem; min-width:0; }
+.context-item.wide { grid-column:1/-1; }
+.context-label { color:#397f18; font-size:.56rem; font-weight:850; letter-spacing:.075em; text-transform:uppercase; line-height:1.2; margin-bottom:.15rem; }
+.context-value { color:var(--ink); font-size:.69rem; font-weight:700; line-height:1.35; overflow-wrap:anywhere; }
+.context-card-foot { display:flex; align-items:center; gap:.35rem; margin:0 .68rem .68rem; padding:.48rem .58rem; border-radius:8px; background:#edf4e8; color:#29451f; font-size:.64rem; line-height:1.3; }
 .stPlotlyChart { background:var(--card); border:0; border-radius:12px; padding:.2rem; }
 [data-baseweb="tab-list"] { gap:.32rem; background:#e6ecef; border-radius:12px; padding:.3rem; }
 [data-baseweb="tab-list"] button { border-radius:8px; padding:.55rem .8rem; color:var(--ink); }
 [data-baseweb="tab-list"] button[aria-selected="true"] { background:var(--navy); color:white; }
 [data-baseweb="tab-highlight"] { display:none; }
+[data-testid="stSegmentedControl"] { background:#e6ecef; border:1px solid #d4dde1; border-radius:12px; padding:.24rem; }
+[data-testid="stSegmentedControl"] button { min-height:2.35rem; border-radius:9px !important; font-family:'Inter',Arial,sans-serif; font-weight:750; }
+.deep-dive-head { display:flex; align-items:flex-end; justify-content:space-between; gap:1rem; margin:1.1rem 0 .55rem; }
+.deep-dive-head strong { display:block; color:var(--navy); font-family:'Barlow Condensed','Arial Narrow',sans-serif; font-size:1.28rem; letter-spacing:.01em; }
+.deep-dive-head span { display:block; color:var(--muted); font-size:.7rem; margin-top:.08rem; }
 .usage-board { display:grid; gap:.58rem; margin:.7rem 0 .35rem; }
 .usage-player { display:grid; grid-template-columns:minmax(180px,.8fr) minmax(220px,1.45fr) 92px; gap:.9rem; align-items:center; background:var(--card); border:1px solid var(--line); border-radius:13px; padding:.72rem .82rem; }
 .usage-player.leader { border-color:var(--gold); box-shadow:0 7px 18px rgba(0,34,68,.08); }
@@ -237,6 +283,7 @@ h1,h2,h3 { letter-spacing:-.025em; }
 .trend-summary { text-align:right; }.trend-summary strong { display:block; font-size:.78rem; color:var(--navy); }.trend-summary span { display:block; color:var(--muted); font-size:.6rem; margin-top:.12rem; }
 @media(max-width:1100px) {
   .context-grid { grid-template-columns:1fr; }
+  .detail-card-grid { grid-template-columns:1fr; }
 }
 @media(max-width:800px) {
   html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] { max-width:100vw; overflow-x:hidden; }
@@ -274,20 +321,38 @@ h1,h2,h3 { letter-spacing:-.025em; }
 
 
 @st.cache_data(ttl=300, show_spinner=False)
-def get_published_snapshot(season: int, passing_td_points: int) -> tuple[pd.DataFrame, pd.DataFrame, int, str, str, str | None, str]:
-    import json
-
+def get_snapshot_metadata() -> dict:
     processed = PROJECT_ROOT / "data" / "processed"
     metadata_path = processed / "live_refresh_metadata.json"
-    board_path = processed / f"live_start_sit_board_{passing_td_points}pt_current.parquet"
-    weekly_path = processed / "live_weekly_current.parquet"
-    if not metadata_path.exists() or not board_path.exists() or not weekly_path.exists():
-        raise FileNotFoundError("A validated production snapshot has not been published.")
-    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    try:
+        response = requests.get(f"{SNAPSHOT_BASE_URL}/live_refresh_metadata.json", timeout=12)
+        response.raise_for_status()
+        return response.json()
+    except (requests.RequestException, ValueError):
+        if not metadata_path.exists():
+            raise FileNotFoundError("A validated production snapshot has not been published.")
+        return json.loads(metadata_path.read_text(encoding="utf-8"))
+
+
+def _read_snapshot_parquet(filename: str) -> pd.DataFrame:
+    try:
+        response = requests.get(f"{SNAPSHOT_BASE_URL}/{filename}", timeout=20)
+        response.raise_for_status()
+        return pd.read_parquet(BytesIO(response.content))
+    except (requests.RequestException, ValueError, OSError):
+        path = PROJECT_ROOT / "data" / "processed" / filename
+        if not path.exists():
+            raise FileNotFoundError(f"Validated snapshot is missing: {filename}")
+        return pd.read_parquet(path)
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def get_published_snapshot(season: int, passing_td_points: int) -> tuple[pd.DataFrame, pd.DataFrame, int, str, str, str | None, str]:
+    metadata = get_snapshot_metadata()
     if int(metadata.get("season", -1)) != season or passing_td_points not in metadata.get("refreshed_qb_passing_td_formats", []):
         raise ValueError("The published snapshot does not match this season or scoring format.")
-    board = pd.read_parquet(board_path)
-    weekly = pd.read_parquet(weekly_path)
+    board = _read_snapshot_parquet(f"live_start_sit_board_{passing_td_points}pt_current.parquet")
+    weekly = _read_snapshot_parquet("live_weekly_current.parquet")
     provider_status = str(metadata.get("sportsdataio_status", "Snapshot unavailable"))
     provider_refreshed_at = metadata.get("sportsdataio_refreshed_at")
     injury_sources = metadata.get("injury_source_status", {})
@@ -327,29 +392,42 @@ def player_photo_html(value: object, label: object) -> str:
 
 
 with st.sidebar:
+    st.markdown(
+        f'<div class="sidebar-logo"><img src="data:image/png;base64,{base64.b64encode(BRAND_ICON.read_bytes()).decode("ascii")}" '
+        'alt="The Sunday Decision Lab SDL logo"></div>',
+        unsafe_allow_html=True,
+    )
     st.markdown('<div class="sidebar-brand">THE SUNDAY <span>DECISION</span> LAB</div>', unsafe_allow_html=True)
     st.caption("Your weekly lineup call")
     page = st.radio("View", ["Decision Room", "Player Trends", "How It Works"], label_visibility="collapsed")
 season = SEASON
 
-header_metadata = json.loads((PROJECT_ROOT / "data" / "processed" / "live_refresh_metadata.json").read_text(encoding="utf-8"))
+header_metadata = get_snapshot_metadata()
 header_week = int(header_metadata.get("next_week", 0))
 header_checked = datetime.fromisoformat(str(header_metadata.get("refreshed_at", datetime.now(timezone.utc).isoformat())).replace("Z", "+00:00"))
 header_age_minutes = max(0, int((datetime.now(timezone.utc) - header_checked.astimezone(timezone.utc)).total_seconds() // 60))
+context_checked = datetime.fromisoformat(str(header_metadata.get("context_refreshed_at", header_metadata.get("sportsdataio_refreshed_at", header_checked.isoformat()))).replace("Z", "+00:00"))
+context_age_minutes = max(0, int((datetime.now(timezone.utc) - context_checked.astimezone(timezone.utc)).total_seconds() // 60))
 
-with st.container(border=True):
-    header_left, header_right = st.columns([1.55, .75], vertical_alignment="center")
+with st.container():
+    header_left, header_right = st.columns([.82, 1.18], gap="large", vertical_alignment="center")
     with header_left:
+        brand_logo_uri = "data:image/png;base64," + base64.b64encode(BRAND_LOGO.read_bytes()).decode("ascii")
         st.markdown(
-            f'<div class="hero"><div><div class="eyebrow">Week {header_week} · {season}</div>'
-            '<h1 class="graffiti-title">THE SUNDAY <span>DECISION</span> LAB</h1><div class="hero-subtitle">Player Comparison</div>'
-            '<p>Compare up to three players and make the final lineup call.</p></div></div>',
+            f'<img class="header-logo" src="{brand_logo_uri}" alt="The Sunday Decision Lab logo">',
             unsafe_allow_html=True,
         )
     with header_right:
-        qb_td_label = st.radio("Full PPR · QB passing TD", ["4 points", "6 points"], horizontal=True)
+        st.markdown(
+            f'<div class="header-details"><div class="eyebrow">Week {header_week} · {season} · Full PPR</div>'
+            '<div class="hero-subtitle">Player Comparison</div>'
+            '<p>Compare up to three players and make the final lineup call.</p>'
+            '<div class="settings-kicker">QB passing touchdown scoring</div></div>',
+            unsafe_allow_html=True,
+        )
+        qb_td_label = st.radio("QB passing touchdown scoring", ["4 points", "6 points"], horizontal=True, label_visibility="collapsed")
         QB_PASS_TD_POINTS = int(qb_td_label.split()[0])
-        st.markdown(f'<div class="header-status"><span class="status-dot"></span>Data current · updated {header_age_minutes} minutes ago</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="header-status"><span class="status-dot"></span>Projections {header_age_minutes} min old · live context {context_age_minutes} min old</div>', unsafe_allow_html=True)
 
 try:
     with st.spinner("Updating weekly stats and matchups…"):
@@ -375,11 +453,11 @@ if page == "Decision Room":
     context_value = "Needs confirmation" if context_is_stale else "Current"
     context_detail = "Unavailable" if context_age_minutes is None else f"Checked {context_age_minutes} min ago"
     high_frequency_day = datetime.now().weekday() in {0, 3, 6}
-    next_refresh_copy = "Within 30 min" if high_frequency_day else "Within 2 hours"
+    next_refresh_copy = "Game-window monitoring" if high_frequency_day else "6 AM / 5 PM Central"
     st.markdown(
         '<div class="game-status">'
-        f'<div class="game-status-item"><div class="game-status-label">Last update</div><div class="game-status-value">{header_age_minutes} min ago</div></div>'
-        f'<div class="game-status-item"><div class="game-status-label">Injury reports</div><div class="game-status-value">Frequent cloud checks</div></div>'
+        f'<div class="game-status-item"><div class="game-status-label">Projections</div><div class="game-status-value">Updated {header_age_minutes} min ago</div></div>'
+        f'<div class="game-status-item"><div class="game-status-label">Live context</div><div class="game-status-value">Updated {context_age_minutes} min ago</div></div>'
         f'<div class="game-status-item"><div class="game-status-label">Weather / depth</div><div class="game-status-value">{context_value} · {context_detail}</div></div>'
         f'<div class="game-status-item"><div class="game-status-label">Next refresh</div><div class="game-status-value">{next_refresh_copy}</div></div>'
         '</div>'
@@ -606,27 +684,12 @@ if page == "Decision Room":
                 )
 
         st.markdown('<div class="section-title">Comparison Tool</div><div class="section-copy">Compare each player’s projection, weekly form, and repeatable usage in one place.</div>', unsafe_allow_html=True)
-        range_tab, trend_tab, usage_tab = st.tabs(["Projection", "Weekly form", "Usage"])
-        detail_records = []
-        for _, detail_row in compare.iterrows():
-            detail_total = detail_row.get("betting_total_live")
-            if detail_total is None or pd.isna(detail_total):
-                detail_total = detail_row.get("total_line")
-            detail_records.append({
-                "Player": detail_row["player"],
-                "Team": detail_row["team"],
-                "Record": detail_row.get("team_record") if pd.notna(detail_row.get("team_record")) else "—",
-                "Opponent": detail_row["next_opponent"],
-                "Site": detail_row["venue"],
-                "Kickoff": " · ".join(str(detail_row.get(value)) for value in ("weekday", "gametime") if detail_row.get(value) is not None and pd.notna(detail_row.get(value))),
-                "Availability": selection_availability_summary(detail_row),
-                "Game total": f"{float(detail_total):.1f}" if detail_total is not None and pd.notna(detail_total) else "—",
-                "Projection": float(detail_row["median_ppr"]),
-                "Range": f'{float(detail_row["floor_ppr"]):.1f}–{float(detail_row["ceiling_ppr"]):.1f}',
-            })
-        comparison_details = pd.DataFrame(detail_records)
-
-        with range_tab:
+        comparison_view = st.segmented_control(
+            "Comparison view", ["Projection", "Weekly form", "Usage"],
+            default="Projection", width="stretch", label_visibility="collapsed",
+            key="comparison_view",
+        )
+        if comparison_view == "Projection":
             range_min = max(0.0, float(compare["floor_ppr"].min()) - 2.0)
             range_max = float(compare["ceiling_ppr"].max()) + 2.0
             range_span = max(range_max - range_min, 1.0)
@@ -660,7 +723,7 @@ if page == "Decision Room":
                 unsafe_allow_html=True,
             )
 
-        with trend_tab:
+        if comparison_view == "Weekly form":
             weekly_name_column = "player_display_name" if "player_display_name" in WEEKLY.columns else "player_name"
             trend_history = WEEKLY.loc[WEEKLY[weekly_name_column].isin(compare["player"])].copy()
             if trend_history.empty:
@@ -717,7 +780,7 @@ if page == "Decision Room":
                     unsafe_allow_html=True,
                 )
 
-        with usage_tab:
+        if comparison_view == "Usage":
             metric_options = {
                 "QB": {"Pass attempts": "ytd_attempts", "Passing yards": "ytd_passing_yards", "Passing TDs": "ytd_passing_tds", "Carries": "ytd_carries", "Rushing yards": "ytd_rushing_yards"},
                 "RB": {"Carries": "ytd_carries", "Targets": "ytd_targets", "Rushing yards": "ytd_rushing_yards", "Receiving yards": "ytd_receiving_yards", "Total touchdowns": "ytd_total_tds"},
@@ -778,11 +841,44 @@ if page == "Decision Room":
                 unsafe_allow_html=True,
             )
 
-        with st.expander("Player & team details"):
-            st.dataframe(comparison_details, hide_index=True, width="stretch", column_config={
-                "Projection": st.column_config.NumberColumn("Median PPR", format="%.1f"),
-                "Game total": "Game total",
-            })
+        st.markdown(
+            '<div class="deep-dive-head"><div><strong>Deep Dive</strong><span>Switch between the details behind this comparison.</span></div></div>',
+            unsafe_allow_html=True,
+        )
+        deep_dive_view = st.segmented_control(
+            "Deep dive view", ["Player details", "Projection drivers", "Matchup context"],
+            default="Player details", width="stretch", label_visibility="collapsed",
+            key="deep_dive_view",
+        )
+        if deep_dive_view == "Player details":
+            detail_cards = []
+            for _, detail_row in compare.iterrows():
+                detail_total = detail_row.get("betting_total_live")
+                if detail_total is None or pd.isna(detail_total):
+                    detail_total = detail_row.get("total_line")
+                availability = selection_availability_summary(detail_row)
+                availability_alert = any(label in availability.casefold() for label in ("questionable", "doubtful", "out", "inactive", "ir", "pup"))
+                kickoff = " · ".join(
+                    str(detail_row.get(value)) for value in ("weekday", "gametime")
+                    if detail_row.get(value) is not None and pd.notna(detail_row.get(value))
+                ) or "TBD"
+                team_record = detail_row.get("team_record") if pd.notna(detail_row.get("team_record")) else "—"
+                photo = player_photo_html(detail_row.get("headshot_url"), detail_row["player"])
+                logo_url = team_logo_url(detail_row.get("team"))
+                logo = f'<img src="{html.escape(logo_url, quote=True)}" alt="{html.escape(str(detail_row["team"]), quote=True)} logo">' if logo_url else ""
+                game_total = f"{float(detail_total):.1f} points" if detail_total is not None and pd.notna(detail_total) else "Not available"
+                detail_cards.append(
+                    f'<article class="detail-card"><div class="detail-card-head">{photo}<div><div class="detail-card-name">{html.escape(str(detail_row["player"]))}</div>'
+                    f'<div class="detail-card-team">{logo}<span>{html.escape(str(detail_row["team"]))} · {html.escape(str(detail_row.get("position", position)))}</span></div></div>'
+                    f'<div class="detail-card-status{" alert" if availability_alert else ""}">{html.escape(availability)}</div></div>'
+                    f'<div class="detail-card-body"><div class="detail-card-row"><span>Matchup</span><b>{html.escape(str(detail_row["venue"]))} vs {html.escape(str(detail_row["next_opponent"]))}</b></div>'
+                    f'<div class="detail-card-row"><span>Kickoff</span><b>{html.escape(kickoff)}</b></div>'
+                    f'<div class="detail-card-row"><span>Team record</span><b>{html.escape(str(team_record))}</b></div>'
+                    f'<div class="detail-card-row"><span>Game total</span><b>{html.escape(game_total)}</b></div>'
+                    f'<div class="detail-card-projection"><div><span>Floor–ceiling</span><small>{float(detail_row["floor_ppr"]):.1f}–{float(detail_row["ceiling_ppr"]):.1f} PPR</small></div>'
+                    f'<div><span>Median</span><strong>{float(detail_row["median_ppr"]):.1f}</strong></div></div></div></article>'
+                )
+            st.markdown(f'<div class="detail-card-grid">{"".join(detail_cards)}</div>', unsafe_allow_html=True)
 
         common = ["player", "team", "next_opponent", "games_played", "season_ppr", "recent_ppr", "recent_opportunities"]
         position_stats = {
@@ -791,7 +887,7 @@ if page == "Decision Room":
             "WR": ["ytd_targets", "ytd_receptions", "ytd_receiving_yards", "ytd_receiving_tds"],
             "TE": ["ytd_targets", "ytd_receptions", "ytd_receiving_yards", "ytd_receiving_tds"],
         }
-        with st.expander("Projection Breakdown"):
+        if deep_dive_view == "Projection drivers":
             st.markdown(
                 '<div class="projection-scope">'
                 '<div class="projection-scope-card included"><strong>Included in our calculation</strong><span>Current-season production, repeatable workload, fading prior-season influence, touchdown regression, and a capped matchup adjustment.</span></div>'
@@ -918,35 +1014,53 @@ if page == "Decision Room":
                     )
                 st.markdown(f'<div class="advanced-stat-grid">{"".join(advanced_cards)}</div>', unsafe_allow_html=True)
 
-        with st.expander("More matchup context"):
-            st.caption("Additional live information for your final decision. None of these details changes our ranking.")
+        if deep_dive_view == "Matchup context":
+            st.caption("Live, informational context for your final call. These details never change our ranking.")
             context_cards = []
             for _, row in compare.iterrows():
                 provider_total = row.get("betting_total_live")
                 if provider_total is None or pd.isna(provider_total):
                     provider_total = row.get("total_line")
-                expected_points = f"{float(provider_total):.1f} combined points" if provider_total is not None and pd.notna(provider_total) else "Not available"
-                pace = f"{row['pace_label']} pace · {row['combined_recent_plays']:.0f} combined plays" if pd.notna(row.get("combined_recent_plays")) else "Not available"
+                if provider_total is not None and pd.notna(provider_total):
+                    total_value = float(provider_total)
+                    scoring_label = "Higher-scoring environment" if total_value >= 48 else "Lower-scoring environment" if total_value <= 42 else "Typical scoring environment"
+                    expected_points = f"{scoring_label} · {total_value:.1f}-point total"
+                else:
+                    expected_points = "Game total is not available"
+                pace = f"{row['pace_label']} expected tempo · {row['combined_recent_plays']:.0f} recent combined plays" if pd.notna(row.get("combined_recent_plays")) else "Recent pace is not available"
                 if pd.notna(row.get("qb_changed")):
                     changes = []
                     if bool(row.get("qb_changed")): changes.append("Starting QB changed")
                     if bool(row.get("ol_changed")): changes.append("Starting O-line changed")
-                    personnel = " · ".join(changes) if changes else "No changes"
+                    personnel = " · ".join(changes) if changes else "No changes reported"
                 else:
-                    personnel = "Not enough history" if PROVIDER_STATUS.startswith("Connected") else "Not available"
+                    personnel = "No changes reported" if PROVIDER_STATUS.startswith("Connected") else "Personnel status unavailable"
+                kickoff = " · ".join(
+                    str(row.get(value)) for value in ("weekday", "gametime")
+                    if row.get(value) is not None and pd.notna(row.get(value))
+                ) or "Kickoff TBD"
+                availability = selection_availability_summary(row)
                 fields = [
-                    ("Game pace", pace, "Expected play volume based on recent team pace"),
-                    ("Expected game points", expected_points, "Sportsbook estimate for the combined score"),
-                    ("QB / O-line", personnel, "Confirmed starting quarterback or offensive-line changes"),
+                    ("Availability", availability, False),
+                    ("Weather", weather_summary(row), False),
+                    ("Expected pace", pace, True),
+                    ("Scoring environment", expected_points, True),
+                    ("Opponent strength", matchup_summary(row), False),
+                    ("QB / O-line", personnel, False),
                 ]
                 rows_html = "".join(
-                    f'<div class="context-row"><div class="context-label context-help" title="{html.escape(help_text)}">{html.escape(label)}</div><div class="context-value">{html.escape(value)}</div></div>'
-                    for label, value, help_text in fields
+                    f'<div class="context-item{" wide" if wide else ""}"><div class="context-label">{html.escape(label)}</div><div class="context-value">{html.escape(value)}</div></div>'
+                    for label, value, wide in fields
                 )
                 photo = player_photo_html(row.get("headshot_url"), row["player"])
-                context_cards.append(f'<article class="context-card"><h3>{photo}<span>{html.escape(str(row["player"]))}</span></h3>{rows_html}</article>')
+                logo_url = team_logo_url(row.get("team"))
+                logo = f'<img src="{html.escape(logo_url, quote=True)}" alt="{html.escape(str(row["team"]), quote=True)} logo">' if logo_url else ""
+                context_cards.append(
+                    f'<article class="context-card"><div class="context-card-head">{photo}<div><div class="context-card-name">{html.escape(str(row["player"]))}</div>'
+                    f'<div class="context-card-game">{logo}<span>{html.escape(str(row["team"]))} · {html.escape(str(row.get("venue", "")))} vs {html.escape(str(row["next_opponent"]))} · {html.escape(kickoff)}</span></div></div></div>'
+                    f'<div class="context-card-body">{rows_html}</div><div class="context-card-foot"><b>Context only:</b> use this alongside the projection, not as a ranking adjustment.</div></article>'
+                )
             st.markdown(f'<div class="context-grid">{"".join(context_cards)}</div>', unsafe_allow_html=True)
-            st.markdown('<div class="note"><b>Separation rule:</b> Start/Sit comes only from the core projection. This additional context is here so you can make the final call.</div>', unsafe_allow_html=True)
 
 elif page == "Player Trends":
     selected_position = st.segmented_control("Position", ["QB", "RB", "WR", "TE"], default="WR")

@@ -138,6 +138,8 @@ def main() -> None:
         "completed_week": int(weekly["week"].max()),
         "next_week": next_week,
         "refreshed_at": datetime.now(timezone.utc).isoformat(),
+        "context_refreshed_at": datetime.now(timezone.utc).isoformat(),
+        "refresh_scope": "Full weekly projection and context rebuild",
         "eligible_players": int(len(eligible)),
         "player_pool_audit": pool_audit,
         "injury_records": int(len(injury_context.records)),
