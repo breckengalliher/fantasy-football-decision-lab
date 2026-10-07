@@ -32,13 +32,42 @@ from dashboard.snapshots import build_personnel_context
 PROCESSED = ROOT / "data" / "processed"
 
 
+def build_scoring_format_boards(
+    board: pd.DataFrame,
+    weekly: pd.DataFrame,
+    prior_weekly: pd.DataFrame,
+    next_week: int,
+) -> dict[int, pd.DataFrame]:
+    """Recalculate and gate a complete snapshot for every supported QB format."""
+    return {
+        passing_td_points: apply_verified_starter_gate(
+            apply_approved_projection_model(
+                board.copy(),
+                weekly,
+                prior_weekly,
+                next_week,
+                passing_td_points=passing_td_points,
+            )
+        )
+        for passing_td_points in (4, 6)
+    }
+
+
 def api_key() -> str:
     value = os.getenv("SPORTSDATAIO_API_KEY", "").strip()
     if value:
         return value
     path = ROOT / ".streamlit" / "secrets.toml"
     if path.exists():
-        return str(tomllib.loads(path.read_text())["SPORTSDATAIO_API_KEY"]).strip()
+        contents = path.read_text()
+        try:
+            return str(tomllib.loads(contents)["SPORTSDATAIO_API_KEY"]).strip()
+        except tomllib.TOMLDecodeError:
+            # A duplicated key should not prevent the unattended refresh. Use the
+            # last independently valid assignment, matching common config behavior.
+            for line in reversed(contents.splitlines()):
+                if line.partition("=")[0].strip() == "SPORTSDATAIO_API_KEY":
+                    return str(tomllib.loads(line)["SPORTSDATAIO_API_KEY"]).strip()
     return ""
 
 
@@ -61,14 +90,19 @@ def main() -> None:
     context = SportsDataIOClient(key).weekly_context(season, next_week)
     board = enrich_board(board, context)
     prior_weekly = load_prior_weekly_data(season)
-    board = apply_approved_projection_model(board, weekly, prior_weekly, next_week, passing_td_points=4)
-    board = apply_verified_starter_gate(board)
+    scoring_boards = build_scoring_format_boards(board, weekly, prior_weekly, next_week)
+    board = scoring_boards[4]
 
     previous_path = PROCESSED / "sportsdataio_depth_current.parquet"
     previous = pd.read_parquet(previous_path) if previous_path.exists() else pd.DataFrame()
     player_context, team_context = build_personnel_context(context.depth_charts, previous)
     PROCESSED.mkdir(parents=True, exist_ok=True)
     atomic_parquet(board, PROCESSED / "live_start_sit_board_current.parquet")
+    for passing_td_points, scoring_board in scoring_boards.items():
+        atomic_parquet(
+            scoring_board,
+            PROCESSED / f"live_start_sit_board_{passing_td_points}pt_current.parquet",
+        )
     atomic_parquet(context.depth_charts, previous_path)
     atomic_parquet(player_context, PROCESSED / "personnel_players_current.parquet")
     atomic_parquet(team_context, PROCESSED / "personnel_teams_current.parquet")
@@ -90,6 +124,11 @@ def main() -> None:
         "unverified_relevant_qbs": int(board.loc[board["position"].eq("QB") & board["is_roster_relevant"] & ~board["verified_qb_starter"]].shape[0]),
         "projection_model": "Approved round-three live model",
         "default_qb_passing_td_points": 4,
+        "refreshed_qb_passing_td_formats": [4, 6],
+        "scoring_format_snapshots": {
+            str(points): f"live_start_sit_board_{points}pt_current.parquet"
+            for points in scoring_boards
+        },
     }
     metadata_path = PROCESSED / "live_refresh_metadata.json"
     temporary = metadata_path.with_suffix(".json.tmp")
