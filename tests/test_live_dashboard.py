@@ -3,11 +3,18 @@ from datetime import date
 import pandas as pd
 
 from dashboard.data import (
+    SCORING_ROLE_TD_EXCEPTION_ENABLED,
+    SCORING_ROLE_TD_EXCEPTION_REQUIREMENT,
     apply_qb_scoring_mode,
     apply_verified_starter_gate,
     build_start_sit_board,
     current_nfl_season,
 )
+
+
+def test_scoring_role_td_exception_remains_policy_locked():
+    assert SCORING_ROLE_TD_EXCEPTION_ENABLED is False
+    assert SCORING_ROLE_TD_EXCEPTION_REQUIREMENT == "verified red-zone or goal-line opportunity data"
 
 
 def test_current_nfl_season_changes_in_september():

@@ -19,6 +19,13 @@ CALIBRATED_INTERVAL_OFFSETS = {
 QB_RANGE_CALIBRATION_PATH = Path(__file__).resolve().parents[1] / "reports" / "qb-model-calibration.json"
 POSITION_RANGE_CALIBRATION_PATH = Path(__file__).resolve().parents[1] / "reports" / "projection-range-calibration.json"
 
+# Policy lock: observed touchdown scoring always receives the approved strong
+# regression. Do not add a player-level scoring-role relaxation until a reliable
+# live source supplies red-zone or goal-line opportunities (not touchdown results
+# or a manually maintained share).
+SCORING_ROLE_TD_EXCEPTION_ENABLED = False
+SCORING_ROLE_TD_EXCEPTION_REQUIREMENT = "verified red-zone or goal-line opportunity data"
+
 DEMO_PLAYERS = pd.DataFrame(
     [
         {
@@ -530,6 +537,11 @@ def apply_approved_projection_model(
     passing_td_points: int = 4,
 ) -> pd.DataFrame:
     """Apply the approved round-three median and calibrated outcome ranges live."""
+    if SCORING_ROLE_TD_EXCEPTION_ENABLED:
+        raise RuntimeError(
+            "Scoring-role touchdown exception is policy-locked until reliable "
+            f"{SCORING_ROLE_TD_EXCEPTION_REQUIREMENT} is integrated and validated."
+        )
     if passing_td_points not in (4, 6):
         raise ValueError("passing_td_points must be 4 or 6")
     import json
@@ -714,6 +726,8 @@ def apply_approved_projection_model(
             result.loc[qb_mask, "floor_ppr"] = (result.loc[qb_mask, "median_ppr"] + lower).clip(lower=0)
             result.loc[qb_mask, "ceiling_ppr"] = result.loc[qb_mask, "median_ppr"] + upper
     result["projection_model"] = "Approved round-three live model"
+    result["scoring_role_td_exception_enabled"] = False
+    result["scoring_role_td_exception_requirement"] = SCORING_ROLE_TD_EXCEPTION_REQUIREMENT
     return result.drop(columns=[
         "approved_season_ppr", "approved_recent_ppr", "approved_recent_opp", "approved_weight", "approved_projection",
         "qb_recent_points", "approved_qb_projection", "qb_archetype_approved",

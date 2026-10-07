@@ -123,6 +123,8 @@ def main() -> None:
         "verified_qb_starters": int(board.loc[board["position"].eq("QB") & board["verified_qb_starter"]].shape[0]),
         "unverified_relevant_qbs": int(board.loc[board["position"].eq("QB") & board["is_roster_relevant"] & ~board["verified_qb_starter"]].shape[0]),
         "projection_model": "Approved round-three live model",
+        "scoring_role_td_exception_enabled": False,
+        "scoring_role_td_exception_requirement": "verified red-zone or goal-line opportunity data",
         "default_qb_passing_td_points": 4,
         "refreshed_qb_passing_td_formats": [4, 6],
         "scoring_format_snapshots": {
