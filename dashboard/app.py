@@ -15,10 +15,12 @@ try:
     from dashboard.providers.sportsdataio import SportsDataIOClient, context_freshness, enrich_board, format_injury_context
     from dashboard.snapshots import load_personnel_snapshot
     from dashboard.outlooks import build_player_outlook
+    from dashboard.states import empty_player_pool_message, provider_issue_message
 except ModuleNotFoundError:
     from providers.sportsdataio import SportsDataIOClient, context_freshness, enrich_board, format_injury_context
     from snapshots import load_personnel_snapshot
     from outlooks import build_player_outlook
+    from states import empty_player_pool_message, provider_issue_message
 
 try:
     from dashboard.data import add_live_supplementary_context, apply_approved_projection_model, apply_verified_starter_gate, build_start_sit_board, current_nfl_season, load_live_context_data, load_live_weekly_data, load_prior_weekly_data
@@ -168,8 +170,10 @@ try:
     with st.spinner("Updating weekly stats and matchups…"):
         BOARD, WEEKLY, NEXT_WEEK, REFRESHED, PROVIDER_STATUS, PROVIDER_REFRESHED_AT = get_live_board(season, provider_key())
 except Exception as error:
-    st.error("Live stats could not be loaded. Check the network connection and try Refresh now.")
-    st.caption(f"Technical detail: {error}")
+    st.error("The weekly player dataset could not be loaded, so projections are temporarily unavailable.")
+    st.info("Check your connection, then use **Refresh now**. The app will not show cached estimates as if they were current.")
+    with st.expander("Technical details"):
+        st.code(f"{type(error).__name__}: {error}")
     st.stop()
 
 PRIOR_WEEKLY = load_prior_weekly_data(season)
@@ -193,6 +197,9 @@ if page == "Decision Room":
         st.warning("Live injury and practice context is more than 90 minutes old or unavailable. Use **Refresh now** before setting a lineup.")
     else:
         st.caption(f"Live injury and practice context checked {context_age_minutes} minute{'s' if context_age_minutes != 1 else ''} ago.")
+    provider_issue = provider_issue_message(PROVIDER_STATUS)
+    if provider_issue:
+        st.warning(provider_issue)
     c1, c2 = st.columns([.62, 1.38])
     position = c1.segmented_control("Position", ["QB", "RB", "WR", "TE"], default="WR")
     pool = BOARD.loc[
@@ -201,23 +208,29 @@ if page == "Decision Room":
         & BOARD["is_roster_relevant"]
         & BOARD["verified_qb_starter"]
     ].copy()
+    excluded_qbs = BOARD.iloc[0:0]
     if position == "QB":
         excluded_qbs = BOARD.loc[
             BOARD["position"].eq("QB") & BOARD["is_roster_relevant"] & ~BOARD["verified_qb_starter"]
         ]
         if not excluded_qbs.empty:
             st.caption(f"{len(excluded_qbs)} QB(s) hidden because the live depth chart does not verify them as QB1.")
-    names = c2.multiselect(
-        "Players to compare",
-        pool["player"].sort_values().tolist(),
-        default=pool.head(3)["player"].tolist(),
-        max_selections=3,
-        placeholder="Choose up to three players",
-    )
+    if pool.empty:
+        c2.warning(empty_player_pool_message(position, len(excluded_qbs)))
+        names = []
+    else:
+        names = c2.multiselect(
+            "Players to compare",
+            pool["player"].sort_values().tolist(),
+            default=pool.head(3)["player"].tolist(),
+            max_selections=3,
+            placeholder="Choose up to three players",
+        )
     compare = pool.loc[pool["player"].isin(names)].sort_values("projected_ppr", ascending=False)
 
     if compare.empty:
-        st.info("Choose at least one player to begin.")
+        if not pool.empty:
+            st.info("Choose at least one available player above to begin the comparison.")
     else:
         leader = compare.iloc[0]
         m1, m2, m3, m4 = st.columns(4)
@@ -346,8 +359,16 @@ elif page == "Player Trends":
         & BOARD["is_roster_relevant"]
         & BOARD["verified_qb_starter"]
     ]
+    if pool.empty:
+        hidden = int((BOARD["position"].eq("QB") & BOARD["is_roster_relevant"] & ~BOARD["verified_qb_starter"]).sum()) if selected_position == "QB" else 0
+        st.warning(empty_player_pool_message(selected_position, hidden))
+        st.stop()
     player_name = st.selectbox("Player", pool["player"].sort_values().tolist())
-    player = pool.loc[pool["player"].eq(player_name)].iloc[0]
+    matches = pool.loc[pool["player"].eq(player_name)]
+    if matches.empty:
+        st.warning("That player record is no longer available after the latest refresh. Choose another player.")
+        st.stop()
+    player = matches.iloc[0]
     id_column = "player_id" if "player_id" in BOARD.columns and "player_id" in WEEKLY.columns else None
     name_column = "player_display_name" if "player_display_name" in WEEKLY.columns else "player_name"
     history = WEEKLY.loc[WEEKLY[name_column].eq(player_name)].sort_values("week")
@@ -356,13 +377,19 @@ elif page == "Player Trends":
     f2.metric("Last four", f"{player['recent_ppr']:.1f}")
     f3.metric("Season", f"{player['season_ppr']:.1f}")
     f4.metric("Next opponent", player["next_opponent"])
-    fig = go.Figure()
-    fig.add_trace(go.Bar(x=history["week"], y=history["fantasy_points_ppr"], name="Weekly PPR", marker_color=COLORS[selected_position], hovertemplate="Week %{x}<br>%{y:.1f} PPR<extra></extra>"))
-    fig.add_hline(y=player["season_ppr"], line_dash="dash", line_color="#5f6b73", annotation_text="Season avg", annotation_position="top left")
-    fig.add_hline(y=player["projected_ppr"], line_dash="dot", line_color="#69be28", annotation_text=f"Week {NEXT_WEEK} projection", annotation_position="top right")
-    fig.update_layout(title=f"{player_name} · weekly production", xaxis_title="Week", yaxis_title="PPR points", showlegend=False)
-    st.plotly_chart(polish(fig, 440), width="stretch", config={"displayModeBar": False})
-    st.markdown(f'<div class="note"><b>Matchup:</b> {player["next_opponent"]} has allowed {player["points_allowed"]:.1f} PPR per {selected_position} performance in this dataset, a {player["matchup_label"].lower()} index for the position.</div>', unsafe_allow_html=True)
+    if history.empty:
+        st.warning("Weekly game history is unavailable for this player. The current projection remains visible above, but no trend chart can be shown.")
+    else:
+        fig = go.Figure()
+        fig.add_trace(go.Bar(x=history["week"], y=history["fantasy_points_ppr"], name="Weekly PPR", marker_color=COLORS[selected_position], hovertemplate="Week %{x}<br>%{y:.1f} PPR<extra></extra>"))
+        fig.add_hline(y=player["season_ppr"], line_dash="dash", line_color="#5f6b73", annotation_text="Season avg", annotation_position="top left")
+        fig.add_hline(y=player["projected_ppr"], line_dash="dot", line_color="#69be28", annotation_text=f"Week {NEXT_WEEK} projection", annotation_position="top right")
+        fig.update_layout(title=f"{player_name} · weekly production", xaxis_title="Week", yaxis_title="PPR points", showlegend=False)
+        st.plotly_chart(polish(fig, 440), width="stretch", config={"displayModeBar": False})
+    if pd.notna(player.get("points_allowed")):
+        st.markdown(f'<div class="note"><b>Matchup:</b> {player["next_opponent"]} has allowed {player["points_allowed"]:.1f} PPR per {selected_position} performance in this dataset, a {str(player["matchup_label"]).lower()} index for the position.</div>', unsafe_allow_html=True)
+    else:
+        st.info("Opponent matchup history is unavailable for this player; no matchup claim is shown.")
 
 else:
     st.subheader("A transparent Start / Sit model plus independent context")
