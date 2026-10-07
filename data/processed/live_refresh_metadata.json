@@ -2,7 +2,7 @@
   "season": 2026,
   "completed_week": 4,
   "next_week": 5,
-  "refreshed_at": "2026-10-07T19:05:06.503603+00:00",
+  "refreshed_at": "2026-10-07T19:56:38.673871+00:00",
   "eligible_players": 203,
   "player_pool_audit": {
     "eligible_players": 203,
@@ -19,21 +19,21 @@
     "missing_opponents": 0,
     "invalid_positions": 0
   },
-  "injury_records": 285,
+  "injury_records": 290,
   "injury_source_status": {
     "nflverse": "Connected \u00b7 19 Week 5 records",
-    "sleeper": "Connected \u00b7 274 designated players"
+    "sleeper": "Connected \u00b7 278 designated players"
   },
-  "injury_refreshed_at": "2026-10-07T19:04:55.990606+00:00",
-  "sportsdataio_status": "Connected \u00b7 2026-10-07 19:04 UTC",
-  "sportsdataio_refreshed_at": "2026-10-07T19:04:56.545364+00:00",
-  "reporting_refreshed_at": "2026-10-07T19:04:56.553854+00:00",
+  "injury_refreshed_at": "2026-10-07T19:56:27.522723+00:00",
+  "sportsdataio_status": "Connected \u00b7 2026-10-07 19:56 UTC",
+  "sportsdataio_refreshed_at": "2026-10-07T19:56:28.648890+00:00",
+  "reporting_refreshed_at": "2026-10-07T19:56:28.657739+00:00",
   "journalism_status": "Connected \u00b7 0 matched items",
   "reporter_social_status": "Connected \u00b7 11 reporter posts",
   "reporting_records": 11,
-  "headshot_refreshed_at": "2026-10-07T19:05:05.426523+00:00",
+  "headshot_refreshed_at": "2026-10-07T19:56:37.727491+00:00",
   "headshot_status": "Connected \u00b7 828 active roster photos",
-  "headshot_coverage": 0.9064039408866995,
+  "headshot_coverage": 0.9408866995073891,
   "depth_chart_players": 1860,
   "snap_coverage": 0.9261083743842364,
   "weather_coverage": 0.9359605911330049,
