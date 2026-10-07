@@ -16,6 +16,8 @@ CALIBRATED_INTERVAL_OFFSETS = {
     "WR": (-6.07, 4.95),
     "TE": (-4.15, 4.31),
 }
+QB_RANGE_CALIBRATION_PATH = Path(__file__).resolve().parents[1] / "reports" / "qb-model-calibration.json"
+POSITION_RANGE_CALIBRATION_PATH = Path(__file__).resolve().parents[1] / "reports" / "projection-range-calibration.json"
 
 DEMO_PLAYERS = pd.DataFrame(
     [
@@ -235,6 +237,22 @@ def load_live_context_data(season: int) -> tuple[pd.DataFrame, pd.DataFrame]:
     return snaps, team_stats
 
 
+def load_prior_weekly_data(season: int) -> pd.DataFrame:
+    """Load the previous regular season used only as the approved early-season anchor."""
+    previous = season - 1
+    local_parquet = PROJECT_ROOT / "data" / "raw" / f"player_stats_{previous}.parquet"
+    local_csv = PROJECT_ROOT / "data" / "raw" / f"player_stats_{previous}.csv"
+    if local_parquet.exists():
+        data = pd.read_parquet(local_parquet)
+    elif local_csv.exists():
+        data = pd.read_csv(local_csv, low_memory=False)
+    else:
+        data = pd.read_parquet(PLAYER_STATS_URL.format(season=previous))
+    if "season_type" in data:
+        data = data.loc[data["season_type"].eq("REG")]
+    return data.loc[data["season"].eq(previous)].copy()
+
+
 def add_live_supplementary_context(
     board: pd.DataFrame, snaps: pd.DataFrame, team_stats: pd.DataFrame
 ) -> pd.DataFrame:
@@ -419,6 +437,216 @@ def add_injury_context(players: pd.DataFrame) -> pd.DataFrame:
     result["injury_detail"] = "No reviewed 2026 injury feed"
     result["injury_as_of"] = pd.NA
     return result
+
+
+def apply_verified_starter_gate(board: pd.DataFrame) -> pd.DataFrame:
+    """Require a live provider depth-chart QB1 designation for QB selection."""
+    result = board.copy()
+    depth_position = result.get("depth_position_live", pd.Series(pd.NA, index=result.index)).astype("string")
+    depth_order = pd.to_numeric(result.get("depth_order_live", pd.Series(np.nan, index=result.index)), errors="coerce")
+    result["verified_qb_starter"] = ~result["position"].eq("QB") | (depth_position.eq("QB") & depth_order.eq(1))
+    result["starter_gate_reason"] = np.where(
+        result["position"].ne("QB"),
+        "Not applicable",
+        np.where(result["verified_qb_starter"], "Verified QB1 in live depth chart", "Not verified as live QB1"),
+    )
+    return result
+
+
+def apply_qb_scoring_mode(
+    board: pd.DataFrame, weekly: pd.DataFrame, passing_td_points: int = 4
+) -> pd.DataFrame:
+    """Recalculate QB production, matchup, and calibrated ranges for 4/6-point pass TD scoring."""
+    if passing_td_points not in (4, 6):
+        raise ValueError("passing_td_points must be 4 or 6")
+    result = board.copy()
+    qbs = weekly.loc[weekly["position"].eq("QB")].copy()
+    if qbs.empty:
+        return result
+    id_column = "player_id" if "player_id" in qbs else "player_display_name"
+    qbs["passing_tds"] = pd.to_numeric(qbs.get("passing_tds", 0), errors="coerce").fillna(0)
+    qbs["qb_points"] = _position_fantasy_points(qbs) + (passing_td_points - 4) * qbs["passing_tds"]
+    for column in ("carries", "rushing_yards"):
+        qbs[column] = pd.to_numeric(qbs.get(column, 0), errors="coerce").fillna(0)
+    qbs = qbs.sort_values([id_column, "week"])
+    summary = qbs.groupby(id_column, as_index=False).agg(qb_season_ppr=("qb_points", "mean"))
+    recent = qbs.groupby(id_column, as_index=False).tail(4).groupby(id_column, as_index=False).agg(
+        qb_recent_ppr=("qb_points", "mean"),
+        qb_recent_carries=("carries", "mean"),
+        qb_recent_rush_yards=("rushing_yards", "mean"),
+    )
+    summary = summary.merge(recent, on=id_column, validate="one_to_one")
+    defense = qbs.groupby("opponent_team", as_index=False)["qb_points"].mean().rename(columns={"qb_points": "qb_points_allowed"})
+    league_qb = float(qbs["qb_points"].mean())
+    defense["qb_matchup_index"] = (defense["qb_points_allowed"] / league_qb).clip(.90, 1.10)
+
+    result = result.merge(summary, on=id_column, how="left")
+    result = result.merge(defense, left_on="next_opponent", right_on="opponent_team", how="left").drop(
+        columns="opponent_team", errors="ignore"
+    )
+    mask = result["position"].eq("QB")
+    result.loc[mask, "season_ppr"] = result.loc[mask, "qb_season_ppr"]
+    result.loc[mask, "recent_ppr"] = result.loc[mask, "qb_recent_ppr"]
+    result.loc[mask, "points_allowed"] = result.loc[mask, "qb_points_allowed"]
+    result.loc[mask, "matchup_index"] = result.loc[mask, "qb_matchup_index"].fillna(1.0)
+    form = RECENT_PPR_WEIGHT * result.loc[mask, "recent_ppr"] + SEASON_PPR_WEIGHT * result.loc[mask, "season_ppr"]
+    projection = form * (1 + MATCHUP_STRENGTH * (result.loc[mask, "matchup_index"] - 1))
+    result.loc[mask, "projected_ppr"] = projection
+    result.loc[mask, "median_ppr"] = projection
+
+    # Use the validated format-specific empirical QB ranges when available.
+    if QB_RANGE_CALIBRATION_PATH.exists():
+        import json
+
+        calibration = json.loads(QB_RANGE_CALIBRATION_PATH.read_text(encoding="utf-8"))
+        offsets = calibration["formats"][f"{passing_td_points}_point_passing_td"]["range_offsets"]
+        offset_table = {row["archetype"]: row for row in offsets}
+        archetype = np.where(
+            result.loc[mask, "qb_recent_carries"].ge(5) | result.loc[mask, "qb_recent_rush_yards"].ge(30),
+            "Mobile",
+            "Pocket",
+        )
+        result.loc[mask, "qb_archetype"] = archetype
+        lower = pd.Series(archetype, index=result.index[mask]).map(
+            {key: value["q10"] * value["lower_scale"] for key, value in offset_table.items()}
+        )
+        upper = pd.Series(archetype, index=result.index[mask]).map(
+            {key: value["q90"] * value["upper_scale"] for key, value in offset_table.items()}
+        )
+        result.loc[mask, "floor_ppr"] = (projection + lower).clip(lower=0)
+        result.loc[mask, "ceiling_ppr"] = projection + upper
+    result["qb_passing_td_points"] = passing_td_points
+    return result.drop(
+        columns=["qb_season_ppr", "qb_recent_ppr", "qb_recent_carries", "qb_recent_rush_yards", "qb_points_allowed", "qb_matchup_index"],
+        errors="ignore",
+    )
+
+
+def apply_approved_projection_model(
+    board: pd.DataFrame,
+    weekly: pd.DataFrame,
+    prior_weekly: pd.DataFrame,
+    next_week: int,
+    passing_td_points: int = 4,
+) -> pd.DataFrame:
+    """Apply the approved round-three median and calibrated outcome ranges live."""
+    if passing_td_points not in (4, 6):
+        raise ValueError("passing_td_points must be 4 or 6")
+    import json
+
+    result = board.copy()
+    current = weekly.copy()
+    prior = prior_weekly.copy()
+    if "season_type" in current:
+        current = current.loc[current["season_type"].eq("REG")]
+    if "season_type" in prior:
+        prior = prior.loc[prior["season_type"].eq("REG")]
+    player_column = "player_id" if "player_id" in current else "player_display_name"
+    team_column = "recent_team" if "recent_team" in current else "team"
+    positions = ["QB", "RB", "WR", "TE"]
+    current = current.loc[current["position"].isin(positions)].copy()
+    prior = prior.loc[prior["position"].isin(positions)].copy()
+    for frame in (current, prior):
+        for column in (
+            "attempts", "carries", "targets", "passing_tds", "rushing_tds", "receiving_tds",
+            "passing_interceptions", "fumbles_lost_total", "rushing_yards",
+        ):
+            if column not in frame:
+                frame[column] = 0.0
+            frame[column] = pd.to_numeric(frame[column], errors="coerce").fillna(0)
+        frame["base_ppr"] = _position_fantasy_points(frame)
+        frame["opportunities"] = np.where(
+            frame["position"].eq("QB"), frame["attempts"] + frame["carries"], frame["carries"] + frame["targets"]
+        )
+        frame["td_points"] = 4 * frame["passing_tds"] + 6 * frame["rushing_tds"] + 6 * frame["receiving_tds"]
+        non_qb = frame["position"].ne("QB")
+        frame_team_column = "recent_team" if "recent_team" in frame else "team"
+        team_total = frame.loc[non_qb].groupby(["season", "week", frame_team_column])["opportunities"].transform("sum")
+        frame["opportunity_share"] = np.nan
+        frame.loc[non_qb, "opportunity_share"] = frame.loc[non_qb, "opportunities"] / team_total.replace(0, np.nan)
+
+    # Approved RB/WR/TE model: workload-supported production, strong TD regression,
+    # steady historical fade, and a sample-scaled matchup adjustment.
+    skill_current = current.loc[current["position"].ne("QB")].sort_values([player_column, "week"])
+    skill_prior = prior.loc[prior["position"].ne("QB")].copy()
+    skill = skill_current.groupby([player_column, "position"], as_index=False).agg(
+        approved_games=("base_ppr", "size"), approved_season_ppr=("base_ppr", "mean"),
+        approved_season_td=("td_points", "mean"),
+    )
+    recent_skill = skill_current.groupby([player_column, "position"], as_index=False).tail(3).groupby(
+        [player_column, "position"], as_index=False
+    ).agg(approved_recent_ppr=("base_ppr", "mean"), approved_recent_opp=("opportunities", "mean"), approved_recent_share=("opportunity_share", "mean"))
+    skill = skill.merge(recent_skill, on=[player_column, "position"])
+    current_rates = skill_current.groupby("position").agg(points=("base_ppr", "sum"), td=("td_points", "sum"), opp=("opportunities", "sum"))
+    current_rates["ppr_rate"] = current_rates["points"] / current_rates["opp"]
+    current_rates["td_rate"] = current_rates["td"] / current_rates["opp"]
+    prior_anchor = skill_prior.groupby([player_column, "position"], as_index=False).agg(
+        prior_ppr=("base_ppr", "mean"), prior_td=("td_points", "mean"),
+        prior_opp=("opportunities", "mean"), prior_share=("opportunity_share", "mean"),
+    )
+    prior_rates = skill_prior.groupby("position").agg(td=("td_points", "sum"), opp=("opportunities", "sum"))
+    prior_rates["td_rate"] = prior_rates["td"] / prior_rates["opp"]
+    skill = skill.merge(prior_anchor, on=[player_column, "position"], how="left")
+    expected_td = skill["approved_recent_opp"] * skill["position"].map(current_rates["td_rate"])
+    td_regressed = skill["approved_season_ppr"] - skill["approved_season_td"] + .25 * skill["approved_season_td"] + .75 * expected_td
+    workload = skill["approved_recent_opp"] * skill["position"].map(current_rates["ppr_rate"])
+    skill["current_signal"] = .75 * td_regressed + .25 * workload
+    prior_expected_td = skill["prior_opp"] * skill["position"].map(prior_rates["td_rate"])
+    skill["history_signal"] = skill["prior_ppr"] - skill["prior_td"] + .25 * skill["prior_td"] + .75 * prior_expected_td
+    skill["history_signal"] = skill["history_signal"].fillna(workload)
+    weight = pd.Series(np.select(
+        [skill["approved_games"].le(2), skill["approved_games"].le(6), skill["approved_games"].le(10)],
+        [.40, .60, .75], default=.90,
+    ), index=skill.index)
+    role_change = (
+        skill["approved_games"].ge(5) & skill["prior_opp"].gt(0)
+        & skill["approved_recent_opp"].ge(1.25 * skill["prior_opp"])
+        & skill["approved_recent_share"].ge(1.15 * skill["prior_share"])
+    )
+    weight = (weight + .10 * role_change.astype(float)).clip(upper=.90)
+    skill["approved_weight"] = weight
+    skill["approved_base"] = weight * skill["current_signal"] + (1 - weight) * skill["history_signal"]
+    defense = skill_current.groupby(["opponent_team", "position"], as_index=False)["base_ppr"].agg(["mean", "size"]).reset_index()
+    league = skill_current.groupby("position")["base_ppr"].mean()
+    defense["raw_matchup"] = (defense["mean"] / defense["position"].map(league)).clip(.90, 1.10)
+    evidence_cap = min(.10, .03 + max(0, next_week - 5) * .01)
+    defense["approved_matchup_factor"] = 1 + (defense["raw_matchup"] - 1).clip(-evidence_cap, evidence_cap) * (defense["size"] / 24).clip(upper=1)
+    skill = skill.merge(
+        result[[player_column, "next_opponent"]], on=player_column, how="left"
+    ).merge(
+        defense[["opponent_team", "position", "approved_matchup_factor"]],
+        left_on=["next_opponent", "position"], right_on=["opponent_team", "position"], how="left",
+    )
+    skill["approved_projection"] = skill["approved_base"] * skill["approved_matchup_factor"].fillna(1.0)
+    result = result.merge(
+        skill[[player_column, "approved_season_ppr", "approved_recent_ppr", "approved_recent_opp", "approved_weight", "approved_projection"]],
+        on=player_column, how="left", validate="one_to_one",
+    )
+    skill_mask = result["position"].ne("QB") & result["approved_projection"].notna()
+    result.loc[skill_mask, "season_ppr"] = result.loc[skill_mask, "approved_season_ppr"]
+    result.loc[skill_mask, "recent_ppr"] = result.loc[skill_mask, "approved_recent_ppr"]
+    result.loc[skill_mask, "recent_opportunities"] = result.loc[skill_mask, "approved_recent_opp"]
+    result.loc[skill_mask, "projected_ppr"] = result.loc[skill_mask, "approved_projection"]
+    result.loc[skill_mask, "median_ppr"] = result.loc[skill_mask, "approved_projection"]
+
+    if POSITION_RANGE_CALIBRATION_PATH.exists():
+        ranges = json.loads(POSITION_RANGE_CALIBRATION_PATH.read_text(encoding="utf-8"))["offsets"]
+        range_table = pd.DataFrame(ranges)
+        buckets = pd.cut(result.loc[skill_mask, "games_played"], [0, 4, 8, np.inf], labels=["2-4", "5-8", "9+"]).astype(str)
+        keys = list(zip(result.loc[skill_mask, "position"], buckets))
+        lower_map = {(row["position"], row["sample_bucket"]): row["p10_offset"] for row in ranges}
+        upper_map = {(row["position"], row["sample_bucket"]): row["p90_offset"] for row in ranges}
+        lower = pd.Series([lower_map.get(key, 0) for key in keys], index=result.index[skill_mask])
+        upper = pd.Series([upper_map.get(key, 0) for key in keys], index=result.index[skill_mask])
+        result.loc[skill_mask, "floor_ppr"] = (result.loc[skill_mask, "median_ppr"] + lower).clip(lower=0)
+        result.loc[skill_mask, "ceiling_ppr"] = result.loc[skill_mask, "median_ppr"] + upper
+
+    # Apply the separately approved QB scoring-format model and empirical ranges.
+    result = apply_qb_scoring_mode(result, current, passing_td_points)
+    result["projection_model"] = "Approved round-three live model"
+    return result.drop(columns=[
+        "approved_season_ppr", "approved_recent_ppr", "approved_recent_opp", "approved_weight", "approved_projection"
+    ], errors="ignore")
 
 
 def load_dashboard_players() -> tuple[pd.DataFrame, str]:

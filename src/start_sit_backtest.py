@@ -27,6 +27,12 @@ def build_backtest_rows(weekly: pd.DataFrame, min_prior_games: int = 3) -> pd.Da
     data["opportunities"] = np.where(
         data["position"].eq("QB"), data["attempts"] + data["carries"], data["carries"] + data["targets"]
     )
+    prior_season = (
+        data.groupby(["season", "player_id"], as_index=False)["fantasy_points_ppr"]
+        .mean()
+        .rename(columns={"fantasy_points_ppr": "prior_season_ppr"})
+    )
+    prior_season["season"] += 1
 
     output: list[pd.DataFrame] = []
     for season, season_data in data.groupby("season", sort=True):
@@ -55,6 +61,7 @@ def build_backtest_rows(weekly: pd.DataFrame, min_prior_games: int = 3) -> pd.Da
             defense["matchup_index"] = (defense["points_allowed"] / defense["league_ppr"]).clip(.85, 1.15)
 
             current = current.merge(features, on="player_id", how="left")
+            current = current.merge(prior_season, on=["season", "player_id"], how="left")
             current = current.merge(defense, on=["opponent_team", "position"], how="left")
             current["matchup_index"] = current["matchup_index"].fillna(1.0)
             floor = current["position"].map(OPPORTUNITY_FLOORS)
@@ -63,6 +70,17 @@ def build_backtest_rows(weekly: pd.DataFrame, min_prior_games: int = 3) -> pd.Da
                 & current["recent_opportunities"].ge(floor)
             ].copy()
             current["target_ppr"] = current["fantasy_points_ppr"]
+            # Workload-based fallback for rookies and players without usable prior history.
+            position_rates = history.groupby("position").apply(
+                lambda group: group["fantasy_points_ppr"].sum() / group["opportunities"].sum()
+                if group["opportunities"].sum() else np.nan,
+                include_groups=False,
+            )
+            position_means = history.groupby("position")["fantasy_points_ppr"].mean()
+            workload_estimate = current["position"].map(position_rates) * current["recent_opportunities"]
+            position_anchor = current["position"].map(position_means)
+            current["new_player_anchor"] = .65 * workload_estimate + .35 * position_anchor
+            current["history_anchor"] = current["prior_season_ppr"].fillna(current["new_player_anchor"])
             output.append(current)
     return pd.concat(output, ignore_index=True) if output else pd.DataFrame()
 
@@ -113,6 +131,48 @@ def add_prediction(rows: pd.DataFrame, recent_weight: float, matchup_strength: f
     ) * (1 + matchup_strength * (result["matchup_index"] - 1))
     result["absolute_error"] = (result["target_ppr"] - result["prediction"]).abs()
     return result
+
+
+SHRINKAGE_SCHEDULES = {
+    "conservative": ((4, .25), (7, .45), (10, .65), (99, .80)),
+    "balanced": ((4, .40), (7, .60), (10, .75), (99, .90)),
+    "aggressive": ((4, .60), (7, .75), (10, .90), (99, 1.00)),
+}
+
+
+def add_shrunk_prediction(
+    rows: pd.DataFrame,
+    schedule: str = "balanced",
+    recent_weight: float = .10,
+    matchup_strength: float = .25,
+) -> pd.DataFrame:
+    """Blend current form with prior history using a sample-size schedule."""
+    result = rows.copy()
+    cutoffs = SHRINKAGE_SCHEDULES[schedule]
+    current_weight = pd.Series(1.0, index=result.index)
+    lower = 0
+    for upper, weight in cutoffs:
+        current_weight.loc[result["games_played"].between(lower, upper)] = weight
+        lower = upper + 1
+    current_form = recent_weight * result["recent_ppr"] + (1 - recent_weight) * result["season_ppr"]
+    anchor = result["history_anchor"].fillna(current_form)
+    base = current_weight * current_form + (1 - current_weight) * anchor
+    result["prediction"] = base * (1 + matchup_strength * (result["matchup_index"] - 1))
+    result["absolute_error"] = (result["target_ppr"] - result["prediction"]).abs()
+    result["current_season_weight"] = current_weight
+    return result
+
+
+def summarize_predictions(rows: pd.DataFrame) -> dict:
+    error = rows["target_ppr"] - rows["prediction"]
+    return {
+        "mae": float(error.abs().mean()),
+        "rmse": float(np.sqrt((error ** 2).mean())),
+        "bias": float(error.mean()),
+        "correlation": float(rows["prediction"].corr(rows["target_ppr"])),
+        "pairwise_accuracy": pairwise_ordering_accuracy(rows),
+        "samples": int(len(rows)),
+    }
 
 
 def pairwise_ordering_accuracy(rows: pd.DataFrame) -> float:

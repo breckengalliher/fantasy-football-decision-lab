@@ -2,7 +2,12 @@ from datetime import date
 
 import pandas as pd
 
-from dashboard.data import build_start_sit_board, current_nfl_season
+from dashboard.data import (
+    apply_qb_scoring_mode,
+    apply_verified_starter_gate,
+    build_start_sit_board,
+    current_nfl_season,
+)
 
 
 def test_current_nfl_season_changes_in_september():
@@ -25,3 +30,39 @@ def test_matchup_adjustment_rewards_easier_opponent():
     bravo = board.loc[board["player"].eq("Bravo")].iloc[0]
     assert week == 5
     assert alpha["projected_ppr"] > bravo["projected_ppr"]
+
+
+def test_verified_starter_gate_requires_live_qb1():
+    board = pd.DataFrame([
+        {"player": "Starter", "position": "QB", "depth_position_live": "QB", "depth_order_live": 1},
+        {"player": "Backup", "position": "QB", "depth_position_live": "QB", "depth_order_live": 2},
+        {"player": "Receiver", "position": "WR", "depth_position_live": "WR", "depth_order_live": 2},
+    ])
+    result = apply_verified_starter_gate(board).set_index("player")
+    assert bool(result.loc["Starter", "verified_qb_starter"])
+    assert not bool(result.loc["Backup", "verified_qb_starter"])
+    assert bool(result.loc["Receiver", "verified_qb_starter"])
+
+
+def test_qb_scoring_toggle_changes_qbs_only():
+    board = pd.DataFrame([
+        {
+            "player_id": "qb", "player": "Quarterback", "position": "QB", "next_opponent": "BBB",
+            "season_ppr": 20.0, "recent_ppr": 20.0, "points_allowed": 20.0, "matchup_index": 1.0,
+            "projected_ppr": 20.0, "median_ppr": 20.0, "floor_ppr": 10.0, "ceiling_ppr": 30.0,
+        },
+        {
+            "player_id": "wr", "player": "Receiver", "position": "WR", "next_opponent": "BBB",
+            "season_ppr": 10.0, "recent_ppr": 10.0, "points_allowed": 10.0, "matchup_index": 1.0,
+            "projected_ppr": 10.0, "median_ppr": 10.0, "floor_ppr": 5.0, "ceiling_ppr": 15.0,
+        },
+    ])
+    weekly = pd.DataFrame([
+        {"player_id": "qb", "position": "QB", "week": 1, "opponent_team": "BBB", "fantasy_points_ppr": 20.0, "passing_tds": 2, "carries": 4, "rushing_yards": 20},
+        {"player_id": "qb", "position": "QB", "week": 2, "opponent_team": "BBB", "fantasy_points_ppr": 20.0, "passing_tds": 2, "carries": 4, "rushing_yards": 20},
+        {"player_id": "wr", "position": "WR", "week": 1, "opponent_team": "BBB", "fantasy_points_ppr": 10.0, "passing_tds": 0, "carries": 0, "rushing_yards": 0},
+    ])
+    four = apply_qb_scoring_mode(board, weekly, 4).set_index("player")
+    six = apply_qb_scoring_mode(board, weekly, 6).set_index("player")
+    assert six.loc["Quarterback", "median_ppr"] > four.loc["Quarterback", "median_ppr"]
+    assert six.loc["Receiver", "median_ppr"] == four.loc["Receiver", "median_ppr"]

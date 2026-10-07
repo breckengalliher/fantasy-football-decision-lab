@@ -21,9 +21,9 @@ except ModuleNotFoundError:
     from outlooks import build_player_outlook
 
 try:
-    from dashboard.data import add_live_supplementary_context, build_start_sit_board, current_nfl_season, load_live_context_data, load_live_weekly_data
+    from dashboard.data import add_live_supplementary_context, apply_approved_projection_model, apply_verified_starter_gate, build_start_sit_board, current_nfl_season, load_live_context_data, load_live_weekly_data, load_prior_weekly_data
 except ModuleNotFoundError:
-    from data import add_live_supplementary_context, build_start_sit_board, current_nfl_season, load_live_context_data, load_live_weekly_data
+    from data import add_live_supplementary_context, apply_approved_projection_model, apply_verified_starter_gate, build_start_sit_board, current_nfl_season, load_live_context_data, load_live_weekly_data, load_prior_weekly_data
 
 
 COLORS = {"QB": "#00529b", "RB": "#69be28", "WR": "#4b788f", "TE": "#a5acaf"}
@@ -56,6 +56,10 @@ h1,h2,h3 { letter-spacing:-.025em; }
 .verdict.start .opponent { color:#c0c8cc; }
 .verdict .score { color:var(--teal); font-size:1.35rem; font-weight:750; margin-top:.8rem; }
 .verdict.start .score { color:#9ee468; }
+.verdict .unit { display:flex; align-items:center; gap:.34rem; flex-wrap:wrap; }
+.range-help { position:relative; display:inline-flex; align-items:center; justify-content:center; width:1.05rem; height:1.05rem; border:1px solid currentColor; border-radius:50%; font-size:.68rem; font-weight:800; cursor:help; opacity:.82; }
+.range-tooltip { visibility:hidden; opacity:0; position:absolute; z-index:20; left:50%; bottom:calc(100% + .5rem); transform:translateX(-50%); width:250px; padding:.55rem .65rem; border-radius:8px; background:#071b2c; color:#f7fafb; font-size:.74rem; font-weight:500; line-height:1.35; text-align:left; box-shadow:0 8px 22px rgba(0,0,0,.22); transition:opacity .12s ease; }
+.range-help:hover .range-tooltip, .range-help:focus .range-tooltip, .range-help:focus-within .range-tooltip { visibility:visible; opacity:1; }
 .verdict .outlook-label { color:var(--muted); text-transform:uppercase; letter-spacing:.1em; font-size:.65rem; font-weight:800; margin-top:1rem; }
 .verdict.start .outlook-label { color:#9ee468; }
 .verdict .reason { color:#536166; font-size:.91rem; line-height:1.5; margin-top:.28rem; }
@@ -127,7 +131,9 @@ with st.sidebar:
     st.divider()
     season = st.selectbox("Season", [SEASON, SEASON - 1], index=0)
     st.markdown("**SCORING**")
-    st.caption("Full PPR · 4-pt passing TD")
+    qb_td_label = st.radio("QB passing TD", ["4 points", "6 points"], horizontal=True)
+    QB_PASS_TD_POINTS = int(qb_td_label.split()[0])
+    st.caption(f"Full PPR · {QB_PASS_TD_POINTS}-pt passing TD")
     st.divider()
     st.markdown("**LIVE DATA**")
     st.caption("Weekly player results and schedule are pulled from nflverse and cached for one hour.")
@@ -144,6 +150,10 @@ except Exception as error:
     st.caption(f"Technical detail: {error}")
     st.stop()
 
+PRIOR_WEEKLY = load_prior_weekly_data(season)
+BOARD = apply_approved_projection_model(BOARD, WEEKLY, PRIOR_WEEKLY, NEXT_WEEK, QB_PASS_TD_POINTS)
+BOARD = apply_verified_starter_gate(BOARD)
+
 with st.sidebar:
     st.caption(f"SPORTSDATAIO · {PROVIDER_STATUS}")
 
@@ -158,7 +168,18 @@ if page == "Decision Room":
     st.markdown('<div class="warning"><b>Before kickoff:</b> live injuries, practice, weather, and depth context are supplementary. Confirm official late-breaking status before locking a lineup.</div>', unsafe_allow_html=True)
     c1, c2 = st.columns([.62, 1.38])
     position = c1.segmented_control("Position", ["QB", "RB", "WR", "TE"], default="WR")
-    pool = BOARD.loc[BOARD["position"].eq(position) & BOARD["next_opponent"].notna() & BOARD["is_roster_relevant"]].copy()
+    pool = BOARD.loc[
+        BOARD["position"].eq(position)
+        & BOARD["next_opponent"].notna()
+        & BOARD["is_roster_relevant"]
+        & BOARD["verified_qb_starter"]
+    ].copy()
+    if position == "QB":
+        excluded_qbs = BOARD.loc[
+            BOARD["position"].eq("QB") & BOARD["is_roster_relevant"] & ~BOARD["verified_qb_starter"]
+        ]
+        if not excluded_qbs.empty:
+            st.caption(f"{len(excluded_qbs)} QB(s) hidden because the live depth chart does not verify them as QB1.")
     names = c2.multiselect(
         "Players to compare",
         pool["player"].sort_values().tolist(),
@@ -182,7 +203,7 @@ if page == "Decision Room":
         if len(compare) > 1 and projection_spread < 2.5:
             st.info("Close call: the model still labels Start and Sit, but the gap is under 2.5 PPR—far smaller than its typical weekly error. Treat this as a lean, not a confident separation.")
 
-        st.markdown('<div class="section-title">Start / Sit verdict</div><div class="section-copy">The verdict uses 90% YTD PPR/G, 10% last-four PPR/G, and a capped opponent-PPR adjustment. Decision Context below is excluded.</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-title">Start / Sit verdict</div><div class="section-copy">The approved model blends current production, repeatable workload, a fading prior-season anchor, touchdown regression, and a sample-scaled matchup adjustment. Decision Context below is excluded.</div>', unsafe_allow_html=True)
         outlook_columns = st.columns(len(compare))
         for index, (column, (_, row)) in enumerate(zip(outlook_columns, compare.iterrows())):
             with column:
@@ -193,7 +214,7 @@ if page == "Decision Room":
                     f'<div class="verdict {card_class}"><div class="tag">{verdict}</div><div class="name">{html.escape(str(row["player"]))}</div>'
                     f'<div class="opponent">{html.escape(str(row["team"]))} · {html.escape(str(row["venue"]))} vs {html.escape(str(row["next_opponent"]))}</div>'
                     f'<div class="score">{row["floor_ppr"]:.1f} · {row["median_ppr"]:.1f} · {row["ceiling_ppr"]:.1f}</div>'
-                    f'<div class="unit">Floor · projection · ceiling</div><div class="outlook-label">Player outlook</div>'
+                    f'<div class="unit">Floor · projection · ceiling <span class="range-help" tabindex="0" aria-label="Range definition">i<span class="range-tooltip" role="tooltip">Floor is the P10 downside outcome, projection is the median estimate, and ceiling is the P90 upside outcome. About 80% of results should fall between floor and ceiling.</span></span></div><div class="outlook-label">Player outlook</div>'
                     f'<div class="reason">{html.escape(reason)}</div></div>',
                     unsafe_allow_html=True,
                 )
@@ -226,7 +247,7 @@ if page == "Decision Room":
                 ["Betting total", "Shown when available"],
                 ["OL / QB changes", "Weekly baseline active · excluded" if provider_connected else "Not connected"],
                 ["Schedule-adjusted opponent", "Shown live · excluded"],
-                ["Floor / median / ceiling", "Shown · excluded"],
+                ["Floor / projection / ceiling", "Shown · P10 / median / P90 · excluded"],
             ], columns=["Factor", "Status"])
             st.dataframe(coverage, hide_index=True, width="stretch")
 
@@ -252,7 +273,7 @@ if page == "Decision Room":
         })
         st.markdown('<div class="section-title">Live Decision Context</div><div class="section-copy">Supplementary evidence for the user. None of these fields changes the Start / Sit verdict.</div>', unsafe_allow_html=True)
         context_rows = []
-        for factor in ["Injury / practice", "Snap / route participation", "Weather", "Pace / scoring environment", "Betting total", "OL / QB changes", "Schedule-adjusted opponent", "Floor · median · ceiling"]:
+        for factor in ["Injury / practice", "Snap / route participation", "Weather", "Pace / scoring environment", "Betting total", "OL / QB changes", "Schedule-adjusted opponent", "Floor · projection · ceiling"]:
             item = {"Factor": factor}
             for _, row in compare.iterrows():
                 if factor == "Injury / practice":
@@ -284,7 +305,7 @@ if page == "Decision Room":
                         value = " · ".join(changes) if changes else "No starter change vs prior snapshot"
                     else:
                         value = "Baseline snapshot only" if PROVIDER_STATUS.startswith("Connected") else "Source not connected"
-                elif factor == "Floor · median · ceiling":
+                elif factor == "Floor · projection · ceiling":
                     value = f"{row['floor_ppr']:.1f} · {row['median_ppr']:.1f} · {row['ceiling_ppr']:.1f}"
                 else:
                     value = "Source not connected"
@@ -295,7 +316,12 @@ if page == "Decision Room":
 
 elif page == "Player Trends":
     selected_position = st.segmented_control("Position", ["QB", "RB", "WR", "TE"], default="WR")
-    pool = BOARD.loc[BOARD["position"].eq(selected_position) & BOARD["next_opponent"].notna() & BOARD["is_roster_relevant"]]
+    pool = BOARD.loc[
+        BOARD["position"].eq(selected_position)
+        & BOARD["next_opponent"].notna()
+        & BOARD["is_roster_relevant"]
+        & BOARD["verified_qb_starter"]
+    ]
     player_name = st.selectbox("Player", pool["player"].sort_values().tolist())
     player = pool.loc[pool["player"].eq(player_name)].iloc[0]
     id_column = "player_id" if "player_id" in BOARD.columns and "player_id" in WEEKLY.columns else None

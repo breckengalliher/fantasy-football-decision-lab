@@ -1,0 +1,39 @@
+{
+  "round_two": {
+    "backtest_2024": {
+      "samples": 3198,
+      "mae": 5.533400686057712,
+      "rmse": 7.173592625281996,
+      "bias_actual_minus_projection": 0.3899793585829123,
+      "correlation": 0.5220959628875984,
+      "pairwise_ordering_accuracy": 0.6700112726988627
+    },
+    "validation_2025": {
+      "samples": 3170,
+      "mae": 5.54288258757011,
+      "rmse": 7.207944950098162,
+      "bias_actual_minus_projection": -0.18711776930935495,
+      "correlation": 0.5014114684608807,
+      "pairwise_ordering_accuracy": 0.6608213744020535
+    }
+  },
+  "round_three": {
+    "notes": "Strong TD regression is relaxed only with verified scoring-role data; the historical archive lacks that field, so no exception was granted.",
+    "backtest_2024": {
+      "samples": 3198,
+      "mae": 5.522543947330807,
+      "rmse": 7.15534613743426,
+      "bias_actual_minus_projection": 0.3744024234846344,
+      "correlation": 0.5249532679869667,
+      "pairwise_ordering_accuracy": 0.6710604149692512
+    },
+    "validation_2025": {
+      "samples": 3170,
+      "mae": 5.526384892757081,
+      "rmse": 7.181689427046097,
+      "bias_actual_minus_projection": -0.1872659787179781,
+      "correlation": 0.5058582781142271,
+      "pairwise_ordering_accuracy": 0.6622097771555244
+    }
+  }
+}

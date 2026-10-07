@@ -1,0 +1,49 @@
+{
+  "scope": "Four-point passing-TD mobile quarterbacks, P10 downside only",
+  "method": "Rolling-origin validation: train only on earlier seasons and validate the next season",
+  "development_seasons": [
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "selected_lower_scale": 1.24,
+  "selection_summary": {
+    "scale": 1.2400000000000004,
+    "folds": 3.0,
+    "samples": 316.0,
+    "pooled_below_p10": 0.0981012658227848,
+    "worst_fold_below_p10": 0.11475409836065574,
+    "mean_fold_absolute_error_from_10pct": 0.017045692361353327
+  },
+  "folds": [
+    {
+      "validation_season": 2023,
+      "training_samples": 101,
+      "validation_samples": 94,
+      "training_q10_residual": -8.456585539502925,
+      "below_p10": 0.10638297872340426
+    },
+    {
+      "validation_season": 2024,
+      "training_samples": 195,
+      "validation_samples": 100,
+      "training_q10_residual": -8.91966276912291,
+      "below_p10": 0.07
+    },
+    {
+      "validation_season": 2025,
+      "training_samples": 295,
+      "validation_samples": 122,
+      "training_q10_residual": -8.83888090150801,
+      "below_p10": 0.11475409836065574
+    }
+  ],
+  "prospective_test": {
+    "season": 2026,
+    "starts_with_week": 5,
+    "status": "FROZEN_AWAITING_OUTCOMES",
+    "success_rule": "At least 10 eligible mobile-QB starts before judging; target below-P10 rate 5%-15% and report exact binomial uncertainty."
+  }
+}

@@ -2,6 +2,7 @@ import pandas as pd
 
 from src.start_sit_backtest import (
     add_prediction,
+    add_shrunk_prediction,
     build_backtest_rows,
     calibrate,
     clustered_mae_difference_ci,
@@ -50,3 +51,13 @@ def test_pairwise_accuracy_and_clustered_interval():
     assert pairwise_ordering_accuracy(predicted) == 1.0
     point, low, high = clustered_mae_difference_ci(rows, (.1, .25), (.65, .25), samples=20)
     assert low <= point <= high
+
+
+def test_balanced_shrinkage_uses_more_current_data_over_time():
+    rows = pd.DataFrame({
+        "games_played": [4, 8, 12], "recent_ppr": [30] * 3, "season_ppr": [30] * 3,
+        "history_anchor": [10] * 3, "matchup_index": [1] * 3, "target_ppr": [20] * 3,
+    })
+    result = add_shrunk_prediction(rows, "balanced")
+    assert result["current_season_weight"].tolist() == [.4, .75, .9]
+    assert result["prediction"].is_monotonic_increasing

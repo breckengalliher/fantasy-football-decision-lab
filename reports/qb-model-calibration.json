@@ -1,0 +1,188 @@
+{
+  "settings": {
+    "passing_td_points": "user toggle: 4 or 6",
+    "rushing": "full credit",
+    "passing_td_regression": "strong",
+    "turnovers": "50% current rate and 50% prior/league expectation",
+    "new_starter": "role/team anchor",
+    "matchup": "full after Week 5",
+    "range_groups": "Mobile, Pocket, Inexperienced",
+    "starter_gate": "verified starter designation required in live app",
+    "tails": "P10 and P90 calibrated separately by archetype",
+    "four_point_mobile_p10": "lower scale frozen at 1.24 after rolling-origin development through 2025; 2026 Week 5 onward is prospective"
+  },
+  "formats": {
+    "4_point_passing_td": {
+      "backtest_2024": {
+        "median": {
+          "samples": 443,
+          "mae": 6.582705172270689,
+          "rmse": 8.29725952823777,
+          "bias": 0.9738036289159457,
+          "correlation": 0.26231808248058547
+        },
+        "ranges": {
+          "samples": 443,
+          "coverage": 0.8216704288939052,
+          "below_p10": 0.0654627539503386,
+          "above_p90": 0.11286681715575621,
+          "mean_width": 21.87535671738493
+        }
+      },
+      "validation_2025": {
+        "median": {
+          "samples": 440,
+          "mae": 6.6385742284532245,
+          "rmse": 8.189746007910033,
+          "bias": -0.37387817308978544,
+          "correlation": 0.22833890874545867
+        },
+        "ranges": {
+          "samples": 440,
+          "coverage": 0.8272727272727273,
+          "below_p10": 0.08636363636363636,
+          "above_p90": 0.08636363636363636,
+          "mean_width": 22.055528624435713
+        }
+      },
+      "validation_2025_by_archetype": [
+        {
+          "archetype": "Inexperienced",
+          "samples": 75,
+          "coverage": 0.8,
+          "below_p10": 0.10666666666666667,
+          "above_p90": 0.09333333333333334,
+          "mean_width": 21.64600352132117
+        },
+        {
+          "archetype": "Mobile",
+          "samples": 122,
+          "coverage": 0.7950819672131147,
+          "below_p10": 0.11475409836065574,
+          "above_p90": 0.09016393442622951,
+          "mean_width": 21.158461268064908
+        },
+        {
+          "archetype": "Pocket",
+          "samples": 243,
+          "coverage": 0.8518518518518519,
+          "below_p10": 0.06584362139917696,
+          "above_p90": 0.0823045267489712,
+          "mean_width": 22.63230475699057
+        }
+      ],
+      "range_offsets": [
+        {
+          "archetype": "Inexperienced",
+          "q10": -11.022489509111695,
+          "q90": 8.73225900799975,
+          "samples": 625,
+          "lower_scale": 1.1100000000000003,
+          "upper_scale": 1.1100000000000003
+        },
+        {
+          "archetype": "Mobile",
+          "q10": -8.91966276912291,
+          "q90": 9.900077876816171,
+          "samples": 195,
+          "lower_scale": 1.24,
+          "upper_scale": 1.0200000000000002
+        },
+        {
+          "archetype": "Pocket",
+          "q10": -9.294487671949865,
+          "q90": 9.071939311173368,
+          "samples": 490,
+          "lower_scale": 1.2000000000000004,
+          "upper_scale": 1.2700000000000005
+        }
+      ]
+    },
+    "6_point_passing_td": {
+      "backtest_2024": {
+        "median": {
+          "samples": 443,
+          "mae": 8.253513291557908,
+          "rmse": 10.300046521476718,
+          "bias": 1.2244297361624472,
+          "correlation": 0.24015050118847314
+        },
+        "ranges": {
+          "samples": 443,
+          "coverage": 0.8126410835214447,
+          "below_p10": 0.06997742663656885,
+          "above_p90": 0.11738148984198646,
+          "mean_width": 26.953678174199634
+        }
+      },
+      "validation_2025": {
+        "median": {
+          "samples": 440,
+          "mae": 8.292260231332195,
+          "rmse": 10.16511117311234,
+          "bias": -0.39402923309923726,
+          "correlation": 0.2102518550704199
+        },
+        "ranges": {
+          "samples": 440,
+          "coverage": 0.8136363636363636,
+          "below_p10": 0.09772727272727273,
+          "above_p90": 0.08863636363636364,
+          "mean_width": 27.197891853135456
+        }
+      },
+      "validation_2025_by_archetype": [
+        {
+          "archetype": "Inexperienced",
+          "samples": 75,
+          "coverage": 0.8533333333333334,
+          "below_p10": 0.10666666666666667,
+          "above_p90": 0.04,
+          "mean_width": 26.496174710068306
+        },
+        {
+          "archetype": "Mobile",
+          "samples": 122,
+          "coverage": 0.8032786885245902,
+          "below_p10": 0.12295081967213115,
+          "above_p90": 0.07377049180327869,
+          "mean_width": 26.010964808678988
+        },
+        {
+          "archetype": "Pocket",
+          "samples": 243,
+          "coverage": 0.8065843621399177,
+          "below_p10": 0.0823045267489712,
+          "above_p90": 0.1111111111111111,
+          "mean_width": 28.01037697722486
+        }
+      ],
+      "range_offsets": [
+        {
+          "archetype": "Inexperienced",
+          "q10": -13.489666406521994,
+          "q90": 10.914865230925592,
+          "samples": 625,
+          "lower_scale": 1.1000000000000003,
+          "upper_scale": 1.1000000000000003
+        },
+        {
+          "archetype": "Mobile",
+          "q10": -11.617841794776604,
+          "q90": 11.815459834663924,
+          "samples": 195,
+          "lower_scale": 1.1100000000000003,
+          "upper_scale": 1.1100000000000003
+        },
+        {
+          "archetype": "Pocket",
+          "q10": -11.75217185445788,
+          "q90": 11.568500839303807,
+          "samples": 490,
+          "lower_scale": 1.1700000000000004,
+          "upper_scale": 1.2400000000000004
+        }
+      ]
+    }
+  }
+}
