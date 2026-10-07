@@ -190,7 +190,28 @@ h1,h2,h3 { letter-spacing:-.025em; }
 .context-label { color:var(--muted); font-size:.72rem; font-weight:800; letter-spacing:.02em; line-height:1.25; }
 .context-value { color:var(--ink); font-size:.82rem; font-weight:600; line-height:1.35; overflow-wrap:anywhere; }
 .context-help { cursor:help; border-bottom:1px dotted currentColor; }
-.stPlotlyChart { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:.2rem; }
+.stPlotlyChart { background:var(--card); border:0; border-radius:12px; padding:.2rem; }
+[data-baseweb="tab-list"] { gap:.32rem; background:#e6ecef; border-radius:12px; padding:.3rem; }
+[data-baseweb="tab-list"] button { border-radius:8px; padding:.55rem .8rem; color:var(--ink); }
+[data-baseweb="tab-list"] button[aria-selected="true"] { background:var(--navy); color:white; }
+[data-baseweb="tab-highlight"] { display:none; }
+.usage-board { display:grid; gap:.58rem; margin:.7rem 0 .35rem; }
+.usage-player { display:grid; grid-template-columns:minmax(180px,.8fr) minmax(220px,1.45fr) 92px; gap:.9rem; align-items:center; background:var(--card); border:1px solid var(--line); border-radius:13px; padding:.72rem .82rem; }
+.usage-player.leader { border-color:var(--gold); box-shadow:0 7px 18px rgba(0,34,68,.08); }
+.usage-identity { display:flex; align-items:center; gap:.62rem; min-width:0; }
+.usage-identity .player-photo { width:46px; height:46px; flex-basis:46px; }
+.usage-name { color:var(--ink); font-size:.82rem; font-weight:850; line-height:1.18; overflow-wrap:anywhere; }
+.usage-team { display:flex; align-items:center; gap:.28rem; color:var(--muted); font-size:.65rem; margin-top:.16rem; }
+.usage-team img { width:1rem; height:1rem; object-fit:contain; }
+.usage-track-wrap { min-width:0; }
+.usage-track { height:10px; border-radius:999px; background:#dfe5e7; overflow:hidden; }
+.usage-fill { height:100%; border-radius:999px; background:var(--wolf); }
+.usage-player.leader .usage-fill { background:linear-gradient(90deg,#397f18,var(--gold)); }
+.usage-rank { color:var(--muted); font-size:.63rem; margin-top:.28rem; }
+.usage-score { text-align:right; }
+.usage-score strong { display:block; color:var(--navy); font-size:1.55rem; line-height:1; letter-spacing:-.03em; }
+.usage-score span { color:var(--muted); font-size:.62rem; }
+.usage-insight { border-left:4px solid var(--gold); background:#edf4e8; color:var(--ink); padding:.66rem .8rem; border-radius:9px; font-size:.75rem; line-height:1.4; margin-top:.65rem; }
 @media(max-width:1100px) {
   .context-grid { grid-template-columns:1fr; }
 }
@@ -208,12 +229,15 @@ h1,h2,h3 { letter-spacing:-.025em; }
   .game-status { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .driver-grid { grid-template-columns:1fr; }
   .advanced-stat-grid { grid-template-columns:1fr; }
+  .usage-player { grid-template-columns:minmax(170px,.9fr) minmax(160px,1.1fr) 78px; }
 }
 @media(max-width:520px) {
   div[data-baseweb="select"] > div { flex-wrap:wrap; }
   .game-status { grid-template-columns:1fr; }
   .decision-edge { align-items:flex-start; flex-direction:column; }
   .projection-scope { grid-template-columns:1fr; }
+  .usage-player { grid-template-columns:1fr 72px; }
+  .usage-track-wrap { grid-column:1/-1; grid-row:2; }
 }
 </style>
 """,
@@ -594,7 +618,7 @@ if page == "Decision Room":
             range_fig.update_layout(title=f"Week {NEXT_WEEK} P10–P90 projection range", xaxis_title="PPR points", yaxis_title="", showlegend=False)
             range_fig.update_yaxes(autorange="reversed")
             range_fig.update_xaxes(range=[max(0, float(compare["floor_ppr"].min()) - 3), float(compare["ceiling_ppr"].max()) + 3])
-            st.plotly_chart(polish(range_fig, 340), width="stretch", config={"displayModeBar": True, "displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+            st.plotly_chart(polish(range_fig, 340), width="stretch", config={"displayModeBar": False})
             overlap = max(0.0, min(compare["ceiling_ppr"]) - max(compare["floor_ppr"]))
             st.caption(f"All selected ranges overlap by {overlap:.1f} PPR. The median gap is {projection_spread:.1f} PPR, so the ordering should be treated as {'a lean' if projection_spread < 2.5 else 'meaningful separation'}.")
 
@@ -625,7 +649,7 @@ if page == "Decision Room":
                     ))
                 trend_fig.update_layout(title="Weekly PPR production", xaxis_title="NFL week", yaxis_title="PPR points", hovermode="x unified")
                 trend_fig.update_xaxes(dtick=1)
-                st.plotly_chart(polish(trend_fig, 380), width="stretch", config={"displayModeBar": True, "displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+                st.plotly_chart(polish(trend_fig, 380), width="stretch", config={"displayModeBar": False})
 
         with usage_tab:
             metric_options = {
@@ -648,16 +672,45 @@ if page == "Decision Room":
                 usage_mode = "Latest week"
             elif usage_mode == "Per game":
                 values = values / pd.to_numeric(usage_values["games_played"], errors="coerce").clip(lower=1)
-            usage_fig = go.Figure(go.Bar(
-                x=values, y=usage_values["player"], orientation="h", marker_color=chart_colors,
-                text=values.map(lambda value: f"{value:.1f}{'%' if is_share else ''}"), textposition="outside",
-                customdata=list(zip(usage_values["team"], usage_values["next_opponent"], usage_values["games_played"])),
-                hovertemplate=f"<b>%{{y}}</b> · %{{customdata[0]}}<br>{usage_label}: %{{x:.1f}}{'%' if is_share else ''}<br>%{{customdata[2]}} games played · next vs %{{customdata[1]}}<extra></extra>",
-            ))
-            usage_fig.update_layout(title=f"{usage_label} · {usage_mode.lower()}", xaxis_title=f"{usage_label}{' (%)' if is_share else ''}", yaxis_title="", showlegend=False)
-            usage_fig.update_yaxes(autorange="reversed")
-            usage_fig.update_xaxes(range=[0, max(float(values.max()) * 1.22, 1)])
-            st.plotly_chart(polish(usage_fig, 330), width="stretch", config={"displayModeBar": True, "displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d"]})
+            usage_values["display_value"] = values
+            ranked_usage = usage_values.sort_values(["display_value", "player"], ascending=[False, True]).reset_index(drop=True)
+            max_value = max(float(ranked_usage["display_value"].max()), 1.0)
+            usage_rows = []
+            ordinal = {1: "1st", 2: "2nd", 3: "3rd"}
+            for rank, (_, usage_row) in enumerate(ranked_usage.iterrows(), start=1):
+                value = float(usage_row["display_value"])
+                width = max(4.0, min(100.0, value / max_value * 100))
+                photo = player_photo_html(usage_row.get("headshot_url"), usage_row["player"])
+                logo_url = team_logo_url(usage_row.get("team"))
+                logo = (
+                    f'<img src="{html.escape(logo_url, quote=True)}" alt="{html.escape(str(usage_row["team"]), quote=True)} logo">'
+                    if logo_url else ""
+                )
+                game_detail = f'{usage_row.get("position", position)} · {usage_row["team"]} vs {usage_row["next_opponent"]}'
+                display_value = f"{value:.1f}{'%' if is_share else ''}"
+                usage_rows.append(
+                    f'<article class="usage-player{" leader" if rank == 1 else ""}">'
+                    f'<div class="usage-identity">{photo}<div><div class="usage-name">{html.escape(str(usage_row["player"]))}</div>'
+                    f'<div class="usage-team">{logo}<span>{html.escape(game_detail)}</span></div></div></div>'
+                    f'<div class="usage-track-wrap"><div class="usage-track"><div class="usage-fill" style="width:{width:.1f}%"></div></div>'
+                    f'<div class="usage-rank">{ordinal.get(rank, f"#{rank}")} of {len(ranked_usage)} · {html.escape(usage_label.lower())}</div></div>'
+                    f'<div class="usage-score"><strong>{display_value}</strong><span>{html.escape(usage_mode)}</span></div></article>'
+                )
+            leader_usage = ranked_usage.iloc[0]
+            if len(ranked_usage) > 1:
+                runner_up = ranked_usage.iloc[1]
+                gap = float(leader_usage["display_value"] - runner_up["display_value"])
+                if gap < 0.05:
+                    insight = f'{leader_usage["player"]} and {runner_up["player"]} are essentially tied in {usage_label.lower()}.'
+                else:
+                    suffix = " percentage points" if is_share else ""
+                    insight = f'{leader_usage["player"]} leads this comparison by {gap:.1f}{suffix} in {usage_label.lower()} ({usage_mode.lower()}).'
+            else:
+                insight = f'{leader_usage["player"]} is shown at {float(leader_usage["display_value"]):.1f}{"%" if is_share else ""} for {usage_label.lower()}.'
+            st.markdown(
+                f'<div class="usage-board">{"".join(usage_rows)}</div><div class="usage-insight"><b>Quick read</b><span>{html.escape(insight)}</span></div>',
+                unsafe_allow_html=True,
+            )
 
         with st.expander("Player & team details"):
             st.dataframe(comparison_details, hide_index=True, width="stretch", column_config={
