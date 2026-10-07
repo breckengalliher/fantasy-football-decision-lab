@@ -106,6 +106,7 @@ def normalize_injuries(payload: Iterable[dict[str, Any]]) -> pd.DataFrame:
             {
                 "player_key": _key(name),
                 "team": str(team),
+                "injury_record_live": True,
                 "injury_status_live": _usable(_first(item, "Status", "InjuryStatus")),
                 "practice_status_live": _usable(_first(item, "Practice", "PracticeStatus")),
                 "injury_body_part_live": _usable(_first(item, "BodyPart", "InjuredBodyPart")),

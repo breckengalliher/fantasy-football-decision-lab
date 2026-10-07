@@ -17,6 +17,7 @@ def test_injury_payload_is_normalized_without_guessing_missing_fields():
         {"Name": "Example Receiver", "Team": "ABC", "Status": "Questionable", "BodyPart": "Hamstring", "PracticeStatus": "Limited"}
     ])
     assert result.loc[0, "player_key"] == "example receiver"
+    assert bool(result.loc[0, "injury_record_live"])
     assert result.loc[0, "injury_status_live"] == "Questionable"
     assert result.loc[0, "practice_status_live"] == "Limited"
 

@@ -286,7 +286,12 @@ if page == "Decision Room":
                 if factor == "Injury / practice":
                     values = [row.get("injury_status_live"), row.get("practice_status_live"), row.get("injury_body_part_live")]
                     values = [str(value) for value in values if value is not None and pd.notna(value)]
-                    value = " · ".join(values) if values else "No provider record" if PROVIDER_STATUS.startswith("Connected") else "Source not connected"
+                    if values:
+                        value = " · ".join(values)
+                    elif pd.notna(row.get("injury_record_live")) and bool(row.get("injury_record_live")):
+                        value = "Provider record present · status unavailable"
+                    else:
+                        value = "No provider record" if PROVIDER_STATUS.startswith("Connected") else "Source not connected"
                     if values and pd.notna(row.get("injury_updated_live")): value += f" · updated {row.get('injury_updated_live')}"
                 elif factor == "Betting total":
                     provider_total = row.get("betting_total_live")
