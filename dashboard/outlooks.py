@@ -8,6 +8,14 @@ import math
 JOURNALISM_AFFECTS_PROJECTION = False
 
 
+def leader_margin(projections: list[float]) -> float:
+    """Return the leader's edge over the runner-up, not the last-place player."""
+    ordered = sorted((float(value) for value in projections), reverse=True)
+    if len(ordered) < 2:
+        return 0.0
+    return ordered[0] - ordered[1]
+
+
 def build_player_outlook(
     row: Mapping,
     rank: int,

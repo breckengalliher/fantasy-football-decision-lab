@@ -17,13 +17,13 @@ import streamlit as st
 
 try:
     from dashboard.providers.sportsdataio import context_freshness, format_injury_context
-    from dashboard.outlooks import build_player_outlook
+    from dashboard.outlooks import build_player_outlook, leader_margin
     from dashboard.states import empty_player_pool_message, provider_issue_message
     from dashboard.methodology_copy import DISCLAIMER_LANGUAGE, METHODOLOGY_LANGUAGE, SOURCE_ATTRIBUTION
     from dashboard.presentation import filter_player_search, matchup_summary, role_summary, selection_availability_summary, team_logo_url, weather_summary
 except ModuleNotFoundError:
     from providers.sportsdataio import context_freshness, format_injury_context
-    from outlooks import build_player_outlook
+    from outlooks import build_player_outlook, leader_margin
     from states import empty_player_pool_message, provider_issue_message
     from methodology_copy import DISCLAIMER_LANGUAGE, METHODOLOGY_LANGUAGE, SOURCE_ATTRIBUTION
     from presentation import filter_player_search, matchup_summary, role_summary, selection_availability_summary, team_logo_url, weather_summary
@@ -582,7 +582,7 @@ if page == "Decision Room":
             st.info("Choose at least one available player above to begin the comparison.")
     else:
         leader = compare.iloc[0]
-        projection_spread = float(compare["median_ppr"].max() - compare["median_ppr"].min())
+        projection_spread = leader_margin(compare["median_ppr"].tolist())
         if len(compare) == 1:
             edge_title = f'{leader["player"]} · {float(leader["median_ppr"]):.1f} projected PPR'
             edge_copy = "Add another player to see the projected advantage."

@@ -1,4 +1,14 @@
-from dashboard.outlooks import JOURNALISM_AFFECTS_PROJECTION, build_player_outlook
+import pytest
+
+from dashboard.outlooks import JOURNALISM_AFFECTS_PROJECTION, build_player_outlook, leader_margin
+
+
+def test_leader_margin_uses_runner_up_in_three_player_comparison():
+    assert leader_margin([21.6, 21.3, 10.7]) == pytest.approx(0.3)
+
+
+def test_leader_margin_handles_single_player():
+    assert leader_margin([21.6]) == 0.0
 
 
 def player(**changes):
