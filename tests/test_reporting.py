@@ -7,6 +7,7 @@ from dashboard.reporting import (
     ReportingContext,
     enrich_with_reporting,
     parse_bluesky_posts,
+    parse_bluesky_rss,
     parse_espn_rss,
     summarize_reporting,
 )
@@ -35,6 +36,16 @@ def test_bluesky_keeps_recent_reporter_posts_only():
     result = parse_bluesky_posts(payload, "CeeDee Lamb", "DAL", datetime(2026, 10, 7, 13, tzinfo=timezone.utc))
     assert result["author"].tolist() == ["beat.example"]
     assert result.loc[0, "url"].endswith("/post/abc")
+
+
+def test_curated_reporter_rss_matches_unique_last_name():
+    xml = """<rss><channel><item><title>Lamb handled a full workload at practice</title>
+    <description></description><link>https://bsky.app/profile/reporter/post/abc</link>
+    <pubDate>Wed, 07 Oct 2026 12:00:00 GMT</pubDate></item></channel></rss>"""
+    players = pd.DataFrame([{"player": "CeeDee Lamb", "team": "DAL"}, {"player": "Nico Collins", "team": "HOU"}])
+    result = parse_bluesky_rss(xml, players, "reporter.bsky.social", "Local Reporter")
+    assert result["player"].tolist() == ["CeeDee Lamb"]
+    assert result.loc[0, "source_type"] == "Reporter social"
 
 
 def test_reporting_summary_is_natural_and_explicitly_non_model():
