@@ -99,6 +99,17 @@ secret named `SPORTSDATAIO_API_KEY`. The public Streamlit process reads only
 these committed snapshots and never calls an upstream provider on behalf of a
 visitor.
 
+## Always-on hosting
+
+Community Cloud remains the preview deployment. Continuous availability uses
+the paid Render web service defined in `render.yaml`, built from the repository
+`Dockerfile`. Render checks Streamlit's `/_stcore/health` endpoint and
+automatically deploys each validated snapshot commit from `main`.
+
+The web container contains only the public application and committed snapshot
+files. It does not receive `SPORTSDATAIO_API_KEY` and cannot call production
+providers. GitHub Actions remains the only production snapshot writer.
+
 ## Project structure
 
 ```text

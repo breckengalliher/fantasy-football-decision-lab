@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: fantasy-football-decision-lab
+    runtime: docker
+    plan: 0.5c-512mb
+    branch: main
+    autoDeployTrigger: commit
+    healthCheckPath: /_stcore/health
+    maxShutdownDelaySeconds: 30
