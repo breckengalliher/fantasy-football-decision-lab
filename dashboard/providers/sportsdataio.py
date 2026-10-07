@@ -12,6 +12,9 @@ import requests
 
 BASE_URL = "https://api.sportsdata.io/v3/nfl"
 CONTEXT_STALE_AFTER_MINUTES = 90
+PROMOTION_INTERVAL_OFFSETS = {
+    "QB": (-6.74, 6.17), "RB": (-5.69, 5.65), "WR": (-6.07, 4.95), "TE": (-4.15, 4.31)
+}
 
 
 @dataclass(frozen=True)
@@ -226,6 +229,7 @@ def normalize_depth_charts(
         rows.append(
             {
                 "player_key": pair[0],
+                "player": str(name),
                 "team": pair[1],
                 "depth_position_live": _first(item, "Position", "DepthChartPosition"),
                 "depth_order_live": _first(item, "DepthOrder", "DepthChartOrder"),
@@ -234,12 +238,83 @@ def normalize_depth_charts(
     return pd.DataFrame(rows)
 
 
+def add_depth_chart_promotions(board: pd.DataFrame, context: SportsDataIOContext) -> pd.DataFrame:
+    """Add verified offensive role players who have no current-season stat row yet."""
+    if context.depth_charts.empty or context.games.empty:
+        return board.copy()
+    result = board.copy()
+    depth = context.depth_charts.copy()
+    depth["depth_order_live"] = pd.to_numeric(depth["depth_order_live"], errors="coerce")
+    role_limits = {"QB": 1, "RB": 2, "WR": 3, "TE": 2}
+    depth = depth.loc[
+        depth["depth_position_live"].isin(role_limits)
+        & depth["depth_order_live"].le(depth["depth_position_live"].map(role_limits))
+    ].copy()
+    if depth.empty:
+        return result
+    existing = set(zip(result["player"].map(_key), result["team"].astype(str)))
+    depth = depth.loc[
+        ~depth.apply(lambda row: (row["player_key"], str(row["team"])) in existing, axis=1)
+    ].merge(
+        context.games[["team", "provider_opponent"]].drop_duplicates("team"), on="team", how="inner"
+    )
+    if depth.empty:
+        return result
+
+    relevant = result.get("is_roster_relevant", pd.Series(False, index=result.index)).fillna(False).astype(bool)
+    position_anchor = result.loc[relevant].groupby("position")["median_ppr"].median()
+    opportunity_anchor = result.loc[relevant].groupby("position")["recent_opportunities"].median()
+    fallback_projection = {"QB": 17.0, "RB": 9.0, "WR": 10.0, "TE": 7.0}
+    fallback_opportunities = {"QB": 31.0, "RB": 11.0, "WR": 6.0, "TE": 4.5}
+    interval_scale = 1.35
+    additions = []
+    for _, promoted in depth.iterrows():
+        position = str(promoted["depth_position_live"])
+        median = float(position_anchor.get(position, fallback_projection[position]))
+        lower, upper = PROMOTION_INTERVAL_OFFSETS[position]
+        row = {column: pd.NA for column in result.columns}
+        row.update({
+            "player_id": f'depth:{promoted["player_key"]}',
+            "player": promoted["player"],
+            "position": position,
+            "team": promoted["team"],
+            "next_opponent": promoted["provider_opponent"],
+            "venue": "Game scheduled",
+            "games_played": 0,
+            "season_ppr": median,
+            "recent_ppr": median,
+            "last_two_ppr": median,
+            "trend": 0.0,
+            "recent_opportunities": float(opportunity_anchor.get(position, fallback_opportunities[position])),
+            "projected_ppr": median,
+            "median_ppr": median,
+            "floor_ppr": max(0.0, median + interval_scale * lower),
+            "ceiling_ppr": median + interval_scale * upper,
+            "confidence": "Limited sample",
+            "matchup_index": 1.0,
+            "schedule_adjusted_index": 1.0,
+            "matchup_label": "Neutral",
+            "is_roster_relevant": True,
+            "limited_sample_role": True,
+        })
+        for stat in (
+            "ytd_attempts", "ytd_carries", "ytd_targets", "ytd_passing_yards", "ytd_rushing_yards",
+            "ytd_receiving_yards", "ytd_receptions", "ytd_passing_tds", "ytd_rushing_tds", "ytd_receiving_tds",
+        ):
+            if stat in row:
+                row[stat] = 0.0
+        additions.append(row)
+    result["limited_sample_role"] = result.get("limited_sample_role", False)
+    return pd.concat([result, pd.DataFrame(additions)], ignore_index=True)
+
+
 def enrich_board(board: pd.DataFrame, context: SportsDataIOContext) -> pd.DataFrame:
     """Join provider context without modifying any projection columns."""
     result = board.copy()
     result["player_key"] = result["player"].map(_key)
     if not context.depth_charts.empty:
-        result = result.merge(context.depth_charts, on=["player_key", "team"], how="left")
+        depth_columns = ["player_key", "team", "depth_position_live", "depth_order_live"]
+        result = result.merge(context.depth_charts[depth_columns], on=["player_key", "team"], how="left")
     if not context.games.empty:
         result = result.merge(context.games, on="team", how="left")
     result["sportsdataio_refreshed_at"] = context.refreshed_at

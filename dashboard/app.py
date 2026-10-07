@@ -809,7 +809,9 @@ if page == "Decision Room":
 
             driver_cards = []
             for _, driver_row in compare.iterrows():
-                games = max(1, int(driver_row.get("games_played", 1)))
+                limited_sample = bool(driver_row.get("limited_sample_role", False))
+                games_played = int(driver_row.get("games_played", 0) or 0)
+                games = max(1, games_played)
                 if position == "QB":
                     ytd_opportunities = float(driver_row.get("ytd_attempts", 0) or 0) + float(driver_row.get("ytd_carries", 0) or 0)
                     workload_copy = "Recent passing and rushing workload supports the current signal."
@@ -844,13 +846,25 @@ if page == "Decision Room":
                 matchup_base = float(base_signal) if base_signal is not None and pd.notna(base_signal) else float(driver_row["median_ppr"]) / max(float(matchup_factor), .01)
                 matchup_delta = matchup_base * (float(matchup_factor) - 1)
 
-                rows = [
-                    ("Current-season production", f'{float(driver_row["season_ppr"]):.1f} PPR/G', 0.0, "The current season establishes the starting production baseline."),
-                    ("Recent repeatable workload", f'{float(driver_row["recent_opportunities"]):.1f} opp/G', opportunity_delta, workload_copy),
-                    ("Prior-season influence", f'{history_remaining:.0%} remains', history_delta, "Early-season sample keeps some prior-season influence; it fades as current games accumulate."),
-                    ("Touchdown regression", f'{td_delta:+.1f} PPR' if has_exact_td else "Applied", td_delta, "Touchdown production is regressed toward a sustainable opportunity-based rate."),
-                    ("Matchup adjustment", f'{matchup_delta:+.1f} PPR', matchup_delta, f'The {driver_row["next_opponent"]} adjustment is evidence-scaled and capped.'),
-                ]
+                if limited_sample:
+                    depth_position = str(driver_row.get("depth_position_live", position))
+                    depth_order = driver_row.get("depth_order_live")
+                    role_label = f'{depth_position}{int(depth_order)}' if depth_order is not None and pd.notna(depth_order) else "Verified role"
+                    rows = [
+                        ("Verified depth-chart role", role_label, 0.0, "The live depth chart confirms a fantasy-relevant offensive role."),
+                        ("Current-season sample", "0 games", 0.0, "No usable game sample is available yet, so we do not manufacture recent production."),
+                        ("Position / role baseline", f'{float(driver_row["median_ppr"]):.1f} PPR', 0.0, "Comparable current-season players provide a conservative starting estimate."),
+                        ("Outcome uncertainty", "Wider range", 0.0, "The floor-to-ceiling range is intentionally wider until real usage arrives."),
+                        ("Matchup adjustment", "Neutral", 0.0, "We wait for real workload evidence before applying a player-specific matchup adjustment."),
+                    ]
+                else:
+                    rows = [
+                        ("Current-season production", f'{float(driver_row["season_ppr"]):.1f} PPR/G', 0.0, "The current season establishes the starting production baseline."),
+                        ("Recent repeatable workload", f'{float(driver_row["recent_opportunities"]):.1f} opp/G', opportunity_delta, workload_copy),
+                        ("Prior-season influence", f'{history_remaining:.0%} remains', history_delta, "Early-season sample keeps some prior-season influence; it fades as current games accumulate."),
+                        ("Touchdown regression", f'{td_delta:+.1f} PPR' if has_exact_td else "Applied", td_delta, "Touchdown production is regressed toward a sustainable opportunity-based rate."),
+                        ("Matchup adjustment", f'{matchup_delta:+.1f} PPR', matchup_delta, f'The {driver_row["next_opponent"]} adjustment is evidence-scaled and capped.'),
+                    ]
                 driver_rows_html = ""
                 for label, value, delta, explanation in rows:
                     symbol, direction_class = driver_direction(delta)

@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 import pandas as pd
 
-from dashboard.providers.sportsdataio import canonical_injury_status, context_freshness, format_injury_context, normalize_depth_charts, normalize_games, normalize_injuries
+from dashboard.providers.sportsdataio import SportsDataIOContext, add_depth_chart_promotions, canonical_injury_status, context_freshness, format_injury_context, normalize_depth_charts, normalize_games, normalize_injuries
 
 
 def test_context_freshness_flags_old_or_missing_data():
@@ -89,3 +89,27 @@ def test_depth_chart_uses_verified_team_id_mapping():
     )
     assert result.loc[0, "team"] == "ARI"
     assert result.loc[0, "depth_order_live"] == 1
+
+
+def test_depth_chart_promotion_adds_zero_game_player_with_limited_sample_projection():
+    board = pd.DataFrame([{
+        "player_id": "veteran", "player": "Veteran Receiver", "position": "WR", "team": "AAA",
+        "next_opponent": "BBB", "median_ppr": 12.0, "recent_opportunities": 8.0,
+        "is_roster_relevant": True,
+    }])
+    context = SportsDataIOContext(
+        injuries=pd.DataFrame(),
+        games=pd.DataFrame([{"team": "AAA", "provider_opponent": "BBB"}]),
+        depth_charts=normalize_depth_charts([
+            {"Name": "Veteran Receiver", "Team": "AAA", "Position": "WR", "DepthOrder": 1},
+            {"Name": "Promoted Receiver", "Team": "AAA", "Position": "WR", "DepthOrder": 2},
+            {"Name": "Practice Squad Receiver", "Team": "AAA", "Position": "WR", "DepthOrder": 5},
+        ]),
+        refreshed_at="2026-10-07T12:00:00+00:00",
+    )
+    result = add_depth_chart_promotions(board, context).set_index("player")
+    assert "Promoted Receiver" in result.index
+    assert "Practice Squad Receiver" not in result.index
+    assert result.loc["Promoted Receiver", "games_played"] == 0
+    assert result.loc["Promoted Receiver", "confidence"] == "Limited sample"
+    assert bool(result.loc["Promoted Receiver", "is_roster_relevant"])

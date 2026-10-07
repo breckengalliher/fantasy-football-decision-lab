@@ -30,6 +30,7 @@ def build_player_outlook(
     opponent = str(row["next_opponent"])
     matchup = str(row["matchup_label"]).lower()
     close = total > 1 and spread < 2.5
+    limited_sample = bool(row.get("limited_sample_role", False))
 
     if total == 1:
         opening = f"We only have {first_name} in this comparison, so add another player before treating this as a true Start/Sit call."
@@ -42,7 +43,12 @@ def build_player_outlook(
     else:
         opening = f"We would sit {first_name} in this comparison because the other option carries the stronger projection."
 
-    if games <= 3:
+    if limited_sample or games == 0:
+        form = (
+            "He has not built a usable current-season sample yet, so we anchor this estimate to comparable "
+            "players at his position and newly assigned depth-chart role. The wider range reflects that uncertainty."
+        )
+    elif games <= 3:
         game_label = "game" if games == 1 else "games"
         form = f"Through {games} {game_label}, his {season:.1f} PPR season average is our clearest current baseline; the sample is still too small to force a short-term trend."
     elif games == 4 and not math.isnan(last_two):

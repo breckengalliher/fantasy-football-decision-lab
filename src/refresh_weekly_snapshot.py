@@ -27,7 +27,7 @@ from dashboard.data import (
     load_live_weekly_data,
     load_prior_weekly_data,
 )
-from dashboard.providers.sportsdataio import SportsDataIOClient, enrich_board
+from dashboard.providers.sportsdataio import SportsDataIOClient, add_depth_chart_promotions, enrich_board
 from dashboard.providers.injuries import enrich_injuries, load_daily_injury_context
 from dashboard.snapshots import build_personnel_context
 from dashboard.reporting import enrich_with_reporting, load_reporting_context
@@ -90,13 +90,13 @@ def main() -> None:
     board, next_week = build_start_sit_board(weekly, schedules, season)
     snaps, teams = load_live_context_data(season)
     board = add_live_supplementary_context(board, snaps, teams)
-    injury_context = load_daily_injury_context(season, next_week)
-    board = enrich_injuries(board, injury_context)
-
     key = api_key()
     if not key:
         raise RuntimeError("SPORTSDATAIO_API_KEY is not configured.")
     context = SportsDataIOClient(key).weekly_context(season, next_week)
+    board = add_depth_chart_promotions(board, context)
+    injury_context = load_daily_injury_context(season, next_week)
+    board = enrich_injuries(board, injury_context)
     board = enrich_board(board, context)
     reporting_context = load_reporting_context(board)
     board = enrich_with_reporting(board, reporting_context)
