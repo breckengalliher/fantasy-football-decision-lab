@@ -69,12 +69,20 @@ h1,h2,h3 { letter-spacing:-.025em; }
 .section-copy { color:var(--muted); font-size:.87rem; margin-bottom:.65rem; }
 .note { border-left:4px solid var(--gold); background:#edf4e8; color:#183515; padding:.72rem .9rem; border-radius:8px; font-size:.84rem; margin-top:1rem; }
 .warning { border-left:4px solid var(--gold); background:#eef5e9; color:#29451f; padding:.72rem .9rem; border-radius:8px; font-size:.84rem; margin:.85rem 0; }
+.context-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.85rem; width:100%; }
+.context-card { background:var(--card); border:1px solid var(--line); border-radius:14px; overflow:hidden; min-width:0; }
+.context-card h3 { margin:0; padding:.9rem 1rem; background:#ebe7dc; color:var(--ink); font-size:1.05rem; }
+.context-row { display:grid; grid-template-columns:minmax(112px,.78fr) minmax(0,1.22fr); gap:.7rem; padding:.67rem 1rem; border-top:1px solid #e5e8e9; align-items:start; }
+.context-label { color:var(--muted); font-size:.72rem; font-weight:800; letter-spacing:.02em; line-height:1.25; }
+.context-value { color:var(--ink); font-size:.82rem; font-weight:600; line-height:1.35; overflow-wrap:anywhere; }
+.context-help { cursor:help; border-bottom:1px dotted currentColor; }
 div[data-testid="stMetric"] { background:var(--card); border:1px solid var(--line); padding:.8rem 1rem; border-radius:12px; }
 .stPlotlyChart { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:.2rem; }
 @media(max-width:1100px) {
   div[data-testid="stHorizontalBlock"]:has(div[data-testid="stMetric"]) { flex-wrap:wrap; }
   div[data-testid="stHorizontalBlock"]:has(div[data-testid="stMetric"]) > div { flex:1 1 calc(50% - .6rem); min-width:240px; }
   div[data-testid="stMetricValue"] > div { font-size:1.65rem; white-space:normal; overflow:visible; text-overflow:clip; line-height:1.12; }
+  .context-grid { grid-template-columns:1fr; }
 }
 @media(max-width:800px) {
   html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] { max-width:100vw; overflow-x:hidden; }
@@ -271,7 +279,7 @@ if page == "Decision Room":
                 ["Snap participation", "Shown live · excluded"],
                 ["Weather", "Shown live · excluded" if provider_connected else "Not connected"],
                 ["Pace + game environment", "Shown live · excluded"],
-                ["Betting total", "Shown when available"],
+                ["Expected game points", "Sportsbook combined-score estimate · shown when available"],
                 ["OL / QB changes", "Weekly baseline active · excluded" if provider_connected else "Not connected"],
                 ["Schedule-adjusted opponent", "Shown live · excluded"],
                 ["Floor / projection / ceiling", "Shown · P10 / median / P90 · excluded"],
@@ -298,44 +306,53 @@ if page == "Decision Room":
             "matchup_label":"Matchup", "points_allowed":st.column_config.NumberColumn("Opp. PPR allowed", format="%.1f"),
             "projected_ppr":st.column_config.NumberColumn("Projection", format="%.1f"), "confidence":"Confidence",
         })
-        st.markdown('<div class="section-title">Live Decision Context</div><div class="section-copy">Supplementary evidence for the user. None of these fields changes the Start / Sit verdict.</div>', unsafe_allow_html=True)
-        context_rows = []
-        for factor in ["Injury / practice", "Snap / route participation", "Weather", "Pace / scoring environment", "Betting total", "OL / QB changes", "Schedule-adjusted opponent", "Floor · projection · ceiling"]:
-            item = {"Factor": factor}
-            for _, row in compare.iterrows():
-                if factor == "Injury / practice":
-                    value = format_injury_context(row, "Connected" in INJURY_SOURCE_STATUS)
-                elif factor == "Betting total":
-                    provider_total = row.get("betting_total_live")
-                    value = f"{float(provider_total):.1f}" if provider_total is not None and pd.notna(provider_total) else f"{row['total_line']:.1f}" if "total_line" in row and pd.notna(row["total_line"]) else "Source not connected"
-                elif factor == "Weather":
-                    weather_bits = []
-                    if pd.notna(row.get("weather_summary_live")): weather_bits.append(str(row.get("weather_summary_live")))
-                    if pd.notna(row.get("temperature_live")): weather_bits.append(f"{float(row.get('temperature_live')):.0f}°F")
-                    if pd.notna(row.get("wind_live")): weather_bits.append(f"{float(row.get('wind_live')):.0f} mph wind")
-                    value = " · ".join(weather_bits) if weather_bits else "Pregame source not connected"
-                    if weather_bits and pd.notna(row.get("game_updated_live")): value += f" · as of {row.get('game_updated_live')}"
-                elif factor == "Snap / route participation":
-                    value = f"{row['latest_snap_pct']:.0%} latest · {row['recent_snap_pct']:.0%} last 3" if pd.notna(row.get("latest_snap_pct")) else "Snap feed unmatched"
-                elif factor == "Pace / scoring environment":
-                    value = f"{row['pace_label']} · {row['combined_recent_plays']:.1f} combined plays" if pd.notna(row.get("combined_recent_plays")) else "Pace feed unavailable"
-                elif factor == "Schedule-adjusted opponent":
-                    value = f"{(row['schedule_adjusted_index'] - 1) * 100:+.0f}% vs player baselines" if pd.notna(row.get("schedule_adjusted_index")) else "Insufficient sample"
-                elif factor == "OL / QB changes":
-                    if pd.notna(row.get("qb_changed")):
-                        changes = []
-                        if bool(row.get("qb_changed")): changes.append("Starting QB changed")
-                        if bool(row.get("ol_changed")): changes.append("Starting OL changed")
-                        value = " · ".join(changes) if changes else "No starter change vs prior snapshot"
-                    else:
-                        value = "Baseline snapshot only" if PROVIDER_STATUS.startswith("Connected") else "Source not connected"
-                elif factor == "Floor · projection · ceiling":
-                    value = f"{row['floor_ppr']:.1f} · {row['median_ppr']:.1f} · {row['ceiling_ppr']:.1f}"
-                else:
-                    value = "Source not connected"
-                item[str(row["player"])] = value
-            context_rows.append(item)
-        st.dataframe(pd.DataFrame(context_rows), hide_index=True, width="stretch")
+        st.markdown('<div class="section-title">Live Decision Context</div><div class="section-copy">Quick pregame context to help you make the final call. These details do not change the model verdict.</div>', unsafe_allow_html=True)
+        context_cards = []
+        for _, row in compare.iterrows():
+            provider_total = row.get("betting_total_live")
+            if provider_total is None or pd.isna(provider_total):
+                provider_total = row.get("total_line")
+            expected_points = f"{float(provider_total):.1f} combined points" if provider_total is not None and pd.notna(provider_total) else "Not available"
+
+            weather_bits = []
+            if pd.notna(row.get("weather_summary_live")): weather_bits.append(str(row.get("weather_summary_live")))
+            if pd.notna(row.get("temperature_live")): weather_bits.append(f"{float(row.get('temperature_live')):.0f}°F")
+            if pd.notna(row.get("wind_live")): weather_bits.append(f"{float(row.get('wind_live')):.0f} mph wind")
+            weather = " · ".join(weather_bits) if weather_bits else "Not available"
+
+            usage = f"{row['latest_snap_pct']:.0%} latest · {row['recent_snap_pct']:.0%} 3-game avg" if pd.notna(row.get("latest_snap_pct")) else "Not available"
+            pace = f"{row['pace_label']} pace · {row['combined_recent_plays']:.0f} combined plays" if pd.notna(row.get("combined_recent_plays")) else "Not available"
+
+            if pd.notna(row.get("qb_changed")):
+                changes = []
+                if bool(row.get("qb_changed")): changes.append("Starting QB changed")
+                if bool(row.get("ol_changed")): changes.append("Starting OL changed")
+                personnel = " · ".join(changes) if changes else "No confirmed starter change"
+            else:
+                personnel = "Not enough snapshot history yet" if PROVIDER_STATUS.startswith("Connected") else "Not available"
+
+            if pd.notna(row.get("schedule_adjusted_index")):
+                opponent_delta = (float(row["schedule_adjusted_index"]) - 1) * 100
+                opponent = f"{abs(opponent_delta):.0f}% {'easier' if opponent_delta > 0 else 'tougher'} than player baselines" if abs(opponent_delta) >= .5 else "Neutral vs player baselines"
+            else:
+                opponent = "Not enough data"
+
+            fields = [
+                ("Availability", format_injury_context(row, "Connected" in INJURY_SOURCE_STATUS), "Latest injury designation and practice participation"),
+                ("Snap share", usage, "Latest snap rate and recent three-game average"),
+                ("Weather", weather, "Current pregame forecast"),
+                ("Game pace", pace, "Expected play volume based on recent team pace"),
+                ("Expected game points", expected_points, "Sportsbook over/under: the expected combined score for both teams"),
+                ("QB / O-line", personnel, "Confirmed starting quarterback or offensive-line changes"),
+                ("Opponent strength", opponent, "Opponent performance adjusted for the players they previously faced"),
+                ("Outcome range", f"{row['floor_ppr']:.1f} floor · {row['median_ppr']:.1f} median · {row['ceiling_ppr']:.1f} ceiling", "P10 floor, median projection, and P90 ceiling"),
+            ]
+            rows_html = "".join(
+                f'<div class="context-row"><div class="context-label context-help" title="{html.escape(help_text)}">{html.escape(label)}</div><div class="context-value">{html.escape(value)}</div></div>'
+                for label, value, help_text in fields
+            )
+            context_cards.append(f'<article class="context-card"><h3>{html.escape(str(row["player"]))}</h3>{rows_html}</article>')
+        st.markdown(f'<div class="context-grid">{"".join(context_cards)}</div>', unsafe_allow_html=True)
         st.markdown('<div class="note"><b>Separation rule:</b> Start / Sit is generated only from the core projection. Decision Context is refreshed and displayed independently so users can override the model using injuries, participation, weather, game environment, personnel news, and uncertainty.</div>', unsafe_allow_html=True)
 
 elif page == "Player Trends":

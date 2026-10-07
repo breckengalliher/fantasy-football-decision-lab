@@ -60,6 +60,20 @@ def test_placeholder_status_displays_as_unavailable_not_a_label():
     assert rendered == "Provider record present · status unavailable"
 
 
+def test_full_practice_is_concise_and_omits_body_part_noise():
+    rendered = format_injury_context({
+        "injury_record_live": True,
+        "practice_status_live": "Full Participation in Practice",
+        "injury_body_part_live": "Thigh",
+        "injury_source_live": "nflverse daily injury report",
+    })
+    assert rendered == "Full practice — no limitation"
+
+
+def test_no_injury_record_uses_plain_language():
+    assert format_injury_context({}, provider_connected=True) == "No injury designation"
+
+
 def test_game_context_is_available_to_both_teams():
     result = normalize_games([
         {"HomeTeam": "AAA", "AwayTeam": "BBB", "ForecastDescription": "Rain", "ForecastWindSpeed": 18, "OverUnder": 44.5}

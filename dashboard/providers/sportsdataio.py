@@ -79,9 +79,21 @@ def canonical_injury_status(value: Any) -> Any:
 
 
 def format_injury_context(row: Any, provider_connected: bool = True) -> str:
-    """Render injury context in a stable status/practice/body-part order."""
+    """Render a concise availability summary without stale-looking injury noise."""
     status = canonical_injury_status(row.get("injury_status_live"))
-    values = [status, _usable(row.get("practice_status_live")), _usable(row.get("injury_body_part_live"))]
+    practice = _usable(row.get("practice_status_live"))
+    body_part = _usable(row.get("injury_body_part_live"))
+    practice_key = "" if pd.isna(practice) else str(practice).strip().casefold()
+    is_full = practice_key in {"full", "full participation", "full participation in practice", "fp"}
+
+    # A full session is the useful headline. Repeating the body part makes a
+    # cleared limitation read like an active restriction.
+    if is_full:
+        if pd.notna(status):
+            return f"{status} · Full practice"
+        return "Full practice — no limitation"
+
+    values = [status, practice, body_part]
     values = [str(value) for value in values if pd.notna(value)]
     if values:
         text = " · ".join(values)
@@ -98,7 +110,7 @@ def format_injury_context(row: Any, provider_connected: bool = True) -> str:
     record = row.get("injury_record_live")
     if pd.notna(record) and bool(record):
         return "Provider record present · status unavailable"
-    return "No injury-report record" if provider_connected else "Injury sources unavailable"
+    return "No injury designation" if provider_connected else "Injury sources unavailable"
 
 
 class SportsDataIOClient:
