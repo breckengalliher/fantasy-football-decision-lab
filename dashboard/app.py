@@ -39,8 +39,9 @@ st.markdown(
     """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bungee&display=swap');
-:root { --ink:#071b2c; --muted:#5f6b73; --navy:#002244; --cream:#f3f6f7; --card:#ffffff; --line:#d7dde0; --teal:#397f18; --gold:#69be28; --wolf:#a5acaf; }
+:root { --ink:#071b2c; --muted:#1b2730; --navy:#002244; --cream:#f3f6f7; --card:#ffffff; --line:#d7dde0; --teal:#397f18; --gold:#69be28; --wolf:#a5acaf; }
 .stApp { background:var(--cream); color:var(--ink); }
+[data-testid="stMain"] [data-testid="stCaptionContainer"] { color:var(--ink); }
 [data-testid="stSidebar"] { background:var(--navy); }
 [data-testid="stSidebar"] * { color:#f7fafb; }
 [data-testid="stSidebar"] [data-baseweb="select"] * { color:var(--ink) !important; }
@@ -92,7 +93,7 @@ h1,h2,h3 { letter-spacing:-.025em; }
 .range-help:hover .range-tooltip, .range-help:focus .range-tooltip, .range-help:focus-within .range-tooltip { visibility:visible; opacity:1; }
 .verdict .outlook-label { color:var(--muted); text-transform:uppercase; letter-spacing:.1em; font-size:.65rem; font-weight:800; margin-top:1rem; }
 .verdict.start .outlook-label { color:#9ee468; }
-.verdict .reason { color:#536166; font-size:.84rem; line-height:1.42; margin-top:.28rem; min-height:2.4em; }
+.verdict .reason { color:var(--ink); font-size:.84rem; line-height:1.42; margin-top:.28rem; min-height:2.4em; }
 .verdict.start .reason { color:#e0e6e8; }
 .decision-edge { display:flex; align-items:center; justify-content:space-between; gap:1rem; background:var(--navy); color:#f7fafb; border:1px solid rgba(105,190,40,.65); border-radius:13px; padding:.82rem 1rem; margin:1rem 0 .75rem; box-shadow:0 7px 18px rgba(0,34,68,.10); }
 .decision-edge-main { min-width:0; }
@@ -113,7 +114,7 @@ h1,h2,h3 { letter-spacing:-.025em; }
 .card-outlook-details { border-top:1px solid #e3e8ea; margin-top:.72rem; padding-top:.22rem; }
 .card-outlook-details summary { color:var(--navy); cursor:pointer; font-size:.74rem; font-weight:800; padding:.5rem .1rem .28rem; list-style-position:inside; }
 .card-outlook-details summary:hover { color:#397f18; }
-.card-outlook-full { color:#536166; font-size:.79rem; line-height:1.5; padding:.42rem .2rem .15rem; }
+.card-outlook-full { color:var(--ink); font-size:.79rem; line-height:1.5; padding:.42rem .2rem .15rem; }
 .verdict.start .card-outlook-details { border-top-color:rgba(255,255,255,.16); }
 .verdict.start .card-outlook-details summary { color:#9ee468; }
 .verdict.start .card-outlook-full { color:#e0e6e8; }
@@ -169,7 +170,7 @@ h1,h2,h3 { letter-spacing:-.025em; }
 .driver-explanation { color:var(--muted); font-size:.65rem; line-height:1.32; margin-top:.18rem; }
 .driver-direction { display:inline-flex; align-items:center; justify-content:center; width:1rem; font-weight:900; margin-right:.16rem; }
 .driver-positive { color:#397f18; }
-.driver-neutral { color:#7a878d; }
+.driver-neutral { color:#46535a; }
 .driver-negative { color:#c45a1a; }
 .driver-final { background:#edf4e8; }
 .driver-final .driver-value { color:#397f18; font-size:.86rem; }
@@ -250,7 +251,7 @@ def polish(fig: go.Figure, height: int = 390) -> go.Figure:
         margin=dict(l=18, r=18, t=52, b=20),
         paper_bgcolor="#ffffff",
         plot_bgcolor="#ffffff",
-        font=dict(family="Arial", color="#33434f", size=12),
+        font=dict(family="Arial", color="#071b2c", size=12),
         title_font=dict(size=16, color="#071b2c"),
         hoverlabel=dict(bgcolor="#002244", font_color="white"),
         legend_title_text="",
