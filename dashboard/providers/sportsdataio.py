@@ -53,6 +53,13 @@ def _key(value: Any) -> str:
     return str(value).strip().casefold()
 
 
+def _usable(value: Any) -> Any:
+    """Reject provider placeholders that look populated but contain no information."""
+    if pd.isna(value) or str(value).strip().casefold() in {"scrambled", "redacted", "unavailable"}:
+        return pd.NA
+    return value
+
+
 class SportsDataIOClient:
     def __init__(self, api_key: str, timeout: int = 20) -> None:
         if not api_key.strip():
@@ -99,12 +106,12 @@ def normalize_injuries(payload: Iterable[dict[str, Any]]) -> pd.DataFrame:
             {
                 "player_key": _key(name),
                 "team": str(team),
-                "injury_status_live": _first(item, "Status", "InjuryStatus"),
-                "practice_status_live": _first(item, "Practice", "PracticeStatus"),
-                "injury_body_part_live": _first(item, "BodyPart", "InjuredBodyPart"),
-                "injury_note_live": _first(item, "Notes", "Note"),
+                "injury_status_live": _usable(_first(item, "Status", "InjuryStatus")),
+                "practice_status_live": _usable(_first(item, "Practice", "PracticeStatus")),
+                "injury_body_part_live": _usable(_first(item, "BodyPart", "InjuredBodyPart")),
+                "injury_note_live": _usable(_first(item, "Notes", "Note")),
                 "injury_position": _first(item, "Position"),
-                "injury_updated_live": _first(item, "Updated", "LastUpdated", "UpdatedDate"),
+                "injury_updated_live": _usable(_first(item, "Updated", "LastUpdated", "UpdatedDate")),
             }
         )
     return pd.DataFrame(rows)

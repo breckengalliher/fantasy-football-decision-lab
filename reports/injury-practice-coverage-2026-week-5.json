@@ -1,0 +1,66 @@
+{
+  "season": 2026,
+  "week": 5,
+  "purpose": "Full-week validation of live injury and practice coverage; missing injury records are never interpreted as healthy.",
+  "observations": [
+    {
+      "observed_at": "2026-10-07T17:29:30.662419+00:00",
+      "provider_refreshed_at": "2026-10-07T17:29:30.661477+00:00",
+      "eligible_players": 238,
+      "provider_injury_records": 455,
+      "matched_relevant_records": 35,
+      "unmatched_provider_records": 420,
+      "duplicate_player_team_records": 0,
+      "status_complete_records": 35,
+      "practice_complete_records": 35,
+      "updated_timestamp_complete_records": 35,
+      "status_completeness": 1.0,
+      "practice_completeness": 1.0,
+      "timestamp_completeness": 1.0,
+      "status_values": [
+        "Scrambled"
+      ],
+      "practice_values": [
+        "Scrambled"
+      ]
+    },
+    {
+      "observed_at": "2026-10-07T17:30:40.179315+00:00",
+      "provider_refreshed_at": "2026-10-07T17:30:40.179315+00:00",
+      "eligible_players": 238,
+      "provider_injury_records": 455,
+      "matched_relevant_records": 35,
+      "unmatched_provider_records": 420,
+      "duplicate_player_team_records": 0,
+      "status_complete_records": 0,
+      "practice_complete_records": 0,
+      "updated_timestamp_complete_records": 35,
+      "status_completeness": 0.0,
+      "practice_completeness": 0.0,
+      "timestamp_completeness": 1.0,
+      "semantic_coverage_pass": false,
+      "status_values": [],
+      "practice_values": [],
+      "validation_note": "Provider placeholders such as Scrambled, Redacted, and Unavailable count as missing."
+    }
+  ],
+  "latest": {
+    "observed_at": "2026-10-07T17:30:40.179315+00:00",
+    "provider_refreshed_at": "2026-10-07T17:30:40.179315+00:00",
+    "eligible_players": 238,
+    "provider_injury_records": 455,
+    "matched_relevant_records": 35,
+    "unmatched_provider_records": 420,
+    "duplicate_player_team_records": 0,
+    "status_complete_records": 0,
+    "practice_complete_records": 0,
+    "updated_timestamp_complete_records": 35,
+    "status_completeness": 0.0,
+    "practice_completeness": 0.0,
+    "timestamp_completeness": 1.0,
+    "semantic_coverage_pass": false,
+    "status_values": [],
+    "practice_values": [],
+    "validation_note": "Provider placeholders such as Scrambled, Redacted, and Unavailable count as missing."
+  }
+}

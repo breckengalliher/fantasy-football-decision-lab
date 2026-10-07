@@ -1,5 +1,7 @@
 from datetime import datetime, timezone
 
+import pandas as pd
+
 from dashboard.providers.sportsdataio import context_freshness, normalize_depth_charts, normalize_games, normalize_injuries
 
 
@@ -17,6 +19,14 @@ def test_injury_payload_is_normalized_without_guessing_missing_fields():
     assert result.loc[0, "player_key"] == "example receiver"
     assert result.loc[0, "injury_status_live"] == "Questionable"
     assert result.loc[0, "practice_status_live"] == "Limited"
+
+
+def test_scrambled_injury_fields_are_not_treated_as_real_coverage():
+    result = normalize_injuries([
+        {"Name": "Example Player", "Team": "SEA", "Status": "Scrambled", "Practice": "Scrambled"}
+    ])
+    assert pd.isna(result.loc[0, "injury_status_live"])
+    assert pd.isna(result.loc[0, "practice_status_live"])
 
 
 def test_game_context_is_available_to_both_teams():
