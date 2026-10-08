@@ -23,7 +23,7 @@ try:
     from dashboard.admin_refresh import authenticate as authenticate_refresh_admin, configured as admin_refresh_configured, refresh_status, trigger_refresh
     from dashboard.states import empty_player_pool_message, provider_issue_message
     from dashboard.methodology_copy import DISCLAIMER_LANGUAGE, METHODOLOGY_LANGUAGE, SOURCE_ATTRIBUTION
-    from dashboard.presentation import eligible_positions, filter_player_search, matchup_summary, projected_team_total, role_summary, selection_availability_summary, team_logo_url, weather_summary
+    from dashboard.presentation import actionable_injury_alert, eligible_positions, filter_player_search, matchup_summary, projected_team_total, role_summary, selection_availability_summary, team_logo_url, weather_summary
 except ModuleNotFoundError:
     from providers.sportsdataio import context_freshness, format_injury_context
     from outlooks import build_player_outlook, leader_margin
@@ -32,7 +32,7 @@ except ModuleNotFoundError:
     from admin_refresh import authenticate as authenticate_refresh_admin, configured as admin_refresh_configured, refresh_status, trigger_refresh
     from states import empty_player_pool_message, provider_issue_message
     from methodology_copy import DISCLAIMER_LANGUAGE, METHODOLOGY_LANGUAGE, SOURCE_ATTRIBUTION
-    from presentation import eligible_positions, filter_player_search, matchup_summary, projected_team_total, role_summary, selection_availability_summary, team_logo_url, weather_summary
+    from presentation import actionable_injury_alert, eligible_positions, filter_player_search, matchup_summary, projected_team_total, role_summary, selection_availability_summary, team_logo_url, weather_summary
 
 try:
     from dashboard.data import current_nfl_season
@@ -146,6 +146,23 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .verdict.start .outlook-label { color:#9ee468; }
 .verdict .reason { color:var(--ink); font-size:.84rem; line-height:1.42; margin-top:.28rem; min-height:2.4em; }
 .verdict.start .reason { color:#e0e6e8; }
+.actionable-alert { margin:.68rem 0 .15rem; padding:.62rem .68rem; border:1px solid #d8e0e3; border-left:4px solid #758791; border-radius:9px; background:#f3f6f7; color:var(--ink); }
+.actionable-alert-head { display:flex; align-items:center; justify-content:space-between; gap:.5rem; }
+.actionable-alert-label { font-size:.62rem; font-weight:850; letter-spacing:.055em; text-transform:uppercase; }
+.actionable-alert-time { color:var(--muted); font-size:.59rem; text-align:right; }
+.actionable-alert-title { font-size:.72rem; font-weight:800; line-height:1.32; margin-top:.28rem; }
+.actionable-alert-verify { color:var(--muted); font-size:.66rem; line-height:1.38; margin-top:.24rem; }
+.actionable-alert.monitor { background:#fff9e8; border-color:#ead79e; border-left-color:#d39b29; }
+.actionable-alert.monitor .actionable-alert-label { color:#7a560c; }
+.actionable-alert.action { background:#fff2e8; border-color:#efc4a5; border-left-color:#d46b20; }
+.actionable-alert.action .actionable-alert-label { color:#94400f; }
+.actionable-alert.unavailable { background:#fff0ee; border-color:#efb6ae; border-left-color:#c83c2b; }
+.actionable-alert.unavailable .actionable-alert-label { color:#9f281b; }
+.actionable-alert.opportunity { background:#edf6e8; border-color:#c7dfb8; border-left-color:#69be28; }
+.actionable-alert.opportunity .actionable-alert-label { color:#397f18; }
+.verdict.start .actionable-alert { background:rgba(255,255,255,.09); border-color:rgba(255,255,255,.18); color:#f7fafb; }
+.verdict.start .actionable-alert-time,.verdict.start .actionable-alert-verify { color:#c7d2d8; }
+.verdict.start .actionable-alert-label { color:#9ee468; }
 .decision-edge { display:flex; align-items:center; justify-content:space-between; gap:1rem; background:var(--navy); color:#f7fafb; border:1px solid rgba(105,190,40,.65); border-radius:13px; padding:.68rem .9rem; margin:.55rem 0 .5rem; box-shadow:0 7px 18px rgba(0,34,68,.10); }
 .decision-edge-main { min-width:0; }
 .decision-edge-label { color:#9ee468; font-size:.62rem; font-weight:850; letter-spacing:.1em; text-transform:uppercase; margin-bottom:.16rem; }
@@ -801,6 +818,16 @@ if page == "Decision Room":
                     f'<div class="broadcast-context-item"><span>↗ Role</span>{html.escape(role_summary(row))}</div>',
                     f'<div class="broadcast-context-item"><span>☁ Weather</span>{html.escape(weather_summary(row))}</div>',
                 ])
+                injury_alert = actionable_injury_alert(row)
+                actionable_alert = ""
+                if injury_alert:
+                    actionable_alert = (
+                        f'<div class="actionable-alert {html.escape(injury_alert["level"], quote=True)}">'
+                        f'<div class="actionable-alert-head"><span class="actionable-alert-label">{html.escape(injury_alert["classification"])}</span>'
+                        f'<span class="actionable-alert-time">{html.escape(injury_alert["changed"])}</span></div>'
+                        f'<div class="actionable-alert-title">{html.escape(injury_alert["headline"])}</div>'
+                        f'<div class="actionable-alert-verify"><b>Verify:</b> {html.escape(injury_alert["verify"])}</div></div>'
+                    )
                 floor = float(row["floor_ppr"])
                 median = float(row["median_ppr"])
                 ceiling = float(row["ceiling_ppr"])
@@ -859,7 +886,7 @@ if page == "Decision Room":
                     f'<div class="game-detail-chips">{game_chips}</div>'
                     f'<div class="projection-primary"><strong>{median:.1f}</strong><span>projected PPR <span class="range-help" tabindex="0" aria-label="Range definition">i<span class="range-tooltip" role="tooltip">Floor is the P10 downside outcome, projection is the median estimate, and ceiling is the P90 upside outcome. About 80% of results should fall between floor and ceiling.</span></span></span></div>'
                     f'<div class="range-track"><span class="range-marker" style="left:{median_position:.1f}%"></span></div><div class="range-labels"><span>Floor {floor:.1f}</span><span>Ceiling {ceiling:.1f}</span></div>'
-                    f'<div class="outlook-label">Player outlook</div><div class="reason">{html.escape(reason)}</div><div class="broadcast-context">{quick_context}</div>'
+                    f'<div class="outlook-label">Player outlook</div><div class="reason">{html.escape(reason)}</div>{actionable_alert}<div class="broadcast-context">{quick_context}</div>'
                     f'{outlook_details}</div>',
                     unsafe_allow_html=True,
                 )

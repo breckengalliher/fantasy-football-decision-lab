@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import Any
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 
@@ -75,6 +76,85 @@ def selection_availability_summary(row: Any) -> str:
         practice_text = "Did not practice"
     values = [value for value in (status_text, practice_text) if value]
     return " · ".join(values) if values else "No injury designation"
+
+
+def _injury_update_time(row: Any) -> str:
+    """Describe the provider's status-change time without inventing one."""
+    updated = row.get("injury_updated_live")
+    checked = row.get("injury_checked_at")
+    value = updated if updated is not None and not pd.isna(updated) else checked
+    if value is None or pd.isna(value):
+        return "Status change time unavailable"
+    try:
+        if isinstance(value, (int, float)) or str(value).strip().isdigit():
+            numeric = float(value)
+            unit = "ms" if numeric > 10_000_000_000 else "s"
+            timestamp = pd.to_datetime(numeric, unit=unit, utc=True)
+        else:
+            timestamp = pd.to_datetime(value, utc=True)
+        local = timestamp.tz_convert(ZoneInfo("America/Chicago"))
+        rendered = f'{local.strftime("%b")} {local.day} · {local.strftime("%I:%M %p").lstrip("0")} CT'
+    except (TypeError, ValueError, OverflowError):
+        return "Status change time unavailable"
+    prefix = "Changed" if updated is not None and not pd.isna(updated) else "Change time unavailable · checked"
+    return f"{prefix} {rendered}"
+
+
+def actionable_injury_alert(row: Any) -> dict[str, str] | None:
+    """Classify injury context into a small set of user actions."""
+    status = "" if row.get("injury_status_live") is None or pd.isna(row.get("injury_status_live")) else str(row.get("injury_status_live")).strip()
+    practice = "" if row.get("practice_status_live") is None or pd.isna(row.get("practice_status_live")) else str(row.get("practice_status_live")).strip()
+    status_key = status.casefold()
+    practice_key = practice.casefold()
+    teammate_effect = "" if row.get("injury_teammate_effect") is None or pd.isna(row.get("injury_teammate_effect")) else str(row.get("injury_teammate_effect")).strip()
+    teammate_boost = row.get("injury_teammate_boost", 0)
+    try:
+        teammate_boost = float(teammate_boost) if teammate_boost is not None and not pd.isna(teammate_boost) else 0.0
+    except (TypeError, ValueError):
+        teammate_boost = 0.0
+
+    changed = _injury_update_time(row)
+    unavailable = {"out", "ir", "injured reserve", "inactive", "pup", "suspended"}
+    did_not_practice = practice_key in {"dnp", "did not participate", "did not participate in practice"} or "did not practice" in practice_key
+    limited = "limited" in practice_key
+    conflict_value = row.get("injury_conflict_live", False)
+    has_conflict = False if conflict_value is None or pd.isna(conflict_value) else bool(conflict_value)
+
+    if status_key in unavailable:
+        return {
+            "classification": "Confirmed unavailable",
+            "level": "unavailable",
+            "headline": status or "Unavailable",
+            "changed": changed,
+            "verify": "Verify the official inactive list and choose a replacement before kickoff.",
+        }
+    if status_key == "doubtful" or did_not_practice or (status_key == "questionable" and limited) or has_conflict:
+        detail = " · ".join(value for value in (status, "Did not practice" if did_not_practice else "Limited practice" if limited else "") if value)
+        return {
+            "classification": "Lineup action may be needed",
+            "level": "action",
+            "headline": detail or "Availability is uncertain",
+            "changed": changed,
+            "verify": "Verify the final practice designation and official inactives before locking the lineup.",
+        }
+    if status_key == "questionable" or limited:
+        detail = " · ".join(value for value in (status, "Limited practice" if limited else "") if value)
+        return {
+            "classification": "Monitor",
+            "level": "monitor",
+            "headline": detail or "Practice participation is limited",
+            "changed": changed,
+            "verify": "Verify the next practice report and final game designation.",
+        }
+    if teammate_effect and teammate_boost > 0:
+        return {
+            "classification": "Teammate opportunity increase",
+            "level": "opportunity",
+            "headline": teammate_effect,
+            "changed": changed,
+            "verify": "Verify the injured teammate’s final status and this player’s expected role before kickoff.",
+        }
+    return None
 
 
 def matchup_summary(row: Any) -> str:
