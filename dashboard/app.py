@@ -331,6 +331,14 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 [data-baseweb="tab-highlight"] { display:none; }
 [data-testid="stSegmentedControl"] { background:#e6ecef; border:1px solid #d4dde1; border-radius:12px; padding:.24rem; }
 [data-testid="stSegmentedControl"] button { min-height:2.35rem; border-radius:9px !important; font-family:'Inter',Arial,sans-serif; font-weight:750; }
+[data-testid="stMain"] [data-testid="stExpander"] { border:1px solid rgba(105,190,40,.62) !important; border-radius:14px !important; background:#fff !important; box-shadow:0 7px 18px rgba(0,34,68,.08); overflow:hidden; margin:.68rem 0; }
+[data-testid="stMain"] [data-testid="stExpander"] details { border:0 !important; border-radius:14px !important; background:#fff; }
+[data-testid="stMain"] [data-testid="stExpander"] summary { min-height:3.2rem; padding:.72rem .9rem !important; background:linear-gradient(105deg,#002244 0%,#06375c 100%) !important; color:#9ee468 !important; border-radius:13px !important; transition:background .16s ease,box-shadow .16s ease; }
+[data-testid="stMain"] [data-testid="stExpander"] summary:hover { background:linear-gradient(105deg,#06375c 0%,#0b466f 100%) !important; box-shadow:inset 4px 0 0 #69be28; }
+[data-testid="stMain"] [data-testid="stExpander"] summary p { color:#9ee468 !important; font-family:'Barlow Condensed','Arial Narrow',sans-serif !important; font-size:1rem !important; font-weight:800 !important; letter-spacing:.025em; }
+[data-testid="stMain"] [data-testid="stExpander"] summary svg { fill:#9ee468 !important; color:#9ee468 !important; }
+[data-testid="stMain"] [data-testid="stExpander"] details[open] summary { border-radius:13px 13px 0 0 !important; border-bottom:3px solid #69be28; }
+[data-testid="stMain"] [data-testid="stExpander"] details[open] > div { padding-top:.38rem; }
 .tool-section-head { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin:1.15rem 0 .55rem; padding:.78rem .9rem; border:1px solid var(--line); border-left:4px solid var(--gold); border-radius:12px; background:var(--card); }
 .tool-section-head h2 { display:block; color:var(--navy); font-family:'Barlow Condensed','Arial Narrow',sans-serif; font-size:1.28rem; letter-spacing:.01em; line-height:1.1; margin:0; padding:0 !important; }
 .tool-section-head span { display:block; color:var(--muted); font-size:.7rem; margin-top:.08rem; line-height:1.35; }
