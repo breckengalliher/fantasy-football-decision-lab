@@ -273,6 +273,18 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .compare-slot-game { color:var(--muted); font-size:.65rem; line-height:1.25; margin-top:.34rem; }
 .compare-slot-footer { display:flex; align-items:center; justify-content:space-between; gap:.4rem; border-top:1px solid #e4e8ea; margin-top:.4rem; padding-top:.38rem; }
 .compare-slot-projection { color:var(--navy); font-size:.75rem; font-weight:800; }
+.st-key-mobile_selection_summary { display:none; }
+.mobile-selection-row { display:flex; align-items:center; gap:.58rem; min-width:0; }
+.mobile-selection-row .player-photo { width:42px; height:42px; flex:0 0 42px; }
+.mobile-selection-main { min-width:0; flex:1; }
+.mobile-selection-name { color:var(--ink); font-size:.82rem; font-weight:850; line-height:1.15; overflow-wrap:anywhere; }
+.mobile-selection-meta { display:flex; align-items:center; gap:.3rem; color:var(--muted); font-size:.61rem; line-height:1.25; margin-top:.13rem; overflow-wrap:anywhere; }
+.mobile-selection-meta img { width:.9rem; height:.9rem; object-fit:contain; flex:0 0 .9rem; }
+.mobile-selection-numbers { flex:0 0 auto; text-align:right; }
+.mobile-selection-projection { display:block; color:var(--navy); font-size:.88rem; font-weight:850; line-height:1; }
+.mobile-selection-status { display:block; color:var(--muted); font-size:.55rem; line-height:1.2; margin-top:.2rem; max-width:92px; }
+.mobile-selection-status.alert { color:#94400f; font-weight:800; }
+.mobile-open-row { min-height:46px; border:1px dashed #bdc8cd; border-radius:9px; display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:.68rem; }
 .availability-pill { border-radius:999px; padding:.24rem .46rem; font-size:.63rem; font-weight:800; line-height:1.15; text-align:right; }
 .availability-ok { background:#edf4e8; color:var(--forest); }
 .availability-alert { background:#fff0e6; color:#a33a13; border:1px solid #efb79f; }
@@ -436,6 +448,12 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
   .focused-status { align-items:flex-start; flex-direction:column; gap:.25rem; }
   .mobile-decision-edge { display:block; }
   .desktop-decision-edge { display:none; }
+  .st-key-mobile_selection_summary { display:block; margin:.2rem 0 .55rem; }
+  .st-key-desktop_selection_cards { display:none; }
+  .st-key-mobile_selection_summary [data-testid="stVerticalBlockBorderWrapper"] { border-radius:11px !important; }
+  .st-key-mobile_selection_summary [data-testid="stVerticalBlockBorderWrapper"] > div { padding:.48rem .55rem !important; }
+  .st-key-mobile_selection_summary [data-testid="stHorizontalBlock"] { align-items:center !important; gap:.48rem !important; }
+  .st-key-mobile_selection_summary [data-testid="stButton"] button { min-height:40px !important; padding:.3rem .58rem !important; font-size:.68rem !important; }
   [data-testid="stExpander"] summary { min-height:44px; align-items:center; }
   [data-testid="stButton"] button, [data-testid="stDownloadButton"] button, [data-testid="stLinkButton"] a { min-height:44px; }
   [data-testid="stHorizontalBlock"] { min-width:0 !important; }
@@ -860,46 +878,75 @@ if page == "Decision Room":
             st.markdown(f'<div class="mobile-decision-edge">{decision_edge_markup}</div>', unsafe_allow_html=True)
 
         st.markdown(f'<div class="comparison-count">Comparison lineup · {len(names)} of 3 slots filled</div>', unsafe_allow_html=True)
-        slot_columns = st.columns(3)
-        for slot_index, slot_column in enumerate(slot_columns):
-            with slot_column:
+        with st.container(key="mobile_selection_summary"):
+            for slot_index in range(3):
                 with st.container(border=True):
                     if slot_index < len(names):
                         selected_row = pool.loc[pool["player"].eq(names[slot_index])].iloc[0]
                         availability = selection_availability_summary(selected_row)
-                        limited_sample = bool(selected_row.get("limited_sample_role", False)) or str(selected_row.get("confidence", "")).casefold() == "limited sample"
-                        sample_badge = explained_term(
-                            "Limited sample",
-                            "This player lacks enough personal workload history, so the projection leans on position, team environment, and verified depth-chart role priors with a wider range.",
-                            "limited-sample-pill",
-                        ) if limited_sample else ""
-                        availability_class = "availability-alert" if any(term in availability.casefold() for term in ("questionable", "doubtful", "out", "inactive", "ir", "did not practice")) else "availability-ok"
+                        is_alert = any(term in availability.casefold() for term in ("questionable", "doubtful", "out", "inactive", "ir", "did not practice"))
                         photo = player_photo_html(selected_row.get("headshot_url"), selected_row["player"])
                         logo_url = team_logo_url(selected_row.get("team"))
                         logo = f'<img src="{html.escape(logo_url, quote=True)}" alt="{html.escape(str(selected_row["team"]), quote=True)} logo">' if logo_url else ""
-                        kickoff = " · ".join(str(value) for value in (selected_row.get("weekday"), selected_row.get("gametime")) if value is not None and pd.notna(value))
-                        st.markdown(
-                            f'<div class="compare-slot-kicker">Player {slot_index + 1}</div>'
-                            f'<div class="compare-slot-top">{photo}<div class="compare-slot-main"><div class="compare-slot-name">{html.escape(str(selected_row["player"]))}</div>'
-                            f'<div class="compare-slot-team">{logo}<span>{html.escape(str(selected_row["team"]))} · {html.escape(str(selected_row["position"]))}</span></div></div></div>'
-                            f'<div class="compare-slot-game">{html.escape(str(selected_row["venue"]))} vs {html.escape(str(selected_row["next_opponent"]))}{" · " + html.escape(kickoff) if kickoff else ""}</div>'
-                            f'<div class="compare-slot-footer"><span class="compare-slot-projection">{float(selected_row["median_ppr"]):.1f} projected PPR</span>{sample_badge}<span class="availability-pill {availability_class}">{html.escape(availability)}</span></div>',
-                            unsafe_allow_html=True,
-                        )
-                        remove_column, replace_column = st.columns(2)
-                        if remove_column.button("Remove", key=f"remove_{position}_{selected_row['player_id']}", width="stretch"):
-                            st.session_state[selection_key] = [value for value in names if value != names[slot_index]]
-                            st.session_state[replacement_key] = None
-                            st.rerun()
-                        replace_label = "Replacing…" if replacement_index == slot_index else "Replace"
-                        if replace_column.button(replace_label, key=f"replace_{position}_{selected_row['player_id']}", width="stretch"):
-                            st.session_state[replacement_key] = None if replacement_index == slot_index else slot_index
-                            st.rerun()
+                        mobile_detail, mobile_action = st.columns([5, 1.35], vertical_alignment="center")
+                        with mobile_detail:
+                            st.markdown(
+                                f'<div class="mobile-selection-row">{photo}<div class="mobile-selection-main">'
+                                f'<div class="mobile-selection-name">{html.escape(str(selected_row["player"]))}</div>'
+                                f'<div class="mobile-selection-meta">{logo}<span>{html.escape(str(selected_row["team"]))} · {html.escape(str(selected_row["position"]))} · {html.escape(str(selected_row["venue"]))} vs {html.escape(str(selected_row["next_opponent"]))}</span></div>'
+                                f'</div><div class="mobile-selection-numbers"><span class="mobile-selection-projection">{float(selected_row["median_ppr"]):.1f}</span>'
+                                f'<span class="mobile-selection-status{" alert" if is_alert else ""}">{html.escape(availability)}</span></div></div>',
+                                unsafe_allow_html=True,
+                            )
+                        with mobile_action:
+                            replace_label = "Cancel" if replacement_index == slot_index else "Replace"
+                            if st.button(replace_label, key=f"mobile_replace_{position}_{selected_row['player_id']}", width="stretch"):
+                                st.session_state[replacement_key] = None if replacement_index == slot_index else slot_index
+                                st.rerun()
                     else:
-                        st.markdown(
-                            f'<div class="open-slot"><div class="open-slot-number">Player {slot_index + 1}</div><div class="open-slot-title">Open comparison slot</div><div class="open-slot-copy">Choose a player from the search panel below.</div></div>',
-                            unsafe_allow_html=True,
-                        )
+                        st.markdown(f'<div class="mobile-open-row">Player {slot_index + 1} · Open slot</div>', unsafe_allow_html=True)
+
+        with st.container(key="desktop_selection_cards"):
+            slot_columns = st.columns(3)
+            for slot_index, slot_column in enumerate(slot_columns):
+                with slot_column:
+                    with st.container(border=True):
+                        if slot_index < len(names):
+                            selected_row = pool.loc[pool["player"].eq(names[slot_index])].iloc[0]
+                            availability = selection_availability_summary(selected_row)
+                            limited_sample = bool(selected_row.get("limited_sample_role", False)) or str(selected_row.get("confidence", "")).casefold() == "limited sample"
+                            sample_badge = explained_term(
+                                "Limited sample",
+                                "This player lacks enough personal workload history, so the projection leans on position, team environment, and verified depth-chart role priors with a wider range.",
+                                "limited-sample-pill",
+                            ) if limited_sample else ""
+                            availability_class = "availability-alert" if any(term in availability.casefold() for term in ("questionable", "doubtful", "out", "inactive", "ir", "did not practice")) else "availability-ok"
+                            photo = player_photo_html(selected_row.get("headshot_url"), selected_row["player"])
+                            logo_url = team_logo_url(selected_row.get("team"))
+                            logo = f'<img src="{html.escape(logo_url, quote=True)}" alt="{html.escape(str(selected_row["team"]), quote=True)} logo">' if logo_url else ""
+                            kickoff = " · ".join(str(value) for value in (selected_row.get("weekday"), selected_row.get("gametime")) if value is not None and pd.notna(value))
+                            st.markdown(
+                                f'<div class="compare-slot-kicker">Player {slot_index + 1}</div>'
+                                f'<div class="compare-slot-top">{photo}<div class="compare-slot-main"><div class="compare-slot-name">{html.escape(str(selected_row["player"]))}</div>'
+                                f'<div class="compare-slot-team">{logo}<span>{html.escape(str(selected_row["team"]))} · {html.escape(str(selected_row["position"]))}</span></div></div></div>'
+                                f'<div class="compare-slot-game">{html.escape(str(selected_row["venue"]))} vs {html.escape(str(selected_row["next_opponent"]))}{" · " + html.escape(kickoff) if kickoff else ""}</div>'
+                                f'<div class="compare-slot-footer"><span class="compare-slot-projection">{float(selected_row["median_ppr"]):.1f} projected PPR</span>{sample_badge}<span class="availability-pill {availability_class}">{html.escape(availability)}</span></div>',
+                                unsafe_allow_html=True,
+                            )
+                            remove_column, replace_column = st.columns(2)
+                            if remove_column.button("Remove", key=f"remove_{position}_{selected_row['player_id']}", width="stretch"):
+                                st.session_state[selection_key] = [value for value in names if value != names[slot_index]]
+                                st.session_state[replacement_key] = None
+                                st.rerun()
+                            replace_label = "Replacing…" if replacement_index == slot_index else "Replace"
+                            if replace_column.button(replace_label, key=f"replace_{position}_{selected_row['player_id']}", width="stretch"):
+                                st.session_state[replacement_key] = None if replacement_index == slot_index else slot_index
+                                st.rerun()
+                        else:
+                            st.markdown(
+                                f'<div class="open-slot"><div class="open-slot-number">Player {slot_index + 1}</div><div class="open-slot-title">Open comparison slot</div><div class="open-slot-copy">Choose a player from the search panel below.</div></div>',
+                                unsafe_allow_html=True,
+                            )
 
         if not preview_compare.empty:
             st.markdown(
