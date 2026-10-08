@@ -62,7 +62,7 @@ st.markdown(
 [data-testid="stSidebar"] * { color:#f7fafb; }
 [data-testid="stSidebar"] [data-baseweb="select"] * { color:var(--ink) !important; }
 [data-testid="stSidebar"] button[kind="secondary"] * { color:var(--ink) !important; }
-.block-container { max-width:1440px; padding-top:1.55rem; }
+.block-container { max-width:1440px; padding-top:.85rem; }
 h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spacing:-.01em; font-weight:800; }
 .hero { display:flex; align-items:flex-end; justify-content:space-between; gap:2rem; padding:0; margin:0; }
 .hero h1 { margin:.12rem 0 .18rem; font-size:2.55rem; line-height:1.02; }
@@ -73,16 +73,15 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .sidebar-brand span { color:#9ee468; }
 .sidebar-logo { text-align:center; margin:.1rem 0 .35rem; }
 .sidebar-logo img { width:88px; height:88px; border-radius:22px; object-fit:cover; }
-.header-logo { display:block; width:min(360px,100%); height:auto; margin:0; mix-blend-mode:multiply; }
+.header-logo { display:block; width:min(225px,100%); height:auto; margin:0; mix-blend-mode:multiply; }
 .hero p { color:var(--muted); margin:0; max-width:720px; }
 .eyebrow { color:#397f18; text-transform:uppercase; letter-spacing:.13em; font-size:.74rem; font-weight:800; }
 .fresh { color:var(--muted); text-align:right; font-size:.78rem; white-space:nowrap; }
 .app-header { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:1rem 1.15rem; margin-bottom:1rem; }
-.header-status { display:flex; justify-content:flex-start; align-items:center; gap:.38rem; color:var(--muted); font-size:.72rem; margin-top:.2rem; }
-.header-details { max-width:620px; padding:.25rem 0; }
-.header-details .eyebrow { margin-bottom:.3rem; }
-.header-details .hero-subtitle { font-family:'Barlow Condensed','Arial Narrow',sans-serif; color:var(--navy); font-size:1.42rem; letter-spacing:.035em; margin-bottom:.2rem; }
-.header-details p { color:var(--muted); margin:.15rem 0 .65rem; font-size:.9rem; line-height:1.45; }
+.header-details { max-width:720px; padding:.05rem 0; }
+.header-details .eyebrow { margin-bottom:.14rem; }
+.header-details .hero-subtitle { font-family:'Barlow Condensed','Arial Narrow',sans-serif; color:var(--navy); font-size:1.3rem; letter-spacing:.035em; margin-bottom:.08rem; }
+.header-details p { color:var(--muted); margin:.08rem 0 .42rem; font-size:.8rem; line-height:1.35; }
 .injury-impact-note { margin:.75rem 0 0; padding:.72rem .8rem; border-radius:10px; background:#f3f7ee; border-left:4px solid var(--gold); color:var(--ink); font-size:.76rem; line-height:1.45; }
 .injury-impact-note summary { cursor:pointer; color:#397f18; font-weight:800; letter-spacing:.035em; list-style:none; }
 .injury-impact-note summary::-webkit-details-marker { display:none; }
@@ -168,11 +167,13 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .section-copy { color:var(--muted); font-size:.87rem; margin-bottom:.65rem; }
 .note { border-left:4px solid var(--gold); background:#edf4e8; color:#183515; padding:.72rem .9rem; border-radius:8px; font-size:.84rem; margin-top:1rem; }
 .warning { border-left:4px solid var(--gold); background:#eef5e9; color:#29451f; padding:.72rem .9rem; border-radius:8px; font-size:.84rem; margin:.85rem 0; }
-.game-status { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:.55rem; margin:.85rem 0 .45rem; }
-.game-status-item { background:var(--card); border:1px solid var(--line); border-radius:11px; padding:.68rem .78rem; min-width:0; }
-.game-status-label { color:var(--muted); font-size:.62rem; font-weight:800; letter-spacing:.07em; text-transform:uppercase; margin-bottom:.16rem; }
-.game-status-value { color:var(--ink); font-size:.8rem; font-weight:720; line-height:1.25; overflow-wrap:anywhere; }
-.game-status-note { color:var(--muted); font-size:.73rem; margin:0 0 .8rem; }
+.freshness-bar { display:flex; align-items:center; gap:.35rem; background:var(--card); border:1px solid var(--line); border-radius:11px; padding:.42rem .5rem; margin:.45rem 0 .55rem; overflow:hidden; }
+.freshness-item { display:flex; align-items:center; gap:.28rem; min-width:0; padding:.08rem .5rem; border-right:1px solid #e3e8ea; color:var(--ink); font-size:.66rem; line-height:1.25; white-space:nowrap; }
+.freshness-item:last-of-type { border-right:0; }
+.freshness-item b { color:var(--muted); font-size:.56rem; font-weight:850; letter-spacing:.055em; text-transform:uppercase; }
+.freshness-item.status-caution { color:#8a5a08; }
+.freshness-reminder { margin-left:auto; color:var(--muted); font-size:.6rem; line-height:1.25; text-align:right; }
+.freshness-alert { display:flex; align-items:center; gap:.42rem; border-left:3px solid #d39b29; background:#fbf6df; color:#76520d; border-radius:8px; padding:.48rem .65rem; margin:0 0 .55rem; font-size:.7rem; line-height:1.35; }
 .player-finder { margin:.35rem 0 .8rem; }
 .finder-copy { color:var(--muted); font-size:.78rem; margin:-.25rem 0 .55rem; }
 .selected-player-name { font-size:.94rem; font-weight:750; line-height:1.2; margin-top:.2rem; }
@@ -320,7 +321,10 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
   .verdict .name { font-size:1.45rem; }
   .range-tooltip { left:0; transform:none; width:min(250px, 75vw); }
   [data-testid="stSidebar"] { width:min(18.75rem, 88vw) !important; }
-  .game-status { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .header-logo { width:min(170px,62vw); margin-bottom:.35rem; }
+  .freshness-bar { flex-wrap:wrap; align-items:flex-start; }
+  .freshness-item { flex:1 1 calc(50% - .35rem); border-right:0; padding:.18rem .3rem; white-space:normal; }
+  .freshness-reminder { flex:1 0 100%; margin:0; padding:.18rem .3rem 0; text-align:left; border-top:1px solid #e3e8ea; }
   .driver-grid { grid-template-columns:1fr; }
   .advanced-stat-grid { grid-template-columns:1fr; }
   .usage-player { grid-template-columns:minmax(170px,.9fr) minmax(160px,1.1fr) 78px; }
@@ -328,7 +332,7 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 }
 @media(max-width:520px) {
   div[data-baseweb="select"] > div { flex-wrap:wrap; }
-  .game-status { grid-template-columns:1fr; }
+  .freshness-item { flex-basis:100%; }
   .decision-edge { align-items:flex-start; flex-direction:column; }
   .projection-scope { grid-template-columns:1fr; }
   .usage-player { grid-template-columns:1fr 72px; }
@@ -434,7 +438,7 @@ context_checked = datetime.fromisoformat(str(header_metadata.get("context_refres
 context_age_minutes = max(0, int((datetime.now(timezone.utc) - context_checked.astimezone(timezone.utc)).total_seconds() // 60))
 
 with st.container():
-    header_left, header_right = st.columns([.82, 1.18], gap="large", vertical_alignment="center")
+    header_left, header_right = st.columns([.48, 1.52], gap="medium", vertical_alignment="center")
     with header_left:
         brand_logo_uri = "data:image/png;base64," + base64.b64encode(BRAND_LOGO.read_bytes()).decode("ascii")
         st.markdown(
@@ -451,7 +455,6 @@ with st.container():
         )
         qb_td_label = st.radio("QB passing touchdown scoring", ["4 points", "6 points"], horizontal=True, label_visibility="collapsed")
         QB_PASS_TD_POINTS = int(qb_td_label.split()[0])
-        st.markdown(f'<div class="header-status"><span class="status-dot"></span>Projections {header_age_minutes} min old · live context {context_age_minutes} min old</div>', unsafe_allow_html=True)
 
 try:
     with st.spinner("Updating weekly stats and matchups…"):
@@ -529,17 +532,17 @@ if page == "Decision Room":
     high_frequency_day = datetime.now().weekday() in {0, 3, 6}
     next_refresh_copy = "Game-window monitoring" if high_frequency_day else "6 AM / 5 PM Central"
     st.markdown(
-        '<div class="game-status">'
-        f'<div class="game-status-item"><div class="game-status-label">Projections</div><div class="game-status-value">Updated {header_age_minutes} min ago</div></div>'
-        f'<div class="game-status-item"><div class="game-status-label">Live context</div><div class="game-status-value">Updated {context_age_minutes} min ago</div></div>'
-        f'<div class="game-status-item"><div class="game-status-label">Weather / depth</div><div class="game-status-value">{context_value} · {context_detail}</div></div>'
-        f'<div class="game-status-item"><div class="game-status-label">Next refresh</div><div class="game-status-value">{next_refresh_copy}</div></div>'
-        '</div>'
-        '<div class="game-status-note"><b>Before kickoff:</b> confirm official inactives and late-breaking team news before locking your lineup.</div>',
+        '<div class="freshness-bar">'
+        f'<div class="freshness-item"><span class="status-dot"></span><b>Projections</b><span>{header_age_minutes}m ago</span></div>'
+        f'<div class="freshness-item"><span class="status-dot"></span><b>Context</b><span>{context_age_minutes}m ago</span></div>'
+        f'<div class="freshness-item{" status-caution" if context_is_stale else ""}"><span class="status-dot"></span><b>Weather / depth</b><span>{context_value} · {context_detail}</span></div>'
+        f'<div class="freshness-item"><b>Next</b><span>{next_refresh_copy}</span></div>'
+        '<div class="freshness-reminder">Confirm official inactives before kickoff.</div>'
+        '</div>',
         unsafe_allow_html=True,
     )
     if context_is_stale:
-        st.warning("Weather or depth-chart context is older than expected or unavailable. Confirm the latest team status before kickoff.")
+        st.markdown('<div class="freshness-alert"><b>Check before kickoff:</b> Some weather or depth-chart context may be stale.</div>', unsafe_allow_html=True)
     provider_issue = provider_issue_message(PROVIDER_STATUS)
     if provider_issue:
         st.warning(provider_issue)
