@@ -394,6 +394,41 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .usage-track { height:10px; border-radius:999px; background:#dfe5e7; overflow:hidden; }
 .usage-fill { height:100%; border-radius:999px; background:var(--wolf); }
 .usage-player.leader .usage-fill { background:linear-gradient(90deg,var(--forest),var(--gold)); }
+.trends-hero { margin:.15rem 0 1rem; padding:1rem 1.1rem; border-radius:16px; background:linear-gradient(115deg,#002244 0%,#06375c 100%); color:#fff; box-shadow:0 10px 24px rgba(0,34,68,.16); }
+.trends-hero .eyebrow { color:#9ee468; font-size:.67rem; font-weight:900; letter-spacing:.11em; text-transform:uppercase; }
+.trends-hero h2 { color:#fff !important; margin:.16rem 0 .2rem !important; padding:0 !important; font-family:'Barlow Condensed','Arial Narrow',sans-serif; font-size:1.75rem; }
+.trends-hero p { color:#dbe6ec !important; margin:0; font-size:.82rem; }
+.trend-player-card { display:grid; grid-template-columns:minmax(230px,1.15fr) repeat(3,minmax(110px,.55fr)); gap:.75rem; align-items:center; margin:.8rem 0; padding:1rem; border:1px solid #cad4d9; border-left:5px solid #69be28; border-radius:16px; background:#fff; box-shadow:0 8px 20px rgba(0,34,68,.08); }
+.trend-player-identity { display:flex; align-items:center; gap:.72rem; min-width:0; }
+.trend-player-identity .player-photo { width:68px; height:68px; flex-basis:68px; }
+.trend-player-name { color:var(--navy); font-family:'Barlow Condensed','Arial Narrow',sans-serif; font-size:1.28rem; font-weight:900; line-height:1.05; }
+.trend-player-team { display:flex; align-items:center; gap:.3rem; color:var(--ink); font-size:.72rem; margin-top:.3rem; }
+.trend-player-team img { width:1.1rem; height:1.1rem; object-fit:contain; }
+.trend-stat { min-height:68px; padding:.62rem .7rem; border-radius:11px; background:#f1f5f6; }
+.trend-stat span { display:block; color:var(--muted); font-size:.61rem; font-weight:800; letter-spacing:.05em; text-transform:uppercase; }
+.trend-stat strong { display:block; color:var(--navy); font-size:1.3rem; line-height:1.15; margin-top:.2rem; }
+.trend-stat small { color:var(--muted); font-size:.61rem; }
+.trend-read { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin:.65rem 0 .9rem; padding:.78rem .9rem; border-radius:12px; background:#edf4e8; border-left:4px solid #69be28; }
+.trend-read b { color:var(--forest); font-size:.68rem; letter-spacing:.07em; text-transform:uppercase; white-space:nowrap; }
+.trend-read span { color:var(--ink); font-size:.76rem; }
+.trend-week-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:.55rem; margin:.7rem 0; }
+.trend-week { min-height:92px; padding:.66rem; border:1px solid #d4dcdf; border-radius:12px; background:#fff; text-align:center; }
+.trend-week.hot { border-color:#69be28; background:#f1f8ec; }
+.trend-week.cool { border-color:#d68b27; background:#fff6e9; }
+.trend-week .week { color:var(--muted); font-size:.61rem; font-weight:850; text-transform:uppercase; }
+.trend-week strong { display:block; color:var(--navy); font-size:1.35rem; line-height:1.1; margin:.22rem 0; }
+.trend-week small { color:var(--muted); font-size:.61rem; }
+.trend-evidence-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.65rem; margin:.75rem 0; }
+.trend-evidence { padding:.8rem; border:1px solid #d4dcdf; border-radius:12px; background:#fff; }
+.trend-evidence span { color:var(--muted); font-size:.62rem; font-weight:850; text-transform:uppercase; letter-spacing:.05em; }
+.trend-evidence strong { display:block; color:var(--navy); font-size:1rem; margin:.2rem 0; }
+.trend-evidence p { color:var(--ink); font-size:.69rem; line-height:1.45; margin:0; }
+.st-key-trends_position [role="radiogroup"], .st-key-trends_view [role="radiogroup"] { display:grid !important; gap:.32rem; padding:.32rem; border:1px solid #d4dcdf; border-radius:12px; background:#e8edef; }
+.st-key-trends_position [role="radiogroup"] { grid-template-columns:repeat(4,minmax(0,1fr)); }
+.st-key-trends_view [role="radiogroup"] { grid-template-columns:repeat(4,minmax(0,1fr)); }
+.st-key-trends_position button, .st-key-trends_view button { border:0 !important; background:transparent !important; color:var(--muted) !important; font-weight:800 !important; }
+.st-key-trends_position button[aria-checked="true"], .st-key-trends_view button[aria-checked="true"] { background:var(--navy) !important; color:#fff !important; }
+.st-key-trends_position button[aria-checked="true"] p, .st-key-trends_view button[aria-checked="true"] p { color:#fff !important; }
 .usage-rank { color:var(--muted); font-size:.63rem; margin-top:.28rem; }
 .usage-score { text-align:right; }
 .usage-score strong { display:block; color:var(--navy); font-size:1.55rem; line-height:1; letter-spacing:-.03em; }
@@ -473,6 +508,7 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
   .advanced-stat-grid { grid-template-columns:1fr; }
   .usage-player { grid-template-columns:minmax(170px,.9fr) minmax(160px,1.1fr) 78px; }
   .projection-row,.form-row { grid-template-columns:minmax(165px,.8fr) minmax(230px,1.3fr) 72px; }
+  .trend-player-card { grid-template-columns:minmax(220px,1.2fr) repeat(3,minmax(90px,.55fr)); }
 }
 @media(max-width:520px) {
   div[data-baseweb="select"] > div { flex-wrap:wrap; }
@@ -494,6 +530,12 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
   .actionable-alert-time { text-align:left; }
   .context-card-body { grid-template-columns:1fr; }
   .context-item.wide { grid-column:auto; }
+  .trend-player-card { grid-template-columns:1fr 1fr; }
+  .trend-player-identity { grid-column:1/-1; }
+  .trend-stat:last-child { grid-column:1/-1; }
+  .trend-week-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .trend-evidence-grid { grid-template-columns:1fr; }
+  .st-key-trends_view [role="radiogroup"] { grid-template-columns:repeat(2,minmax(0,1fr)); }
 }
 </style>
 """,
@@ -700,6 +742,12 @@ context_checked = datetime.fromisoformat(str(header_metadata.get("context_refres
 context_age_minutes = max(0, int((datetime.now(timezone.utc) - context_checked.astimezone(timezone.utc)).total_seconds() // 60))
 shared_qb_points = str(st.query_params.get("qb", "4"))
 shared_qb_index = 1 if shared_qb_points == "6" else 0
+header_copy = {
+    "Decision Room": ("Player Comparison", "Compare up to three players and make the final lineup call."),
+    "Player Trends": ("Player Trends", "Track current form, repeatable opportunity, and the next-week outlook."),
+    "How It Works": ("How It Works", "See what shapes our projections, what stays informational, and where the data comes from."),
+}
+header_title, header_description = header_copy[page]
 
 with st.container():
     st.markdown('<h1 class="sr-only">The Sunday Decision Lab</h1>', unsafe_allow_html=True)
@@ -713,8 +761,8 @@ with st.container():
     with header_right:
         st.markdown(
             f'<div class="header-details"><div class="eyebrow">Week {header_week} · {season} · Full PPR</div>'
-            '<div class="hero-subtitle">Player Comparison</div>'
-            '<p>Compare up to three players and make the final lineup call.</p>'
+            f'<div class="hero-subtitle">{html.escape(header_title)}</div>'
+            f'<p>{html.escape(header_description)}</p>'
             '<div class="settings-kicker">QB passing touchdown scoring</div></div>',
             unsafe_allow_html=True,
         )
@@ -1319,7 +1367,19 @@ if page == "Decision Room":
                 unsafe_allow_html=True,
             )
 
-        comparison_shell = st.expander("Analysis Hub", expanded=False)
+        # Streamlit reruns the script whenever a control inside an expander changes.
+        # Remember that the user is actively working in the hub so those reruns do
+        # not collapse the panel between analysis views.
+        if "analysis_hub_expanded" not in st.session_state:
+            st.session_state.analysis_hub_expanded = False
+
+        def keep_analysis_hub_open() -> None:
+            st.session_state.analysis_hub_expanded = True
+
+        comparison_shell = st.expander(
+            "Analysis Hub",
+            expanded=st.session_state.analysis_hub_expanded,
+        )
         comparison_shell.markdown(
             '<div class="tool-section-head"><div><h2>Analysis Hub</h2><span>Projection, form, usage, matchup, market context, and methodology in one place.</span></div><span class="tool-section-badge">6 analysis views</span></div>',
             unsafe_allow_html=True,
@@ -1328,6 +1388,7 @@ if page == "Decision Room":
             "Analysis view", ["Projection", "Weekly form", "Usage", "Matchup", "Market", "Methodology"],
             default="Projection", width="stretch", label_visibility="collapsed",
             key="comparison_view",
+            on_change=keep_analysis_hub_open,
         )
         if comparison_view == "Projection":
             range_min = max(0.0, float(compare["floor_ppr"].min()) - 2.0)
@@ -1429,8 +1490,14 @@ if page == "Decision Room":
                 "FLEX": {"Opportunities": "recent_opportunities", "Carries": "ytd_carries", "Targets": "ytd_targets", "Receptions": "ytd_receptions", "Rushing yards": "ytd_rushing_yards", "Receiving yards": "ytd_receiving_yards", "Total touchdowns": "ytd_total_tds"},
             }[position]
             usage_left, usage_right = comparison_shell.columns([1, 1])
-            usage_label = usage_left.selectbox("Statistic", list(metric_options), key=f"comparison_usage_metric_{position}")
-            usage_mode = usage_right.radio("Display", ["Per game", "Season total"], horizontal=True, key=f"comparison_usage_mode_{position}")
+            usage_label = usage_left.selectbox(
+                "Statistic", list(metric_options), key=f"comparison_usage_metric_{position}",
+                on_change=keep_analysis_hub_open,
+            )
+            usage_mode = usage_right.radio(
+                "Display", ["Per game", "Season total"], horizontal=True,
+                key=f"comparison_usage_mode_{position}", on_change=keep_analysis_hub_open,
+            )
             usage_column = metric_options[usage_label]
             usage_values = compare.copy()
             if usage_column == "recent_opportunities":
@@ -1526,45 +1593,15 @@ if page == "Decision Room":
 
         deep_dive_shell = comparison_shell
         if comparison_view == "Projection":
-            show_projection_drivers = comparison_shell.toggle("Show projection drivers and detailed statistics", key=f"show_projection_drivers_{position}")
+            show_projection_drivers = comparison_shell.toggle(
+                "Show projection drivers and detailed statistics",
+                key=f"show_projection_drivers_{position}", on_change=keep_analysis_hub_open,
+            )
             deep_dive_view = "Projection drivers" if show_projection_drivers else None
         elif comparison_view == "Matchup":
             deep_dive_view = "Matchup context"
         else:
             deep_dive_view = None
-        if deep_dive_view == "Matchup context":
-            detail_cards = []
-            for _, detail_row in compare.iterrows():
-                detail_total = detail_row.get("betting_total_live")
-                if detail_total is None or pd.isna(detail_total):
-                    detail_total = detail_row.get("total_line")
-                availability = selection_availability_summary(detail_row)
-                availability_alert = any(label in availability.casefold() for label in ("questionable", "doubtful", "out", "inactive", "ir", "pup"))
-                kickoff = " · ".join(
-                    str(detail_row.get(value)) for value in ("weekday", "gametime")
-                    if detail_row.get(value) is not None and pd.notna(detail_row.get(value))
-                ) or "TBD"
-                team_record = detail_row.get("team_record") if pd.notna(detail_row.get("team_record")) else "—"
-                photo = player_photo_html(detail_row.get("headshot_url"), detail_row["player"])
-                logo_url = team_logo_url(detail_row.get("team"))
-                logo = f'<img src="{html.escape(logo_url, quote=True)}" alt="{html.escape(str(detail_row["team"]), quote=True)} logo">' if logo_url else ""
-                game_total = f"{float(detail_total):.1f} points" if detail_total is not None and pd.notna(detail_total) else "Not available"
-                detail_team_total = projected_team_total(detail_row)
-                team_total = f"{detail_team_total:.1f} points" if detail_team_total is not None else "Not available"
-                detail_cards.append(
-                    f'<article class="detail-card"><div class="detail-card-head">{photo}<div><div class="detail-card-name">{html.escape(str(detail_row["player"]))}</div>'
-                    f'<div class="detail-card-team">{logo}<span>{html.escape(str(detail_row["team"]))} · {html.escape(str(detail_row.get("position", position)))}</span></div></div>'
-                    f'<div class="detail-card-status{" alert" if availability_alert else ""}">{html.escape(availability)}</div></div>'
-                    f'<div class="detail-card-body"><div class="detail-card-row"><span>Matchup</span><b>{html.escape(str(detail_row["venue"]))} vs {html.escape(str(detail_row["next_opponent"]))}</b></div>'
-                    f'<div class="detail-card-row"><span>Kickoff</span><b>{html.escape(kickoff)}</b></div>'
-                    f'<div class="detail-card-row"><span>Team record</span><b>{html.escape(str(team_record))}</b></div>'
-                    f'<div class="detail-card-row"><span>Game total</span><b>{html.escape(game_total)}</b></div>'
-                    f'<div class="detail-card-row"><span>Projected team total</span><b>{html.escape(team_total)}</b></div>'
-                    f'<div class="detail-card-projection"><div><span>Floor–ceiling</span><small>{float(detail_row["floor_ppr"]):.1f}–{float(detail_row["ceiling_ppr"]):.1f} PPR</small></div>'
-                    f'<div><span>Median</span><strong>{float(detail_row["median_ppr"]):.1f}</strong></div></div></div></article>'
-                )
-            deep_dive_shell.markdown(f'<div class="detail-card-grid">{"".join(detail_cards)}</div>', unsafe_allow_html=True)
-
         common = ["player", "team", "next_opponent", "games_played", "season_ppr", "recent_ppr", "recent_opportunities"]
         position_stats = {
             "QB": ["ytd_attempts", "ytd_passing_yards", "ytd_passing_tds", "ytd_rushing_yards", "ytd_rushing_tds"],
@@ -1738,13 +1775,21 @@ if page == "Decision Room":
                     if row.get(value) is not None and pd.notna(row.get(value))
                 ) or "Kickoff TBD"
                 availability = selection_availability_summary(row)
+                team_record = row.get("team_record") if pd.notna(row.get("team_record")) else "—"
+                implied_team_total = projected_team_total(row)
+                team_total = f"{implied_team_total:.1f} points" if implied_team_total is not None else "Not available"
+                projection_range = f'{float(row["floor_ppr"]):.1f}–{float(row["ceiling_ppr"]):.1f} PPR'
                 fields = [
                     ("Availability", availability, False),
                     ("Weather", weather_summary(row), False),
+                    ("Team record", str(team_record), False),
+                    ("Projected team total", team_total, False),
                     ("Expected pace", pace, True),
                     ("Scoring environment", expected_points, True),
                     ("Opponent strength", matchup_summary(row), False),
                     ("QB / O-line", personnel, False),
+                    ("Projection range", projection_range, False),
+                    ("Median projection", f'{float(row["median_ppr"]):.1f} PPR', False),
                 ]
                 rows_html = "".join(
                     f'<div class="context-item{" wide" if wide else ""}"><div class="context-label">{html.escape(label)}</div><div class="context-value">{html.escape(value)}</div></div>'
@@ -1773,7 +1818,15 @@ if page == "Decision Room":
             comparison_shell.markdown(DISCLAIMER_LANGUAGE)
 
 elif page == "Player Trends":
-    selected_position = st.segmented_control("Position", ["QB", "RB", "WR", "TE"], default="WR")
+    st.markdown(
+        '<section class="trends-hero"><div class="eyebrow">Player Trends</div><h2>See what is changing—and what is likely to last</h2>'
+        '<p>Review weekly production, repeatable workload, and the upcoming outlook without confusing one big game for a dependable trend.</p></section>',
+        unsafe_allow_html=True,
+    )
+    control_left, control_right = st.columns([1, 1.5])
+    selected_position = control_left.segmented_control(
+        "Position", ["QB", "RB", "WR", "TE"], default="WR", key="trends_position", width="stretch"
+    )
     pool = BOARD.loc[
         BOARD["position"].eq(selected_position)
         & BOARD["next_opponent"].notna()
@@ -1784,7 +1837,10 @@ elif page == "Player Trends":
         hidden = int((BOARD["position"].eq("QB") & BOARD["base_roster_relevant"] & ~BOARD["verified_qb_starter"]).sum()) if selected_position == "QB" else 0
         st.warning(empty_player_pool_message(selected_position, hidden))
         st.stop()
-    player_name = st.selectbox("Player", pool["player"].sort_values().tolist())
+    player_name = control_right.selectbox(
+        "Find a player", pool["player"].sort_values().tolist(),
+        key=f"trends_player_{selected_position}",
+    )
     matches = pool.loc[pool["player"].eq(player_name)]
     if matches.empty:
         st.warning("That player record is no longer available after the latest refresh. Choose another player.")
@@ -1793,24 +1849,180 @@ elif page == "Player Trends":
     id_column = "player_id" if "player_id" in BOARD.columns and "player_id" in WEEKLY.columns else None
     name_column = "player_display_name" if "player_display_name" in WEEKLY.columns else "player_name"
     history = WEEKLY.loc[WEEKLY[name_column].eq(player_name)].sort_values("week")
-    f1, f2, f3, f4 = st.columns(4)
-    f1.metric("Week projection", f"{player['projected_ppr']:.1f}")
-    f2.metric("Last four", f"{player['recent_ppr']:.1f}")
-    f3.metric("Season", f"{player['season_ppr']:.1f}")
-    f4.metric("Next opponent", player["next_opponent"])
-    if history.empty:
-        st.warning("Weekly game history is unavailable for this player. The current projection remains visible above, but no trend chart can be shown.")
+    projection = float(player["projected_ppr"])
+    season_average = float(player["season_ppr"])
+    recent_average = float(player["recent_ppr"])
+    availability = selection_availability_summary(player)
+    photo = player_photo_html(player.get("headshot_url"), player_name)
+    logo_url = team_logo_url(player.get("team"))
+    logo = f'<img src="{html.escape(logo_url, quote=True)}" alt="{html.escape(str(player["team"]), quote=True)} logo">' if logo_url else ""
+    game_line = " · ".join(
+        str(player.get(value)) for value in ("weekday", "gametime")
+        if player.get(value) is not None and pd.notna(player.get(value))
+    ) or "Kickoff TBD"
+    st.markdown(
+        f'<section class="trend-player-card"><div class="trend-player-identity">{photo}<div><div class="trend-player-name">{html.escape(player_name)}</div>'
+        f'<div class="trend-player-team">{logo}<span>{html.escape(str(player["team"]))} · {selected_position} · {html.escape(str(player.get("venue", "")))} vs {html.escape(str(player["next_opponent"]))}</span></div>'
+        f'<div class="trend-player-team"><span>{html.escape(game_line)} · {html.escape(availability)}</span></div></div></div>'
+        f'<div class="trend-stat"><span>Week {NEXT_WEEK}</span><strong>{projection:.1f}</strong><small>Projected PPR</small></div>'
+        f'<div class="trend-stat"><span>Recent form</span><strong>{recent_average:.1f}</strong><small>PPR per game</small></div>'
+        f'<div class="trend-stat"><span>Season baseline</span><strong>{season_average:.1f}</strong><small>PPR per game</small></div></section>',
+        unsafe_allow_html=True,
+    )
+
+    recorded = history.dropna(subset=["fantasy_points_ppr"]).copy()
+    games_played = len(recorded)
+    if games_played >= 2:
+        latest_score = float(recorded.iloc[-1]["fantasy_points_ppr"])
+        prior_score = float(recorded.iloc[-2]["fantasy_points_ppr"])
+        form_change = latest_score - prior_score
+        direction = "up" if form_change > 2 else "down" if form_change < -2 else "steady"
+        trend_sentence = (
+            f"{player_name} is trending {direction} after scoring {latest_score:.1f} PPR last week. "
+            f"We project {projection:.1f} this week, {abs(projection - season_average):.1f} points "
+            f"{'above' if projection >= season_average else 'below'} the season baseline."
+        )
+    elif games_played == 1:
+        latest_score = float(recorded.iloc[-1]["fantasy_points_ppr"])
+        trend_sentence = f"Only one game is available for {player_name}. Treat the {latest_score:.1f}-point result as an early signal—not an established trend."
     else:
-        fig = go.Figure()
-        fig.add_trace(go.Bar(x=history["week"], y=history["fantasy_points_ppr"], name="Weekly PPR", marker_color=COLORS[selected_position], hovertemplate="Week %{x}<br>%{y:.1f} PPR<extra></extra>"))
-        fig.add_hline(y=player["season_ppr"], line_dash="dash", line_color="#5f6b73", annotation_text="Season avg", annotation_position="top left")
-        fig.add_hline(y=player["projected_ppr"], line_dash="dot", line_color="#69be28", annotation_text=f"Week {NEXT_WEEK} projection", annotation_position="top right")
-        fig.update_layout(title=f"{player_name} · weekly production", xaxis_title="Week", yaxis_title="PPR points", showlegend=False)
-        st.plotly_chart(polish(fig, 440), width="stretch", config={"displayModeBar": False})
-    if pd.notna(player.get("points_allowed")):
-        st.markdown(f'<div class="note"><b>Matchup:</b> {player["next_opponent"]} has allowed {player["points_allowed"]:.1f} PPR per {selected_position} performance in this dataset, a {str(player["matchup_label"]).lower()} index for the position.</div>', unsafe_allow_html=True)
+        trend_sentence = f"No completed-game sample is available for {player_name}. The outlook relies more heavily on the expected role, team environment, and position priors."
+    st.markdown(f'<div class="trend-read"><b>Quick read</b><span>{html.escape(trend_sentence)}</span></div>', unsafe_allow_html=True)
+
+    recent_weeks = list(range(max(1, NEXT_WEEK - 4), NEXT_WEEK))
+    weekly_lookup = {int(row["week"]): row for _, row in recorded.iterrows()}
+    week_cards = []
+    for week_number in recent_weeks:
+        week_row = weekly_lookup.get(week_number)
+        if week_row is None:
+            week_cards.append(f'<article class="trend-week"><div class="week">Week {week_number}</div><strong>—</strong><small>No recorded game</small></article>')
+            continue
+        points = float(week_row["fantasy_points_ppr"])
+        tone = "hot" if points >= max(season_average + 3, 20) else "cool" if points <= max(season_average - 3, 8) else ""
+        opponent = week_row.get("opponent_team") if pd.notna(week_row.get("opponent_team")) else "—"
+        week_cards.append(
+            f'<article class="trend-week {tone}"><div class="week">Week {week_number} · vs {html.escape(str(opponent))}</div>'
+            f'<strong>{points:.1f}</strong><small>PPR points</small></article>'
+        )
+    st.markdown('<div class="tool-section-head"><div><h2>Recent weekly form</h2><span>Results are context; repeatable volume matters more than a single spike.</span></div><span class="tool-section-badge">Last 4 weeks</span></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="trend-week-grid">{"".join(week_cards)}</div>', unsafe_allow_html=True)
+
+    if "trends_hub_expanded" not in st.session_state:
+        st.session_state.trends_hub_expanded = False
+
+    def keep_trends_hub_open() -> None:
+        st.session_state.trends_hub_expanded = True
+
+    trends_shell = st.expander("Trends Analysis", expanded=st.session_state.trends_hub_expanded)
+    trends_shell.markdown(
+        '<div class="tool-section-head"><div><h2>Trends Analysis</h2><span>Inspect production, opportunity, matchup, and player context.</span></div><span class="tool-section-badge">Supporting evidence</span></div>',
+        unsafe_allow_html=True,
+    )
+    trends_view = trends_shell.segmented_control(
+        "Trend view", ["Production", "Opportunity", "Matchup", "Player profile"],
+        default="Production", key="trends_view", label_visibility="collapsed", width="stretch",
+        on_change=keep_trends_hub_open,
+    )
+    if trends_view == "Production":
+        if recorded.empty:
+            trends_shell.info("Weekly production is not available yet. The projection remains visible above and uncertainty is widened for the limited sample.")
+        else:
+            actual_weeks = pd.to_numeric(recorded["week"], errors="coerce").dropna().astype(int).tolist()
+            actual_scores = pd.to_numeric(recorded.loc[recorded["week"].notna(), "fantasy_points_ppr"], errors="coerce").fillna(0).tolist()
+            trends_shell.markdown(
+                f'<div class="comparison-panel-head"><div><h3>{html.escape(player_name)} · performance path</h3>'
+                '<p>Completed games are connected; the dotted segment leads to our upcoming projection.</p></div>'
+                f'<div class="panel-key">{games_played} game{"s" if games_played != 1 else ""} tracked</div></div>',
+                unsafe_allow_html=True,
+            )
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(
+                x=actual_weeks,
+                y=actual_scores,
+                mode="lines+markers+text",
+                name="Completed games",
+                line=dict(color="#002244", width=4, shape="spline" if len(actual_weeks) >= 3 else "linear"),
+                marker=dict(size=13, color="#69be28", line=dict(color="#ffffff", width=3)),
+                text=[f"{score:.1f}" for score in actual_scores],
+                textposition="top center",
+                textfont=dict(color="#002244", size=13),
+                fill="tozeroy",
+                fillcolor="rgba(0,34,68,.07)",
+                hovertemplate="Week %{x}<br><b>%{y:.1f} PPR</b><extra></extra>",
+            ))
+            last_week = actual_weeks[-1]
+            last_score = actual_scores[-1]
+            fig.add_trace(go.Scatter(
+                x=[last_week, NEXT_WEEK], y=[last_score, projection], mode="lines",
+                line=dict(color="#69be28", width=4, dash="dot"),
+                hoverinfo="skip", showlegend=False,
+            ))
+            fig.add_trace(go.Scatter(
+                x=[NEXT_WEEK], y=[projection], mode="markers+text", name=f"Week {NEXT_WEEK} projection",
+                marker=dict(size=18, symbol="diamond", color="#69be28", line=dict(color="#002244", width=3)),
+                text=[f"{projection:.1f} proj."], textposition="top center",
+                textfont=dict(color="#285f18", size=13),
+                hovertemplate=f"Week {NEXT_WEEK} projection<br><b>%{{y:.1f}} PPR</b><extra></extra>",
+            ))
+            fig.add_hline(y=season_average, line_dash="dash", line_color="#7f8d94", line_width=2)
+            fig.add_annotation(
+                x=min(actual_weeks), y=season_average, text=f"Season baseline {season_average:.1f}",
+                showarrow=False, xanchor="left", yanchor="bottom", font=dict(color="#5f6b73", size=11),
+                bgcolor="rgba(255,255,255,.82)",
+            )
+            tick_values = sorted(set([*actual_weeks, NEXT_WEEK]))
+            tick_labels = [f"W{week}{' · PROJ' if week == NEXT_WEEK else ''}" for week in tick_values]
+            fig = polish(fig, 330)
+            fig.update_layout(
+                margin=dict(l=18, r=18, t=28, b=18), showlegend=False,
+                hovermode="closest", paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="#f8fafb",
+            )
+            fig.update_xaxes(
+                title=None, tickmode="array", tickvals=tick_values, ticktext=tick_labels,
+                range=[min(tick_values) - .35, max(tick_values) + .35], gridcolor="rgba(0,34,68,.07)",
+                tickfont=dict(color="#5f6b73", size=11), fixedrange=True,
+            )
+            fig.update_yaxes(
+                title=None, rangemode="tozero", gridcolor="rgba(0,34,68,.09)",
+                tickfont=dict(color="#5f6b73", size=11), fixedrange=True,
+            )
+            trends_shell.plotly_chart(fig, width="stretch", config={"displayModeBar": False, "responsive": True})
+            trends_shell.markdown(f'<div class="panel-insight"><b>How to read it</b><span>{html.escape(trend_sentence)}</span></div>', unsafe_allow_html=True)
+    elif trends_view == "Opportunity":
+        if selected_position == "QB":
+            opportunity_items = [("Recent workload", player.get("recent_opportunities"), "Pass attempts and designed rushing work that can repeat."), ("Season attempts", player.get("ytd_attempts"), "Total passing attempts through the current week."), ("Rushing yards", player.get("ytd_rushing_yards"), "Ground production that can raise the weekly floor.")]
+        elif selected_position == "RB":
+            opportunity_items = [("Recent opportunities", player.get("recent_opportunities"), "Carries plus targets over the recent sample."), ("Season carries", player.get("ytd_carries"), "Total rushing attempts this season."), ("Season targets", player.get("ytd_targets"), "Receiving opportunities that matter in PPR scoring.")]
+        else:
+            opportunity_items = [("Recent opportunities", player.get("recent_opportunities"), "Recent targets used as a repeatable workload signal."), ("Season targets", player.get("ytd_targets"), "Total passing-game opportunities this season."), ("Latest snap share", player.get("latest_snap_pct"), "Share of offensive snaps in the latest tracked game.")]
+        evidence = []
+        for label, value, explanation in opportunity_items:
+            if value is None or pd.isna(value):
+                display = "Unavailable"
+            elif "share" in label.casefold():
+                share_value = float(value)
+                display = f"{share_value * 100 if share_value <= 1 else share_value:.0f}%"
+            else:
+                display = f"{float(value):.1f}"
+            evidence.append(f'<article class="trend-evidence"><span>{html.escape(label)}</span><strong>{display}</strong><p>{html.escape(explanation)}</p></article>')
+        trends_shell.markdown(f'<div class="trend-evidence-grid">{"".join(evidence)}</div>', unsafe_allow_html=True)
+    elif trends_view == "Matchup":
+        factor = float(player.get("projection_matchup_factor", 1.0)) if pd.notna(player.get("projection_matchup_factor")) else 1.0
+        adjustment = (factor - 1) * 100
+        matchup_direction = "easier" if adjustment > 1 else "tougher" if adjustment < -1 else "neutral"
+        trends_shell.markdown(
+            f'<div class="trend-read"><b>Schedule-adjusted matchup</b><span>{html.escape(str(player["next_opponent"]))} is rated {abs(adjustment):.0f}% {matchup_direction} than the player baseline. '
+            'This adjustment is capped and scaled to the amount of opponent evidence available.</span></div>', unsafe_allow_html=True,
+        )
     else:
-        st.info("Opponent matchup history is unavailable for this player; no matchup claim is shown.")
+        confidence = str(player.get("confidence", "Standard sample"))
+        profile_items = [
+            ("Games in sample", str(games_played), "Completed games available for current-season trend analysis."),
+            ("Projection range", f'{float(player.get("floor_ppr", projection)):.1f}–{float(player.get("ceiling_ppr", projection)):.1f}', "Downside-to-upside range, not a guarantee."),
+            ("Confidence", confidence, "How much reliable personal workload history supports the estimate."),
+        ]
+        profile = [f'<article class="trend-evidence"><span>{html.escape(label)}</span><strong>{html.escape(value)}</strong><p>{html.escape(copy)}</p></article>' for label, value, copy in profile_items]
+        trends_shell.markdown(f'<div class="trend-evidence-grid">{"".join(profile)}</div>', unsafe_allow_html=True)
 
 else:
     st.subheader("How The Sunday Decision Lab works")
