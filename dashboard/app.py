@@ -18,12 +18,14 @@ import streamlit as st
 try:
     from dashboard.providers.sportsdataio import context_freshness, format_injury_context
     from dashboard.outlooks import build_player_outlook, leader_margin
+    from dashboard.injury_impact import apply_injury_scenario
     from dashboard.states import empty_player_pool_message, provider_issue_message
     from dashboard.methodology_copy import DISCLAIMER_LANGUAGE, METHODOLOGY_LANGUAGE, SOURCE_ATTRIBUTION
     from dashboard.presentation import filter_player_search, matchup_summary, role_summary, selection_availability_summary, team_logo_url, weather_summary
 except ModuleNotFoundError:
     from providers.sportsdataio import context_freshness, format_injury_context
     from outlooks import build_player_outlook, leader_margin
+    from injury_impact import apply_injury_scenario
     from states import empty_player_pool_message, provider_issue_message
     from methodology_copy import DISCLAIMER_LANGUAGE, METHODOLOGY_LANGUAGE, SOURCE_ATTRIBUTION
     from presentation import filter_player_search, matchup_summary, role_summary, selection_availability_summary, team_logo_url, weather_summary
@@ -77,6 +79,8 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .header-details .eyebrow { margin-bottom:.3rem; }
 .header-details .hero-subtitle { font-family:'Barlow Condensed','Arial Narrow',sans-serif; color:var(--navy); font-size:1.42rem; letter-spacing:.035em; margin-bottom:.2rem; }
 .header-details p { color:var(--muted); margin:.15rem 0 .65rem; font-size:.9rem; line-height:1.45; }
+.injury-impact-note { margin:.75rem 0 0; padding:.72rem .8rem; border-radius:10px; background:#f3f7ee; border-left:4px solid var(--gold); color:var(--ink); font-size:.76rem; line-height:1.45; }
+.injury-impact-note strong { display:block; color:#397f18; font-size:.66rem; letter-spacing:.08em; text-transform:uppercase; margin-bottom:.2rem; }
 .settings-kicker { color:#397f18; font-size:.64rem; font-weight:850; letter-spacing:.1em; text-transform:uppercase; }
 .status-dot { display:inline-block; width:.48rem; height:.48rem; border-radius:50%; background:var(--gold); }
 .verdict { background:#fbfcfc; color:var(--ink); border:1px solid #dfe4e6; border-radius:16px; padding:1.15rem 1.25rem; min-height:0; }
@@ -432,6 +436,7 @@ with st.container():
 try:
     with st.spinner("Updating weekly stats and matchups…"):
         BOARD, WEEKLY, NEXT_WEEK, REFRESHED, PROVIDER_STATUS, PROVIDER_REFRESHED_AT, INJURY_SOURCE_STATUS = get_published_snapshot(season, QB_PASS_TD_POINTS)
+        BOARD = apply_injury_scenario(BOARD)
 except Exception as error:
     st.error("The weekly player dataset could not be loaded, so projections are temporarily unavailable.")
     st.info("Check your connection, then use **Refresh now**. The app will not show cached estimates as if they were current.")
@@ -469,6 +474,18 @@ if page == "Decision Room":
     provider_issue = provider_issue_message(PROVIDER_STATUS)
     if provider_issue:
         st.warning(provider_issue)
+    projection_scenario = st.segmented_control(
+        "Projection scenario", ["Baseline", "Injury-adjusted"], default="Baseline",
+        width="stretch", key="projection_scenario",
+    )
+    if projection_scenario == "Injury-adjusted":
+        BOARD["median_ppr"] = BOARD["injury_adjusted_median_ppr"]
+        BOARD["projected_ppr"] = BOARD["injury_adjusted_median_ppr"]
+        BOARD["floor_ppr"] = BOARD["injury_adjusted_floor_ppr"]
+        BOARD["ceiling_ppr"] = BOARD["injury_adjusted_ceiling_ppr"]
+        st.caption("Optional scenario: active injuries, practice participation, quarterback availability, and teammate opportunity shifts are applied. The baseline model remains unchanged.")
+    else:
+        st.caption("Baseline model: injuries remain visible as decision context but do not alter the projection.")
     position = st.segmented_control("Position", ["QB", "RB", "WR", "TE"], default="WR")
     pool = BOARD.loc[
         BOARD["position"].eq(position)
@@ -601,7 +618,8 @@ if page == "Decision Room":
             unsafe_allow_html=True,
         )
 
-        st.markdown('<div class="section-title">Start / Sit verdict</div><div class="section-copy">We build this ranking from current production, repeatable workload, a fading prior-season anchor, touchdown regression, and a sample-scaled matchup adjustment. The live context shown below helps you make the final call but does not change our ranking.</div>', unsafe_allow_html=True)
+        scenario_copy = " This optional view also applies current injury and teammate-availability scenarios." if projection_scenario == "Injury-adjusted" else " The live context shown below helps you make the final call but does not change our ranking."
+        st.markdown(f'<div class="section-title">Start / Sit verdict</div><div class="section-copy">We build this ranking from current production, repeatable workload, a fading prior-season anchor, touchdown regression, and a sample-scaled matchup adjustment.{scenario_copy}</div>', unsafe_allow_html=True)
         outlook_columns = st.columns(len(compare))
         top_gap = 0.0 if len(compare) == 1 else float(compare.iloc[0]["median_ppr"] - compare.iloc[1]["median_ppr"])
         edge_confidence = "Solo view" if len(compare) == 1 else "Lean" if top_gap < 2.5 else "Moderate edge" if top_gap < 5 else "Strong edge"
@@ -672,13 +690,31 @@ if page == "Decision Room":
                     f'<details class="card-outlook-details"><summary>Expand player outlook</summary><div class="card-outlook-full">'
                     f'{html.escape(full_reason)}{reporting_links}</div></details>'
                 )
+                injury_note = ""
+                if projection_scenario == "Injury-adjusted":
+                    baseline = float(row.get("baseline_median_ppr", median))
+                    delta = median - baseline
+                    risk = str(row.get("injury_risk_label", "No adjustment"))
+                    teammate_effect = str(row.get("injury_teammate_effect", "") or "").strip()
+                    if risk != "No adjustment" or teammate_effect:
+                        impact_parts = []
+                        if risk != "No adjustment":
+                            impact_parts.append(str(row.get("injury_impact_summary", "")))
+                            impact_parts.append(str(row.get("injury_recovery_outlook", "")))
+                        if teammate_effect:
+                            impact_parts.append(teammate_effect)
+                        impact_label = f"Injury impact · {risk}" if risk != "No adjustment" else "Team opportunity shift"
+                        injury_note = (
+                            f'<div class="injury-impact-note"><strong>{html.escape(impact_label)} · {delta:+.1f} PPR</strong>'
+                            f'{html.escape(" ".join(part for part in impact_parts if part))}</div>'
+                        )
                 st.markdown(
                     f'<div class="verdict {card_class}"><div style="display:flex;align-items:center;gap:.45rem"><div class="tag">{verdict}</div><div class="confidence-label">{edge_confidence}</div></div><div class="player-heading">{photo}<div class="name">{html.escape(str(row["player"]))}</div></div>'
                     f'<div class="opponent team-line">{logo}<span>{html.escape(player_details)}</span></div>'
                     f'<div class="game-detail-line">{html.escape(" · ".join(game_details))}</div>'
                     f'<div class="projection-primary"><strong>{median:.1f}</strong><span>projected PPR <span class="range-help" tabindex="0" aria-label="Range definition">i<span class="range-tooltip" role="tooltip">Floor is the P10 downside outcome, projection is the median estimate, and ceiling is the P90 upside outcome. About 80% of results should fall between floor and ceiling.</span></span></span></div>'
                     f'<div class="range-track"><span class="range-marker" style="left:{median_position:.1f}%"></span></div><div class="range-labels"><span>Floor {floor:.1f}</span><span>Ceiling {ceiling:.1f}</span></div>'
-                    f'<div class="outlook-label">Player outlook</div><div class="reason">{html.escape(reason)}</div><div class="broadcast-context">{quick_context}</div>'
+                    f'<div class="outlook-label">Player outlook</div><div class="reason">{html.escape(reason)}</div>{injury_note}<div class="broadcast-context">{quick_context}</div>'
                     f'{f"<div class=\"relative-sit-note\">{html.escape(relative_note)}</div>" if relative_note else ""}{outlook_details}</div>',
                     unsafe_allow_html=True,
                 )
