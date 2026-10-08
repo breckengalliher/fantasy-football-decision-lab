@@ -2,20 +2,18 @@
 
 from __future__ import annotations
 
-import base64
 import html
 import json
 import os
+from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
 from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
-import plotly.graph_objects as go
 import requests
 import streamlit as st
 import streamlit.components.v1 as components
-from PIL import Image, ImageDraw, ImageFont
 from urllib.parse import urlencode
 from streamlit_local_storage import LocalStorage
 
@@ -500,7 +498,15 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
   .mobile-decision-edge { display:block; }
   .desktop-decision-edge { display:none; }
   .st-key-mobile_selection_summary { display:block; margin:.2rem 0 .55rem; }
-  .st-key-desktop_selection_cards { display:none; }
+  .st-key-desktop_selection_cards { display:block; }
+  .st-key-desktop_selection_cards [data-testid="stHorizontalBlock"] { gap:.45rem !important; }
+  .st-key-desktop_selection_cards [data-testid="stVerticalBlockBorderWrapper"] { border-radius:11px !important; }
+  .st-key-desktop_selection_cards [data-testid="stVerticalBlockBorderWrapper"] > div { padding:.55rem .62rem !important; }
+  .st-key-desktop_selection_cards [data-testid="stButton"] button { min-height:38px !important; padding:.28rem .5rem !important; font-size:.68rem !important; }
+  .st-key-desktop_selection_cards .compare-slot-kicker { display:none; }
+  .st-key-desktop_selection_cards .compare-slot-top { margin:0 !important; }
+  .st-key-desktop_selection_cards .compare-slot-game { margin:.28rem 0 !important; font-size:.68rem !important; }
+  .st-key-desktop_selection_cards .compare-slot-footer { margin-top:.2rem !important; }
   .st-key-mobile_selection_summary [data-testid="stVerticalBlockBorderWrapper"] { border-radius:11px !important; }
   .st-key-mobile_selection_summary [data-testid="stVerticalBlockBorderWrapper"] > div { padding:.48rem .55rem !important; }
   .st-key-mobile_selection_summary [data-testid="stHorizontalBlock"] { align-items:center !important; gap:.48rem !important; }
@@ -561,12 +567,22 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 )
 
 
-@st.cache_data(ttl=300, show_spinner=False)
+@st.cache_resource(show_spinner=False)
+def get_http_session() -> requests.Session:
+    """Reuse HTTPS connections for immutable production snapshot downloads."""
+    session = requests.Session()
+    adapter = requests.adapters.HTTPAdapter(pool_connections=4, pool_maxsize=10, max_retries=1)
+    session.mount("https://", adapter)
+    session.mount("http://", adapter)
+    return session
+
+
+@st.cache_data(ttl=60, max_entries=1, show_spinner=False)
 def get_snapshot_metadata() -> dict:
     processed = PROJECT_ROOT / "data" / "processed"
     metadata_path = processed / "live_refresh_metadata.json"
     try:
-        response = requests.get(f"{SNAPSHOT_BASE_URL}/live_refresh_metadata.json", timeout=12)
+        response = get_http_session().get(f"{SNAPSHOT_BASE_URL}/live_refresh_metadata.json", timeout=(3.05, 8))
         response.raise_for_status()
         return response.json()
     except (requests.RequestException, ValueError):
@@ -577,7 +593,7 @@ def get_snapshot_metadata() -> dict:
 
 def _read_snapshot_parquet(filename: str) -> pd.DataFrame:
     try:
-        response = requests.get(f"{SNAPSHOT_BASE_URL}/{filename}", timeout=20)
+        response = get_http_session().get(f"{SNAPSHOT_BASE_URL}/{filename}", timeout=(3.05, 12))
         response.raise_for_status()
         return pd.read_parquet(BytesIO(response.content))
     except (requests.RequestException, ValueError, OSError):
@@ -587,13 +603,29 @@ def _read_snapshot_parquet(filename: str) -> pd.DataFrame:
         return pd.read_parquet(path)
 
 
-@st.cache_data(ttl=300, show_spinner=False)
+@st.cache_resource(ttl=300, max_entries=4, show_spinner=False)
 def get_published_snapshot(season: int, passing_td_points: int) -> tuple[pd.DataFrame, pd.DataFrame, int, str, str, str | None, str]:
+    """Load one immutable public snapshot shared safely by all sessions.
+
+    Callers only select or copy rows; they never mutate these frames. Resource
+    caching therefore avoids serializing and copying ~4.4 MB of public data on
+    every rerun without mixing any user-specific state into the cache.
+    """
     metadata = get_snapshot_metadata()
     if int(metadata.get("season", -1)) != season or passing_td_points not in metadata.get("refreshed_qb_passing_td_formats", []):
         raise ValueError("The published snapshot does not match this season or scoring format.")
-    board = _read_snapshot_parquet(f"live_start_sit_board_{passing_td_points}pt_current.parquet")
-    weekly = _read_snapshot_parquet("live_weekly_current.parquet")
+    # Both files belong to the same validated snapshot and are independent.
+    # Downloading them concurrently removes one full network round trip on a
+    # cold cache. Injury enrichment is also snapshot-scoped, so doing it here
+    # prevents ~1 second of repeated Pandas work on every widget interaction.
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        board_future = executor.submit(
+            _read_snapshot_parquet,
+            f"live_start_sit_board_{passing_td_points}pt_current.parquet",
+        )
+        weekly_future = executor.submit(_read_snapshot_parquet, "live_weekly_current.parquet")
+        board = apply_injury_scenario(board_future.result())
+        weekly = weekly_future.result()
     provider_status = str(metadata.get("sportsdataio_status", "Snapshot unavailable"))
     provider_refreshed_at = metadata.get("sportsdataio_refreshed_at")
     injury_sources = metadata.get("injury_source_status", {})
@@ -601,22 +633,6 @@ def get_published_snapshot(season: int, passing_td_points: int) -> tuple[pd.Data
     checked_at = metadata.get("refreshed_at", datetime.now(timezone.utc).isoformat())
     refreshed = datetime.fromisoformat(str(checked_at).replace("Z", "+00:00")).strftime("%b %d, %Y · %H:%M UTC")
     return board, weekly, int(metadata["next_week"]), refreshed, provider_status, provider_refreshed_at, injury_status
-
-
-def polish(fig: go.Figure, height: int = 390) -> go.Figure:
-    fig.update_layout(
-        height=height,
-        margin=dict(l=18, r=18, t=52, b=20),
-        paper_bgcolor="#ffffff",
-        plot_bgcolor="#ffffff",
-        font=dict(family="Arial", color="#071b2c", size=12),
-        title_font=dict(size=16, color="#071b2c"),
-        hoverlabel=dict(bgcolor="#002244", font_color="white"),
-        legend_title_text="",
-    )
-    fig.update_xaxes(gridcolor="#e3e8ea", zeroline=False)
-    fig.update_yaxes(gridcolor="#e3e8ea", zeroline=False)
-    return fig
 
 
 def production_broadcast_html(player_name: str, games: list[dict], projection: float, season_average: float, next_week: int) -> str:
@@ -852,8 +868,12 @@ def explained_term(label: object, explanation: object, class_name: str = "") -> 
     )
 
 
+@st.cache_data(max_entries=24, show_spinner=False)
 def build_share_image(compare: pd.DataFrame, week: int, scoring_label: str, refreshed: str) -> bytes:
     """Create a compact, social-friendly PNG for the current comparison."""
+    # Pillow is only needed after the user opens sharing and requests the card.
+    from PIL import Image, ImageDraw, ImageFont
+
     ordered = compare.sort_values("median_ppr", ascending=False).head(3).reset_index(drop=True)
     leader = ordered.iloc[0]
     margin = leader_margin(ordered["median_ppr"].tolist())
@@ -926,19 +946,23 @@ def show_onboarding() -> None:
         st.rerun(scope="app")
 
 
-browser_storage = LocalStorage(key="sdl_browser_preferences")
-persisted_onboarding_seen = str(browser_storage.getItem("sdl_onboarding_dismissed")).casefold() == "true"
+browser_storage = None
+if "onboarding_seen" not in st.session_state:
+    # Mount the browser-storage bridge only while restoring the preference.
+    # Keeping this custom component off routine reruns reduces interaction work.
+    browser_storage = LocalStorage(key="sdl_browser_preferences")
+    persisted_onboarding_seen = str(browser_storage.getItem("sdl_onboarding_dismissed")).casefold() == "true"
+else:
+    persisted_onboarding_seen = bool(st.session_state["onboarding_seen"])
 if st.session_state.get("onboarding_pending_persist", False):
+    if browser_storage is None:
+        browser_storage = LocalStorage(key="sdl_browser_preferences")
     browser_storage.setItem("sdl_onboarding_dismissed", "true", key="persist_onboarding_dismissal")
     st.session_state["onboarding_pending_persist"] = False
 
 
 with st.sidebar:
-    st.markdown(
-        f'<div class="sidebar-logo"><img src="data:image/png;base64,{base64.b64encode(BRAND_ICON.read_bytes()).decode("ascii")}" '
-        'alt="The Sunday Decision Lab SDL logo"></div>',
-        unsafe_allow_html=True,
-    )
+    st.image(str(BRAND_ICON), width=88)
     st.markdown('<div class="sidebar-brand">THE SUNDAY <span>DECISION</span> LAB</div>', unsafe_allow_html=True)
     st.caption("Your weekly lineup call")
     page = st.radio("View", ["Decision Room", "Player Trends", "How It Works"], label_visibility="collapsed")
@@ -992,11 +1016,9 @@ with st.container():
     st.markdown('<h1 class="sr-only">The Sunday Decision Lab</h1>', unsafe_allow_html=True)
     header_left, header_right = st.columns([.48, 1.52], gap="medium", vertical_alignment="center")
     with header_left:
-        brand_logo_uri = "data:image/png;base64," + base64.b64encode(BRAND_LOGO.read_bytes()).decode("ascii")
-        st.markdown(
-            f'<img class="header-logo" src="{brand_logo_uri}" alt="The Sunday Decision Lab logo">',
-            unsafe_allow_html=True,
-        )
+        # Streamlit serves a cacheable media URL instead of embedding ~576 KB
+        # of base64 data in every interaction response.
+        st.image(str(BRAND_LOGO), width=225)
     with header_right:
         st.markdown(
             f'<div class="header-details"><div class="eyebrow">Week {header_week} · {season} · Full PPR</div>'
@@ -1011,7 +1033,6 @@ with st.container():
 try:
     with st.spinner("Updating weekly stats and matchups…"):
         BOARD, WEEKLY, NEXT_WEEK, REFRESHED, PROVIDER_STATUS, PROVIDER_REFRESHED_AT, INJURY_SOURCE_STATUS = get_published_snapshot(season, QB_PASS_TD_POINTS)
-        BOARD = apply_injury_scenario(BOARD)
 except Exception as error:
     st.error("The weekly player dataset could not be loaded, so projections are temporarily unavailable.")
     st.info("Check your connection, then use **Refresh now**. The app will not show cached estimates as if they were current.")
@@ -1026,6 +1047,7 @@ with st.sidebar:
         st.caption(INJURY_SOURCE_STATUS)
         if st.button("Check for latest updates", width="stretch"):
             st.cache_data.clear()
+            get_published_snapshot.clear()
             st.rerun()
         st.caption("Loads the newest validated cloud snapshot. It does not call providers or consume API quota.")
         st.divider()
@@ -1169,34 +1191,6 @@ if page == "Decision Room":
             st.markdown(f'<div class="mobile-decision-edge">{decision_edge_markup}</div>', unsafe_allow_html=True)
 
         st.markdown(f'<div class="comparison-count">Comparison lineup · {len(names)} of 3 slots filled</div>', unsafe_allow_html=True)
-        with st.container(key="mobile_selection_summary"):
-            for slot_index in range(3):
-                with st.container(border=True):
-                    if slot_index < len(names):
-                        selected_row = pool.loc[pool["player"].eq(names[slot_index])].iloc[0]
-                        availability = selection_availability_summary(selected_row)
-                        is_alert = any(term in availability.casefold() for term in ("questionable", "doubtful", "out", "inactive", "ir", "did not practice"))
-                        photo = player_photo_html(selected_row.get("headshot_url"), selected_row["player"])
-                        logo_url = team_logo_url(selected_row.get("team"))
-                        logo = f'<img src="{html.escape(logo_url, quote=True)}" alt="{html.escape(str(selected_row["team"]), quote=True)} logo">' if logo_url else ""
-                        mobile_detail, mobile_action = st.columns([5, 1.35], vertical_alignment="center")
-                        with mobile_detail:
-                            st.markdown(
-                                f'<div class="mobile-selection-row">{photo}<div class="mobile-selection-main">'
-                                f'<div class="mobile-selection-name">{html.escape(str(selected_row["player"]))}</div>'
-                                f'<div class="mobile-selection-meta">{logo}<span>{html.escape(str(selected_row["team"]))} · {html.escape(str(selected_row["position"]))} · {html.escape(str(selected_row["venue"]))} vs {html.escape(str(selected_row["next_opponent"]))}</span></div>'
-                                f'</div><div class="mobile-selection-numbers"><span class="mobile-selection-projection">{float(selected_row["median_ppr"]):.1f}</span>'
-                                f'<span class="mobile-selection-status{" alert" if is_alert else ""}">{html.escape(availability)}</span></div></div>',
-                                unsafe_allow_html=True,
-                            )
-                        with mobile_action:
-                            replace_label = "Cancel" if replacement_index == slot_index else "Replace"
-                            if st.button(replace_label, key=f"mobile_replace_{position}_{selected_row['player_id']}", width="stretch"):
-                                st.session_state[replacement_key] = None if replacement_index == slot_index else slot_index
-                                st.rerun()
-                    else:
-                        st.markdown(f'<div class="mobile-open-row">Player {slot_index + 1} · Open slot</div>', unsafe_allow_html=True)
-
         with st.container(key="desktop_selection_cards"):
             slot_columns = st.columns(3)
             for slot_index, slot_column in enumerate(slot_columns):
@@ -1244,7 +1238,14 @@ if page == "Decision Room":
                 f'<div class="desktop-decision-edge">{decision_edge_markup}</div>',
                 unsafe_allow_html=True,
             )
-            with st.expander("Share this comparison"):
+            # Expander bodies execute even while visually closed. A toggle
+            # provides the same disclosure behavior while keeping image
+            # generation and the clipboard component genuinely lazy.
+            if st.toggle(
+                "Share this comparison",
+                key=f"share_comparison_{position}",
+                help="Create a restorable link or downloadable comparison card.",
+            ):
                 st.caption("Copy a restorable comparison link or download a ready-to-share image.")
                 share_query = urlencode(
                     {
@@ -1310,7 +1311,12 @@ if page == "Decision Room":
             with st.expander(panel_label, expanded=True):
                 if replacement_index is not None:
                     st.markdown(f'<div class="replacement-note">Replacing <b>{html.escape(names[replacement_index])}</b>. Choose a player below to complete the swap.</div>', unsafe_allow_html=True)
-                query = st.text_input("Search eligible players", key=f"smart_search_query_{position}", placeholder="Search by player or team…")
+                # Form inputs stay entirely in the browser while the user is
+                # typing. Only Search submits a rerun, avoiding a full app pass
+                # for every character on mobile keyboards.
+                with st.form(f"smart_search_form_{position}", border=False):
+                    query = st.text_input("Search eligible players", key=f"smart_search_query_{position}", placeholder="Search by player or team…")
+                    st.form_submit_button("Search", type="primary", width="stretch")
                 results = filter_player_search(pool.loc[~pool["player"].isin(names)], query)
                 if results.empty:
                     st.info("No eligible players match that search. Try a full name or team abbreviation.")
@@ -1606,29 +1612,27 @@ if page == "Decision Room":
                 unsafe_allow_html=True,
             )
 
-        # Streamlit reruns the script whenever a control inside an expander changes.
-        # Remember that the user is actively working in the hub so those reruns do
-        # not collapse the panel between analysis views.
-        if "analysis_hub_expanded" not in st.session_state:
-            st.session_state.analysis_hub_expanded = False
-
-        def keep_analysis_hub_open() -> None:
-            st.session_state.analysis_hub_expanded = True
-
-        comparison_shell = st.expander(
+        # Streamlit expanders execute their complete body even while closed.
+        # This server-aware disclosure avoids building analysis markup until a
+        # user asks for it, and its session-state key stays open across reruns.
+        analysis_hub_open = st.toggle(
             "Analysis Hub",
-            expanded=st.session_state.analysis_hub_expanded,
+            key="analysis_hub_open",
+            help="Open projection, form, usage, matchup, market, and methodology views.",
         )
-        comparison_shell.markdown(
-            '<div class="tool-section-head"><div><h2>Analysis Hub</h2><span>Projection, form, usage, matchup, market context, and methodology in one place.</span></div><span class="tool-section-badge">6 analysis views</span></div>',
-            unsafe_allow_html=True,
-        )
-        comparison_view = comparison_shell.segmented_control(
-            "Analysis view", ["Projection", "Weekly form", "Usage", "Matchup", "Market", "Methodology"],
-            default="Projection", width="stretch", label_visibility="collapsed",
-            key="comparison_view",
-            on_change=keep_analysis_hub_open,
-        )
+        comparison_shell = st.container(border=analysis_hub_open, key="analysis_hub_panel")
+        if analysis_hub_open:
+            comparison_shell.markdown(
+                '<div class="tool-section-head"><div><h2>Analysis Hub</h2><span>Projection, form, usage, matchup, market context, and methodology in one place.</span></div><span class="tool-section-badge">6 analysis views</span></div>',
+                unsafe_allow_html=True,
+            )
+            comparison_view = comparison_shell.segmented_control(
+                "Analysis view", ["Projection", "Weekly form", "Usage", "Matchup", "Market", "Methodology"],
+                default="Projection", width="stretch", label_visibility="collapsed",
+                key="comparison_view",
+            )
+        else:
+            comparison_view = None
         if comparison_view == "Projection":
             range_min = max(0.0, float(compare["floor_ppr"].min()) - 2.0)
             range_max = float(compare["ceiling_ppr"].max()) + 2.0
@@ -1731,11 +1735,10 @@ if page == "Decision Room":
             usage_left, usage_right = comparison_shell.columns([1, 1])
             usage_label = usage_left.selectbox(
                 "Statistic", list(metric_options), key=f"comparison_usage_metric_{position}",
-                on_change=keep_analysis_hub_open,
             )
             usage_mode = usage_right.radio(
                 "Display", ["Per game", "Season total"], horizontal=True,
-                key=f"comparison_usage_mode_{position}", on_change=keep_analysis_hub_open,
+                key=f"comparison_usage_mode_{position}",
             )
             usage_column = metric_options[usage_label]
             usage_values = compare.copy()
@@ -1834,7 +1837,7 @@ if page == "Decision Room":
         if comparison_view == "Projection":
             show_projection_drivers = comparison_shell.toggle(
                 "Show projection drivers and detailed statistics",
-                key=f"show_projection_drivers_{position}", on_change=keep_analysis_hub_open,
+                key=f"show_projection_drivers_{position}",
             )
             deep_dive_view = "Projection drivers" if show_projection_drivers else None
         elif comparison_view == "Matchup":

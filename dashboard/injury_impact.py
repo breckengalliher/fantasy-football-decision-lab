@@ -5,6 +5,7 @@ from __future__ import annotations
 import math
 from typing import Any
 
+import numpy as np
 import pandas as pd
 
 
@@ -97,43 +98,59 @@ def apply_injury_scenario(board: pd.DataFrame) -> pd.DataFrame:
     result["baseline_median_ppr"] = pd.to_numeric(result["median_ppr"], errors="coerce").fillna(0.0)
     result["baseline_floor_ppr"] = pd.to_numeric(result["floor_ppr"], errors="coerce").fillna(0.0)
     result["baseline_ceiling_ppr"] = pd.to_numeric(result["ceiling_ppr"], errors="coerce").fillna(0.0)
-    result["injury_direct_factor"] = result.apply(direct_availability_factor, axis=1)
-    result["injury_teammate_boost"] = 0.0
-    result["injury_team_efficiency_factor"] = 1.0
-    result["injury_teammate_effect"] = ""
+    # Row-wise DataFrame.apply constructs hundreds of Series objects on every
+    # snapshot refresh. Plain records preserve the exact rules with much lower
+    # allocation and dispatch overhead.
+    source_records = result.to_dict("records")
+    direct_factors = [direct_availability_factor(row) for row in source_records]
+    result["injury_direct_factor"] = direct_factors
+    row_count = len(result)
+    teammate_boost = np.zeros(row_count, dtype=float)
+    team_efficiency = np.ones(row_count, dtype=float)
+    teammate_effect = np.full(row_count, "", dtype=object)
+    positions = result["position"].astype(str).to_numpy()
+    players = result["player"].astype(str).to_numpy()
+    factors = np.asarray(direct_factors, dtype=float)
+    baselines = result["baseline_median_ppr"].to_numpy(dtype=float)
+    opportunities = pd.to_numeric(result.get("recent_opportunities"), errors="coerce").fillna(0).clip(lower=1).to_numpy(dtype=float)
+    skill_mask = np.isin(positions, tuple(SKILL_POSITIONS))
 
-    # A missing skill player creates a partial opportunity pool; some team volume simply disappears.
-    for team, team_rows in result.groupby("team"):
-        for source_index, source in team_rows.iterrows():
-            factor = float(source["injury_direct_factor"])
-            position = _text(source.get("position"))
+    # A missing skill player creates a partial opportunity pool; some team
+    # volume simply disappears. NumPy position arrays avoid repeated DataFrame
+    # slices and scalar .at writes while preserving the existing calculations.
+    for team_positions in result.groupby("team", sort=True).indices.values():
+        team_positions = np.asarray(team_positions, dtype=int)
+        for source_position in team_positions:
+            factor = factors[source_position]
+            position = positions[source_position]
             if factor >= 0.99:
                 continue
             if position == "QB":
                 penalty = min(0.12, (1 - factor) * 0.12)
-                candidate_index = team_rows.index[team_rows["position"].isin(SKILL_POSITIONS)]
-                result.loc[candidate_index, "injury_team_efficiency_factor"] *= 1 - penalty
-                for index in candidate_index:
-                    result.at[index, "injury_teammate_effect"] = f'{source["player"]} availability lowers the team passing outlook.'
+                candidates = team_positions[skill_mask[team_positions]]
+                team_efficiency[candidates] *= 1 - penalty
+                teammate_effect[candidates] = f'{players[source_position]} availability lowers the team passing outlook.'
                 continue
             if position not in SKILL_POSITIONS:
                 continue
-            candidates = team_rows.loc[
-                (team_rows.index != source_index)
-                & team_rows["position"].isin(SKILL_POSITIONS)
-                & team_rows["injury_direct_factor"].ge(0.50)
-            ].copy()
-            if candidates.empty:
+            candidates = team_positions[
+                (team_positions != source_position)
+                & skill_mask[team_positions]
+                & (factors[team_positions] >= 0.50)
+            ]
+            if not len(candidates):
                 continue
-            usage = pd.to_numeric(candidates.get("recent_opportunities"), errors="coerce").fillna(0).clip(lower=1)
-            affinity = candidates["position"].map(lambda value: 1.2 if value == position else 1.0)
-            weights = usage * affinity
-            pool = float(source["baseline_median_ppr"]) * (1 - factor) * 0.45
-            for index, weight in weights.items():
-                baseline = float(result.at[index, "baseline_median_ppr"])
-                boost = min(3.0, baseline * 0.20, pool * float(weight / weights.sum()))
-                result.at[index, "injury_teammate_boost"] += boost
-                result.at[index, "injury_teammate_effect"] = f'{source["player"]} reduced availability could create additional opportunity.'
+            affinity = np.where(positions[candidates] == position, 1.2, 1.0)
+            weights = opportunities[candidates] * affinity
+            pool = baselines[source_position] * (1 - factor) * 0.45
+            distributed = pool * weights / weights.sum()
+            boosts = np.minimum(3.0, np.minimum(baselines[candidates] * 0.20, distributed))
+            teammate_boost[candidates] += boosts
+            teammate_effect[candidates] = f'{players[source_position]} reduced availability could create additional opportunity.'
+
+    result["injury_teammate_boost"] = teammate_boost
+    result["injury_team_efficiency_factor"] = team_efficiency
+    result["injury_teammate_effect"] = teammate_effect
 
     direct = result["injury_direct_factor"]
     team_factor = result["injury_team_efficiency_factor"]
@@ -142,7 +159,13 @@ def apply_injury_scenario(board: pd.DataFrame) -> pd.DataFrame:
     result["injury_adjusted_floor_ppr"] = (result["baseline_floor_ppr"] * direct * team_factor + boost * 0.50).clip(lower=0)
     result["injury_adjusted_ceiling_ppr"] = (result["baseline_ceiling_ppr"] * direct * team_factor + boost * 1.20).clip(lower=0)
     result.loc[result["injury_teammate_boost"].abs().lt(0.10), "injury_teammate_effect"] = ""
-    result["injury_risk_label"] = result.apply(lambda row: _risk_label(row, float(row["injury_direct_factor"])), axis=1)
-    result["injury_recovery_outlook"] = result.apply(lambda row: _recovery_outlook(row, float(row["injury_direct_factor"])), axis=1)
-    result["injury_impact_summary"] = result.apply(lambda row: _direct_summary(row, float(row["injury_direct_factor"])), axis=1)
+    result["injury_risk_label"] = [
+        _risk_label(row, float(factor)) for row, factor in zip(source_records, direct_factors)
+    ]
+    result["injury_recovery_outlook"] = [
+        _recovery_outlook(row, float(factor)) for row, factor in zip(source_records, direct_factors)
+    ]
+    result["injury_impact_summary"] = [
+        _direct_summary(row, float(factor)) for row, factor in zip(source_records, direct_factors)
+    ]
     return result
