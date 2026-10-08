@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 import pandas as pd
 
-from dashboard.providers.sportsdataio import SportsDataIOContext, add_depth_chart_promotions, canonical_injury_status, context_freshness, format_injury_context, normalize_depth_charts, normalize_games, normalize_injuries
+from dashboard.providers.sportsdataio import SportsDataIOContext, add_depth_chart_promotions, canonical_injury_status, context_freshness, flatten_player_props, format_injury_context, normalize_depth_charts, normalize_games, normalize_injuries
 
 
 def test_context_freshness_flags_old_or_missing_data():
@@ -80,6 +80,27 @@ def test_game_context_is_available_to_both_teams():
     ])
     assert set(result["team"]) == {"AAA", "BBB"}
     assert result["betting_total_live"].eq(44.5).all()
+
+
+def test_player_props_keep_only_unambiguous_lines_and_devig_touchdowns():
+    result = flatten_player_props([
+        {
+            "Name": "Receiving Yards", "PlayerName": "Example WR", "Team": "SEA",
+            "BettingOutcomes": [
+                {"BettingOutcomeType": "Over", "Value": 72.5, "SportsbookName": "A"},
+                {"BettingOutcomeType": "Under", "Value": 72.5, "SportsbookName": "A"},
+            ],
+        },
+        {
+            "Name": "Anytime Touchdown Scorer", "PlayerName": "Example WR", "Team": "SEA",
+            "BettingOutcomes": [
+                {"BettingOutcomeType": "Yes", "PayoutAmerican": -120},
+                {"BettingOutcomeType": "No", "PayoutAmerican": 100},
+            ],
+        },
+    ])
+    assert [row["market"] for row in result] == ["receiving_yards", "rushing_receiving_tds"]
+    assert round(result[1]["line"], 3) == 0.522
 
 
 def test_depth_chart_uses_verified_team_id_mapping():

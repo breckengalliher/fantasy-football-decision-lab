@@ -2,12 +2,17 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Iterable
 
 import pandas as pd
 import requests
+
+try:
+    from dashboard.market_expectations import devig_yes_no, normalize_market_lines
+except ModuleNotFoundError:
+    from market_expectations import devig_yes_no, normalize_market_lines
 
 
 BASE_URL = "https://api.sportsdata.io/v3/nfl"
@@ -23,6 +28,8 @@ class SportsDataIOContext:
     games: pd.DataFrame
     depth_charts: pd.DataFrame
     refreshed_at: str
+    market_lines: pd.DataFrame = field(default_factory=pd.DataFrame)
+    market_status: str = "Not requested"
 
 
 def context_freshness(
@@ -142,12 +149,90 @@ class SportsDataIOClient:
             for item in teams or []
             if item.get("TeamID") is not None and item.get("Key")
         }
+        market_records: list[dict[str, Any]] = []
+        market_status = "No player props currently published"
+        game_ids = [item.get("GameKey") or item.get("GameID") or item.get("ScoreID") for item in games or []]
+        for game_id in dict.fromkeys(value for value in game_ids if value is not None):
+            try:
+                props = self._get(f"odds/json/BettingPlayerPropsByGameID/{game_id}")
+            except requests.RequestException as exc:
+                if getattr(exc.response, "status_code", None) in {401, 403}:
+                    market_status = "Player-prop feed is not included in the connected subscription"
+                continue
+            market_records.extend(flatten_player_props(props))
+        market_lines = normalize_market_lines(market_records)
+        if not market_lines.empty:
+            market_status = f"Connected · {len(market_lines)} players with validated lines"
         return SportsDataIOContext(
             injuries=pd.DataFrame(),
             games=normalize_games(games),
             depth_charts=normalize_depth_charts(depth, team_map),
             refreshed_at=datetime.now(timezone.utc).isoformat(),
+            market_lines=market_lines,
+            market_status=market_status,
         )
+
+
+def _market_key(value: Any) -> str | None:
+    text = str(value or "").casefold().replace("-", " ").replace("_", " ")
+    if "reception" in text and "yard" not in text:
+        return "receptions"
+    if "receiv" in text and "yard" in text:
+        return "receiving_yards"
+    if "rush" in text and "yard" in text:
+        return "rushing_yards"
+    if "pass" in text and "yard" in text:
+        return "passing_yards"
+    if "pass" in text and ("touchdown" in text or " td" in f" {text}"):
+        return "passing_tds"
+    if "interception" in text:
+        return "interceptions"
+    if "touchdown" in text and ("anytime" in text or "score" in text):
+        return "rushing_receiving_tds"
+    return None
+
+
+def flatten_player_props(payload: Any) -> list[dict[str, Any]]:
+    """Extract only unambiguous over/under player lines from provider markets."""
+    flattened: list[dict[str, Any]] = []
+    for market in payload or []:
+        if not isinstance(market, dict):
+            continue
+        descriptor = " ".join(str(market.get(key) or "") for key in ("Name", "BettingBetType", "BettingMarketType", "MarketType"))
+        outcomes = market.get("BettingOutcomes") or market.get("Outcomes") or market.get("ConsensusOutcomes") or []
+        if _market_key(descriptor) == "rushing_receiving_tds":
+            yes = next((item for item in outcomes if isinstance(item, dict) and str(item.get("BettingOutcomeType") or item.get("OutcomeType") or item.get("Name") or "").casefold() in {"yes", "over"}), None)
+            no = next((item for item in outcomes if isinstance(item, dict) and str(item.get("BettingOutcomeType") or item.get("OutcomeType") or item.get("Name") or "").casefold() in {"no", "under"}), None)
+            if yes:
+                probability = devig_yes_no(yes.get("PayoutAmerican") or yes.get("AmericanOdds"), (no or {}).get("PayoutAmerican") or (no or {}).get("AmericanOdds"))
+                player = yes.get("PlayerName") or yes.get("ParticipantName") or market.get("PlayerName") or market.get("ParticipantName")
+                team = yes.get("Team") or yes.get("TeamKey") or market.get("Team") or market.get("TeamKey")
+                if probability is not None and player and team:
+                    flattened.append({
+                        "player": player, "team": team, "market": "rushing_receiving_tds", "line": probability,
+                        "book": yes.get("SportsbookName") or "Consensus", "updated_at": yes.get("Updated") or market.get("Updated"),
+                    })
+            continue
+        for outcome in outcomes:
+            if not isinstance(outcome, dict):
+                continue
+            outcome_type = str(outcome.get("BettingOutcomeType") or outcome.get("OutcomeType") or outcome.get("Name") or "")
+            if outcome_type and "over" not in outcome_type.casefold() and outcome_type.casefold() not in {"yes", "o"}:
+                continue
+            market_key = _market_key(f"{descriptor} {outcome.get('Name') or ''}")
+            player = outcome.get("PlayerName") or outcome.get("ParticipantName") or market.get("PlayerName") or market.get("ParticipantName")
+            team = outcome.get("Team") or outcome.get("TeamKey") or market.get("Team") or market.get("TeamKey")
+            line = outcome.get("Value") if outcome.get("Value") is not None else outcome.get("Point")
+            if not market_key or not player or not team or line is None:
+                continue
+            book = outcome.get("SportsbookName") or outcome.get("Sportsbook") or "Consensus"
+            if isinstance(book, dict):
+                book = book.get("Name") or book.get("Key") or "Sportsbook"
+            flattened.append({
+                "player": player, "team": team, "market": market_key, "line": line,
+                "book": book, "updated_at": outcome.get("Updated") or market.get("Updated"),
+            })
+    return flattened
 
 
 def normalize_injuries(payload: Iterable[dict[str, Any]]) -> pd.DataFrame:
@@ -195,6 +280,7 @@ def normalize_games(payload: Iterable[dict[str, Any]]) -> pd.DataFrame:
                     "betting_total_live": total,
                     "game_status_live": _first(item, "Status"),
                     "game_updated_live": _first(item, "Updated", "DateTimeUTC", "DateTime"),
+                    "provider_game_id": _first(item, "GameKey", "GameID", "ScoreID"),
                 }
             )
     return pd.DataFrame(rows)

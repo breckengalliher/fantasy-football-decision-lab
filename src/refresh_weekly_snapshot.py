@@ -32,6 +32,7 @@ from dashboard.providers.injuries import enrich_injuries, load_daily_injury_cont
 from dashboard.snapshots import build_personnel_context
 from dashboard.reporting import enrich_with_reporting, load_reporting_context
 from dashboard.headshots import enrich_with_headshots, load_headshot_context
+from dashboard.market_expectations import enrich_with_market
 
 
 PROCESSED = ROOT / "data" / "processed"
@@ -104,6 +105,10 @@ def main() -> None:
     board = enrich_with_headshots(board, headshot_context)
     prior_weekly = load_prior_weekly_data(season)
     scoring_boards = build_scoring_format_boards(board, weekly, prior_weekly, next_week)
+    scoring_boards = {
+        points: enrich_with_market(scoring_board, context.market_lines, points)
+        for points, scoring_board in scoring_boards.items()
+    }
     board = scoring_boards[4]
 
     previous_path = PROCESSED / "sportsdataio_depth_current.parquet"
@@ -150,6 +155,8 @@ def main() -> None:
         "injury_refreshed_at": injury_context.checked_at,
         "sportsdataio_status": f"Connected · {context.refreshed_at[:16].replace('T', ' ')} UTC",
         "sportsdataio_refreshed_at": context.refreshed_at,
+        "market_status": context.market_status,
+        "market_refreshed_at": context.refreshed_at,
         "reporting_refreshed_at": reporting_context.checked_at,
         "journalism_status": reporting_context.journalism_status,
         "reporter_social_status": reporting_context.social_status,

@@ -19,6 +19,7 @@ try:
     from dashboard.providers.sportsdataio import context_freshness, format_injury_context
     from dashboard.outlooks import build_player_outlook, leader_margin
     from dashboard.injury_impact import apply_injury_scenario
+    from dashboard.market_expectations import market_summary
     from dashboard.admin_refresh import authenticate as authenticate_refresh_admin, configured as admin_refresh_configured, refresh_status, trigger_refresh
     from dashboard.states import empty_player_pool_message, provider_issue_message
     from dashboard.methodology_copy import DISCLAIMER_LANGUAGE, METHODOLOGY_LANGUAGE, SOURCE_ATTRIBUTION
@@ -27,6 +28,7 @@ except ModuleNotFoundError:
     from providers.sportsdataio import context_freshness, format_injury_context
     from outlooks import build_player_outlook, leader_margin
     from injury_impact import apply_injury_scenario
+    from market_expectations import market_summary
     from admin_refresh import authenticate as authenticate_refresh_admin, configured as admin_refresh_configured, refresh_status, trigger_refresh
     from states import empty_player_pool_message, provider_issue_message
     from methodology_copy import DISCLAIMER_LANGUAGE, METHODOLOGY_LANGUAGE, SOURCE_ATTRIBUTION
@@ -88,6 +90,17 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .injury-impact-note[open] summary::after { content:'–'; }
 .injury-impact-body { padding-top:.55rem; }
 .injury-impact-range { display:block; margin-top:.35rem; font-weight:700; color:var(--navy); }
+.market-note { margin:.65rem 0 0; padding:.68rem .78rem; border-radius:10px; background:#eef4f7; border-left:4px solid #4b788f; color:var(--ink); font-size:.74rem; line-height:1.42; }
+.market-note summary { cursor:pointer; color:var(--navy); font-weight:800; letter-spacing:.025em; list-style:none; }
+.market-note summary::-webkit-details-marker { display:none; }
+.market-note summary::after { content:'+'; float:right; font-size:1rem; }
+.market-note[open] summary::after { content:'–'; }
+.market-note-body { padding-top:.5rem; }
+.market-note-lines { display:block; margin-top:.28rem; font-weight:700; }
+.market-note-meta { display:block; margin-top:.34rem; color:var(--muted); font-size:.67rem; }
+.verdict.start .market-note { background:rgba(75,120,143,.2); border-left-color:#9fc5d8; color:#f4f8fa; }
+.verdict.start .market-note summary { color:#bfe2f2; }
+.verdict.start .market-note-meta { color:#c0c8cc; }
 .settings-kicker { color:#397f18; font-size:.64rem; font-weight:850; letter-spacing:.1em; text-transform:uppercase; }
 .status-dot { display:inline-block; width:.48rem; height:.48rem; border-radius:50%; background:var(--gold); }
 .verdict { background:#fbfcfc; color:var(--ink); border:1px solid #dfe4e6; border-radius:16px; padding:1.15rem 1.25rem; min-height:0; }
@@ -755,20 +768,41 @@ if page == "Decision Room":
                         f'<div class="injury-impact-body">{html.escape(" ".join(part for part in impact_parts if part))}'
                         f'<span class="injury-impact-range">Adjusted range: {adjusted_floor:.1f}–{adjusted_ceiling:.1f} PPR</span></div></details>'
                     )
+                market_note = ""
+                market_value = row.get("market_implied_ppr")
+                if market_value is not None and pd.notna(market_value):
+                    market_value = float(market_value)
+                    market_delta = market_value - median
+                    market_lines = market_summary(row)
+                    book_count = row.get("market_book_count")
+                    book_text = ""
+                    if book_count is not None and pd.notna(book_count):
+                        count = int(book_count)
+                        book_text = f"Median across {count} sportsbook{'s' if count != 1 else ''}. "
+                    updated = row.get("market_updated_at")
+                    updated_text = f"Last line update: {updated}." if updated is not None and pd.notna(updated) else ""
+                    comparison = "above" if market_delta > .05 else "below" if market_delta < -.05 else "in line with"
+                    market_note = (
+                        f'<details class="market-note"><summary>Market expectation · {market_value:.1f} PPR ({market_delta:+.1f})</summary>'
+                        f'<div class="market-note-body">The market-implied total is {comparison} our {median:.1f} PPR projection. '
+                        f'This is supplemental and does not change the Start/Sit ranking.'
+                        f'{f"<span class=\"market-note-lines\">{html.escape(market_lines)}</span>" if market_lines else ""}'
+                        f'<span class="market-note-meta">{html.escape(book_text + updated_text)}</span></div></details>'
+                    )
                 st.markdown(
                     f'<div class="verdict {card_class}"><div style="display:flex;align-items:center;gap:.45rem"><div class="tag">{verdict}</div><div class="confidence-label">{edge_confidence}</div></div><div class="player-heading">{photo}<div class="name">{html.escape(str(row["player"]))}</div></div>'
                     f'<div class="opponent team-line">{logo}<span>{html.escape(player_details)}</span></div>'
                     f'<div class="game-detail-line">{html.escape(" · ".join(game_details))}</div>'
                     f'<div class="projection-primary"><strong>{median:.1f}</strong><span>projected PPR <span class="range-help" tabindex="0" aria-label="Range definition">i<span class="range-tooltip" role="tooltip">Floor is the P10 downside outcome, projection is the median estimate, and ceiling is the P90 upside outcome. About 80% of results should fall between floor and ceiling.</span></span></span></div>'
                     f'<div class="range-track"><span class="range-marker" style="left:{median_position:.1f}%"></span></div><div class="range-labels"><span>Floor {floor:.1f}</span><span>Ceiling {ceiling:.1f}</span></div>'
-                    f'<div class="outlook-label">Player outlook</div><div class="reason">{html.escape(reason)}</div>{injury_note}<div class="broadcast-context">{quick_context}</div>'
+                    f'<div class="outlook-label">Player outlook</div><div class="reason">{html.escape(reason)}</div>{injury_note}{market_note}<div class="broadcast-context">{quick_context}</div>'
                     f'{f"<div class=\"relative-sit-note\">{html.escape(relative_note)}</div>" if relative_note else ""}{outlook_details}</div>',
                     unsafe_allow_html=True,
                 )
 
-        st.markdown('<div class="section-title">Comparison Tool</div><div class="section-copy">Compare each player’s projection, weekly form, and repeatable usage in one place.</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-title">Comparison Tool</div><div class="section-copy">Compare each player’s projection, weekly form, repeatable usage, and supplemental market expectations in one place.</div>', unsafe_allow_html=True)
         comparison_view = st.segmented_control(
-            "Comparison view", ["Projection", "Weekly form", "Usage"],
+            "Comparison view", ["Projection", "Weekly form", "Usage", "Market"],
             default="Projection", width="stretch", label_visibility="collapsed",
             key="comparison_view",
         )
@@ -921,6 +955,42 @@ if page == "Decision Room":
                 insight = f'{leader_usage["player"]} is shown at {float(leader_usage["display_value"]):.1f}{"%" if is_share else ""} for {usage_label.lower()}.'
             st.markdown(
                 f'<div class="usage-board">{"".join(usage_rows)}</div><div class="usage-insight"><b>Quick read</b><span>{html.escape(insight)}</span></div>',
+                unsafe_allow_html=True,
+            )
+
+        if comparison_view == "Market":
+            market_rows = []
+            available_count = 0
+            for _, market_row in compare.iterrows():
+                market_value = market_row.get("market_implied_ppr")
+                photo = player_photo_html(market_row.get("headshot_url"), market_row["player"])
+                logo_url = team_logo_url(market_row.get("team"))
+                logo = f'<img src="{html.escape(logo_url, quote=True)}" alt="{html.escape(str(market_row["team"]), quote=True)} logo">' if logo_url else ""
+                identity = (
+                    f'<div class="usage-identity">{photo}<div><div class="usage-name">{html.escape(str(market_row["player"]))}</div>'
+                    f'<div class="usage-team">{logo}<span>{html.escape(str(market_row["team"]))} · {html.escape(str(market_row.get("position", position)))} vs {html.escape(str(market_row["next_opponent"]))}</span></div></div></div>'
+                )
+                if market_value is None or pd.isna(market_value):
+                    market_rows.append(
+                        f'<article class="usage-player">{identity}<div class="usage-track-wrap"><div class="usage-rank">No validated player props are currently available. Missing or suspended lines are never treated as zero.</div></div><div class="usage-score"><strong>—</strong><span>Market PPR</span></div></article>'
+                    )
+                    continue
+                available_count += 1
+                market_value = float(market_value)
+                model_value = float(market_row["median_ppr"])
+                delta = market_value - model_value
+                lines = market_summary(market_row)
+                market_rows.append(
+                    f'<article class="usage-player">{identity}<div class="usage-track-wrap"><div class="usage-rank">{html.escape(lines)}</div><div class="usage-rank">Our projection: {model_value:.1f} · difference: {delta:+.1f} PPR</div></div><div class="usage-score"><strong>{market_value:.1f}</strong><span>Market PPR</span></div></article>'
+                )
+            market_insight = (
+                f"Validated player-prop expectations are available for {available_count} of {len(compare)} selected players."
+                if available_count else
+                "Sportsbooks usually publish most NFL player props 72–96 hours before kickoff. Check again closer to game time."
+            )
+            st.markdown(
+                f'<div class="comparison-panel-head"><div><h3>Market Expectations</h3><p>Consensus receiving, rushing and passing lines translated to the selected fantasy scoring format.</p></div><div class="panel-key">Supplemental only</div></div>'
+                f'<div class="usage-board">{"".join(market_rows)}</div><div class="usage-insight"><b>Important</b><span>{html.escape(market_insight)} These values never change our ranking.</span></div>',
                 unsafe_allow_html=True,
             )
 

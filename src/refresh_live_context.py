@@ -15,6 +15,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from dashboard.headshots import enrich_with_headshots, load_headshot_context
+from dashboard.market_expectations import enrich_with_market
 from dashboard.providers.injuries import enrich_injuries, load_daily_injury_context
 from dashboard.providers.sportsdataio import SportsDataIOClient, add_depth_chart_promotions, enrich_board
 from dashboard.reporting import enrich_with_reporting, load_reporting_context
@@ -31,7 +32,13 @@ PROVIDER_COLUMNS = [
     "depth_position_live", "depth_order_live", "provider_opponent",
     "weather_summary_live", "temperature_live", "wind_live",
     "betting_total_live", "game_status_live", "game_updated_live",
-    "sportsdataio_refreshed_at",
+    "provider_game_id", "sportsdataio_refreshed_at",
+]
+MARKET_COLUMNS = [
+    "market_receptions", "market_receiving_yards", "market_rushing_yards",
+    "market_passing_yards", "market_passing_tds", "market_rushing_receiving_tds",
+    "market_interceptions", "market_book_count", "market_updated_at",
+    "market_implied_ppr", "market_available", "market_checked_at",
 ]
 REPORTING_COLUMNS = ["reporting_summary", "reporting_sources_json", "reporting_checked_at"]
 HEADSHOT_COLUMNS = ["headshot_url", "headshot_source"]
@@ -43,6 +50,7 @@ def refresh_board(
     injury_context,
     reporting_context=None,
     headshot_context=None,
+    passing_td_points: int = 4,
 ) -> pd.DataFrame:
     """Replace only informational fields, preserving existing model outputs."""
     projection_columns = [
@@ -50,7 +58,7 @@ def refresh_board(
         if column in board.columns
     ]
     frozen = board.set_index("player_id")[projection_columns].copy()
-    result = board.drop(columns=INJURY_COLUMNS + PROVIDER_COLUMNS, errors="ignore")
+    result = board.drop(columns=INJURY_COLUMNS + PROVIDER_COLUMNS + MARKET_COLUMNS, errors="ignore")
     if reporting_context is not None:
         result = result.drop(columns=REPORTING_COLUMNS, errors="ignore")
     if headshot_context is not None:
@@ -58,6 +66,7 @@ def refresh_board(
     result = add_depth_chart_promotions(result, provider_context)
     result = enrich_injuries(result, injury_context)
     result = enrich_board(result, provider_context)
+    result = enrich_with_market(result, provider_context.market_lines, passing_td_points)
     if reporting_context is not None:
         result = enrich_with_reporting(result, reporting_context)
     if headshot_context is not None:
@@ -92,6 +101,7 @@ def main() -> None:
         refreshed = refresh_board(
             pd.read_parquet(path), provider_context, injury_context,
             reporting_context, headshot_context,
+            passing_td_points=points,
         )
         atomic_parquet(refreshed, path)
         if points == 4:
@@ -126,6 +136,8 @@ def main() -> None:
         },
         "sportsdataio_refreshed_at": provider_context.refreshed_at,
         "sportsdataio_status": f"Connected · {provider_context.refreshed_at[:16].replace('T', ' ')} UTC",
+        "market_status": provider_context.market_status,
+        "market_refreshed_at": provider_context.refreshed_at,
         "refresh_scope": "Live context only; projections preserved",
     })
     temporary = metadata_path.with_suffix(".json.tmp")
