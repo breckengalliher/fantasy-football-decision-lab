@@ -14,6 +14,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import requests
 import streamlit as st
+import streamlit.components.v1 as components
 from PIL import Image, ImageDraw, ImageFont
 from urllib.parse import urlencode
 from streamlit_local_storage import LocalStorage
@@ -917,6 +918,43 @@ if page == "Decision Room":
                 share_url = f"{APP_BASE_URL}?{share_query}"
                 st.markdown("**Shareable link**")
                 st.code(share_url, language=None)
+                safe_share_url = json.dumps(share_url)
+                components.html(
+                    f"""
+                    <button id="copy-comparison-link" type="button">Copy link</button>
+                    <script>
+                    const button = document.getElementById("copy-comparison-link");
+                    const shareUrl = {safe_share_url};
+                    button.addEventListener("click", async () => {{
+                      try {{
+                        await navigator.clipboard.writeText(shareUrl);
+                      }} catch (error) {{
+                        const fallback = document.createElement("textarea");
+                        fallback.value = shareUrl;
+                        fallback.style.position = "fixed";
+                        fallback.style.opacity = "0";
+                        document.body.appendChild(fallback);
+                        fallback.select();
+                        document.execCommand("copy");
+                        fallback.remove();
+                      }}
+                      button.textContent = "Copied!";
+                      button.classList.add("copied");
+                      window.setTimeout(() => {{
+                        button.textContent = "Copy link";
+                        button.classList.remove("copied");
+                      }}, 1800);
+                    }});
+                    </script>
+                    <style>
+                    html, body {{ margin:0; padding:0; background:transparent; font-family:Inter,Arial,sans-serif; }}
+                    button {{ width:100%; min-height:44px; border:1px solid #69be28; border-radius:9px; background:#002244; color:#9ee468; font-size:14px; font-weight:800; cursor:pointer; transition:background .15s ease, color .15s ease; }}
+                    button:hover, button:focus-visible {{ background:#0b3658; outline:3px solid #4b9fea; outline-offset:2px; }}
+                    button.copied {{ background:#397f18; color:#ffffff; }}
+                    </style>
+                    """,
+                    height=50,
+                )
                 st.caption("Opening this link restores the selected players, position, and quarterback touchdown scoring format.")
                 share_scoring = f"Full PPR · {QB_PASS_TD_POINTS}-point passing TDs"
                 share_image = build_share_image(preview_compare, NEXT_WEEK, share_scoring, REFRESHED)
