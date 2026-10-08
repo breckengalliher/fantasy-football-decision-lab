@@ -33,9 +33,11 @@ from dashboard.snapshots import build_personnel_context
 from dashboard.reporting import enrich_with_reporting, load_reporting_context
 from dashboard.headshots import enrich_with_headshots, load_headshot_context
 from dashboard.market_expectations import enrich_with_market
+from src.projection_ledger import append_forecast_snapshot, build_forecast_snapshot, write_manifest
 
 
 PROCESSED = ROOT / "data" / "processed"
+LEDGER = ROOT / "data" / "projection_ledger"
 
 
 def build_scoring_format_boards(
@@ -185,6 +187,32 @@ def main() -> None:
     temporary = metadata_path.with_suffix(".json.tmp")
     temporary.write_text(json.dumps(metadata, indent=2))
     temporary.replace(metadata_path)
+    publication_time = metadata["refreshed_at"]
+    ledger_paths = []
+    for passing_td_points, scoring_board in scoring_boards.items():
+        snapshot = build_forecast_snapshot(
+            scoring_board,
+            season=season,
+            week=next_week,
+            scoring_format=f"PPR-{passing_td_points}PT-PASS-TD",
+            model_version=metadata["projection_model"],
+            forecast_timestamp=publication_time,
+            information_cutoff=publication_time,
+            snapshot_id=f"{season}-W{next_week}-{passing_td_points}pt-{publication_time[:19].replace(':', '')}",
+        )
+        ledger_paths.append(append_forecast_snapshot(snapshot, LEDGER))
+    write_manifest(
+        ledger_paths,
+        root=LEDGER,
+        metadata={
+            "publication_id": f"{season}-W{next_week}-{publication_time[:19].replace(':', '')}",
+            "forecast_timestamp": publication_time,
+            "information_cutoff": publication_time,
+            "season": season,
+            "week": next_week,
+            "model_version": metadata["projection_model"],
+        },
+    )
     print(json.dumps(metadata))
 
 

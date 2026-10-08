@@ -25,7 +25,8 @@ try:
     from dashboard.admin_refresh import authenticate as authenticate_refresh_admin, configured as admin_refresh_configured, refresh_status, trigger_refresh
     from dashboard.states import empty_player_pool_message, provider_issue_message
     from dashboard.methodology_copy import DISCLAIMER_LANGUAGE, METHODOLOGY_LANGUAGE, SOURCE_ATTRIBUTION
-    from dashboard.presentation import actionable_injury_alert, eligible_positions, filter_player_search, matchup_summary, projected_team_total, role_summary, selection_availability_summary, team_logo_url, weather_summary
+    from dashboard.presentation import actionable_injury_alert, eligible_positions, matchup_summary, projected_team_total, role_summary, selection_availability_summary, team_logo_url, weather_summary
+    from dashboard.decision_policy import CLOSE_CALL_THRESHOLD_PPR
 except ModuleNotFoundError:
     from providers.sportsdataio import context_freshness, format_injury_context
     from outlooks import build_player_outlook, leader_margin
@@ -34,7 +35,8 @@ except ModuleNotFoundError:
     from admin_refresh import authenticate as authenticate_refresh_admin, configured as admin_refresh_configured, refresh_status, trigger_refresh
     from states import empty_player_pool_message, provider_issue_message
     from methodology_copy import DISCLAIMER_LANGUAGE, METHODOLOGY_LANGUAGE, SOURCE_ATTRIBUTION
-    from presentation import actionable_injury_alert, eligible_positions, filter_player_search, matchup_summary, projected_team_total, role_summary, selection_availability_summary, team_logo_url, weather_summary
+    from presentation import actionable_injury_alert, eligible_positions, matchup_summary, projected_team_total, role_summary, selection_availability_summary, team_logo_url, weather_summary
+    from decision_policy import CLOSE_CALL_THRESHOLD_PPR
 
 try:
     from dashboard.data import current_nfl_season
@@ -45,8 +47,8 @@ except ModuleNotFoundError:
 COLORS = {"QB": "#00529b", "RB": "#69be28", "WR": "#4b788f", "TE": "#a5acaf"}
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SEASON = current_nfl_season()
-BRAND_LOGO = PROJECT_ROOT / "dashboard" / "assets" / "sunday-decision-lab-logo.png"
-BRAND_ICON = PROJECT_ROOT / "dashboard" / "assets" / "sunday-decision-lab-icon.png"
+BRAND_LOGO = PROJECT_ROOT / "dashboard" / "assets" / "sunday-decision-lab-logo-clean.png"
+BRAND_ICON = PROJECT_ROOT / "dashboard" / "assets" / "sunday-decision-lab-icon-clean.png"
 SNAPSHOT_BASE_URL = os.getenv(
     "SNAPSHOT_BASE_URL",
     "https://raw.githubusercontent.com/breckengalliher/fantasy-football-decision-lab/main/data/processed",
@@ -76,9 +78,12 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .hero-subtitle { color:var(--forest); font-size:.76rem; font-weight:850; letter-spacing:.13em; text-transform:uppercase; margin-bottom:.32rem; }
 .sidebar-brand { font-family:'Bungee',Impact,sans-serif; color:#f7fafb; font-size:1.18rem; line-height:1.12; letter-spacing:.02em; margin:.15rem 0 .2rem; }
 .sidebar-brand span { color:#9ee468; }
-.sidebar-logo { text-align:center; margin:.1rem 0 .35rem; }
-.sidebar-logo img { width:88px; height:88px; border-radius:22px; object-fit:cover; }
-.header-logo { display:block; width:min(225px,100%); height:auto; margin:0; mix-blend-mode:multiply; }
+.st-key-sidebar_brand_mark { width:78px; margin:.05rem 0 .45rem; }
+.st-key-sidebar_brand_mark [data-testid="stImage"] { width:78px; margin:0; }
+.st-key-sidebar_brand_mark [data-testid="stImage"] img { display:block; width:78px; height:auto; object-fit:contain; }
+.st-key-header_brand_mark { width:168px; max-width:100%; margin:0; }
+.st-key-header_brand_mark [data-testid="stImage"] { width:168px; max-width:100%; margin:0; }
+.st-key-header_brand_mark [data-testid="stImage"] img { display:block; width:168px; max-width:100%; height:auto; object-fit:contain; }
 .hero p { color:var(--muted); margin:0; max-width:720px; }
 .eyebrow { color:var(--forest); text-transform:uppercase; letter-spacing:.13em; font-size:.74rem; font-weight:800; }
 .fresh { color:var(--muted); text-align:right; font-size:.78rem; white-space:nowrap; }
@@ -291,6 +296,10 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .open-slot-title { color:var(--ink); font-size:.95rem; font-weight:780; margin:.3rem 0 .12rem; }
 .open-slot-copy { font-size:.72rem; line-height:1.35; max-width:210px; }
 .replacement-note { background:#edf4e8; border-left:3px solid var(--gold); color:var(--forest-deep); border-radius:8px; padding:.55rem .7rem; font-size:.76rem; margin:.35rem 0 .65rem; }
+.smart-search-intro { background:var(--navy); border:1px solid #174a70; border-bottom:3px solid var(--green); border-radius:12px; color:#fff; padding:.7rem .85rem; margin:.55rem 0 .4rem; }
+.smart-search-title { color:var(--green); font-size:.78rem; font-weight:900; letter-spacing:.08em; text-transform:uppercase; }
+.smart-search-copy { color:#dce8f2; font-size:.78rem; line-height:1.35; margin-top:.18rem; }
+.smart-search-result { background:#edf4e8; border-left:3px solid var(--green); border-radius:8px; color:var(--ink); font-size:.78rem; padding:.55rem .7rem; margin:.35rem 0 .5rem; }
 .projection-scope { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.7rem; margin:.35rem 0 1rem; }
 .projection-scope-card { border:1px solid var(--line); border-radius:11px; padding:.75rem .85rem; background:#fbfcfc; }
 .projection-scope-card.included { border-left:4px solid var(--gold); }
@@ -396,7 +405,7 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .trends-hero .eyebrow { color:#9ee468; font-size:.67rem; font-weight:900; letter-spacing:.11em; text-transform:uppercase; }
 .trends-hero h2 { color:#fff !important; margin:.1rem 0 !important; padding:0 !important; font-family:'Barlow Condensed','Arial Narrow',sans-serif; font-size:1.45rem; }
 .trends-hero p { color:#dbe6ec !important; margin:0; font-size:.72rem; }
-.trend-player-card { display:grid; grid-template-columns:minmax(230px,1.15fr) repeat(3,minmax(110px,.55fr)); gap:.48rem; align-items:center; margin:.42rem 0; padding:.48rem .68rem; border:1px solid #cad4d9; border-left:5px solid #69be28; border-radius:13px; background:#fff; box-shadow:0 6px 15px rgba(0,34,68,.07); }
+.trend-player-card { display:grid; grid-template-columns:minmax(230px,1.2fr) repeat(4,minmax(96px,.48fr)); gap:.48rem; align-items:center; margin:.42rem 0; padding:.58rem .68rem; border:1px solid #cad4d9; border-left:5px solid #69be28; border-radius:13px; background:#fff; box-shadow:0 6px 15px rgba(0,34,68,.07); }
 .trend-player-identity { display:flex; align-items:center; gap:.72rem; min-width:0; }
 .trend-player-identity .player-photo { width:44px; height:44px; flex-basis:44px; }
 .trend-player-name { color:var(--navy); font-family:'Barlow Condensed','Arial Narrow',sans-serif; font-size:1.1rem; font-weight:900; line-height:1.02; }
@@ -406,6 +415,20 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .trend-stat span { display:block; color:var(--muted); font-size:.61rem; font-weight:800; letter-spacing:.05em; text-transform:uppercase; }
 .trend-stat strong { display:block; color:var(--navy); font-size:1.02rem; line-height:1.04; margin-top:.06rem; }
 .trend-stat small { color:var(--muted); font-size:.61rem; }
+.trend-status { display:inline-flex; align-items:center; max-width:100%; margin-top:.25rem; padding:.18rem .42rem; border-radius:999px; background:#eef3f5; color:var(--forest); font-size:.6rem; font-weight:850; }
+.trend-status.alert { background:#fff0df; color:#934f09; }
+.trend-insights-title { margin:.7rem 0 .35rem; color:var(--navy); font-size:.74rem; font-weight:900; letter-spacing:.07em; text-transform:uppercase; }
+.trend-insight-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.55rem; margin:.35rem 0 .7rem; }
+.trend-insight-card { min-height:90px; padding:.65rem .72rem; border:1px solid #d4dcdf; border-top:3px solid #74858d; border-radius:11px; background:#fff; }
+.trend-insight-card.positive { border-top-color:#397f18; background:#f4f9f1; }
+.trend-insight-card.negative { border-top-color:#c3741d; background:#fff8ef; }
+.trend-insight-card span { display:block; color:var(--forest); font-size:.59rem; font-weight:900; letter-spacing:.055em; text-transform:uppercase; }
+.trend-insight-card strong { display:block; margin:.15rem 0; color:var(--navy); font-size:.8rem; }
+.trend-insight-card p { margin:0; color:var(--ink); font-size:.65rem; line-height:1.4; }
+.game-log { display:grid; gap:.35rem; }
+.game-log-row { display:grid; grid-template-columns:58px minmax(80px,.7fr) repeat(4,minmax(54px,.45fr)); gap:.4rem; align-items:center; padding:.45rem .55rem; border:1px solid #dce3e6; border-radius:9px; background:#fff; color:var(--ink); font-size:.64rem; }
+.game-log-row.header { border:0; background:#e9eef0; color:var(--forest); font-size:.57rem; font-weight:900; letter-spacing:.04em; text-transform:uppercase; }
+.game-log-row strong { color:var(--navy); }
 .trend-read { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin:.65rem 0 .9rem; padding:.78rem .9rem; border-radius:12px; background:#edf4e8; border-left:4px solid #69be28; }
 .trend-read b { color:var(--forest); font-size:.68rem; letter-spacing:.07em; text-transform:uppercase; white-space:nowrap; }
 .trend-read span { color:var(--ink); font-size:.76rem; }
@@ -530,9 +553,24 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
   .advanced-stat-grid { grid-template-columns:1fr; }
   .usage-player { grid-template-columns:minmax(170px,.9fr) minmax(160px,1.1fr) 78px; }
   .projection-row,.form-row { grid-template-columns:minmax(165px,.8fr) minmax(230px,1.3fr) 72px; }
-  .trend-player-card { grid-template-columns:minmax(220px,1.2fr) repeat(3,minmax(90px,.55fr)); }
+  .trend-player-card { grid-template-columns:minmax(220px,1.2fr) repeat(4,minmax(86px,.5fr)); }
 }
 @media(max-width:520px) {
+  [data-testid="stHorizontalBlock"]:has(.st-key-header_brand_mark) {
+    flex-wrap:nowrap !important; align-items:center !important; gap:.75rem !important;
+  }
+  [data-testid="stHorizontalBlock"]:has(.st-key-header_brand_mark) > [data-testid="stColumn"]:first-child {
+    flex:0 0 92px !important; width:92px !important; min-width:92px !important;
+  }
+  [data-testid="stHorizontalBlock"]:has(.st-key-header_brand_mark) > [data-testid="stColumn"]:last-child {
+    flex:1 1 auto !important; width:auto !important; min-width:0 !important;
+  }
+  .st-key-sidebar_brand_mark,
+  .st-key-sidebar_brand_mark [data-testid="stImage"],
+  .st-key-sidebar_brand_mark [data-testid="stImage"] img { width:68px; }
+  .st-key-header_brand_mark,
+  .st-key-header_brand_mark [data-testid="stImage"],
+  .st-key-header_brand_mark [data-testid="stImage"] img { width:88px; }
   div[data-baseweb="select"] > div { flex-wrap:wrap; }
   .freshness-item { flex-basis:100%; }
   .decision-edge { align-items:flex-start; flex-direction:column; }
@@ -554,7 +592,15 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
   .context-item.wide { grid-column:auto; }
   .trend-player-card { grid-template-columns:1fr 1fr; }
   .trend-player-identity { grid-column:1/-1; }
-  .trend-stat:last-child { grid-column:1/-1; }
+  .trend-stat { min-height:50px; }
+  .st-key-trends_controls [data-testid="stHorizontalBlock"] { flex-direction:column !important; gap:.45rem !important; }
+  .st-key-trends_controls [data-testid="stColumn"] { width:100% !important; flex:1 1 100% !important; }
+  .st-key-trends_position button { min-width:0 !important; padding:.42rem .2rem !important; }
+  .st-key-trends_position button p { font-size:.72rem !important; }
+  .trend-insight-grid { grid-template-columns:1fr; }
+  .trend-insight-card { min-height:0; padding:.52rem .62rem; }
+  .game-log-row { grid-template-columns:48px minmax(72px,1fr) repeat(2,minmax(48px,.6fr)); }
+  .game-log-row span:nth-child(n+5) { display:none; }
   .trend-week-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .trend-evidence-grid { grid-template-columns:1fr; }
   .opportunity-summary { grid-template-columns:1fr; }
@@ -635,107 +681,109 @@ def get_published_snapshot(season: int, passing_td_points: int) -> tuple[pd.Data
     return board, weekly, int(metadata["next_week"]), refreshed, provider_status, provider_refreshed_at, injury_status
 
 
-def production_broadcast_html(player_name: str, games: list[dict], projection: float, season_average: float, next_week: int) -> str:
-    """Compact broadcast-style production viewer with buttons and touch swiping."""
+def production_broadcast_html(
+    player_name: str,
+    games: list[dict],
+    projection: float,
+    floor: float,
+    ceiling: float,
+    season_average: float,
+    recent_average: float,
+    next_week: int,
+) -> str:
+    """Responsive weekly production chart with no external chart dependency."""
     payload = json.dumps(games, separators=(",", ":")).replace("</", "<\\/")
     safe_name = html.escape(player_name)
     return f"""
-<div id="production-broadcast" class="broadcast-shell" aria-label="{safe_name} weekly PPR production viewer">
+<div id="production-broadcast" class="broadcast-shell" aria-label="{safe_name} weekly PPR performance chart">
   <style>
     * {{ box-sizing:border-box; }}
-    html,body {{ margin:0; padding:0; overflow:hidden; background:transparent; font-family:Arial,sans-serif; color:#fff; }}
-    .broadcast-shell {{ width:100%; min-width:0; overflow:hidden; border-radius:14px; background:linear-gradient(118deg,#002244 0%,#06375c 100%); box-shadow:0 8px 20px rgba(0,34,68,.15); }}
-    .broadcast-top {{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:9px 12px 5px; color:#9ee468; font-size:10px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }}
-    .broadcast-top span:last-child {{ color:#dbe6ec; text-align:right; }}
-    .scoreboard {{ display:grid; grid-template-columns:36px minmax(0,1fr) auto minmax(0,1fr) 36px; align-items:center; gap:8px; padding:3px 8px 9px; }}
-    .nav {{ display:grid; place-items:center; width:34px; height:34px; border:1px solid rgba(255,255,255,.28); border-radius:8px; background:rgba(255,255,255,.08); color:#fff; font-size:20px; cursor:pointer; }}
-    .nav:disabled {{ opacity:.3; cursor:default; }}
-    .score {{ min-width:0; text-align:center; }}
-    .score b {{ display:block; color:#fff; font-family:'Arial Narrow',Arial,sans-serif; font-size:clamp(25px,4.2vw,38px); line-height:1; }}
-    .score span {{ display:block; margin-top:5px; color:#c9d7de; font-size:11px; line-height:1.25; }}
-    .score small {{ display:block; margin-top:3px; overflow:hidden; color:#9ee468; font-size:10px; line-height:1.2; text-overflow:ellipsis; white-space:nowrap; }}
-    .versus {{ color:#9ee468; font-size:20px; font-weight:900; }}
-    .week-strip {{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:5px; padding:7px 10px 8px; border-top:1px solid rgba(255,255,255,.17); }}
-    .week-chip {{ min-width:0; padding:5px 4px; border:0; border-radius:7px; background:rgba(255,255,255,.07); color:#c9d7de; font-size:10px; cursor:pointer; }}
-    .week-chip strong {{ display:block; margin-top:2px; color:#fff; font-size:12px; }}
-    .week-chip.active {{ background:#69be28; color:#002244; }}
-    .week-chip.active strong {{ color:#002244; }}
-    .broadcast-foot {{ display:flex; justify-content:space-between; gap:8px; padding:0 11px 7px; color:#c9d7de; font-size:10px; }}
+    html,body {{ margin:0; padding:0; overflow:hidden; background:transparent; font-family:Arial,sans-serif; color:#071b2c; }}
+    .broadcast-shell {{ width:100%; min-width:0; overflow:hidden; border:1px solid #cbd6db; border-radius:14px; background:#fff; box-shadow:0 8px 20px rgba(0,34,68,.08); }}
+    .broadcast-top {{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 11px; background:#002244; }}
+    .broadcast-title b {{ display:block; color:#fff; font-size:13px; }}
+    .broadcast-title span {{ display:block; margin-top:2px; color:#c9d7de; font-size:9px; }}
+    .periods {{ display:flex; gap:4px; }}
+    .period {{ min-height:31px; padding:5px 9px; border:1px solid rgba(255,255,255,.25); border-radius:8px; background:transparent; color:#dce8ef; font-size:10px; font-weight:800; cursor:pointer; }}
+    .period.active {{ border-color:#69be28; background:#69be28; color:#002244; }}
+    .chart-wrap {{ position:relative; padding:4px 7px 0; }}
+    svg {{ display:block; width:100%; height:190px; overflow:visible; touch-action:manipulation; }}
+    .tooltip {{ position:absolute; z-index:5; display:none; max-width:170px; padding:6px 8px; border-radius:8px; background:#002244; color:#fff; font-size:10px; line-height:1.35; pointer-events:none; box-shadow:0 5px 15px rgba(0,34,68,.22); }}
+    .controls {{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:5px 12px; padding:6px 11px 8px; border-top:1px solid #e1e7e9; color:#50616a; font-size:9px; }}
+    .reference-controls {{ display:flex; flex-wrap:wrap; gap:9px; }}
+    .reference-controls label {{ display:flex; align-items:center; gap:4px; min-height:28px; cursor:pointer; }}
+    .reference-controls input {{ accent-color:#285f18; }}
+    .legend {{ display:flex; gap:9px; }}
+    .legend span::before {{ content:''; display:inline-block; width:10px; height:3px; margin-right:4px; vertical-align:middle; background:#4b788f; }}
+    .legend .projected::before {{ background:#69be28; }}
     @media(max-width:520px) {{
-      .broadcast-top {{ padding:8px 9px 5px; font-size:10px; }}
-      .scoreboard {{ grid-template-columns:34px minmax(0,1fr) auto minmax(0,1fr) 34px; gap:4px; padding:3px 5px 8px; }}
-      .nav {{ width:32px; height:36px; }}
-      .week-strip {{ grid-template-columns:repeat(3,minmax(0,1fr)); padding:7px 8px 8px; }}
-      .week-chip:nth-child(n+4) {{ display:none; }}
-      .broadcast-foot {{ padding:0 9px 6px; }}
+      .broadcast-top {{ align-items:flex-start; padding:8px; }}
+      .broadcast-title span {{ max-width:155px; }}
+      .period {{ min-height:34px; padding:6px 8px; }}
+      svg {{ height:176px; }}
+      .controls {{ padding:5px 8px 7px; }}
+      .legend {{ width:100%; justify-content:flex-end; }}
     }}
   </style>
-  <div class="broadcast-top"><span>Production trend</span><span id="broadcast-label">Recorded game</span></div>
-  <div class="scoreboard" id="swipe-zone">
-    <button class="nav" id="previous-week" type="button" aria-label="Previous recorded week">&#8249;</button>
-    <div class="score"><b id="actual-score">—</b><span id="actual-label">Recorded PPR</span><small id="opponent-label">—</small></div>
-    <div class="versus" aria-hidden="true">→</div>
-    <div class="score"><b>{projection:.1f}</b><span>Week {next_week} projection</span><small>Season avg {season_average:.1f}</small></div>
-    <button class="nav" id="next-week" type="button" aria-label="Next recorded week">&#8250;</button>
+  <div class="broadcast-top">
+    <div class="broadcast-title"><b>{safe_name} · weekly PPR</b><span>Actual results stay separate from the Week {next_week} projection</span></div>
+    <div class="periods" role="group" aria-label="Trend time period"><button class="period active" data-period="all">Season</button><button class="period" data-period="5">Last 5</button><button class="period" data-period="3">Last 3</button></div>
   </div>
-  <div class="week-strip" id="week-strip"></div>
-  <div class="broadcast-foot"><span>Tap arrows or a week</span><span>Swipe left/right on mobile</span></div>
+  <div class="chart-wrap"><svg id="production-chart" viewBox="0 0 720 210" role="img" aria-label="Weekly PPR results and upcoming projection"></svg><div class="tooltip" id="production-tooltip"></div></div>
+  <div class="controls"><div class="reference-controls"><label><input id="season-line" type="checkbox" checked>Season avg</label><label><input id="recent-line" type="checkbox" checked>Recent avg</label><span>Missing weeks are left open</span></div><div class="legend"><span>Actual</span><span class="projected">Projection range</span></div></div>
 </div>
 <script>
 (() => {{
   const games = {payload};
   const root = document.getElementById('production-broadcast');
-  let current = Math.max(0, games.length - 1);
-  const actual = root.querySelector('#actual-score');
-  const actualLabel = root.querySelector('#actual-label');
-  const opponent = root.querySelector('#opponent-label');
-  const label = root.querySelector('#broadcast-label');
-  const previous = root.querySelector('#previous-week');
-  const next = root.querySelector('#next-week');
-  const strip = root.querySelector('#week-strip');
-  function visibleIndexes() {{
-    const count = window.innerWidth <= 520 ? 3 : 4;
-    let start = Math.max(0, current - count + 1);
-    if (start + count > games.length) start = Math.max(0, games.length - count);
-    return games.slice(start, start + count).map((_, offset) => start + offset);
-  }}
+  const svg = root.querySelector('#production-chart');
+  const tooltip = root.querySelector('#production-tooltip');
+  let period = 'all';
+  const projection = {projection:.3f};
+  const floor = {floor:.3f};
+  const ceiling = {ceiling:.3f};
+  const seasonAverage = {season_average:.3f};
+  const recentAverage = {recent_average:.3f};
+  const NS = 'http://www.w3.org/2000/svg';
+  function node(tag, attributes={{}}, text='') {{ const element=document.createElementNS(NS,tag); Object.entries(attributes).forEach(([key,value])=>element.setAttribute(key,value)); if(text) element.textContent=text; return element; }}
+  function showTooltip(event, copy) {{ tooltip.textContent=copy; tooltip.style.display='block'; const box=root.getBoundingClientRect(); tooltip.style.left=`${{Math.min(box.width-178,Math.max(5,event.clientX-box.left+8))}}px`; tooltip.style.top=`${{Math.max(5,event.clientY-box.top-46)}}px`; }}
+  function hideTooltip() {{ tooltip.style.display='none'; }}
   function render() {{
-    if (!games.length) return;
-    const game = games[current];
-    actual.textContent = Number(game.score).toFixed(1);
-    actualLabel.textContent = `Week ${{game.week}} PPR`;
-    opponent.textContent = game.opponent ? `vs ${{game.opponent}}` : 'Opponent unavailable';
-    label.textContent = `Week ${{game.week}} of ${{games[games.length - 1].week}}`;
-    previous.disabled = current === 0;
-    next.disabled = current === games.length - 1;
-    strip.innerHTML = '';
-    visibleIndexes().forEach(index => {{
-      const gameItem = games[index];
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = `week-chip${{index === current ? ' active' : ''}}`;
-      button.setAttribute('aria-pressed', index === current ? 'true' : 'false');
-      button.innerHTML = `W${{gameItem.week}}<strong>${{Number(gameItem.score).toFixed(1)}}</strong>`;
-      button.addEventListener('click', () => {{ current = index; render(); }});
-      strip.appendChild(button);
-    }});
+    let visible = period === 'all' ? games : games.slice(-Number(period));
+    svg.innerHTML=''; hideTooltip();
+    const width=720, height=210, left=38, right=25, top=16, bottom=34;
+    const values=visible.filter(item=>item.score!==null).map(item=>Number(item.score)).concat([projection,floor,ceiling,seasonAverage,recentAverage]);
+    const max=Math.max(5,...values)*1.12;
+    const xStep=(width-left-right)/Math.max(1,visible.length);
+    const x=index=>left+xStep*index;
+    const y=value=>top+(height-top-bottom)*(1-Number(value)/max);
+    [0,.25,.5,.75,1].forEach(fraction=>{{ const value=max*fraction; const yy=y(value); svg.appendChild(node('line',{{x1:left,y1:yy,x2:width-right,y2:yy,stroke:'#e1e7e9','stroke-width':'1'}})); svg.appendChild(node('text',{{x:left-5,y:yy+3,'text-anchor':'end',fill:'#66757d','font-size':'9'}},value.toFixed(0))); }});
+    const showSeason=root.querySelector('#season-line').checked;
+    const showRecent=root.querySelector('#recent-line').checked;
+    [[showSeason,seasonAverage,'#68777f','6 5','Season'],[showRecent,recentAverage,'#285f18','2 4','Recent']].forEach(([show,value,color,dash,label])=>{{ if(!show)return; const yy=y(value); svg.appendChild(node('line',{{x1:left,y1:yy,x2:width-right,y2:yy,stroke:color,'stroke-width':'1.5','stroke-dasharray':dash}})); svg.appendChild(node('text',{{x:width-right,y:yy-4,'text-anchor':'end',fill:color,'font-size':'9','font-weight':'700'}},`${{label}} ${{Number(value).toFixed(1)}}`)); }});
+    let segment=[];
+    function flush() {{ if(segment.length>1) svg.appendChild(node('polyline',{{points:segment.join(' '),fill:'none',stroke:'#4b788f','stroke-width':'4','stroke-linecap':'round','stroke-linejoin':'round'}})); segment=[]; }}
+    visible.forEach((game,index)=>{{
+      const xx=x(index);
+      svg.appendChild(node('text',{{x:xx,y:height-11,'text-anchor':'middle',fill:'#66757d','font-size':'9'}},`W${{game.week}}`));
+      if(game.score===null) {{ flush(); svg.appendChild(node('circle',{{cx:xx,cy:y(0),r:'3',fill:'#fff',stroke:'#aeb9be','stroke-width':'1.5'}})); return; }}
+      const yy=y(game.score); segment.push(`${{xx}},${{yy}}`);
+      const point=node('circle',{{cx:xx,cy:yy,r:'5',fill:'#fff',stroke:'#4b788f','stroke-width':'3',tabindex:'0'}});
+      const context=`Week ${{game.week}} · ${{Number(game.score).toFixed(1)}} PPR${{game.opponent?' vs '+game.opponent:''}}`;
+      point.addEventListener('pointerenter',event=>showTooltip(event,context)); point.addEventListener('pointerleave',hideTooltip); point.addEventListener('click',event=>showTooltip(event,context));
+      svg.appendChild(point);
+    }}); flush();
+    const projectionX=x(visible.length);
+    const range=node('line',{{x1:projectionX,y1:y(ceiling),x2:projectionX,y2:y(floor),stroke:'#69be28','stroke-width':'8','stroke-linecap':'round',opacity:'.35'}}); svg.appendChild(range);
+    svg.appendChild(node('line',{{x1:projectionX-6,y1:y(ceiling),x2:projectionX+6,y2:y(ceiling),stroke:'#285f18','stroke-width':'2'}}));
+    svg.appendChild(node('line',{{x1:projectionX-6,y1:y(floor),x2:projectionX+6,y2:y(floor),stroke:'#285f18','stroke-width':'2'}}));
+    const projectionPoint=node('circle',{{cx:projectionX,cy:y(projection),r:'7',fill:'#69be28',stroke:'#002244','stroke-width':'3',tabindex:'0'}});
+    const projectionCopy=`Week {next_week} projection · ${{projection.toFixed(1)}} PPR · floor ${{floor.toFixed(1)}} · ceiling ${{ceiling.toFixed(1)}}`;
+    projectionPoint.addEventListener('pointerenter',event=>showTooltip(event,projectionCopy)); projectionPoint.addEventListener('pointerleave',hideTooltip); projectionPoint.addEventListener('click',event=>showTooltip(event,projectionCopy)); svg.appendChild(projectionPoint);
+    svg.appendChild(node('text',{{x:projectionX,y:height-11,'text-anchor':'middle',fill:'#285f18','font-size':'9','font-weight':'800'}},'PROJ'));
   }}
-  previous.addEventListener('click', () => {{ if (current > 0) {{ current -= 1; render(); }} }});
-  next.addEventListener('click', () => {{ if (current < games.length - 1) {{ current += 1; render(); }} }});
-  let startX = null;
-  const swipeZone = root.querySelector('#swipe-zone');
-  swipeZone.addEventListener('touchstart', event => {{ startX = event.changedTouches[0].clientX; }}, {{passive:true}});
-  swipeZone.addEventListener('touchend', event => {{
-    if (startX === null) return;
-    const distance = event.changedTouches[0].clientX - startX;
-    if (Math.abs(distance) > 38) {{
-      if (distance < 0 && current < games.length - 1) current += 1;
-      if (distance > 0 && current > 0) current -= 1;
-      render();
-    }}
-    startX = null;
-  }}, {{passive:true}});
-  window.addEventListener('resize', render);
+  root.querySelectorAll('.period').forEach(button=>button.addEventListener('click',()=>{{ period=button.dataset.period; root.querySelectorAll('.period').forEach(item=>item.classList.toggle('active',item===button)); render(); }}));
+  root.querySelector('#season-line').addEventListener('change',render); root.querySelector('#recent-line').addEventListener('change',render);
   render();
 }})();
 </script>
@@ -895,7 +943,7 @@ def build_share_image(compare: pd.DataFrame, week: int, scoring_label: str, refr
     draw.text((65, 96), f"WEEK {week} COMPARISON · {scoring_label.upper()}", fill="#cbd5da", font=font(16, True))
     draw.text((65, 145), recommendation, fill="white", font=font(31, True))
     if len(ordered) > 1:
-        draw.text((65, 188), "CLOSE CALL" if margin < 2.5 else "CLEARER PROJECTED EDGE", fill="#9ee468", font=font(15, True))
+        draw.text((65, 188), "CLOSE CALL" if margin < CLOSE_CALL_THRESHOLD_PPR else "CLEARER PROJECTED EDGE", fill="#9ee468", font=font(15, True))
     row_top = 250
     for index, row in ordered.iterrows():
         y = row_top + index * 98
@@ -962,7 +1010,8 @@ if st.session_state.get("onboarding_pending_persist", False):
 
 
 with st.sidebar:
-    st.image(str(BRAND_ICON), width=88)
+    with st.container(key="sidebar_brand_mark"):
+        st.image(str(BRAND_ICON), width=78)
     st.markdown('<div class="sidebar-brand">THE SUNDAY <span>DECISION</span> LAB</div>', unsafe_allow_html=True)
     st.caption("Your weekly lineup call")
     page = st.radio("View", ["Decision Room", "Player Trends", "How It Works"], label_visibility="collapsed")
@@ -1005,7 +1054,6 @@ header_title, header_description = header_copy[page]
 if page == "Player Trends":
     st.markdown(
         """<style>
-        .header-logo { width:min(155px,100%) !important; }
         .header-details p { margin:.08rem 0 .24rem !important; }
         .header-details .hero-subtitle { font-size:1.05rem !important; }
         </style>""",
@@ -1014,11 +1062,12 @@ if page == "Player Trends":
 
 with st.container():
     st.markdown('<h1 class="sr-only">The Sunday Decision Lab</h1>', unsafe_allow_html=True)
-    header_left, header_right = st.columns([.48, 1.52], gap="medium", vertical_alignment="center")
+    header_left, header_right = st.columns([.24, 1.76], gap="medium", vertical_alignment="center")
     with header_left:
         # Streamlit serves a cacheable media URL instead of embedding ~576 KB
         # of base64 data in every interaction response.
-        st.image(str(BRAND_LOGO), width=225)
+        with st.container(key="header_brand_mark"):
+            st.image(str(BRAND_LOGO), width=168)
     with header_right:
         st.markdown(
             f'<div class="header-details"><div class="eyebrow">Week {header_week} · {season} · Full PPR</div>'
@@ -1157,10 +1206,15 @@ if page == "Decision Room":
         if selection_key not in st.session_state:
             shared_players = [value.strip() for value in str(st.query_params.get("players", "")).split("|") if value.strip()]
             valid_shared_players = [name for name in shared_players if name in valid_names][:3]
-            st.session_state[selection_key] = valid_shared_players or pool.sort_values("projected_ppr", ascending=False).head(3)["player"].tolist()
+            # New visitors should make an intentional comparison rather than
+            # inheriting demo players. Shared links remain restorable.
+            st.session_state[selection_key] = valid_shared_players
         st.session_state[selection_key] = [name for name in st.session_state[selection_key] if name in valid_names][:3]
         if replacement_key not in st.session_state:
             st.session_state[replacement_key] = None
+        search_version_key = f"smart_search_version_{position}"
+        if search_version_key not in st.session_state:
+            st.session_state[search_version_key] = 0
         names = list(st.session_state[selection_key])
         replacement_index = st.session_state[replacement_key]
         if replacement_index is not None and (replacement_index < 0 or replacement_index >= len(names)):
@@ -1178,8 +1232,8 @@ if page == "Decision Room":
                 preview_badge = "1 player selected"
             else:
                 preview_title = f'{preview_leader["player"]} leads by {preview_spread:.1f} PPR'
-                preview_copy = "The projections are close—treat this as a lean." if preview_spread < 2.5 else "We see a meaningful projected advantage."
-                preview_badge = "Close call" if preview_spread < 2.5 else "Clearer edge"
+                preview_copy = "The projections are close—treat this as a lean." if preview_spread < CLOSE_CALL_THRESHOLD_PPR else "We see a meaningful projected advantage."
+                preview_badge = "Close call" if preview_spread < CLOSE_CALL_THRESHOLD_PPR else "Clearer edge"
             decision_edge_markup = (
                 '<div class="decision-edge">'
                 f'<div class="decision-edge-main"><div class="decision-edge-label">Week {NEXT_WEEK} decision edge</div>'
@@ -1306,55 +1360,91 @@ if page == "Decision Room":
                 )
                 st.caption(f"Includes the recommendation, projection ranges, and data snapshot timestamp ({REFRESHED}).")
 
-        if len(names) < 3 or replacement_index is not None:
-            panel_label = "Replace a player" if replacement_index is not None else "Find a player"
-            with st.expander(panel_label, expanded=True):
+        available_pool = pool.loc[~pool["player"].isin(names)].sort_values(
+            ["projected_ppr", "player"], ascending=[False, True]
+        )
+        st.markdown(
+            '<div class="smart-search-intro"><div class="smart-search-title">Smart player search</div>'
+            f'<div class="smart-search-copy">{"All three slots are filled. Search for any eligible player, then choose exactly who to replace." if len(names) >= 3 else "Start typing a player name or team. Relevant eligible players appear instantly."}</div></div>',
+            unsafe_allow_html=True,
+        )
+        if replacement_index is not None:
+            st.markdown(
+                f'<div class="replacement-note">Replacing <b>{html.escape(names[replacement_index])}</b>. Search below and select the new player.</div>',
+                unsafe_allow_html=True,
+            )
+        if available_pool.empty:
+            st.info("Every eligible player in this position is already selected.")
+        else:
+            candidate_lookup = {
+                str(row["player_id"]): row for _, row in available_pool.iterrows()
+            }
+
+            def format_search_candidate(player_id: str) -> str:
+                row = candidate_lookup[str(player_id)]
+                opponent = row.get("next_opponent")
+                opponent_text = "" if opponent is None or pd.isna(opponent) else f" vs {opponent}"
+                return (
+                    f'{row["player"]} · {row["team"]} {row["position"]}{opponent_text}'
+                    f' · {float(row["median_ppr"]):.1f} PPR'
+                )
+
+            chosen_player_id = st.selectbox(
+                "Search players by name or team",
+                options=list(candidate_lookup),
+                index=None,
+                format_func=format_search_candidate,
+                placeholder="Type a player name or team…",
+                key=f'smart_search_candidate_{position}_{st.session_state[search_version_key]}',
+                help="Suggestions filter immediately as you type. Only eligible players for the selected position are shown.",
+            )
+            if chosen_player_id is not None:
+                result_row = candidate_lookup[str(chosen_player_id)]
+                availability = selection_availability_summary(result_row)
+                st.markdown(
+                    f'<div class="smart-search-result"><b>{html.escape(str(result_row["player"]))}</b> · '
+                    f'{html.escape(str(result_row["team"]))} {html.escape(str(result_row["position"]))} · '
+                    f'{float(result_row["median_ppr"]):.1f} projected PPR · {html.escape(availability)}</div>',
+                    unsafe_allow_html=True,
+                )
                 if replacement_index is not None:
-                    st.markdown(f'<div class="replacement-note">Replacing <b>{html.escape(names[replacement_index])}</b>. Choose a player below to complete the swap.</div>', unsafe_allow_html=True)
-                # Form inputs stay entirely in the browser while the user is
-                # typing. Only Search submits a rerun, avoiding a full app pass
-                # for every character on mobile keyboards.
-                with st.form(f"smart_search_form_{position}", border=False):
-                    query = st.text_input("Search eligible players", key=f"smart_search_query_{position}", placeholder="Search by player or team…")
-                    st.form_submit_button("Search", type="primary", width="stretch")
-                results = filter_player_search(pool.loc[~pool["player"].isin(names)], query)
-                if results.empty:
-                    st.info("No eligible players match that search. Try a full name or team abbreviation.")
+                    if st.button(
+                        f'Replace {names[replacement_index]} with {result_row["player"]}',
+                        key=f'confirm_replace_{position}_{result_row["player_id"]}_{replacement_index}',
+                        type="primary",
+                        width="stretch",
+                    ):
+                        updated_names = list(names)
+                        updated_names[replacement_index] = str(result_row["player"])
+                        st.session_state[selection_key] = updated_names
+                        st.session_state[replacement_key] = None
+                        st.session_state[search_version_key] += 1
+                        st.rerun()
+                elif len(names) < 3:
+                    if st.button(
+                        f'Add {result_row["player"]}',
+                        key=f'add_search_player_{position}_{result_row["player_id"]}',
+                        type="primary",
+                        width="stretch",
+                    ):
+                        st.session_state[selection_key] = [*names, str(result_row["player"])]
+                        st.session_state[search_version_key] += 1
+                        st.rerun()
                 else:
-                    for _, result_row in results.iterrows():
-                        with st.container(border=True):
-                            photo_column, details_column, logo_column, action_column = st.columns([.10, .56, .10, .24], vertical_alignment="center")
-                            photo_url = result_row.get("headshot_url")
-                            if photo_url is not None and pd.notna(photo_url):
-                                photo_column.image(str(photo_url), width=52)
-                            availability = selection_availability_summary(result_row)
-                            result_limited_sample = bool(result_row.get("limited_sample_role", False)) or str(result_row.get("confidence", "")).casefold() == "limited sample"
-                            sample_copy = (
-                                " · " + explained_term(
-                                    "Limited sample",
-                                    "Personal history is insufficient, so position, team environment, and verified depth-chart role priors carry more weight.",
-                                )
-                                if result_limited_sample else ""
-                            )
-                            availability_prefix = "⚠ " if any(term in availability.casefold() for term in ("questionable", "doubtful", "out", "inactive", "ir", "did not practice")) else ""
-                            details_column.markdown(
-                                f'<b>{html.escape(str(result_row["player"]))}</b><br>'
-                                f'{html.escape(str(result_row["team"]))} · {html.escape(str(result_row["position"]))} · {html.escape(str(result_row["venue"]))} vs {html.escape(str(result_row["next_opponent"]))}<br>'
-                                f'<span class="selected-player-meta">{availability_prefix}{html.escape(availability)}{sample_copy}</span>', unsafe_allow_html=True,
-                            )
-                            logo_url = team_logo_url(result_row.get("team"))
-                            if logo_url:
-                                logo_column.image(logo_url, width=34)
-                            action_label = f"Replace · {float(result_row['median_ppr']):.1f}" if replacement_index is not None else f"Add · {float(result_row['median_ppr']):.1f}"
-                            if action_column.button(action_label, key=f"choose_{position}_{result_row['player_id']}_{replacement_index}", width="stretch"):
-                                if replacement_index is None:
-                                    st.session_state[selection_key] = [*names, str(result_row["player"])]
-                                else:
-                                    updated_names = list(names)
-                                    updated_names[replacement_index] = str(result_row["player"])
-                                    st.session_state[selection_key] = updated_names
-                                    st.session_state[replacement_key] = None
-                                st.rerun()
+                    st.caption("Comparison is full. Choose which current player this result should replace.")
+                    replace_columns = st.columns(3)
+                    for slot_index, replace_column in enumerate(replace_columns):
+                        if replace_column.button(
+                            f'Replace {names[slot_index]}',
+                            key=f'smart_replace_{position}_{result_row["player_id"]}_{slot_index}',
+                            width="stretch",
+                        ):
+                            updated_names = list(names)
+                            updated_names[slot_index] = str(result_row["player"])
+                            st.session_state[selection_key] = updated_names
+                            st.session_state[replacement_key] = None
+                            st.session_state[search_version_key] += 1
+                            st.rerun()
     compare = pool.loc[pool["player"].isin(names)].sort_values("projected_ppr", ascending=False)
 
     if compare.empty:
@@ -1369,8 +1459,8 @@ if page == "Decision Room":
             edge_badge = "1 player selected"
         else:
             edge_title = f'{leader["player"]} leads by {projection_spread:.1f} PPR'
-            edge_copy = "The projections are close—treat this as a lean and use the live context below to make your final call." if projection_spread < 2.5 else "We see a meaningful projected advantage, with live context below for your final decision."
-            edge_badge = "Close call" if projection_spread < 2.5 else "Clearer edge"
+            edge_copy = "The projections are close—treat this as a lean and use the live context below to make your final call." if projection_spread < CLOSE_CALL_THRESHOLD_PPR else "We see a meaningful projected advantage, with live context below for your final decision."
+            edge_badge = "Close call" if projection_spread < CLOSE_CALL_THRESHOLD_PPR else "Clearer edge"
         verdict_intro = '<div class="section-title">Start / Sit verdict</div>'
         if not no_clutter_mode:
             verdict_intro += '<div class="section-copy">We build this ranking from current production, repeatable workload, a fading prior-season anchor, touchdown regression, and a sample-scaled matchup adjustment. When an active injury matters, an optional injury-adjusted outlook appears directly on that player’s card.</div>'
@@ -1389,18 +1479,18 @@ if page == "Decision Room":
                 if len(compare) == 1:
                     card_edge_label = "Solo view"
                     card_edge_help = "Add another player before treating this as a Start/Sit comparison."
-                elif index == 0 and top_gap < 2.5:
+                elif index == 0 and top_gap < CLOSE_CALL_THRESHOLD_PPR:
                     card_edge_label = "Lean edge"
-                    card_edge_help = f"The preferred player leads the next-best option by {top_gap:.1f} PPR—less than our 2.5-point close-call threshold."
+                    card_edge_help = f"The preferred player leads the next-best option by {top_gap:.1f} PPR—less than our {CLOSE_CALL_THRESHOLD_PPR:.0f}-point close-call threshold."
                 elif index == 0 and top_gap < 5:
                     card_edge_label = "Moderate edge"
                     card_edge_help = f"The preferred player leads the next-best option by {top_gap:.1f} PPR. This is meaningful, but not decisive."
                 elif index == 0:
                     card_edge_label = "Strong edge"
                     card_edge_help = f"The preferred player leads the next-best option by {top_gap:.1f} PPR."
-                elif player_gap < 2.5:
+                elif player_gap < CLOSE_CALL_THRESHOLD_PPR:
                     card_edge_label = "Close call"
-                    card_edge_help = f"This player is only {player_gap:.1f} PPR behind the leader, inside our 2.5-point close-call threshold."
+                    card_edge_help = f"This player is only {player_gap:.1f} PPR behind the leader, inside our {CLOSE_CALL_THRESHOLD_PPR:.0f}-point close-call threshold."
                 elif player_gap < 5:
                     card_edge_label = "Moderate gap"
                     card_edge_help = f"This player trails the leader by {player_gap:.1f} PPR."
@@ -1414,9 +1504,9 @@ if page == "Decision Room":
                 if index == 0 and len(compare) > 1:
                     verdict = "START · PREFERRED"
                     verdict_help = "Highest median projection among the players you selected."
-                elif len(compare) > 1 and float(leader["median_ppr"] - row["median_ppr"]) < 2.5:
+                elif len(compare) > 1 and float(leader["median_ppr"] - row["median_ppr"]) < CLOSE_CALL_THRESHOLD_PPR:
                     verdict = "SIT · CLOSE ALTERNATIVE"
-                    verdict_help = "Lower only relative to the selected leader and still inside the 2.5-point close-call range—not an automatic bench recommendation."
+                    verdict_help = f"Lower only relative to the selected leader and still inside the {CLOSE_CALL_THRESHOLD_PPR:.0f}-point close-call range—not an automatic bench recommendation."
                 elif len(compare) > 1:
                     verdict = "SIT · RISKIER OPTION"
                     verdict_help = "Lower median projection than the selected leader, with a larger comparison gap—not necessarily a bench in every league."
@@ -1427,11 +1517,11 @@ if page == "Decision Room":
                 full_reason = build_player_outlook(row, index, len(compare), projection_spread, row.get("reporting_summary"))
                 if len(compare) == 1:
                     reason = "Add another player to turn this into a true Start/Sit comparison."
-                elif index == 0 and top_gap < 2.5:
+                elif index == 0 and top_gap < CLOSE_CALL_THRESHOLD_PPR:
                     reason = "Our preferred start, but only by a slim margin."
                 elif index == 0:
                     reason = "Our preferred start with the strongest projection in this group."
-                elif float(leader["median_ppr"] - row["median_ppr"]) < 2.5:
+                elif float(leader["median_ppr"] - row["median_ppr"]) < CLOSE_CALL_THRESHOLD_PPR:
                     reason = "A close alternative with a nearly identical projection."
                 else:
                     reason = "The riskier option relative to the other players in this comparison."
@@ -1660,7 +1750,7 @@ if page == "Decision Room":
                     f'<div class="projection-score"><strong>{median:.1f}</strong><span>Projected PPR</span></div></article>'
                 )
             overlap = max(0.0, min(compare["ceiling_ppr"]) - max(compare["floor_ppr"]))
-            range_insight = f'{leader["player"]} leads by {projection_spread:.1f} PPR. The ranges overlap by {overlap:.1f}, so this is {"a close lean" if projection_spread < 2.5 else "a meaningful edge"}.'
+            range_insight = f'{leader["player"]} leads by {projection_spread:.1f} PPR. The ranges overlap by {overlap:.1f}, so this is {"a close lean" if projection_spread < CLOSE_CALL_THRESHOLD_PPR else "a meaningful edge"}.'
             comparison_shell.markdown(
                 f'<div class="comparison-panel-head"><div><h3>Week {NEXT_WEEK} Projection</h3><p>Floor, median projection, and ceiling shown together.</p></div><div class="panel-key">Floor ← range → Ceiling</div></div>'
                 f'<div class="projection-board">{"".join(projection_rows)}</div><div class="panel-insight"><b>Quick read</b><span>{html.escape(range_insight)}</span></div>',
@@ -2060,7 +2150,8 @@ if page == "Decision Room":
             comparison_shell.markdown(DISCLAIMER_LANGUAGE)
 
 elif page == "Player Trends":
-    control_left, control_right = st.columns([1, 1.5])
+    trends_controls = st.container(key="trends_controls")
+    control_left, control_right = trends_controls.columns([1, 1.5])
     selected_position = control_left.segmented_control(
         "Position", ["QB", "RB", "WR", "TE"], default="WR", key="trends_position", width="stretch"
     )
@@ -2086,6 +2177,10 @@ elif page == "Player Trends":
     id_column = "player_id" if "player_id" in BOARD.columns and "player_id" in WEEKLY.columns else None
     name_column = "player_display_name" if "player_display_name" in WEEKLY.columns else "player_name"
     history = WEEKLY.loc[WEEKLY[name_column].eq(player_name)].sort_values("week")
+    history = history.copy()
+    history["trend_ppr"] = pd.to_numeric(history["fantasy_points_ppr"], errors="coerce")
+    if selected_position == "QB" and QB_PASS_TD_POINTS != 4 and "passing_tds" in history:
+        history["trend_ppr"] += (QB_PASS_TD_POINTS - 4) * pd.to_numeric(history["passing_tds"], errors="coerce").fillna(0)
     projection = float(player["projected_ppr"])
     season_average = float(player["season_ppr"])
     recent_average = float(player["recent_ppr"])
@@ -2097,21 +2192,26 @@ elif page == "Player Trends":
         str(player.get(value)) for value in ("weekday", "gametime")
         if player.get(value) is not None and pd.notna(player.get(value))
     ) or "Kickoff TBD"
+    availability_alert = any(
+        term in availability.casefold()
+        for term in ("questionable", "doubtful", "out", "inactive", "ir", "did not practice")
+    )
     st.markdown(
         f'<section class="trend-player-card"><div class="trend-player-identity">{photo}<div><div class="trend-player-name">{html.escape(player_name)}</div>'
         f'<div class="trend-player-team">{logo}<span>{html.escape(str(player["team"]))} · {selected_position} · {html.escape(str(player.get("venue", "")))} vs {html.escape(str(player["next_opponent"]))}</span></div>'
-        f'<div class="trend-player-team"><span>{html.escape(game_line)} · {html.escape(availability)}</span></div></div></div>'
+        f'<div class="trend-player-team"><span>{html.escape(game_line)}</span></div><span class="trend-status{" alert" if availability_alert else ""}">{html.escape(availability)}</span></div></div>'
         f'<div class="trend-stat"><span>Week {NEXT_WEEK}</span><strong>{projection:.1f}</strong><small>Projected PPR</small></div>'
         f'<div class="trend-stat"><span>Recent form</span><strong>{recent_average:.1f}</strong><small>PPR per game</small></div>'
-        f'<div class="trend-stat"><span>Season baseline</span><strong>{season_average:.1f}</strong><small>PPR per game</small></div></section>',
+        f'<div class="trend-stat"><span>Season baseline</span><strong>{season_average:.1f}</strong><small>PPR per game</small></div>'
+        f'<div class="trend-stat"><span>Projected range</span><strong>{float(player.get("floor_ppr", projection)):.1f}–{float(player.get("ceiling_ppr", projection)):.1f}</strong><small>Floor to ceiling</small></div></section>',
         unsafe_allow_html=True,
     )
 
-    recorded = history.dropna(subset=["fantasy_points_ppr"]).copy()
+    recorded = history.dropna(subset=["trend_ppr"]).copy()
     games_played = len(recorded)
     if games_played >= 2:
-        latest_score = float(recorded.iloc[-1]["fantasy_points_ppr"])
-        prior_score = float(recorded.iloc[-2]["fantasy_points_ppr"])
+        latest_score = float(recorded.iloc[-1]["trend_ppr"])
+        prior_score = float(recorded.iloc[-2]["trend_ppr"])
         form_change = latest_score - prior_score
         direction = "up" if form_change > 2 else "down" if form_change < -2 else "steady"
         trend_sentence = (
@@ -2120,10 +2220,60 @@ elif page == "Player Trends":
             f"{'above' if projection >= season_average else 'below'} the season baseline."
         )
     elif games_played == 1:
-        latest_score = float(recorded.iloc[-1]["fantasy_points_ppr"])
+        latest_score = float(recorded.iloc[-1]["trend_ppr"])
         trend_sentence = f"Only one game is available for {player_name}. Treat the {latest_score:.1f}-point result as an early signal—not an established trend."
     else:
         trend_sentence = f"No completed-game sample is available for {player_name}. The outlook relies more heavily on the expected role, team environment, and position priors."
+
+    if selected_position == "QB":
+        recorded_opportunities = pd.to_numeric(recorded.get("attempts"), errors="coerce").fillna(0) + pd.to_numeric(recorded.get("carries"), errors="coerce").fillna(0)
+        recorded_touchdowns = pd.to_numeric(recorded.get("passing_tds"), errors="coerce").fillna(0) + pd.to_numeric(recorded.get("rushing_tds"), errors="coerce").fillna(0)
+        opportunity_name = "dropbacks and carries"
+    elif selected_position == "RB":
+        recorded_opportunities = pd.to_numeric(recorded.get("carries"), errors="coerce").fillna(0) + pd.to_numeric(recorded.get("targets"), errors="coerce").fillna(0)
+        recorded_touchdowns = pd.to_numeric(recorded.get("rushing_tds"), errors="coerce").fillna(0) + pd.to_numeric(recorded.get("receiving_tds"), errors="coerce").fillna(0)
+        opportunity_name = "carries and targets"
+    else:
+        recorded_opportunities = pd.to_numeric(recorded.get("targets"), errors="coerce").fillna(0)
+        recorded_touchdowns = pd.to_numeric(recorded.get("receiving_tds"), errors="coerce").fillna(0)
+        opportunity_name = "targets"
+    season_opportunity_average = float(recorded_opportunities.mean()) if len(recorded_opportunities) else 0.0
+    recent_opportunity_average = float(recorded_opportunities.tail(3).mean()) if len(recorded_opportunities) else 0.0
+    opportunity_delta = recent_opportunity_average - season_opportunity_average
+    if games_played < 2:
+        role_title, role_copy, role_class = "Early role sample", "There is not enough completed-game workload to call the role growing or shrinking.", ""
+    elif opportunity_delta >= 1.5:
+        role_title, role_copy, role_class = "Opportunity is growing", f"Recent {opportunity_name} are {opportunity_delta:.1f} per game above the season rate.", "positive"
+    elif opportunity_delta <= -1.5:
+        role_title, role_copy, role_class = "Opportunity is shrinking", f"Recent {opportunity_name} are {abs(opportunity_delta):.1f} per game below the season rate.", "negative"
+    else:
+        role_title, role_copy, role_class = "Role is holding steady", f"Recent {opportunity_name} remain close to the season workload.", ""
+    recent_touchdowns = float(recorded_touchdowns.tail(3).sum()) if len(recorded_touchdowns) else 0.0
+    production_delta = recent_average - season_average
+    if games_played < 2:
+        sustainability_title, sustainability_copy, sustainability_class = "Sustainability unclear", "More games are needed before separating repeatable volume from scoring variance.", ""
+    elif production_delta > 2 and recent_touchdowns >= 2 and opportunity_delta < 1.5:
+        sustainability_title, sustainability_copy, sustainability_class = "Scoring is touchdown-led", f"{recent_touchdowns:.0f} touchdowns in the recent sample are lifting results without the same increase in workload.", "negative"
+    elif opportunity_delta >= 1.5:
+        sustainability_title, sustainability_copy, sustainability_class = "Production has volume support", "The recent scoring change is accompanied by a meaningful workload increase.", "positive"
+    else:
+        sustainability_title, sustainability_copy, sustainability_class = "Production near established role", "Recent scoring and opportunity do not show a strong divergence from the season profile.", ""
+    matchup_factor = float(player.get("projection_matchup_factor", 1.0)) if pd.notna(player.get("projection_matchup_factor")) else 1.0
+    if availability_alert:
+        watch_title, watch_copy, watch_class = "Verify availability", f"{availability}. Check the final practice report and official inactives.", "negative"
+    elif matchup_factor >= 1.02:
+        watch_title, watch_copy, watch_class = "Favorable matchup signal", f"The capped matchup input adds {(matchup_factor - 1) * 100:.1f}% to the median projection.", "positive"
+    elif matchup_factor <= 0.98:
+        watch_title, watch_copy, watch_class = "Matchup adds resistance", f"The capped matchup input trims {(1 - matchup_factor) * 100:.1f}% from the median projection.", "negative"
+    else:
+        watch_title, watch_copy, watch_class = "Watch the next workload", "The matchup is near neutral, so role and opportunity should drive the next evaluation.", ""
+    st.markdown(
+        '<div class="trend-insights-title">Fantasy manager read</div><div class="trend-insight-grid">'
+        f'<article class="trend-insight-card {role_class}"><span>Role trajectory</span><strong>{html.escape(role_title)}</strong><p>{html.escape(role_copy)}</p></article>'
+        f'<article class="trend-insight-card {sustainability_class}"><span>Sustainability</span><strong>{html.escape(sustainability_title)}</strong><p>{html.escape(sustainability_copy)}</p></article>'
+        f'<article class="trend-insight-card {watch_class}"><span>Watch next</span><strong>{html.escape(watch_title)}</strong><p>{html.escape(watch_copy)}</p></article></div>',
+        unsafe_allow_html=True,
+    )
     if "trends_hub_expanded" not in st.session_state:
         st.session_state.trends_hub_expanded = True
 
@@ -2140,13 +2290,20 @@ elif page == "Player Trends":
         if recorded.empty:
             trends_shell.info("Weekly production is not available yet. The projection remains visible above and uncertainty is widened for the limited sample.")
         else:
+            recorded_by_week = {
+                int(game_row["week"]): game_row
+                for _, game_row in recorded.dropna(subset=["week", "trend_ppr"]).iterrows()
+            }
+            final_completed_week = max(1, NEXT_WEEK - 1)
             broadcast_games = []
-            for _, game_row in recorded.dropna(subset=["week", "fantasy_points_ppr"]).iterrows():
-                opponent_value = game_row.get("opponent_team")
+            for week_number in range(1, final_completed_week + 1):
+                game_row = recorded_by_week.get(week_number)
+                opponent_value = None if game_row is None else game_row.get("opponent_team")
                 broadcast_games.append({
-                    "week": int(game_row["week"]),
-                    "score": round(float(game_row["fantasy_points_ppr"]), 1),
+                    "week": week_number,
+                    "score": None if game_row is None else round(float(game_row["trend_ppr"]), 1),
                     "opponent": str(opponent_value) if opponent_value is not None and pd.notna(opponent_value) else "",
+                    "context": "No recorded game" if game_row is None else "Completed game",
                 })
             trends_shell.markdown(
                 f'<div class="comparison-panel-head"><div><h3>{html.escape(player_name)} · production broadcast</h3>'
@@ -2156,11 +2313,41 @@ elif page == "Player Trends":
             )
             with trends_shell:
                 components.html(
-                    production_broadcast_html(player_name, broadcast_games, projection, season_average, NEXT_WEEK),
-                    height=205,
+                    production_broadcast_html(
+                        player_name,
+                        broadcast_games,
+                        projection,
+                        float(player.get("floor_ppr", projection)),
+                        float(player.get("ceiling_ppr", projection)),
+                        season_average,
+                        recent_average,
+                        NEXT_WEEK,
+                    ),
+                    height=286,
                     scrolling=False,
                 )
             trends_shell.markdown(f'<div class="panel-insight"><b>How to read it</b><span>{html.escape(trend_sentence)}</span></div>', unsafe_allow_html=True)
+            game_log_rows = []
+            for _, game_row in recorded.sort_values("week", ascending=False).iterrows():
+                opponent_value = game_row.get("opponent_team")
+                opponent_display = f'vs {opponent_value}' if opponent_value is not None and pd.notna(opponent_value) else "Opponent —"
+                targets = float(pd.to_numeric(pd.Series([game_row.get("targets")]), errors="coerce").fillna(0).iloc[0])
+                carries = float(pd.to_numeric(pd.Series([game_row.get("carries")]), errors="coerce").fillna(0).iloc[0])
+                receptions = float(pd.to_numeric(pd.Series([game_row.get("receptions")]), errors="coerce").fillna(0).iloc[0])
+                touchdowns = sum(
+                    float(pd.to_numeric(pd.Series([game_row.get(column)]), errors="coerce").fillna(0).iloc[0])
+                    for column in ("passing_tds", "rushing_tds", "receiving_tds")
+                )
+                game_log_rows.append(
+                    f'<div class="game-log-row"><strong>W{int(game_row["week"])}</strong><span>{html.escape(opponent_display)}</span>'
+                    f'<span><strong>{float(game_row["trend_ppr"]):.1f}</strong> PPR</span><span>{targets:.0f} tgt</span><span>{carries:.0f} car</span><span>{receptions:.0f} rec · {touchdowns:.0f} TD</span></div>'
+                )
+            with trends_shell.expander("Weekly game log"):
+                st.markdown(
+                    '<div class="game-log"><div class="game-log-row header"><span>Week</span><span>Opponent</span><span>Fantasy</span><span>Targets</span><span>Carries</span><span>Receptions / TD</span></div>'
+                    + "".join(game_log_rows) + "</div>",
+                    unsafe_allow_html=True,
+                )
     elif trends_view == "Opportunity":
         opportunity_history = recorded.copy()
         if selected_position == "QB":

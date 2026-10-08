@@ -1,0 +1,13 @@
+{
+  "publication_id": "2026-W5-initial-audit",
+  "forecast_timestamp": "2026-10-08T02:26:24.850266+00:00",
+  "information_cutoff": "2026-10-08T02:26:24.850266+00:00",
+  "season": 2026,
+  "week": 5,
+  "model_version": "Approved round-three live model",
+  "note": "Initial prospective ledger seed from the preserved current production snapshots.",
+  "forecast_files": [
+    "data\\projection_ledger\\projections\\season=2026\\week=5\\2026-10-08T02-26-24.850266_00-00_PPR-4PT-PASS-TD_2026-W5-4pt-initial-audit.parquet",
+    "data\\projection_ledger\\projections\\season=2026\\week=5\\2026-10-08T02-26-24.850266_00-00_PPR-6PT-PASS-TD_2026-W5-6pt-initial-audit.parquet"
+  ]
+}

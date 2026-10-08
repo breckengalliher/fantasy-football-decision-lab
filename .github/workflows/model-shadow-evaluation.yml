@@ -1,0 +1,53 @@
+name: Projection challenger shadow evaluation
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 7 * * 2"
+      timezone: "America/Chicago"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: model-shadow-evaluation
+  cancel-in-progress: false
+
+jobs:
+  shadow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - run: pip install -r requirements.txt
+      - name: Download public historical weekly inputs
+        shell: bash
+        run: |
+          mkdir -p data/raw
+          for season in 2021 2022 2023 2024 2025; do
+            curl --fail --retry 3 --location "https://github.com/nflverse/nflverse-data/releases/download/player_stats/stats_player_week_${season}.parquet" --output "data/raw/player_stats_${season}.parquet"
+          done
+          python -c "import pandas as pd; from pathlib import Path; [pd.read_parquet(p).to_csv(p.with_suffix('.csv'), index=False) for p in Path('data/raw').glob('player_stats_*.parquet')]"
+      - name: Generate non-production challenger forecasts
+        run: python src/refresh_shadow_challenger.py
+      - name: Validate challenger isolation
+        run: python -m pytest tests/test_shadow_challenger.py tests/test_projection_ledger.py -q
+      - name: Publish immutable shadow snapshot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f data/shadow_ledger
+          git diff --cached --quiet || git commit -m "Record projection challenger shadow forecasts [skip ci]"
+          git push
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: projection-challenger-shadow
+          path: data/shadow_ledger
+          if-no-files-found: warn
+          retention-days: 120

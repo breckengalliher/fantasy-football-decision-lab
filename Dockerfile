@@ -11,6 +11,7 @@ RUN pip install --upgrade pip && \
     pip install -r /tmp/dashboard-requirements.txt
 
 COPY dashboard ./dashboard
+RUN python dashboard/patch_streamlit_branding.py
 COPY data/processed ./data/processed
 COPY .streamlit/config.toml ./.streamlit/config.toml
 

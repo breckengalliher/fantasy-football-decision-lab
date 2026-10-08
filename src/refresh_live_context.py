@@ -21,6 +21,7 @@ from dashboard.providers.sportsdataio import SportsDataIOClient, add_depth_chart
 from dashboard.reporting import enrich_with_reporting, load_reporting_context
 from dashboard.snapshots import build_personnel_context
 from src.refresh_weekly_snapshot import PROCESSED, api_key, atomic_parquet
+from src.context_ledger import append_context_snapshot, build_context_snapshot
 
 
 INJURY_COLUMNS = [
@@ -42,6 +43,7 @@ MARKET_COLUMNS = [
 ]
 REPORTING_COLUMNS = ["reporting_summary", "reporting_sources_json", "reporting_checked_at"]
 HEADSHOT_COLUMNS = ["headshot_url", "headshot_source"]
+CONTEXT_LEDGER = ROOT / "data" / "context_ledger"
 
 
 def refresh_board(
@@ -96,6 +98,7 @@ def main() -> None:
     seed = pd.read_parquet(PROCESSED / "live_start_sit_board_4pt_current.parquet")
     reporting_context = load_reporting_context(seed) if args.include_reporting else None
     headshot_context = load_headshot_context() if args.include_headshots else None
+    archived_board = None
     for points in (4, 6):
         path = PROCESSED / f"live_start_sit_board_{points}pt_current.parquet"
         refreshed = refresh_board(
@@ -106,6 +109,7 @@ def main() -> None:
         atomic_parquet(refreshed, path)
         if points == 4:
             atomic_parquet(refreshed, PROCESSED / "live_start_sit_board_current.parquet")
+            archived_board = refreshed
 
     previous_path = PROCESSED / "sportsdataio_depth_current.parquet"
     previous = pd.read_parquet(previous_path) if previous_path.exists() else pd.DataFrame()
@@ -143,6 +147,11 @@ def main() -> None:
     temporary = metadata_path.with_suffix(".json.tmp")
     temporary.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
     temporary.replace(metadata_path)
+    captured_at = metadata["context_refreshed_at"]
+    context_snapshot = build_context_snapshot(
+        archived_board, season=season, week=week, captured_at=captured_at
+    )
+    append_context_snapshot(context_snapshot, CONTEXT_LEDGER)
     print(json.dumps({"season": season, "week": week, "scope": metadata["refresh_scope"]}))
 
 

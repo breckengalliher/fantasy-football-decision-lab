@@ -38,7 +38,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f data/processed/live_refresh_metadata.json data/processed/live_weekly_current.parquet data/processed/live_start_sit_board_current.parquet data/processed/live_start_sit_board_4pt_current.parquet data/processed/live_start_sit_board_6pt_current.parquet data/processed/personnel_players_current.parquet data/processed/personnel_teams_current.parquet data/processed/sportsdataio_depth_current.parquet data/processed/reporting_context_current.parquet data/processed/headshot_context_current.parquet
+          git add -f data/processed/live_refresh_metadata.json data/processed/live_weekly_current.parquet data/processed/live_start_sit_board_current.parquet data/processed/live_start_sit_board_4pt_current.parquet data/processed/live_start_sit_board_6pt_current.parquet data/processed/personnel_players_current.parquet data/processed/personnel_teams_current.parquet data/processed/sportsdataio_depth_current.parquet data/processed/reporting_context_current.parquet data/processed/headshot_context_current.parquet data/projection_ledger
           git diff --cached --quiet || git commit -m "Refresh weekly production data [skip ci]"
           git push
       - uses: actions/upload-artifact@v4
@@ -53,5 +53,6 @@ jobs:
             data/processed/live_start_sit_board_6pt_current.parquet
             data/processed/reporting_context_current.parquet
             data/processed/headshot_context_current.parquet
+            data/projection_ledger
           if-no-files-found: warn
           retention-days: 28

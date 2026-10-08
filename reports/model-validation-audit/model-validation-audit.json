@@ -1,0 +1,892 @@
+{
+  "study_classification": "legitimate walk-forward simulation; not archived published forecasts",
+  "evaluation": {
+    "train": "2021-2023",
+    "model_selection": "2024",
+    "final_test": "2025",
+    "scoring": "full PPR with 4-point passing TDs"
+  },
+  "data_quality": {
+    "rows": 29340,
+    "seasons": [
+      2021,
+      2022,
+      2023,
+      2024,
+      2025
+    ],
+    "regular_season_rows": 29340,
+    "positions": {
+      "WR": 12267,
+      "RB": 7686,
+      "TE": 6108,
+      "QB": 3279
+    },
+    "duplicate_player_weeks": 0,
+    "missing_required": {
+      "player_id": 0,
+      "season": 0,
+      "week": 0,
+      "position": 0,
+      "opponent_team": 0,
+      "fantasy_points_ppr": 0
+    },
+    "feature_availability": {
+      "box_score_opportunity": {
+        "required_fields": [
+          "attempts",
+          "carries",
+          "targets"
+        ],
+        "present_fields": [
+          "attempts",
+          "carries",
+          "targets"
+        ],
+        "complete": true
+      },
+      "receiving_efficiency": {
+        "required_fields": [
+          "receiving_yards",
+          "receiving_air_yards",
+          "target_share"
+        ],
+        "present_fields": [
+          "receiving_yards",
+          "receiving_air_yards",
+          "target_share"
+        ],
+        "complete": true
+      },
+      "routes_and_first_read": {
+        "required_fields": [
+          "routes",
+          "route_participation",
+          "first_read_share"
+        ],
+        "present_fields": [],
+        "complete": false
+      },
+      "snaps": {
+        "required_fields": [
+          "offense_snaps",
+          "snap_pct"
+        ],
+        "present_fields": [],
+        "complete": false
+      },
+      "historical_injury_timestamp": {
+        "required_fields": [
+          "injury_status",
+          "injury_updated_at"
+        ],
+        "present_fields": [],
+        "complete": false
+      },
+      "historical_market_timestamp": {
+        "required_fields": [
+          "market_line",
+          "market_timestamp"
+        ],
+        "present_fields": [],
+        "complete": false
+      }
+    },
+    "point_in_time_classification": "walk-forward box-score simulation; not an archive of published forecasts"
+  },
+  "benchmarks_2025": {
+    "incumbent": {
+      "point_accuracy": {
+        "samples": 3170,
+        "mae": 5.526384892757081,
+        "median_absolute_error": 4.477207180784324,
+        "rmse": 7.181689427046097,
+        "bias_actual_minus_projection": -0.1872659787179781,
+        "extreme_miss_rate_over_15": 0.0416403785488959
+      },
+      "start_sit": {
+        "accuracy": 0.6830342154991319,
+        "pairs": 312753,
+        "gap_buckets": {
+          "0-2": {
+            "accuracy": 0.5409465748577961,
+            "pairs": 73486
+          },
+          "2-5": {
+            "accuracy": 0.6356845431148124,
+            "pairs": 95582
+          },
+          "5-10": {
+            "accuracy": 0.7549320985252345,
+            "pairs": 102796
+          },
+          "10+": {
+            "accuracy": 0.8683264447650958,
+            "pairs": 40889
+          }
+        },
+        "position_combinations": {
+          "QB-QB": {
+            "accuracy": 0.6089847790749224,
+            "pairs": 6767
+          },
+          "QB-RB": {
+            "accuracy": 0.6863498814099943,
+            "pairs": 24454
+          },
+          "QB-TE": {
+            "accuracy": 0.7664269774361517,
+            "pairs": 20165
+          },
+          "QB-WR": {
+            "accuracy": 0.7097779288465896,
+            "pairs": 35304
+          },
+          "RB-RB": {
+            "accuracy": 0.6808794772738113,
+            "pairs": 20967
+          },
+          "RB-TE": {
+            "accuracy": 0.6966561190455828,
+            "pairs": 35079
+          },
+          "RB-WR": {
+            "accuracy": 0.6691489707651783,
+            "pairs": 61502
+          },
+          "TE-TE": {
+            "accuracy": 0.6695227304914319,
+            "pairs": 14122
+          },
+          "TE-WR": {
+            "accuracy": 0.6722333247590969,
+            "pairs": 50539
+          },
+          "WR-WR": {
+            "accuracy": 0.6591416974506317,
+            "pairs": 43854
+          }
+        },
+        "week_clustered_95_interval": [
+          0.6746753640199874,
+          0.6935809569850583
+        ]
+      }
+    },
+    "season_average": {
+      "point_accuracy": {
+        "samples": 3170,
+        "mae": 5.630112761653821,
+        "median_absolute_error": 4.364375,
+        "rmse": 7.417531383860864,
+        "bias_actual_minus_projection": -0.06163419978456627,
+        "extreme_miss_rate_over_15": 0.0555205047318612
+      },
+      "start_sit": {
+        "accuracy": 0.674153565659635,
+        "pairs": 312635,
+        "gap_buckets": {
+          "0-2": {
+            "accuracy": 0.535707156785972,
+            "pairs": 65127
+          },
+          "2-5": {
+            "accuracy": 0.6165580859037186,
+            "pairs": 86725
+          },
+          "5-10": {
+            "accuracy": 0.7196979586098866,
+            "pairs": 99589
+          },
+          "10+": {
+            "accuracy": 0.8290028434160212,
+            "pairs": 61194
+          }
+        },
+        "position_combinations": {
+          "QB-QB": {
+            "accuracy": 0.5921655580192166,
+            "pairs": 6765
+          },
+          "QB-RB": {
+            "accuracy": 0.6825617536397841,
+            "pairs": 24452
+          },
+          "QB-TE": {
+            "accuracy": 0.7524177949709865,
+            "pairs": 20163
+          },
+          "QB-WR": {
+            "accuracy": 0.6988272619115065,
+            "pairs": 35302
+          },
+          "RB-RB": {
+            "accuracy": 0.6810591603053435,
+            "pairs": 20960
+          },
+          "RB-TE": {
+            "accuracy": 0.6883235411556671,
+            "pairs": 35062
+          },
+          "RB-WR": {
+            "accuracy": 0.6620410288112707,
+            "pairs": 61469
+          },
+          "TE-TE": {
+            "accuracy": 0.6630303888928243,
+            "pairs": 14117
+          },
+          "TE-WR": {
+            "accuracy": 0.6610578826510413,
+            "pairs": 50516
+          },
+          "WR-WR": {
+            "accuracy": 0.6472655091377855,
+            "pairs": 43829
+          }
+        },
+        "week_clustered_95_interval": [
+          0.6661128280884376,
+          0.6836713938937383
+        ]
+      }
+    },
+    "rolling_3": {
+      "point_accuracy": {
+        "samples": 3170,
+        "mae": 5.963724500525763,
+        "median_absolute_error": 4.600000000000001,
+        "rmse": 7.838436975802271,
+        "bias_actual_minus_projection": -0.43323869610935845,
+        "extreme_miss_rate_over_15": 0.06056782334384858
+      },
+      "start_sit": {
+        "accuracy": 0.660282793627222,
+        "pairs": 312454,
+        "gap_buckets": {
+          "0-2": {
+            "accuracy": 0.5326826720634558,
+            "pairs": 61271
+          },
+          "2-5": {
+            "accuracy": 0.599620818298575,
+            "pairs": 81755
+          },
+          "5-10": {
+            "accuracy": 0.6903221046418483,
+            "pairs": 94876
+          },
+          "10+": {
+            "accuracy": 0.7934461852130057,
+            "pairs": 74552
+          }
+        },
+        "position_combinations": {
+          "QB-QB": {
+            "accuracy": 0.5886178861788618,
+            "pairs": 6765
+          },
+          "QB-RB": {
+            "accuracy": 0.6642807476788417,
+            "pairs": 24449
+          },
+          "QB-TE": {
+            "accuracy": 0.7466025195913104,
+            "pairs": 20162
+          },
+          "QB-WR": {
+            "accuracy": 0.6892458496232081,
+            "pairs": 35298
+          },
+          "RB-RB": {
+            "accuracy": 0.661637622344235,
+            "pairs": 20945
+          },
+          "RB-TE": {
+            "accuracy": 0.672671215278769,
+            "pairs": 35029
+          },
+          "RB-WR": {
+            "accuracy": 0.6478210617135229,
+            "pairs": 61429
+          },
+          "TE-TE": {
+            "accuracy": 0.643956043956044,
+            "pairs": 14105
+          },
+          "TE-WR": {
+            "accuracy": 0.6454136708459604,
+            "pairs": 50487
+          },
+          "WR-WR": {
+            "accuracy": 0.6353545734840699,
+            "pairs": 43785
+          }
+        },
+        "week_clustered_95_interval": [
+          0.6514534759611621,
+          0.6713379702727033
+        ]
+      }
+    },
+    "rolling_5": {
+      "point_accuracy": {
+        "samples": 3170,
+        "mae": 5.7138085173501585,
+        "median_absolute_error": 4.42,
+        "rmse": 7.518433777922824,
+        "bias_actual_minus_projection": -0.2515082018927445,
+        "extreme_miss_rate_over_15": 0.0555205047318612
+      },
+      "start_sit": {
+        "accuracy": 0.6723872598422678,
+        "pairs": 312555,
+        "gap_buckets": {
+          "0-2": {
+            "accuracy": 0.5370124533788482,
+            "pairs": 63276
+          },
+          "2-5": {
+            "accuracy": 0.6133487979755378,
+            "pairs": 85356
+          },
+          "5-10": {
+            "accuracy": 0.7104054653718744,
+            "pairs": 96901
+          },
+          "10+": {
+            "accuracy": 0.820417176449524,
+            "pairs": 67022
+          }
+        },
+        "position_combinations": {
+          "QB-QB": {
+            "accuracy": 0.5900354819633353,
+            "pairs": 6764
+          },
+          "QB-RB": {
+            "accuracy": 0.6785407549793464,
+            "pairs": 24451
+          },
+          "QB-TE": {
+            "accuracy": 0.750756260848004,
+            "pairs": 20165
+          },
+          "QB-WR": {
+            "accuracy": 0.6958159825500694,
+            "pairs": 35301
+          },
+          "RB-RB": {
+            "accuracy": 0.6795036984013362,
+            "pairs": 20955
+          },
+          "RB-TE": {
+            "accuracy": 0.6862929681928398,
+            "pairs": 35055
+          },
+          "RB-WR": {
+            "accuracy": 0.6609011178547602,
+            "pairs": 61457
+          },
+          "TE-TE": {
+            "accuracy": 0.6588235294117647,
+            "pairs": 14110
+          },
+          "TE-WR": {
+            "accuracy": 0.6600182221517984,
+            "pairs": 50488
+          },
+          "WR-WR": {
+            "accuracy": 0.6469218653701294,
+            "pairs": 43809
+          }
+        },
+        "week_clustered_95_interval": [
+          0.664721046362795,
+          0.681729365927223
+        ]
+      }
+    },
+    "ewm": {
+      "point_accuracy": {
+        "samples": 3170,
+        "mae": 5.721632913538774,
+        "median_absolute_error": 4.4809246748922265,
+        "rmse": 7.553117438802502,
+        "bias_actual_minus_projection": -0.2407539151680694,
+        "extreme_miss_rate_over_15": 0.05488958990536277
+      },
+      "start_sit": {
+        "accuracy": 0.6717516490754626,
+        "pairs": 312751,
+        "gap_buckets": {
+          "0-2": {
+            "accuracy": 0.535959681332269,
+            "pairs": 63891
+          },
+          "2-5": {
+            "accuracy": 0.6132651006313894,
+            "pairs": 84417
+          },
+          "5-10": {
+            "accuracy": 0.7087507518719017,
+            "pairs": 96426
+          },
+          "10+": {
+            "accuracy": 0.8194421982739609,
+            "pairs": 68017
+          }
+        },
+        "position_combinations": {
+          "QB-QB": {
+            "accuracy": 0.5967193734298804,
+            "pairs": 6767
+          },
+          "QB-RB": {
+            "accuracy": 0.6767808947411467,
+            "pairs": 24454
+          },
+          "QB-TE": {
+            "accuracy": 0.7480783535829407,
+            "pairs": 20165
+          },
+          "QB-WR": {
+            "accuracy": 0.6995524586449128,
+            "pairs": 35304
+          },
+          "RB-RB": {
+            "accuracy": 0.6806410072971812,
+            "pairs": 20967
+          },
+          "RB-TE": {
+            "accuracy": 0.6857289469182963,
+            "pairs": 35078
+          },
+          "RB-WR": {
+            "accuracy": 0.6590842574225229,
+            "pairs": 61502
+          },
+          "TE-TE": {
+            "accuracy": 0.6597507435207478,
+            "pairs": 14122
+          },
+          "TE-WR": {
+            "accuracy": 0.6574724470211124,
+            "pairs": 50539
+          },
+          "WR-WR": {
+            "accuracy": 0.6457026885275807,
+            "pairs": 43853
+          }
+        },
+        "week_clustered_95_interval": [
+          0.6639901386550707,
+          0.6809122628535268
+        ]
+      }
+    },
+    "opportunity_only": {
+      "point_accuracy": {
+        "samples": 3170,
+        "mae": 5.774178841541296,
+        "median_absolute_error": 4.628036457842521,
+        "rmse": 7.46593717834684,
+        "bias_actual_minus_projection": -0.3546540939551891,
+        "extreme_miss_rate_over_15": 0.04574132492113565
+      },
+      "start_sit": {
+        "accuracy": 0.6658200442699498,
+        "pairs": 309465,
+        "gap_buckets": {
+          "0-2": {
+            "accuracy": 0.5381047423607792,
+            "pairs": 71146
+          },
+          "2-5": {
+            "accuracy": 0.6208303361497912,
+            "pairs": 93143
+          },
+          "5-10": {
+            "accuracy": 0.7244506247796624,
+            "pairs": 102116
+          },
+          "10+": {
+            "accuracy": 0.8351137947050628,
+            "pairs": 43060
+          }
+        },
+        "position_combinations": {
+          "QB-QB": {
+            "accuracy": 0.5644604532492871,
+            "pairs": 6663
+          },
+          "QB-RB": {
+            "accuracy": 0.6713012186145416,
+            "pairs": 24454
+          },
+          "QB-TE": {
+            "accuracy": 0.7595834366476568,
+            "pairs": 20165
+          },
+          "QB-WR": {
+            "accuracy": 0.6978812599138908,
+            "pairs": 35304
+          },
+          "RB-RB": {
+            "accuracy": 0.6716722554308209,
+            "pairs": 20577
+          },
+          "RB-TE": {
+            "accuracy": 0.6800079819835229,
+            "pairs": 35079
+          },
+          "RB-WR": {
+            "accuracy": 0.6526617020584696,
+            "pairs": 61502
+          },
+          "TE-TE": {
+            "accuracy": 0.6559867629362214,
+            "pairs": 13296
+          },
+          "TE-WR": {
+            "accuracy": 0.6453234136013771,
+            "pairs": 50539
+          },
+          "WR-WR": {
+            "accuracy": 0.6389963233538652,
+            "pairs": 41886
+          }
+        },
+        "week_clustered_95_interval": [
+          0.6569934218906649,
+          0.6758774029285958
+        ]
+      }
+    },
+    "regularized_opportunity_efficiency": {
+      "point_accuracy": {
+        "samples": 3170,
+        "mae": 5.478441007326168,
+        "median_absolute_error": 4.394839732751176,
+        "rmse": 7.165273378477131,
+        "bias_actual_minus_projection": 0.05826223312011998,
+        "extreme_miss_rate_over_15": 0.043533123028391164
+      },
+      "start_sit": {
+        "accuracy": 0.684198073239905,
+        "pairs": 312753,
+        "gap_buckets": {
+          "0-2": {
+            "accuracy": 0.5460078859724119,
+            "pairs": 78367
+          },
+          "2-5": {
+            "accuracy": 0.6448145237663463,
+            "pairs": 99258
+          },
+          "5-10": {
+            "accuracy": 0.765369747477283,
+            "pairs": 99595
+          },
+          "10+": {
+            "accuracy": 0.8714715897897729,
+            "pairs": 35533
+          }
+        },
+        "position_combinations": {
+          "QB-QB": {
+            "accuracy": 0.5983449091177775,
+            "pairs": 6767
+          },
+          "QB-RB": {
+            "accuracy": 0.691706878220332,
+            "pairs": 24454
+          },
+          "QB-TE": {
+            "accuracy": 0.7655839325564097,
+            "pairs": 20165
+          },
+          "QB-WR": {
+            "accuracy": 0.7142250169952413,
+            "pairs": 35304
+          },
+          "RB-RB": {
+            "accuracy": 0.6852196308484761,
+            "pairs": 20967
+          },
+          "RB-TE": {
+            "accuracy": 0.6971407394737592,
+            "pairs": 35079
+          },
+          "RB-WR": {
+            "accuracy": 0.6716692140093005,
+            "pairs": 61502
+          },
+          "TE-TE": {
+            "accuracy": 0.6692394844922815,
+            "pairs": 14122
+          },
+          "TE-WR": {
+            "accuracy": 0.6706899622074042,
+            "pairs": 50539
+          },
+          "WR-WR": {
+            "accuracy": 0.658776850458339,
+            "pairs": 43854
+          }
+        },
+        "week_clustered_95_interval": [
+          0.6753579263853786,
+          0.6943970727635022
+        ]
+      }
+    }
+  },
+  "incumbent_segments_2025": {
+    "position": {
+      "QB": {
+        "samples": 471,
+        "mae": 6.654385664230106,
+        "median_absolute_error": 5.732121604908041,
+        "rmse": 8.164388575889348,
+        "bias_actual_minus_projection": -0.17779602050229598,
+        "extreme_miss_rate_over_15": 0.050955414012738856
+      },
+      "RB": {
+        "samples": 825,
+        "mae": 5.830408385675962,
+        "median_absolute_error": 4.629456320892073,
+        "rmse": 7.6586802793263224,
+        "bias_actual_minus_projection": 0.0972512529132221,
+        "extreme_miss_rate_over_15": 0.055757575757575756
+      },
+      "TE": {
+        "samples": 681,
+        "mae": 4.494341394056046,
+        "median_absolute_error": 3.501986731574796,
+        "rmse": 6.071539293311289,
+        "bias_actual_minus_projection": 0.11038771881763347,
+        "extreme_miss_rate_over_15": 0.02643171806167401
+      },
+      "WR": {
+        "samples": 1193,
+        "mae": 5.459925443967081,
+        "median_absolute_error": 4.577461500320784,
+        "rmse": 7.009015001280923,
+        "bias_actual_minus_projection": -0.5576676840298624,
+        "extreme_miss_rate_over_15": 0.036881810561609385
+      }
+    },
+    "season_phase": {
+      "weeks_3_to_8": {
+        "samples": 1133,
+        "mae": 5.536674592429117,
+        "median_absolute_error": 4.444341380008865,
+        "rmse": 7.143606717466052,
+        "bias_actual_minus_projection": 0.14367979554857507,
+        "extreme_miss_rate_over_15": 0.04148278905560459
+      },
+      "weeks_9_plus": {
+        "samples": 2037,
+        "mae": 5.520661657740673,
+        "median_absolute_error": 4.491930133453392,
+        "rmse": 7.2027842727917015,
+        "bias_actual_minus_projection": -0.3713413651902436,
+        "extreme_miss_rate_over_15": 0.041728031418753066
+      }
+    },
+    "workload": {
+      "high": {
+        "samples": 1029,
+        "mae": 6.556261759604114,
+        "median_absolute_error": 5.45480995149101,
+        "rmse": 8.209557719549009,
+        "bias_actual_minus_projection": -0.3180375295745732,
+        "extreme_miss_rate_over_15": 0.05928085519922255
+      },
+      "medium": {
+        "samples": 1080,
+        "mae": 5.75079301077148,
+        "median_absolute_error": 4.824872704482638,
+        "rmse": 7.3987822178524665,
+        "bias_actual_minus_projection": -0.34954684554988724,
+        "extreme_miss_rate_over_15": 0.04351851851851852
+      },
+      "low": {
+        "samples": 1061,
+        "mae": 4.299142608646664,
+        "median_absolute_error": 3.44415078125,
+        "rmse": 5.745574781304937,
+        "bias_actual_minus_projection": 0.10474840583423509,
+        "extreme_miss_rate_over_15": 0.022620169651272386
+      }
+    },
+    "history": {
+      "sparse_2_to_4_games": {
+        "samples": 831,
+        "mae": 5.346343608058452,
+        "median_absolute_error": 4.099082607835378,
+        "rmse": 7.037697770431155,
+        "bias_actual_minus_projection": 0.1981653964996085,
+        "extreme_miss_rate_over_15": 0.036101083032490974
+      },
+      "established_5_plus_games": {
+        "samples": 2339,
+        "mae": 5.590349966542697,
+        "median_absolute_error": 4.567807588860342,
+        "rmse": 7.232156617922201,
+        "bias_actual_minus_projection": -0.3242020508880569,
+        "extreme_miss_rate_over_15": 0.04360837964942283
+      }
+    }
+  },
+  "regularized_segments_2025": {
+    "position": {
+      "QB": {
+        "samples": 471,
+        "mae": 6.668263075917738,
+        "median_absolute_error": 5.67323405405984,
+        "rmse": 8.200395591901689,
+        "bias_actual_minus_projection": -0.21229061856465825,
+        "extreme_miss_rate_over_15": 0.05732484076433121
+      },
+      "RB": {
+        "samples": 825,
+        "mae": 5.739335572258545,
+        "median_absolute_error": 4.433246339732886,
+        "rmse": 7.5846805078929185,
+        "bias_actual_minus_projection": 0.32586123609210554,
+        "extreme_miss_rate_over_15": 0.05818181818181818
+      },
+      "TE": {
+        "samples": 681,
+        "mae": 4.465037054867231,
+        "median_absolute_error": 3.4619600232151164,
+        "rmse": 6.106457149215074,
+        "bias_actual_minus_projection": 0.39276966119708856,
+        "extreme_miss_rate_over_15": 0.02936857562408223
+      },
+      "WR": {
+        "samples": 1193,
+        "mae": 5.406759432513676,
+        "median_absolute_error": 4.461164478535666,
+        "rmse": 6.986068843268789,
+        "bias_actual_minus_projection": -0.21092330152260697,
+        "extreme_miss_rate_over_15": 0.03604358759430008
+      }
+    },
+    "season_phase": {
+      "weeks_3_to_8": {
+        "samples": 1133,
+        "mae": 5.465533536179235,
+        "median_absolute_error": 4.264465287984386,
+        "rmse": 7.145380867287111,
+        "bias_actual_minus_projection": 0.5825066884827181,
+        "extreme_miss_rate_over_15": 0.04854368932038835
+      },
+      "weeks_9_plus": {
+        "samples": 2037,
+        "mae": 5.485620273310202,
+        "median_absolute_error": 4.4819580244348565,
+        "rmse": 7.176313929770562,
+        "bias_actual_minus_projection": -0.23332783459015186,
+        "extreme_miss_rate_over_15": 0.040746195385370644
+      }
+    },
+    "workload": {
+      "high": {
+        "samples": 1029,
+        "mae": 6.472854257638032,
+        "median_absolute_error": 5.309123468411988,
+        "rmse": 8.176856897054945,
+        "bias_actual_minus_projection": -0.016638570156667264,
+        "extreme_miss_rate_over_15": 0.0641399416909621
+      },
+      "medium": {
+        "samples": 1080,
+        "mae": 5.63164540437532,
+        "median_absolute_error": 4.661636316089927,
+        "rmse": 7.3376058434742495,
+        "bias_actual_minus_projection": 0.1846071497454728,
+        "extreme_miss_rate_over_15": 0.041666666666666664
+      },
+      "low": {
+        "samples": 1061,
+        "mae": 4.358071560215906,
+        "median_absolute_error": 3.5520476658858957,
+        "rmse": 5.809070902657681,
+        "bias_actual_minus_projection": 0.0022965560385299027,
+        "extreme_miss_rate_over_15": 0.02544769085768143
+      }
+    },
+    "history": {
+      "sparse_2_to_4_games": {
+        "samples": 831,
+        "mae": 5.286896555930993,
+        "median_absolute_error": 3.927679579580935,
+        "rmse": 7.070356782198948,
+        "bias_actual_minus_projection": 0.6056646390705017,
+        "extreme_miss_rate_over_15": 0.044524669073405534
+      },
+      "established_5_plus_games": {
+        "samples": 2339,
+        "mae": 5.546492926569175,
+        "median_absolute_error": 4.555096139412887,
+        "rmse": 7.198694055445231,
+        "bias_actual_minus_projection": -0.136218912388545,
+        "extreme_miss_rate_over_15": 0.043180846515604956
+      }
+    }
+  },
+  "regularized_model": {
+    "selected_alpha": 100.0,
+    "validation": [
+      {
+        "alpha": 1.0,
+        "mae": 5.520026745815288
+      },
+      {
+        "alpha": 10.0,
+        "mae": 5.51890327485915
+      },
+      {
+        "alpha": 100.0,
+        "mae": 5.516284933994468
+      },
+      {
+        "alpha": 1000.0,
+        "mae": 5.541041693464446
+      }
+    ],
+    "training_seasons": [
+      2021,
+      2022,
+      2023,
+      2024
+    ],
+    "test_season": 2025
+  },
+  "regularized_vs_incumbent": {
+    "mae_difference": -0.04794388543091107,
+    "week_clustered_95_interval": [
+      -0.09331274600159119,
+      -0.0043580401877977544
+    ],
+    "clusters": 16
+  },
+  "production_interval_audit": {
+    "source": "C:\\Users\\Brecken\\Documents\\Codex\\2026-07-22\\hi\\outputs\\fantasy-football-wr-analytics\\reports\\projection-range-calibration.json",
+    "interval": "production empirical P10-P90 residual range",
+    "samples": 3170,
+    "coverage": 0.7965299684542587,
+    "mean_width": 16.772121190649617,
+    "target_coverage": 0.8,
+    "note": "P20-P80 remains experimental; the current production interval is unchanged."
+  },
+  "known_gaps": [
+    "No immutable archive of exact user-visible pregame projections exists before this audit.",
+    "Historical injury, depth-chart, route, snap, first-read, weather, and market states are not fully timestamped in the local archive.",
+    "The 2021-2025 historical evaluation validates full PPR with four-point passing TDs; six-point QB results require a separately specified walk-forward reconstruction.",
+    "Pairwise comparisons are correlated; week-clustered uncertainty is reported and raw pair counts are not treated as independent samples."
+  ]
+}

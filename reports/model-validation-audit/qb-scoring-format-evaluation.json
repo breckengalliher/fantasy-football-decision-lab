@@ -1,0 +1,57 @@
+{
+  "classification": "walk-forward QB simulation; not archived published forecasts",
+  "formats": {
+    "4": {
+      "approved_qb_formula": {
+        "samples": 467,
+        "mae": 6.740869119774477,
+        "rmse": 8.293592510441815,
+        "bias_actual_minus_projection": -0.33352182308825307,
+        "pairwise_ordering_accuracy": 0.593138730063196,
+        "eligible_pairs": 6646
+      },
+      "season_average": {
+        "samples": 467,
+        "mae": 6.908148100174868,
+        "rmse": 8.600330964655416,
+        "bias_actual_minus_projection": -0.38795767128422376,
+        "pairwise_ordering_accuracy": 0.5880493678506924,
+        "eligible_pairs": 6644
+      },
+      "rolling_three": {
+        "samples": 467,
+        "mae": 7.106188436830835,
+        "rmse": 8.973826147307694,
+        "bias_actual_minus_projection": -0.6085153461812992,
+        "pairwise_ordering_accuracy": 0.5839229263886798,
+        "eligible_pairs": 6643
+      }
+    },
+    "6": {
+      "approved_qb_formula": {
+        "samples": 467,
+        "mae": 8.382336327986696,
+        "rmse": 10.23381807322401,
+        "bias_actual_minus_projection": -0.35316178536939086,
+        "pairwise_ordering_accuracy": 0.5859786369790884,
+        "eligible_pairs": 6647
+      },
+      "season_average": {
+        "samples": 467,
+        "mae": 8.633837639281964,
+        "rmse": 10.63540738154245,
+        "bias_actual_minus_projection": -0.4371540970331121,
+        "pairwise_ordering_accuracy": 0.5805626598465473,
+        "eligible_pairs": 6647
+      },
+      "rolling_three": {
+        "samples": 467,
+        "mae": 8.933211991434689,
+        "rmse": 11.159866389012207,
+        "bias_actual_minus_projection": -0.7255745895788723,
+        "pairwise_ordering_accuracy": 0.5713425647200482,
+        "eligible_pairs": 6644
+      }
+    }
+  }
+}

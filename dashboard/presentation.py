@@ -7,6 +7,11 @@ from zoneinfo import ZoneInfo
 
 import pandas as pd
 
+try:
+    from dashboard.decision_policy import CLOSE_CALL_THRESHOLD_PPR
+except ModuleNotFoundError:
+    from decision_policy import CLOSE_CALL_THRESHOLD_PPR
+
 
 POSITION_GROUPS = {"FLEX": ("RB", "WR", "TE")}
 
@@ -204,7 +209,7 @@ def comparison_summary(compare: pd.DataFrame) -> str:
     gap = float(leader["median_ppr"] - runner_up["median_ppr"])
     if gap < 1:
         ending = "This is a genuine toss-up."
-    elif gap < 2.5:
+    elif gap < CLOSE_CALL_THRESHOLD_PPR:
         ending = "Treat this as a lean, not a lock."
     else:
         ending = "The model sees meaningful separation."

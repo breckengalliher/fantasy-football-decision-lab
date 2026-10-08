@@ -17,7 +17,7 @@ def player(**changes):
 
 
 def test_close_start_outlook_is_conversational_and_cautious():
-    text = build_player_outlook(player(), rank=0, total=3, spread=2.1)
+    text = build_player_outlook(player(), rank=0, total=3, spread=1.9)
     assert "slim margin" in text
     assert "lean" in text
     assert "We predict" in text

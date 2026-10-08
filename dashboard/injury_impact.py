@@ -10,6 +10,7 @@ import pandas as pd
 
 
 SKILL_POSITIONS = {"RB", "WR", "TE"}
+OFFENSIVE_LINE_POSITIONS = {"OL", "OT", "LT", "RT", "OG", "LG", "RG", "G", "C"}
 HIGH_RISK_AREAS = {"hamstring", "groin", "calf", "concussion", "knee", "ankle", "achilles"}
 
 
@@ -22,6 +23,12 @@ def _text(value: Any) -> str:
 def _contains(value: Any, *terms: str) -> bool:
     text = _text(value).casefold()
     return any(term in text for term in terms)
+
+
+def teammate_display_label(player: Any, position: Any) -> str:
+    """Use a familiar unit label when an offensive lineman supplies context."""
+    normalized_position = _text(position).upper()
+    return "O-Line" if normalized_position in OFFENSIVE_LINE_POSITIONS else _text(player)
 
 
 def direct_availability_factor(row: pd.Series) -> float:
@@ -108,6 +115,10 @@ def apply_injury_scenario(board: pd.DataFrame) -> pd.DataFrame:
     teammate_boost = np.zeros(row_count, dtype=float)
     team_efficiency = np.ones(row_count, dtype=float)
     teammate_effect = np.full(row_count, "", dtype=object)
+    # Several unavailable teammates may contribute to one player's scenario.
+    # Track the strongest individual contribution so the explanation names the
+    # primary driver instead of whichever source row happened to run last.
+    teammate_effect_strength = np.zeros(row_count, dtype=float)
     positions = result["position"].astype(str).to_numpy()
     players = result["player"].astype(str).to_numpy()
     factors = np.asarray(direct_factors, dtype=float)
@@ -146,7 +157,11 @@ def apply_injury_scenario(board: pd.DataFrame) -> pd.DataFrame:
             distributed = pool * weights / weights.sum()
             boosts = np.minimum(3.0, np.minimum(baselines[candidates] * 0.20, distributed))
             teammate_boost[candidates] += boosts
-            teammate_effect[candidates] = f'{players[source_position]} reduced availability could create additional opportunity.'
+            primary_driver = teammate_display_label(players[source_position], position)
+            stronger_effect = boosts > teammate_effect_strength[candidates]
+            stronger_candidates = candidates[stronger_effect]
+            teammate_effect[stronger_candidates] = f'{primary_driver} reduced availability could create additional opportunity.'
+            teammate_effect_strength[stronger_candidates] = boosts[stronger_effect]
 
     result["injury_teammate_boost"] = teammate_boost
     result["injury_team_efficiency_factor"] = team_efficiency

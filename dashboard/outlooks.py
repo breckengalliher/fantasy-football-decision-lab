@@ -5,6 +5,11 @@ from __future__ import annotations
 from collections.abc import Mapping
 import math
 
+try:
+    from dashboard.decision_policy import CLOSE_CALL_THRESHOLD_PPR
+except ModuleNotFoundError:
+    from decision_policy import CLOSE_CALL_THRESHOLD_PPR
+
 JOURNALISM_AFFECTS_PROJECTION = False
 
 
@@ -37,7 +42,7 @@ def build_player_outlook(
         last_two = math.nan
     opponent = str(row["next_opponent"])
     matchup = str(row["matchup_label"]).lower()
-    close = total > 1 and spread < 2.5
+    close = total > 1 and spread < CLOSE_CALL_THRESHOLD_PPR
     limited_sample = bool(row.get("limited_sample_role", False))
 
     if total == 1:
