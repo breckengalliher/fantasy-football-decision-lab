@@ -206,6 +206,16 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .share-panel strong { display:block; color:var(--navy); font-size:.78rem; }
 .share-panel span { display:block; color:var(--muted); font-size:.68rem; margin-top:.12rem; }
 .share-link-label { color:var(--navy); font-size:.68rem; font-weight:800; margin:.35rem 0 .18rem; }
+.onboarding-intro { color:var(--muted); font-size:.82rem; line-height:1.45; margin:-.15rem 0 .75rem; }
+.onboarding-steps { display:grid; gap:.55rem; margin:.25rem 0 .8rem; }
+.onboarding-step { display:grid; grid-template-columns:2rem 1fr; gap:.62rem; align-items:start; padding:.68rem .72rem; border:1px solid #d7e0e4; border-radius:11px; background:#f7fafb; }
+.onboarding-number { display:flex; align-items:center; justify-content:center; width:2rem; height:2rem; border-radius:50%; background:var(--navy); color:#9ee468; font-family:'Barlow Condensed','Arial Narrow',sans-serif; font-size:1.05rem; font-weight:800; }
+.onboarding-step strong { display:block; color:var(--navy); font-size:.82rem; margin-bottom:.12rem; }
+.onboarding-step span { color:var(--muted); font-size:.72rem; line-height:1.38; }
+.onboarding-must-know { padding:.7rem .78rem; border-left:4px solid var(--gold); border-radius:9px; background:#edf4e8; }
+.onboarding-must-know strong { color:#315f1e; font-size:.72rem; letter-spacing:.055em; text-transform:uppercase; }
+.onboarding-must-know ul { margin:.42rem 0 0; padding-left:1.1rem; color:var(--ink); font-size:.69rem; line-height:1.42; }
+.onboarding-must-know li + li { margin-top:.25rem; }
 .limited-sample-pill { display:inline-flex; align-items:center; border-radius:999px; background:#fff1d6; border:1px solid #e3bd70; color:#744b00; padding:.22rem .46rem; font-size:.58rem; font-weight:850; letter-spacing:.045em; text-transform:uppercase; }
 .limited-sample-note { margin:.62rem 0 .12rem; padding:.62rem .68rem; border:1px solid #e3bd70; border-left:4px solid #d28a18; border-radius:9px; background:#fff8e8; color:var(--ink); font-size:.68rem; line-height:1.4; }
 .limited-sample-note strong { display:block; color:#744b00; font-size:.62rem; letter-spacing:.06em; text-transform:uppercase; margin-bottom:.18rem; }
@@ -592,6 +602,29 @@ def build_share_image(compare: pd.DataFrame, week: int, scoring_label: str, refr
     return output.getvalue()
 
 
+@st.dialog("Welcome to The Sunday Decision Lab")
+def show_onboarding() -> None:
+    """Explain the core workflow and the interpretation rules every user needs."""
+    st.markdown(
+        '<div class="onboarding-intro">Build a focused lineup comparison in three quick steps.</div>'
+        '<div class="onboarding-steps">'
+        '<div class="onboarding-step"><div class="onboarding-number">1</div><div><strong>Choose a position</strong><span>Select QB, RB, WR, TE, or FLEX. FLEX lets you compare running backs, wide receivers, and tight ends together.</span></div></div>'
+        '<div class="onboarding-step"><div class="onboarding-number">2</div><div><strong>Select up to three players</strong><span>Use the player slots and search panel. Replace any selection with one click.</span></div></div>'
+        '<div class="onboarding-step"><div class="onboarding-number">3</div><div><strong>Review the recommendation</strong><span>Start with the Decision Edge and player cards, then open supporting evidence only when you want more detail.</span></div></div>'
+        '</div>'
+        '<div class="onboarding-must-know"><strong>Must know before making your call</strong><ul>'
+        '<li><b>Start and Sit are relative only to the players you selected.</b> “Sit” is not an automatic bench recommendation for every league.</li>'
+        '<li><b>Injuries, practice reports, weather, journalism, and market data are supporting context.</b> They do not change the baseline ranking.</li>'
+        '<li><b>Floor and ceiling are P10 and P90 estimates—not guarantees.</b> Actual results can finish outside the displayed range.</li>'
+        '<li><b>Always check the data timestamp and official inactive list before kickoff.</b> Late status changes can occur after the latest refresh.</li>'
+        '</ul></div>',
+        unsafe_allow_html=True,
+    )
+    if st.button("Got it — start comparing", type="primary", width="stretch"):
+        st.session_state["onboarding_seen"] = True
+        st.rerun()
+
+
 with st.sidebar:
     st.markdown(
         f'<div class="sidebar-logo"><img src="data:image/png;base64,{base64.b64encode(BRAND_ICON.read_bytes()).decode("ascii")}" '
@@ -608,6 +641,13 @@ with st.sidebar:
         key="no_clutter_mode",
     )
     st.caption("Answer first · deeper evidence when you want it" if no_clutter_mode else "Full dashboard view")
+    if st.button("Quick start guide", width="stretch"):
+        st.session_state["onboarding_seen"] = False
+        st.rerun()
+if "onboarding_seen" not in st.session_state:
+    st.session_state["onboarding_seen"] = False
+if not st.session_state["onboarding_seen"]:
+    show_onboarding()
 season = SEASON
 
 header_metadata = get_snapshot_metadata()
