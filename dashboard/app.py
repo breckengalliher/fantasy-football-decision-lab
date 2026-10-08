@@ -16,6 +16,7 @@ import requests
 import streamlit as st
 from PIL import Image, ImageDraw, ImageFont
 from urllib.parse import urlencode
+from streamlit_local_storage import LocalStorage
 
 try:
     from dashboard.providers.sportsdataio import context_freshness, format_injury_context
@@ -603,6 +604,13 @@ def build_share_image(compare: pd.DataFrame, week: int, scoring_label: str, refr
     return output.getvalue()
 
 
+def dismiss_onboarding() -> None:
+    """Close the guide immediately and persist that choice on the next render."""
+    st.session_state["onboarding_seen"] = True
+    st.session_state["onboarding_force_open"] = False
+    st.session_state["onboarding_pending_persist"] = True
+
+
 @st.dialog("Welcome to The Sunday Decision Lab")
 def show_onboarding() -> None:
     """Explain the core workflow and the interpretation rules every user needs."""
@@ -621,9 +629,14 @@ def show_onboarding() -> None:
         '</ul></div>',
         unsafe_allow_html=True,
     )
-    if st.button("Got it — start comparing", type="primary", width="stretch"):
-        st.session_state["onboarding_seen"] = True
-        st.rerun()
+    st.button("Got it — start comparing", type="primary", width="stretch", on_click=dismiss_onboarding)
+
+
+browser_storage = LocalStorage(key="sdl_browser_preferences")
+persisted_onboarding_seen = str(browser_storage.getItem("sdl_onboarding_dismissed")).casefold() == "true"
+if st.session_state.get("onboarding_pending_persist", False):
+    browser_storage.setItem("sdl_onboarding_dismissed", "true", key="persist_onboarding_dismissal")
+    st.session_state["onboarding_pending_persist"] = False
 
 
 with st.sidebar:
@@ -644,10 +657,15 @@ with st.sidebar:
     st.caption("Answer first · deeper evidence when you want it" if no_clutter_mode else "Full dashboard view")
     if st.button("Quick start guide", width="stretch"):
         st.session_state["onboarding_seen"] = False
+        st.session_state["onboarding_force_open"] = True
         st.rerun()
 if "onboarding_seen" not in st.session_state:
-    st.session_state["onboarding_seen"] = False
-if not st.session_state["onboarding_seen"]:
+    st.session_state["onboarding_seen"] = persisted_onboarding_seen
+if "onboarding_force_open" not in st.session_state:
+    st.session_state["onboarding_force_open"] = False
+if persisted_onboarding_seen and not st.session_state["onboarding_force_open"]:
+    st.session_state["onboarding_seen"] = True
+if st.session_state["onboarding_force_open"] or not st.session_state["onboarding_seen"]:
     show_onboarding()
 season = SEASON
 
