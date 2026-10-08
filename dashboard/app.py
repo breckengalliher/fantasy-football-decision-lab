@@ -394,19 +394,19 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .usage-track { height:10px; border-radius:999px; background:#dfe5e7; overflow:hidden; }
 .usage-fill { height:100%; border-radius:999px; background:var(--wolf); }
 .usage-player.leader .usage-fill { background:linear-gradient(90deg,var(--forest),var(--gold)); }
-.trends-hero { margin:.15rem 0 1rem; padding:1rem 1.1rem; border-radius:16px; background:linear-gradient(115deg,#002244 0%,#06375c 100%); color:#fff; box-shadow:0 10px 24px rgba(0,34,68,.16); }
+.trends-hero { margin:.1rem 0 .55rem; padding:.7rem .9rem; border-radius:13px; background:linear-gradient(115deg,#002244 0%,#06375c 100%); color:#fff; box-shadow:0 8px 18px rgba(0,34,68,.14); }
 .trends-hero .eyebrow { color:#9ee468; font-size:.67rem; font-weight:900; letter-spacing:.11em; text-transform:uppercase; }
-.trends-hero h2 { color:#fff !important; margin:.16rem 0 .2rem !important; padding:0 !important; font-family:'Barlow Condensed','Arial Narrow',sans-serif; font-size:1.75rem; }
-.trends-hero p { color:#dbe6ec !important; margin:0; font-size:.82rem; }
-.trend-player-card { display:grid; grid-template-columns:minmax(230px,1.15fr) repeat(3,minmax(110px,.55fr)); gap:.75rem; align-items:center; margin:.8rem 0; padding:1rem; border:1px solid #cad4d9; border-left:5px solid #69be28; border-radius:16px; background:#fff; box-shadow:0 8px 20px rgba(0,34,68,.08); }
+.trends-hero h2 { color:#fff !important; margin:.1rem 0 !important; padding:0 !important; font-family:'Barlow Condensed','Arial Narrow',sans-serif; font-size:1.45rem; }
+.trends-hero p { color:#dbe6ec !important; margin:0; font-size:.72rem; }
+.trend-player-card { display:grid; grid-template-columns:minmax(230px,1.15fr) repeat(3,minmax(110px,.55fr)); gap:.48rem; align-items:center; margin:.42rem 0; padding:.48rem .68rem; border:1px solid #cad4d9; border-left:5px solid #69be28; border-radius:13px; background:#fff; box-shadow:0 6px 15px rgba(0,34,68,.07); }
 .trend-player-identity { display:flex; align-items:center; gap:.72rem; min-width:0; }
-.trend-player-identity .player-photo { width:68px; height:68px; flex-basis:68px; }
-.trend-player-name { color:var(--navy); font-family:'Barlow Condensed','Arial Narrow',sans-serif; font-size:1.28rem; font-weight:900; line-height:1.05; }
-.trend-player-team { display:flex; align-items:center; gap:.3rem; color:var(--ink); font-size:.72rem; margin-top:.3rem; }
+.trend-player-identity .player-photo { width:44px; height:44px; flex-basis:44px; }
+.trend-player-name { color:var(--navy); font-family:'Barlow Condensed','Arial Narrow',sans-serif; font-size:1.1rem; font-weight:900; line-height:1.02; }
+.trend-player-team { display:flex; align-items:center; gap:.26rem; color:var(--ink); font-size:.66rem; margin-top:.18rem; }
 .trend-player-team img { width:1.1rem; height:1.1rem; object-fit:contain; }
-.trend-stat { min-height:68px; padding:.62rem .7rem; border-radius:11px; background:#f1f5f6; }
+.trend-stat { min-height:47px; padding:.34rem .5rem; border-radius:9px; background:#f1f5f6; }
 .trend-stat span { display:block; color:var(--muted); font-size:.61rem; font-weight:800; letter-spacing:.05em; text-transform:uppercase; }
-.trend-stat strong { display:block; color:var(--navy); font-size:1.3rem; line-height:1.15; margin-top:.2rem; }
+.trend-stat strong { display:block; color:var(--navy); font-size:1.02rem; line-height:1.04; margin-top:.06rem; }
 .trend-stat small { color:var(--muted); font-size:.61rem; }
 .trend-read { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin:.65rem 0 .9rem; padding:.78rem .9rem; border-radius:12px; background:#edf4e8; border-left:4px solid #69be28; }
 .trend-read b { color:var(--forest); font-size:.68rem; letter-spacing:.07em; text-transform:uppercase; white-space:nowrap; }
@@ -423,6 +423,22 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .trend-evidence span { color:var(--muted); font-size:.62rem; font-weight:850; text-transform:uppercase; letter-spacing:.05em; }
 .trend-evidence strong { display:block; color:var(--navy); font-size:1rem; margin:.2rem 0; }
 .trend-evidence p { color:var(--ink); font-size:.69rem; line-height:1.45; margin:0; }
+.opportunity-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.6rem; margin:.65rem 0 .75rem; }
+.opportunity-kpi { padding:.7rem .78rem; border:1px solid #d4dcdf; border-radius:12px; background:#fff; }
+.opportunity-kpi span { display:block; color:var(--forest); font-size:.61rem; font-weight:900; letter-spacing:.06em; text-transform:uppercase; }
+.opportunity-kpi strong { display:block; margin:.12rem 0; color:var(--navy); font-size:1.18rem; }
+.opportunity-kpi small { color:var(--ink); font-size:.64rem; }
+.matchup-trend-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:.58rem; margin:.72rem 0; }
+.matchup-trend-stat { min-height:92px; padding:.7rem; border:1px solid #d4dcdf; border-radius:12px; background:#fff; }
+.matchup-trend-stat span { display:block; color:var(--forest); font-size:.6rem; font-weight:900; letter-spacing:.055em; text-transform:uppercase; }
+.matchup-trend-stat strong { display:block; margin:.18rem 0; color:var(--navy); font-size:1.08rem; line-height:1.1; }
+.matchup-trend-stat small { display:block; color:var(--ink); font-size:.63rem; line-height:1.35; }
+.matchup-verdict { margin:.65rem 0; overflow:hidden; border:1px solid #bfd0d8; border-radius:14px; background:#fff; }
+.matchup-verdict-head { display:flex; align-items:center; justify-content:space-between; gap:.7rem; padding:.62rem .78rem; background:#002244; color:#fff; }
+.matchup-verdict-head b { color:#9ee468; font-size:.7rem; letter-spacing:.07em; text-transform:uppercase; }
+.matchup-verdict-head span { padding:.22rem .5rem; border-radius:999px; background:rgba(105,190,40,.17); color:#b8f188; font-size:.62rem; font-weight:900; text-transform:uppercase; }
+.matchup-verdict p { margin:0; padding:.72rem .8rem; color:var(--ink); font-size:.73rem; line-height:1.48; }
+.matchup-freshness { padding:0 .8rem .68rem; color:var(--muted); font-size:.6rem; }
 .st-key-trends_position [role="radiogroup"], .st-key-trends_view [role="radiogroup"] { display:grid !important; gap:.32rem; padding:.32rem; border:1px solid #d4dcdf; border-radius:12px; background:#e8edef; }
 .st-key-trends_position [role="radiogroup"] { grid-template-columns:repeat(4,minmax(0,1fr)); }
 .st-key-trends_view [role="radiogroup"] { grid-template-columns:repeat(4,minmax(0,1fr)); }
@@ -535,6 +551,8 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
   .trend-stat:last-child { grid-column:1/-1; }
   .trend-week-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .trend-evidence-grid { grid-template-columns:1fr; }
+  .opportunity-summary { grid-template-columns:1fr; }
+  .matchup-trend-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .st-key-trends_view [role="radiogroup"] { grid-template-columns:repeat(2,minmax(0,1fr)); }
 }
 </style>
@@ -599,6 +617,217 @@ def polish(fig: go.Figure, height: int = 390) -> go.Figure:
     fig.update_xaxes(gridcolor="#e3e8ea", zeroline=False)
     fig.update_yaxes(gridcolor="#e3e8ea", zeroline=False)
     return fig
+
+
+def production_broadcast_html(player_name: str, games: list[dict], projection: float, season_average: float, next_week: int) -> str:
+    """Compact broadcast-style production viewer with buttons and touch swiping."""
+    payload = json.dumps(games, separators=(",", ":")).replace("</", "<\\/")
+    safe_name = html.escape(player_name)
+    return f"""
+<div id="production-broadcast" class="broadcast-shell" aria-label="{safe_name} weekly PPR production viewer">
+  <style>
+    * {{ box-sizing:border-box; }}
+    html,body {{ margin:0; padding:0; overflow:hidden; background:transparent; font-family:Arial,sans-serif; color:#fff; }}
+    .broadcast-shell {{ width:100%; min-width:0; overflow:hidden; border-radius:14px; background:linear-gradient(118deg,#002244 0%,#06375c 100%); box-shadow:0 8px 20px rgba(0,34,68,.15); }}
+    .broadcast-top {{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:9px 12px 5px; color:#9ee468; font-size:10px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }}
+    .broadcast-top span:last-child {{ color:#dbe6ec; text-align:right; }}
+    .scoreboard {{ display:grid; grid-template-columns:36px minmax(0,1fr) auto minmax(0,1fr) 36px; align-items:center; gap:8px; padding:3px 8px 9px; }}
+    .nav {{ display:grid; place-items:center; width:34px; height:34px; border:1px solid rgba(255,255,255,.28); border-radius:8px; background:rgba(255,255,255,.08); color:#fff; font-size:20px; cursor:pointer; }}
+    .nav:disabled {{ opacity:.3; cursor:default; }}
+    .score {{ min-width:0; text-align:center; }}
+    .score b {{ display:block; color:#fff; font-family:'Arial Narrow',Arial,sans-serif; font-size:clamp(25px,4.2vw,38px); line-height:1; }}
+    .score span {{ display:block; margin-top:5px; color:#c9d7de; font-size:11px; line-height:1.25; }}
+    .score small {{ display:block; margin-top:3px; overflow:hidden; color:#9ee468; font-size:10px; line-height:1.2; text-overflow:ellipsis; white-space:nowrap; }}
+    .versus {{ color:#9ee468; font-size:20px; font-weight:900; }}
+    .week-strip {{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:5px; padding:7px 10px 8px; border-top:1px solid rgba(255,255,255,.17); }}
+    .week-chip {{ min-width:0; padding:5px 4px; border:0; border-radius:7px; background:rgba(255,255,255,.07); color:#c9d7de; font-size:10px; cursor:pointer; }}
+    .week-chip strong {{ display:block; margin-top:2px; color:#fff; font-size:12px; }}
+    .week-chip.active {{ background:#69be28; color:#002244; }}
+    .week-chip.active strong {{ color:#002244; }}
+    .broadcast-foot {{ display:flex; justify-content:space-between; gap:8px; padding:0 11px 7px; color:#c9d7de; font-size:10px; }}
+    @media(max-width:520px) {{
+      .broadcast-top {{ padding:8px 9px 5px; font-size:10px; }}
+      .scoreboard {{ grid-template-columns:34px minmax(0,1fr) auto minmax(0,1fr) 34px; gap:4px; padding:3px 5px 8px; }}
+      .nav {{ width:32px; height:36px; }}
+      .week-strip {{ grid-template-columns:repeat(3,minmax(0,1fr)); padding:7px 8px 8px; }}
+      .week-chip:nth-child(n+4) {{ display:none; }}
+      .broadcast-foot {{ padding:0 9px 6px; }}
+    }}
+  </style>
+  <div class="broadcast-top"><span>Production trend</span><span id="broadcast-label">Recorded game</span></div>
+  <div class="scoreboard" id="swipe-zone">
+    <button class="nav" id="previous-week" type="button" aria-label="Previous recorded week">&#8249;</button>
+    <div class="score"><b id="actual-score">—</b><span id="actual-label">Recorded PPR</span><small id="opponent-label">—</small></div>
+    <div class="versus" aria-hidden="true">→</div>
+    <div class="score"><b>{projection:.1f}</b><span>Week {next_week} projection</span><small>Season avg {season_average:.1f}</small></div>
+    <button class="nav" id="next-week" type="button" aria-label="Next recorded week">&#8250;</button>
+  </div>
+  <div class="week-strip" id="week-strip"></div>
+  <div class="broadcast-foot"><span>Tap arrows or a week</span><span>Swipe left/right on mobile</span></div>
+</div>
+<script>
+(() => {{
+  const games = {payload};
+  const root = document.getElementById('production-broadcast');
+  let current = Math.max(0, games.length - 1);
+  const actual = root.querySelector('#actual-score');
+  const actualLabel = root.querySelector('#actual-label');
+  const opponent = root.querySelector('#opponent-label');
+  const label = root.querySelector('#broadcast-label');
+  const previous = root.querySelector('#previous-week');
+  const next = root.querySelector('#next-week');
+  const strip = root.querySelector('#week-strip');
+  function visibleIndexes() {{
+    const count = window.innerWidth <= 520 ? 3 : 4;
+    let start = Math.max(0, current - count + 1);
+    if (start + count > games.length) start = Math.max(0, games.length - count);
+    return games.slice(start, start + count).map((_, offset) => start + offset);
+  }}
+  function render() {{
+    if (!games.length) return;
+    const game = games[current];
+    actual.textContent = Number(game.score).toFixed(1);
+    actualLabel.textContent = `Week ${{game.week}} PPR`;
+    opponent.textContent = game.opponent ? `vs ${{game.opponent}}` : 'Opponent unavailable';
+    label.textContent = `Week ${{game.week}} of ${{games[games.length - 1].week}}`;
+    previous.disabled = current === 0;
+    next.disabled = current === games.length - 1;
+    strip.innerHTML = '';
+    visibleIndexes().forEach(index => {{
+      const gameItem = games[index];
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = `week-chip${{index === current ? ' active' : ''}}`;
+      button.setAttribute('aria-pressed', index === current ? 'true' : 'false');
+      button.innerHTML = `W${{gameItem.week}}<strong>${{Number(gameItem.score).toFixed(1)}}</strong>`;
+      button.addEventListener('click', () => {{ current = index; render(); }});
+      strip.appendChild(button);
+    }});
+  }}
+  previous.addEventListener('click', () => {{ if (current > 0) {{ current -= 1; render(); }} }});
+  next.addEventListener('click', () => {{ if (current < games.length - 1) {{ current += 1; render(); }} }});
+  let startX = null;
+  const swipeZone = root.querySelector('#swipe-zone');
+  swipeZone.addEventListener('touchstart', event => {{ startX = event.changedTouches[0].clientX; }}, {{passive:true}});
+  swipeZone.addEventListener('touchend', event => {{
+    if (startX === null) return;
+    const distance = event.changedTouches[0].clientX - startX;
+    if (Math.abs(distance) > 38) {{
+      if (distance < 0 && current < games.length - 1) current += 1;
+      if (distance > 0 && current > 0) current -= 1;
+      render();
+    }}
+    startX = null;
+  }}, {{passive:true}});
+  window.addEventListener('resize', render);
+  render();
+}})();
+</script>
+"""
+
+
+def opportunity_tracker_html(player_name: str, games: list[dict], opportunity_label: str, season_average: float, recent_average: float, snap_share: str, role_label: str) -> str:
+    """Compact, paged opportunity chart that fits without internal scrolling."""
+    payload = json.dumps(games, separators=(",", ":")).replace("</", "<\\/")
+    safe_name = html.escape(player_name)
+    safe_metric = html.escape(opportunity_label)
+    safe_role = html.escape(role_label)
+    return f"""
+<div id="opportunity-tracker" class="opportunity-shell" aria-label="{safe_name} weekly {safe_metric.lower()} trend">
+  <style>
+    * {{ box-sizing:border-box; }}
+    html,body {{ margin:0; padding:0; overflow:hidden; background:transparent; font-family:Arial,sans-serif; color:#071b2c; }}
+    .opportunity-shell {{ width:100%; min-width:0; overflow:hidden; border:1px solid #cbd6db; border-radius:13px; background:#fff; }}
+    .opportunity-head {{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 12px; background:#002244; }}
+    .opportunity-head div {{ min-width:0; }}
+    .opportunity-head b {{ display:block; overflow:hidden; color:#fff; font-size:14px; text-overflow:ellipsis; white-space:nowrap; }}
+    .opportunity-head span {{ display:block; margin-top:2px; color:#c9d7de; font-size:10px; }}
+    .role {{ flex:0 0 auto; padding:4px 8px; border-radius:999px; background:rgba(105,190,40,.18); color:#b8f188 !important; font-size:10px !important; font-weight:800; text-transform:uppercase; }}
+    .chart-row {{ display:grid; grid-template-columns:34px minmax(0,1fr) 34px; align-items:center; gap:7px; padding:8px 9px 5px; }}
+    .nav {{ display:grid; place-items:center; width:32px; height:38px; border:1px solid #ccd6da; border-radius:8px; background:#f0f4f5; color:#002244; font-size:20px; cursor:pointer; }}
+    .nav:disabled {{ opacity:.3; cursor:default; }}
+    .plot {{ position:relative; height:112px; min-width:0; border-bottom:1px solid #aebbc1; }}
+    .average {{ position:absolute; left:0; right:0; border-top:2px dashed #68777f; z-index:1; }}
+    .average span {{ position:absolute; top:-15px; left:2px; padding:1px 4px; background:rgba(255,255,255,.93); color:#4d5b62; font-size:9px; }}
+    .bars {{ position:absolute; inset:0; display:grid; align-items:end; gap:7px; padding:10px 4px 0; z-index:2; }}
+    .bar-item {{ display:flex; min-width:0; height:100%; flex-direction:column; justify-content:flex-end; align-items:center; }}
+    .bar-value {{ margin-bottom:3px; color:#002244; font-size:10px; font-weight:800; }}
+    .bar {{ width:min(34px,72%); min-height:3px; border-radius:5px 5px 0 0; background:#4b788f; }}
+    .bar-item.latest .bar {{ background:#69be28; }}
+    .bar-week {{ margin-top:3px; color:#5f6b73; font-size:9px; }}
+    .summary {{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1px; margin-top:5px; background:#d9e1e4; border-top:1px solid #d9e1e4; }}
+    .summary div {{ min-width:0; padding:6px 8px; background:#f5f8f9; }}
+    .summary span {{ display:block; color:#285f18; font-size:9px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; }}
+    .summary b {{ display:block; margin-top:1px; overflow:hidden; color:#002244; font-size:13px; text-overflow:ellipsis; white-space:nowrap; }}
+    .hint {{ display:flex; justify-content:space-between; gap:8px; padding:5px 10px 7px; color:#65727a; font-size:9px; }}
+    @media(max-width:520px) {{
+      .opportunity-head {{ padding:8px 9px; }}
+      .chart-row {{ grid-template-columns:32px minmax(0,1fr) 32px; gap:4px; padding:7px 6px 4px; }}
+      .plot {{ height:104px; }}
+      .nav {{ width:30px; height:36px; }}
+      .summary div {{ padding:5px 6px; }}
+    }}
+  </style>
+  <div class="opportunity-head"><div><b>{safe_name} · season opportunity</b><span>{safe_metric} by week · dashed line is the season average</span></div><span class="role">{safe_role}</span></div>
+  <div class="chart-row" id="opportunity-swipe-zone">
+    <button class="nav" id="opportunity-previous" type="button" aria-label="Show earlier weeks">&#8249;</button>
+    <div class="plot"><div class="average" id="opportunity-average"><span>Avg {season_average:.1f}</span></div><div class="bars" id="opportunity-bars"></div></div>
+    <button class="nav" id="opportunity-next" type="button" aria-label="Show later weeks">&#8250;</button>
+  </div>
+  <div class="summary"><div><span>Latest</span><b>{games[-1]['value'] if games else 0:.0f} {safe_metric}</b></div><div><span>Recent 3</span><b>{recent_average:.1f} per game</b></div><div><span>Snap share</span><b>{html.escape(snap_share)}</b></div></div>
+  <div class="hint"><span>Latest week highlighted</span><span>Use arrows or swipe</span></div>
+</div>
+<script>
+(() => {{
+  const games = {payload};
+  const root = document.getElementById('opportunity-tracker');
+  const bars = root.querySelector('#opportunity-bars');
+  const average = root.querySelector('#opportunity-average');
+  const previous = root.querySelector('#opportunity-previous');
+  const next = root.querySelector('#opportunity-next');
+  let page = 0;
+  function count() {{ return window.innerWidth <= 520 ? 4 : 6; }}
+  function pages() {{ return Math.max(1, Math.ceil(games.length / count())); }}
+  function render() {{
+    page = Math.min(page, pages() - 1);
+    const size = count();
+    const start = page * size;
+    const visible = games.slice(start, start + size);
+    const maxValue = Math.max(1, Number({season_average:.3f}), ...games.map(game => Number(game.value))) * 1.16;
+    bars.style.gridTemplateColumns = `repeat(${{Math.max(1, visible.length)}},minmax(0,1fr))`;
+    average.style.bottom = `${{Math.min(94, ({season_average:.3f} / maxValue) * 100)}}%`;
+    bars.innerHTML = '';
+    visible.forEach((game, offset) => {{
+      const item = document.createElement('div');
+      const isLatest = start + offset === games.length - 1;
+      item.className = `bar-item${{isLatest ? ' latest' : ''}}`;
+      const height = Math.max(3, (Number(game.value) / maxValue) * 88);
+      item.innerHTML = `<div class="bar-value">${{Number(game.value).toFixed(0)}}</div><div class="bar" style="height:${{height}}%"></div><div class="bar-week">W${{game.week}}</div>`;
+      bars.appendChild(item);
+    }});
+    previous.disabled = page === 0;
+    next.disabled = page >= pages() - 1;
+  }}
+  previous.addEventListener('click', () => {{ if (page > 0) {{ page -= 1; render(); }} }});
+  next.addEventListener('click', () => {{ if (page < pages() - 1) {{ page += 1; render(); }} }});
+  let startX = null;
+  const zone = root.querySelector('#opportunity-swipe-zone');
+  zone.addEventListener('touchstart', event => {{ startX = event.changedTouches[0].clientX; }}, {{passive:true}});
+  zone.addEventListener('touchend', event => {{
+    if (startX === null) return;
+    const distance = event.changedTouches[0].clientX - startX;
+    if (Math.abs(distance) > 38) {{
+      if (distance < 0 && page < pages() - 1) page += 1;
+      if (distance > 0 && page > 0) page -= 1;
+      render();
+    }}
+    startX = null;
+  }}, {{passive:true}});
+  window.addEventListener('resize', render);
+  render();
+}})();
+</script>
+"""
 
 
 def player_photo_html(value: object, label: object) -> str:
@@ -748,6 +977,16 @@ header_copy = {
     "How It Works": ("How It Works", "See what shapes our projections, what stays informational, and where the data comes from."),
 }
 header_title, header_description = header_copy[page]
+
+if page == "Player Trends":
+    st.markdown(
+        """<style>
+        .header-logo { width:min(155px,100%) !important; }
+        .header-details p { margin:.08rem 0 .24rem !important; }
+        .header-details .hero-subtitle { font-size:1.05rem !important; }
+        </style>""",
+        unsafe_allow_html=True,
+    )
 
 with st.container():
     st.markdown('<h1 class="sr-only">The Sunday Decision Lab</h1>', unsafe_allow_html=True)
@@ -1818,11 +2057,6 @@ if page == "Decision Room":
             comparison_shell.markdown(DISCLAIMER_LANGUAGE)
 
 elif page == "Player Trends":
-    st.markdown(
-        '<section class="trends-hero"><div class="eyebrow">Player Trends</div><h2>See what is changing—and what is likely to last</h2>'
-        '<p>Review weekly production, repeatable workload, and the upcoming outlook without confusing one big game for a dependable trend.</p></section>',
-        unsafe_allow_html=True,
-    )
     control_left, control_right = st.columns([1, 1.5])
     selected_position = control_left.segmented_control(
         "Position", ["QB", "RB", "WR", "TE"], default="WR", key="trends_position", width="stretch"
@@ -1887,37 +2121,13 @@ elif page == "Player Trends":
         trend_sentence = f"Only one game is available for {player_name}. Treat the {latest_score:.1f}-point result as an early signal—not an established trend."
     else:
         trend_sentence = f"No completed-game sample is available for {player_name}. The outlook relies more heavily on the expected role, team environment, and position priors."
-    st.markdown(f'<div class="trend-read"><b>Quick read</b><span>{html.escape(trend_sentence)}</span></div>', unsafe_allow_html=True)
-
-    recent_weeks = list(range(max(1, NEXT_WEEK - 4), NEXT_WEEK))
-    weekly_lookup = {int(row["week"]): row for _, row in recorded.iterrows()}
-    week_cards = []
-    for week_number in recent_weeks:
-        week_row = weekly_lookup.get(week_number)
-        if week_row is None:
-            week_cards.append(f'<article class="trend-week"><div class="week">Week {week_number}</div><strong>—</strong><small>No recorded game</small></article>')
-            continue
-        points = float(week_row["fantasy_points_ppr"])
-        tone = "hot" if points >= max(season_average + 3, 20) else "cool" if points <= max(season_average - 3, 8) else ""
-        opponent = week_row.get("opponent_team") if pd.notna(week_row.get("opponent_team")) else "—"
-        week_cards.append(
-            f'<article class="trend-week {tone}"><div class="week">Week {week_number} · vs {html.escape(str(opponent))}</div>'
-            f'<strong>{points:.1f}</strong><small>PPR points</small></article>'
-        )
-    st.markdown('<div class="tool-section-head"><div><h2>Recent weekly form</h2><span>Results are context; repeatable volume matters more than a single spike.</span></div><span class="tool-section-badge">Last 4 weeks</span></div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="trend-week-grid">{"".join(week_cards)}</div>', unsafe_allow_html=True)
-
     if "trends_hub_expanded" not in st.session_state:
-        st.session_state.trends_hub_expanded = False
+        st.session_state.trends_hub_expanded = True
 
     def keep_trends_hub_open() -> None:
         st.session_state.trends_hub_expanded = True
 
     trends_shell = st.expander("Trends Analysis", expanded=st.session_state.trends_hub_expanded)
-    trends_shell.markdown(
-        '<div class="tool-section-head"><div><h2>Trends Analysis</h2><span>Inspect production, opportunity, matchup, and player context.</span></div><span class="tool-section-badge">Supporting evidence</span></div>',
-        unsafe_allow_html=True,
-    )
     trends_view = trends_shell.segmented_control(
         "Trend view", ["Production", "Opportunity", "Matchup", "Player profile"],
         default="Production", key="trends_view", label_visibility="collapsed", width="stretch",
@@ -1927,92 +2137,115 @@ elif page == "Player Trends":
         if recorded.empty:
             trends_shell.info("Weekly production is not available yet. The projection remains visible above and uncertainty is widened for the limited sample.")
         else:
-            actual_weeks = pd.to_numeric(recorded["week"], errors="coerce").dropna().astype(int).tolist()
-            actual_scores = pd.to_numeric(recorded.loc[recorded["week"].notna(), "fantasy_points_ppr"], errors="coerce").fillna(0).tolist()
+            broadcast_games = []
+            for _, game_row in recorded.dropna(subset=["week", "fantasy_points_ppr"]).iterrows():
+                opponent_value = game_row.get("opponent_team")
+                broadcast_games.append({
+                    "week": int(game_row["week"]),
+                    "score": round(float(game_row["fantasy_points_ppr"]), 1),
+                    "opponent": str(opponent_value) if opponent_value is not None and pd.notna(opponent_value) else "",
+                })
             trends_shell.markdown(
-                f'<div class="comparison-panel-head"><div><h3>{html.escape(player_name)} · performance path</h3>'
-                '<p>Completed games are connected; the dotted segment leads to our upcoming projection.</p></div>'
+                f'<div class="comparison-panel-head"><div><h3>{html.escape(player_name)} · production broadcast</h3>'
+                '<p>Review one completed week at a time against the upcoming projection.</p></div>'
                 f'<div class="panel-key">{games_played} game{"s" if games_played != 1 else ""} tracked</div></div>',
                 unsafe_allow_html=True,
             )
-            fig = go.Figure()
-            fig.add_trace(go.Scatter(
-                x=actual_weeks,
-                y=actual_scores,
-                mode="lines+markers+text",
-                name="Completed games",
-                line=dict(color="#002244", width=4, shape="spline" if len(actual_weeks) >= 3 else "linear"),
-                marker=dict(size=13, color="#69be28", line=dict(color="#ffffff", width=3)),
-                text=[f"{score:.1f}" for score in actual_scores],
-                textposition="top center",
-                textfont=dict(color="#002244", size=13),
-                fill="tozeroy",
-                fillcolor="rgba(0,34,68,.07)",
-                hovertemplate="Week %{x}<br><b>%{y:.1f} PPR</b><extra></extra>",
-            ))
-            last_week = actual_weeks[-1]
-            last_score = actual_scores[-1]
-            fig.add_trace(go.Scatter(
-                x=[last_week, NEXT_WEEK], y=[last_score, projection], mode="lines",
-                line=dict(color="#69be28", width=4, dash="dot"),
-                hoverinfo="skip", showlegend=False,
-            ))
-            fig.add_trace(go.Scatter(
-                x=[NEXT_WEEK], y=[projection], mode="markers+text", name=f"Week {NEXT_WEEK} projection",
-                marker=dict(size=18, symbol="diamond", color="#69be28", line=dict(color="#002244", width=3)),
-                text=[f"{projection:.1f} proj."], textposition="top center",
-                textfont=dict(color="#285f18", size=13),
-                hovertemplate=f"Week {NEXT_WEEK} projection<br><b>%{{y:.1f}} PPR</b><extra></extra>",
-            ))
-            fig.add_hline(y=season_average, line_dash="dash", line_color="#7f8d94", line_width=2)
-            fig.add_annotation(
-                x=min(actual_weeks), y=season_average, text=f"Season baseline {season_average:.1f}",
-                showarrow=False, xanchor="left", yanchor="bottom", font=dict(color="#5f6b73", size=11),
-                bgcolor="rgba(255,255,255,.82)",
-            )
-            tick_values = sorted(set([*actual_weeks, NEXT_WEEK]))
-            tick_labels = [f"W{week}{' · PROJ' if week == NEXT_WEEK else ''}" for week in tick_values]
-            fig = polish(fig, 330)
-            fig.update_layout(
-                margin=dict(l=18, r=18, t=28, b=18), showlegend=False,
-                hovermode="closest", paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="#f8fafb",
-            )
-            fig.update_xaxes(
-                title=None, tickmode="array", tickvals=tick_values, ticktext=tick_labels,
-                range=[min(tick_values) - .35, max(tick_values) + .35], gridcolor="rgba(0,34,68,.07)",
-                tickfont=dict(color="#5f6b73", size=11), fixedrange=True,
-            )
-            fig.update_yaxes(
-                title=None, rangemode="tozero", gridcolor="rgba(0,34,68,.09)",
-                tickfont=dict(color="#5f6b73", size=11), fixedrange=True,
-            )
-            trends_shell.plotly_chart(fig, width="stretch", config={"displayModeBar": False, "responsive": True})
+            with trends_shell:
+                components.html(
+                    production_broadcast_html(player_name, broadcast_games, projection, season_average, NEXT_WEEK),
+                    height=205,
+                    scrolling=False,
+                )
             trends_shell.markdown(f'<div class="panel-insight"><b>How to read it</b><span>{html.escape(trend_sentence)}</span></div>', unsafe_allow_html=True)
     elif trends_view == "Opportunity":
+        opportunity_history = recorded.copy()
         if selected_position == "QB":
-            opportunity_items = [("Recent workload", player.get("recent_opportunities"), "Pass attempts and designed rushing work that can repeat."), ("Season attempts", player.get("ytd_attempts"), "Total passing attempts through the current week."), ("Rushing yards", player.get("ytd_rushing_yards"), "Ground production that can raise the weekly floor.")]
+            opportunity_history["opportunity"] = pd.to_numeric(opportunity_history.get("attempts"), errors="coerce").fillna(0) + pd.to_numeric(opportunity_history.get("carries"), errors="coerce").fillna(0)
+            opportunity_label = "Attempts + carries"
         elif selected_position == "RB":
-            opportunity_items = [("Recent opportunities", player.get("recent_opportunities"), "Carries plus targets over the recent sample."), ("Season carries", player.get("ytd_carries"), "Total rushing attempts this season."), ("Season targets", player.get("ytd_targets"), "Receiving opportunities that matter in PPR scoring.")]
+            opportunity_history["opportunity"] = pd.to_numeric(opportunity_history.get("carries"), errors="coerce").fillna(0) + pd.to_numeric(opportunity_history.get("targets"), errors="coerce").fillna(0)
+            opportunity_label = "Carries + targets"
         else:
-            opportunity_items = [("Recent opportunities", player.get("recent_opportunities"), "Recent targets used as a repeatable workload signal."), ("Season targets", player.get("ytd_targets"), "Total passing-game opportunities this season."), ("Latest snap share", player.get("latest_snap_pct"), "Share of offensive snaps in the latest tracked game.")]
-        evidence = []
-        for label, value, explanation in opportunity_items:
-            if value is None or pd.isna(value):
-                display = "Unavailable"
-            elif "share" in label.casefold():
-                share_value = float(value)
-                display = f"{share_value * 100 if share_value <= 1 else share_value:.0f}%"
-            else:
-                display = f"{float(value):.1f}"
-            evidence.append(f'<article class="trend-evidence"><span>{html.escape(label)}</span><strong>{display}</strong><p>{html.escape(explanation)}</p></article>')
-        trends_shell.markdown(f'<div class="trend-evidence-grid">{"".join(evidence)}</div>', unsafe_allow_html=True)
+            opportunity_history["opportunity"] = pd.to_numeric(opportunity_history.get("targets"), errors="coerce").fillna(0)
+            opportunity_label = "Targets"
+        opportunity_history = opportunity_history.dropna(subset=["week", "opportunity"])
+        opportunity_weeks = pd.to_numeric(opportunity_history["week"], errors="coerce").astype(int).tolist()
+        opportunity_values = pd.to_numeric(opportunity_history["opportunity"], errors="coerce").fillna(0).tolist()
+        season_opportunity = float(pd.Series(opportunity_values).mean()) if opportunity_values else 0.0
+        recent_opportunity = float(pd.Series(opportunity_values[-3:]).mean()) if opportunity_values else 0.0
+        latest_opportunity = float(opportunity_values[-1]) if opportunity_values else 0.0
+        comparison_opportunity = recent_opportunity if len(opportunity_values) >= 3 else latest_opportunity
+        change = comparison_opportunity - season_opportunity
+        change_copy = "Role is expanding" if change >= 1.5 else "Role is contracting" if change <= -1.5 else "Role is steady"
+        change_phrase = "more opportunities than" if change >= 1.5 else "fewer opportunities than" if change <= -1.5 else "about as many opportunities as"
+        latest_snap = player.get("latest_snap_pct")
+        latest_snap_display = "Unavailable"
+        if latest_snap is not None and pd.notna(latest_snap):
+            latest_snap_value = float(latest_snap)
+            latest_snap_display = f"{latest_snap_value * 100 if latest_snap_value <= 1 else latest_snap_value:.0f}%"
+        if opportunity_values:
+            opportunity_games = [
+                {"week": week, "value": round(float(value), 1)}
+                for week, value in zip(opportunity_weeks, opportunity_values)
+            ]
+            with trends_shell:
+                components.html(
+                    opportunity_tracker_html(
+                        player_name, opportunity_games, opportunity_label, season_opportunity,
+                        recent_opportunity, latest_snap_display, change_copy,
+                    ),
+                    height=236,
+                    scrolling=False,
+                )
+            trends_shell.markdown(
+                f'<div class="panel-insight"><b>What changed</b><span>Over the recent sample, {html.escape(player_name)} is seeing {change_phrase} the season baseline. Opportunity describes workload—not guaranteed fantasy points.</span></div>',
+                unsafe_allow_html=True,
+            )
+        else:
+            trends_shell.info("Weekly opportunity data is not available yet. The role summary will appear after the first recorded game.")
     elif trends_view == "Matchup":
         factor = float(player.get("projection_matchup_factor", 1.0)) if pd.notna(player.get("projection_matchup_factor")) else 1.0
         adjustment = (factor - 1) * 100
-        matchup_direction = "easier" if adjustment > 1 else "tougher" if adjustment < -1 else "neutral"
+        matchup_direction = "favorable" if adjustment > 1 else "unfavorable" if adjustment < -1 else "neutral"
+        schedule_index = float(player.get("schedule_adjusted_index", 1.0)) if pd.notna(player.get("schedule_adjusted_index")) else 1.0
+        schedule_delta = (schedule_index - 1) * 100
+        position_rows = BOARD.loc[BOARD["position"].eq(selected_position)].drop_duplicates(["next_opponent"])
+        opponent_rank = None
+        if not position_rows.empty and "schedule_adjusted_index" in position_rows.columns:
+            ranked = position_rows.assign(_rank_value=pd.to_numeric(position_rows["schedule_adjusted_index"], errors="coerce")).dropna(subset=["_rank_value"]).sort_values("_rank_value", ascending=False)
+            ranked["_rank"] = range(1, len(ranked) + 1)
+            opponent_match = ranked.loc[ranked["next_opponent"].eq(player["next_opponent"])]
+            if not opponent_match.empty:
+                opponent_rank = int(opponent_match.iloc[0]["_rank"])
+        opponent_record_rows = BOARD.loc[BOARD["team"].eq(player["next_opponent"]), "team_record"].dropna()
+        opponent_record = str(opponent_record_rows.iloc[0]) if not opponent_record_rows.empty else "Unavailable"
+        pace = player.get("combined_recent_plays")
+        pace_display = f"{float(pace):.0f}" if pace is not None and pd.notna(pace) else "—"
+        live_total = player.get("betting_total_live")
+        total = live_total if live_total is not None and pd.notna(live_total) else player.get("total_line")
+        total_display = f"{float(total):.1f}" if total is not None and pd.notna(total) else "—"
+        rank_copy = f"No. {opponent_rank} of {len(position_rows)} most favorable" if opponent_rank is not None else "Rank unavailable"
+        schedule_word = "above" if schedule_delta > 1 else "below" if schedule_delta < -1 else "near"
+        pace_word = str(player.get("pace_label", "Neutral")).lower()
+        rationale = (
+            f"We rate {player['next_opponent']} as a {matchup_direction} matchup for {selected_position}s. "
+            f"After adjusting for the opponents they have already faced, their result is {abs(schedule_delta):.0f}% {schedule_word} the league baseline. "
+            f"The expected pace is {pace_word}, and the {total_display}-point game environment provides additional context. "
+            f"Only a capped {adjustment:+.1f}% matchup adjustment is applied to the projection."
+        )
+        freshness = f"Validated data snapshot: {REFRESHED}"
         trends_shell.markdown(
-            f'<div class="trend-read"><b>Schedule-adjusted matchup</b><span>{html.escape(str(player["next_opponent"]))} is rated {abs(adjustment):.0f}% {matchup_direction} than the player baseline. '
-            'This adjustment is capped and scaled to the amount of opponent evidence available.</span></div>', unsafe_allow_html=True,
+            f'<div class="matchup-verdict"><div class="matchup-verdict-head"><b>{html.escape(str(player["team"]))} vs {html.escape(str(player["next_opponent"]))}</b><span>{html.escape(matchup_direction)} matchup</span></div>'
+            f'<p>{html.escape(rationale)}</p><div class="matchup-freshness">{html.escape(freshness)}</div></div>'
+            '<div class="matchup-trend-grid">'
+            f'<article class="matchup-trend-stat"><span>Opponent record</span><strong>{html.escape(opponent_record)}</strong><small>Current season record</small></article>'
+            f'<article class="matchup-trend-stat"><span>Schedule-adjusted</span><strong>{schedule_delta:+.0f}%</strong><small>{html.escape(rank_copy)} for {html.escape(selected_position)}s</small></article>'
+            f'<article class="matchup-trend-stat"><span>Projection matchup effect</span><strong>{adjustment:+.1f}%</strong><small>Capped opponent adjustment applied to this player’s median projection</small></article>'
+            f'<article class="matchup-trend-stat"><span>Game environment</span><strong>{total_display} pts</strong><small>{pace_display} recent combined plays · {html.escape(str(player.get("pace_label", "Neutral")))} pace</small></article>'
+            '</div>'
+            '<div class="panel-insight"><b>How to use this</b><span>The schedule-adjusted rating is the opponent signal used by our projection. Pace, betting environment, weather, injuries, and reporting remain live decision context for you.</span></div>',
+            unsafe_allow_html=True,
         )
     else:
         confidence = str(player.get("confidence", "Standard sample"))
