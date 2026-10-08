@@ -164,14 +164,20 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .verdict.start .game-detail-chip { background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.17); color:#dbe3e6; }
 .verdict.start .game-detail-chip.matchup { background:rgba(105,190,40,.14); border-color:rgba(158,228,104,.28); color:#b7ed8e; }
 .verdict.start .game-detail-chip.team-total { background:rgba(75,120,143,.28); border-color:rgba(191,226,242,.24); color:#d6ecf5; }
-.relative-sit-note { color:var(--muted); font-size:.68rem; line-height:1.35; margin-top:.62rem; font-style:italic; }
+.comparison-relative-note { color:var(--muted); font-size:.7rem; line-height:1.4; margin:.45rem .1rem 0; font-style:italic; }
 .card-outlook-details { border-top:1px solid #e3e8ea; margin-top:auto; padding-top:.22rem; }
 .card-outlook-details summary { color:var(--navy); cursor:pointer; font-size:.74rem; font-weight:800; padding:.5rem .1rem .28rem; list-style-position:inside; }
 .card-outlook-details summary:hover { color:#397f18; }
 .card-outlook-full { color:var(--ink); font-size:.79rem; line-height:1.5; padding:.42rem .2rem .15rem; }
+.analysis-detail-section { border-top:1px solid #e3e8ea; margin-top:.65rem; padding-top:.6rem; }
+.analysis-detail-section strong { display:block; color:var(--navy); font-size:.68rem; letter-spacing:.055em; text-transform:uppercase; margin-bottom:.2rem; }
+.analysis-detail-meta { display:block; color:var(--muted); font-size:.68rem; margin-top:.28rem; }
 .verdict.start .card-outlook-details { border-top-color:rgba(255,255,255,.16); }
 .verdict.start .card-outlook-details summary { color:#9ee468; }
 .verdict.start .card-outlook-full { color:#e0e6e8; }
+.verdict.start .analysis-detail-section { border-top-color:rgba(255,255,255,.16); }
+.verdict.start .analysis-detail-section strong { color:#9ee468; }
+.verdict.start .analysis-detail-meta { color:#c0c8cc; }
 .reporting-sources { margin-top:.65rem; font-size:.72rem; color:var(--muted); line-height:1.35; }
 .reporting-sources a { color:#397f18; font-weight:700; text-decoration:none; }
 .verdict.start .reporting-sources { color:#c0c8cc; }
@@ -777,11 +783,6 @@ if page == "Decision Room":
                 median = float(row["median_ppr"])
                 ceiling = float(row["ceiling_ppr"])
                 median_position = max(5.0, min(95.0, 100 * (median - floor) / max(ceiling - floor, .1)))
-                relative_note = "Sit is relative to the players in this comparison—not an automatic bench recommendation." if index > 0 and len(compare) > 1 else ""
-                outlook_details = (
-                    f'<details class="card-outlook-details"><summary>Expand player outlook</summary><div class="card-outlook-full">'
-                    f'{html.escape(full_reason)}{reporting_links}</div></details>'
-                )
                 injury_note = ""
                 baseline = float(row.get("baseline_median_ppr", median))
                 adjusted = float(row.get("injury_adjusted_median_ppr", baseline))
@@ -801,9 +802,9 @@ if page == "Decision Room":
                         impact_parts.append(teammate_effect)
                     impact_label = f"Injury impact · {risk}" if risk != "No adjustment" else "Team opportunity shift"
                     injury_note = (
-                        f'<details class="injury-impact-note"><summary>{html.escape(impact_label)} · {adjusted:.1f} PPR ({delta:+.1f})</summary>'
-                        f'<div class="injury-impact-body">{html.escape(" ".join(part for part in impact_parts if part))}'
-                        f'<span class="injury-impact-range">Adjusted range: {adjusted_floor:.1f}–{adjusted_ceiling:.1f} PPR</span></div></details>'
+                        f'<div class="analysis-detail-section"><strong>{html.escape(impact_label)} · {adjusted:.1f} PPR ({delta:+.1f})</strong>'
+                        f'{html.escape(" ".join(part for part in impact_parts if part))}'
+                        f'<span class="analysis-detail-meta">Adjusted range: {adjusted_floor:.1f}–{adjusted_ceiling:.1f} PPR</span></div>'
                     )
                 market_note = ""
                 market_value = row.get("market_implied_ppr")
@@ -820,22 +821,32 @@ if page == "Decision Room":
                     updated_text = f"Last line update: {updated}." if updated is not None and pd.notna(updated) else ""
                     comparison = "above" if market_delta > .05 else "below" if market_delta < -.05 else "in line with"
                     market_note = (
-                        f'<details class="market-note"><summary>Market expectation · {market_value:.1f} PPR ({market_delta:+.1f})</summary>'
-                        f'<div class="market-note-body">The market-implied total is {comparison} our {median:.1f} PPR projection. '
+                        f'<div class="analysis-detail-section"><strong>Market expectation · {market_value:.1f} PPR ({market_delta:+.1f})</strong>'
+                        f'The market-implied total is {comparison} our {median:.1f} PPR projection. '
                         f'This is supplemental and does not change the Start/Sit ranking.'
                         f'{f"<span class=\"market-note-lines\">{html.escape(market_lines)}</span>" if market_lines else ""}'
-                        f'<span class="market-note-meta">{html.escape(book_text + updated_text)}</span></div></details>'
+                        f'<span class="analysis-detail-meta">{html.escape(book_text + updated_text)}</span></div>'
                     )
+                outlook_details = (
+                    f'<details class="card-outlook-details"><summary>Full player analysis</summary><div class="card-outlook-full">'
+                    f'{html.escape(full_reason)}{injury_note}{market_note}{reporting_links}</div></details>'
+                )
                 st.markdown(
                     f'<div class="verdict {card_class}"><div style="display:flex;align-items:center;gap:.45rem"><div class="tag">{verdict}</div><div class="confidence-label">{edge_confidence}</div></div><div class="player-heading">{photo}<div class="name">{html.escape(str(row["player"]))}</div></div>'
                     f'<div class="opponent team-line">{logo}<span>{html.escape(player_details)}</span></div>'
                     f'<div class="game-detail-chips">{game_chips}</div>'
                     f'<div class="projection-primary"><strong>{median:.1f}</strong><span>projected PPR <span class="range-help" tabindex="0" aria-label="Range definition">i<span class="range-tooltip" role="tooltip">Floor is the P10 downside outcome, projection is the median estimate, and ceiling is the P90 upside outcome. About 80% of results should fall between floor and ceiling.</span></span></span></div>'
                     f'<div class="range-track"><span class="range-marker" style="left:{median_position:.1f}%"></span></div><div class="range-labels"><span>Floor {floor:.1f}</span><span>Ceiling {ceiling:.1f}</span></div>'
-                    f'<div class="outlook-label">Player outlook</div><div class="reason">{html.escape(reason)}</div>{injury_note}{market_note}<div class="broadcast-context">{quick_context}</div>'
-                    f'{f"<div class=\"relative-sit-note\">{html.escape(relative_note)}</div>" if relative_note else ""}{outlook_details}</div>',
+                    f'<div class="outlook-label">Player outlook</div><div class="reason">{html.escape(reason)}</div><div class="broadcast-context">{quick_context}</div>'
+                    f'{outlook_details}</div>',
                     unsafe_allow_html=True,
                 )
+
+        if len(compare) > 1:
+            st.markdown(
+                '<div class="comparison-relative-note">“Sit” is relative to the other selected players—not an automatic bench recommendation in every league.</div>',
+                unsafe_allow_html=True,
+            )
 
         st.markdown('<div class="section-title">Comparison Tool</div><div class="section-copy">Compare each player’s projection, weekly form, repeatable usage, and supplemental market expectations in one place.</div>', unsafe_allow_html=True)
         comparison_view = st.segmented_control(
