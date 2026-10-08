@@ -142,6 +142,8 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .label-help { position:relative; cursor:help; }
 .label-help .label-tooltip { visibility:hidden; opacity:0; position:absolute; z-index:30; right:0; bottom:calc(100% + .48rem); width:240px; padding:.52rem .6rem; border-radius:8px; background:#071b2c; color:#f7fafb; font-size:.69rem; font-weight:550; letter-spacing:0; line-height:1.35; text-align:left; text-transform:none; box-shadow:0 8px 22px rgba(0,0,0,.22); transition:opacity .12s ease; }
 .label-help:hover .label-tooltip,.label-help:focus .label-tooltip,.label-help:focus-within .label-tooltip { visibility:visible; opacity:1; }
+.explained-term { display:inline-flex; align-items:center; gap:.18rem; border-bottom:1px dotted currentColor; line-height:1.2; }
+.explained-term::after { content:'ⓘ'; font-size:.76em; opacity:.72; }
 .range-help { position:relative; display:inline-flex; align-items:center; justify-content:center; width:1.05rem; height:1.05rem; border:1px solid currentColor; border-radius:50%; font-size:.68rem; font-weight:800; cursor:help; opacity:.82; }
 .range-tooltip { visibility:hidden; opacity:0; position:absolute; z-index:20; left:50%; bottom:calc(100% + .5rem); transform:translateX(-50%); width:250px; padding:.55rem .65rem; border-radius:8px; background:#071b2c; color:#f7fafb; font-size:.74rem; font-weight:500; line-height:1.35; text-align:left; box-shadow:0 8px 22px rgba(0,0,0,.22); transition:opacity .12s ease; }
 .range-help:hover .range-tooltip, .range-help:focus .range-tooltip, .range-help:focus-within .range-tooltip { visibility:visible; opacity:1; }
@@ -534,6 +536,15 @@ def player_photo_html(value: object, label: object) -> str:
     )
 
 
+def explained_term(label: object, explanation: object, class_name: str = "") -> str:
+    """Render the shared hover, keyboard-focus, and mobile-tap help treatment."""
+    classes = f"explained-term label-help {class_name}".strip()
+    return (
+        f'<span class="{html.escape(classes, quote=True)}" tabindex="0">{html.escape(str(label))}'
+        f'<span class="label-tooltip" role="tooltip">{html.escape(str(explanation))}</span></span>'
+    )
+
+
 with st.sidebar:
     st.markdown(
         f'<div class="sidebar-logo"><img src="data:image/png;base64,{base64.b64encode(BRAND_ICON.read_bytes()).decode("ascii")}" '
@@ -720,7 +731,11 @@ if page == "Decision Room":
                         selected_row = pool.loc[pool["player"].eq(names[slot_index])].iloc[0]
                         availability = selection_availability_summary(selected_row)
                         limited_sample = bool(selected_row.get("limited_sample_role", False)) or str(selected_row.get("confidence", "")).casefold() == "limited sample"
-                        sample_badge = '<span class="limited-sample-pill">Limited sample</span>' if limited_sample else ""
+                        sample_badge = explained_term(
+                            "Limited sample",
+                            "This player lacks enough personal workload history, so the projection leans on position, team environment, and verified depth-chart role priors with a wider range.",
+                            "limited-sample-pill",
+                        ) if limited_sample else ""
                         availability_class = "availability-alert" if any(term in availability.casefold() for term in ("questionable", "doubtful", "out", "inactive", "ir", "did not practice")) else "availability-ok"
                         photo = player_photo_html(selected_row.get("headshot_url"), selected_row["player"])
                         logo_url = team_logo_url(selected_row.get("team"))
@@ -791,12 +806,18 @@ if page == "Decision Room":
                                 photo_column.image(str(photo_url), width=52)
                             availability = selection_availability_summary(result_row)
                             result_limited_sample = bool(result_row.get("limited_sample_role", False)) or str(result_row.get("confidence", "")).casefold() == "limited sample"
-                            sample_copy = " · Limited-sample role/position estimate" if result_limited_sample else ""
+                            sample_copy = (
+                                " · " + explained_term(
+                                    "Limited sample",
+                                    "Personal history is insufficient, so position, team environment, and verified depth-chart role priors carry more weight.",
+                                )
+                                if result_limited_sample else ""
+                            )
                             availability_prefix = "⚠ " if any(term in availability.casefold() for term in ("questionable", "doubtful", "out", "inactive", "ir", "did not practice")) else ""
                             details_column.markdown(
                                 f'<b>{html.escape(str(result_row["player"]))}</b><br>'
                                 f'{html.escape(str(result_row["team"]))} · {html.escape(str(result_row["position"]))} · {html.escape(str(result_row["venue"]))} vs {html.escape(str(result_row["next_opponent"]))}<br>'
-                                f'<span class="selected-player-meta">{availability_prefix}{html.escape(availability)}{html.escape(sample_copy)}</span>', unsafe_allow_html=True,
+                                f'<span class="selected-player-meta">{availability_prefix}{html.escape(availability)}{sample_copy}</span>', unsafe_allow_html=True,
                             )
                             logo_url = team_logo_url(result_row.get("team"))
                             if logo_url:
@@ -859,7 +880,7 @@ if page == "Decision Room":
                     card_edge_label = "Clear gap"
                     card_edge_help = f"This player trails the leader by {player_gap:.1f} PPR."
                 confidence_badge = (
-                    f'<div class="confidence-label label-help" tabindex="0">{html.escape(card_edge_label)}'
+                    f'<div class="confidence-label label-help explained-term" tabindex="0">{html.escape(card_edge_label)}'
                     f'<span class="label-tooltip" role="tooltip">{html.escape(card_edge_help)} This label measures separation within this comparison—not certainty that any projection will hit.</span></div>'
                 )
                 if index == 0 and len(compare) > 1:
@@ -936,10 +957,18 @@ if page == "Decision Room":
                 )
                 practice = format_injury_context(row, "Connected" in INJURY_SOURCE_STATUS)
                 practice_alert = any(term in practice.casefold() for term in ("questionable", "doubtful", "out", "inactive", "ir", "did not practice"))
+                matchup_help = explained_term(
+                    matchup_summary(row),
+                    "Opponent difficulty after accounting for the strength of offenses already faced. The percentage is relative to this player’s baseline, and the projection adjustment is capped.",
+                )
+                role_help = explained_term(
+                    role_summary(row),
+                    "Recent snap, route, carry, or target participation compared with the player’s earlier role. ‘Role expanding’ means recent involvement has increased; this card context is informational.",
+                )
                 quick_context = "".join([
                     f'<div class="broadcast-context-item{" context-alert" if practice_alert else ""}"><span>● Practice</span>{html.escape(practice)}</div>',
-                    f'<div class="broadcast-context-item"><span>◆ Matchup</span>{html.escape(matchup_summary(row))}</div>',
-                    f'<div class="broadcast-context-item"><span>↗ Role</span>{html.escape(role_summary(row))}</div>',
+                    f'<div class="broadcast-context-item"><span>◆ Matchup</span>{matchup_help}</div>',
+                    f'<div class="broadcast-context-item"><span>↗ Role</span>{role_help}</div>',
                     f'<div class="broadcast-context-item"><span>☁ Weather</span>{html.escape(weather_summary(row))}</div>',
                 ])
                 injury_alert = actionable_injury_alert(row)
@@ -953,8 +982,12 @@ if page == "Decision Room":
                         opportunity_ceiling = float(row.get("injury_adjusted_ceiling_ppr", row["ceiling_ppr"]))
                         opportunity_delta = opportunity_adjusted - opportunity_baseline
                         opportunity_copy = str(row.get("injury_teammate_effect", "") or injury_alert["headline"])
+                        opportunity_label = explained_term(
+                            "Opportunity impact",
+                            "An optional scenario showing how a teammate’s reduced availability could redistribute workload. It does not change the baseline Start/Sit ranking.",
+                        )
                         opportunity_details = (
-                            '<details class="opportunity-details"><summary>Opportunity impact</summary><div class="opportunity-details-body">'
+                            f'<details class="opportunity-details"><summary>{opportunity_label}</summary><div class="opportunity-details-body">'
                             f'<strong>Adjusted outlook · {opportunity_adjusted:.1f} PPR ({opportunity_delta:+.1f})</strong>'
                             f'{html.escape(opportunity_copy)}'
                             f'<span class="opportunity-details-range">Adjusted range: {opportunity_floor:.1f}–{opportunity_ceiling:.1f} PPR</span>'
@@ -969,7 +1002,11 @@ if page == "Decision Room":
                         f'{opportunity_details}</div>'
                     )
                 sample_note = ""
-                sample_badge = '<span class="limited-sample-pill">Limited sample</span>' if limited_sample else ""
+                sample_badge = explained_term(
+                    "Limited sample",
+                    "Personal workload evidence is not sufficient yet. We use position, team environment, and verified role priors and intentionally widen the outcome range.",
+                    "limited-sample-pill",
+                ) if limited_sample else ""
                 if limited_sample:
                     sample_reason = str(row.get("limited_sample_reason", "No usable current-season workload or production history"))
                     prior_weights = str(row.get("limited_sample_prior_weights", "Position, team environment, and verified depth-chart role priors"))
@@ -1021,8 +1058,12 @@ if page == "Decision Room":
                     updated = row.get("market_updated_at")
                     updated_text = f"Last line update: {updated}." if updated is not None and pd.notna(updated) else ""
                     comparison = "above" if market_delta > .05 else "below" if market_delta < -.05 else "in line with"
+                    market_term = explained_term(
+                        "Market-implied PPR",
+                        "A supplemental fantasy-point expectation translated from consensus sportsbook player-prop lines. It never changes our calibrated projection or Start/Sit ranking.",
+                    )
                     market_note = (
-                        f'<div class="analysis-detail-section"><strong>Market expectation · {market_value:.1f} PPR ({market_delta:+.1f})</strong>'
+                        f'<div class="analysis-detail-section"><strong>{market_term} · {market_value:.1f} PPR ({market_delta:+.1f})</strong>'
                         f'The market-implied total is {comparison} our {median:.1f} PPR projection. '
                         f'This is supplemental and does not change the Start/Sit ranking.'
                         f'{f"<span class=\"market-note-lines\">{html.escape(market_lines)}</span>" if market_lines else ""}'
@@ -1217,6 +1258,10 @@ if page == "Decision Room":
         if comparison_view == "Market":
             market_rows = []
             available_count = 0
+            market_ppr_label = explained_term(
+                "Market-implied PPR",
+                "A supplemental fantasy-point expectation translated from consensus sportsbook player-prop lines. It never changes our projection or Start/Sit ranking.",
+            )
             for _, market_row in compare.iterrows():
                 market_value = market_row.get("market_implied_ppr")
                 photo = player_photo_html(market_row.get("headshot_url"), market_row["player"])
@@ -1228,7 +1273,7 @@ if page == "Decision Room":
                 )
                 if market_value is None or pd.isna(market_value):
                     market_rows.append(
-                        f'<article class="usage-player">{identity}<div class="usage-track-wrap"><div class="usage-rank">No validated player props are currently available. Missing or suspended lines are never treated as zero.</div></div><div class="usage-score"><strong>—</strong><span>Market PPR</span></div></article>'
+                        f'<article class="usage-player">{identity}<div class="usage-track-wrap"><div class="usage-rank">No validated player props are currently available. Missing or suspended lines are never treated as zero.</div></div><div class="usage-score"><strong>—</strong><span>{market_ppr_label}</span></div></article>'
                     )
                     continue
                 available_count += 1
@@ -1237,7 +1282,7 @@ if page == "Decision Room":
                 delta = market_value - model_value
                 lines = market_summary(market_row)
                 market_rows.append(
-                    f'<article class="usage-player">{identity}<div class="usage-track-wrap"><div class="usage-rank">{html.escape(lines)}</div><div class="usage-rank">Our projection: {model_value:.1f} · difference: {delta:+.1f} PPR</div></div><div class="usage-score"><strong>{market_value:.1f}</strong><span>Market PPR</span></div></article>'
+                    f'<article class="usage-player">{identity}<div class="usage-track-wrap"><div class="usage-rank">{html.escape(lines)}</div><div class="usage-rank">Our projection: {model_value:.1f} · difference: {delta:+.1f} PPR</div></div><div class="usage-score"><strong>{market_value:.1f}</strong><span>{market_ppr_label}</span></div></article>'
                 )
             market_insight = (
                 f"Validated player-prop expectations are available for {available_count} of {len(compare)} selected players."
@@ -1420,7 +1465,18 @@ if page == "Decision Room":
                             display_value = f"{float(stat_value):.0f}"
                         else:
                             display_value = str(stat_value)
-                        stat_rows_html += f'<div class="advanced-stat-row"><span>{html.escape(stat_labels[stat_column])}</span><b>{html.escape(display_value)}</b></div>'
+                        stat_label = html.escape(stat_labels[stat_column])
+                        if stat_column == "schedule_adjusted_index":
+                            stat_label = explained_term(
+                                stat_labels[stat_column],
+                                "Opponent difficulty adjusted for the quality of offenses previously faced. Values are interpreted relative to the player’s baseline and the projection adjustment is capped.",
+                            )
+                        elif stat_column == "confidence":
+                            stat_label = explained_term(
+                                stat_labels[stat_column],
+                                "How much reliable personal workload history supports the estimate. Limited Sample means role/team/position priors carry more weight and the range is wider.",
+                            )
+                        stat_rows_html += f'<div class="advanced-stat-row"><span>{stat_label}</span><b>{html.escape(display_value)}</b></div>'
                     advanced_cards.append(
                         f'<article class="advanced-stat-card"><div class="advanced-stat-head"><strong>{html.escape(str(stat_row["player"]))}</strong>'
                         f'<span>{html.escape(str(stat_row["team"]))} · {html.escape(str(stat_row["position"]))} · vs {html.escape(str(stat_row["next_opponent"]))}</span></div>{stat_rows_html}</article>'
