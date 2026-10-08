@@ -139,6 +139,9 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .verdict.start .range-labels { color:#c0c8cc; }
 .confidence-label { margin-left:auto; border-radius:999px; padding:.27rem .48rem; font-size:.61rem; font-weight:850; letter-spacing:.04em; text-transform:uppercase; background:#edf4e8; color:#397f18; }
 .verdict.start .confidence-label { background:rgba(105,190,40,.16); color:#9ee468; }
+.label-help { position:relative; cursor:help; }
+.label-help .label-tooltip { visibility:hidden; opacity:0; position:absolute; z-index:30; right:0; bottom:calc(100% + .48rem); width:240px; padding:.52rem .6rem; border-radius:8px; background:#071b2c; color:#f7fafb; font-size:.69rem; font-weight:550; letter-spacing:0; line-height:1.35; text-align:left; text-transform:none; box-shadow:0 8px 22px rgba(0,0,0,.22); transition:opacity .12s ease; }
+.label-help:hover .label-tooltip,.label-help:focus .label-tooltip,.label-help:focus-within .label-tooltip { visibility:visible; opacity:1; }
 .range-help { position:relative; display:inline-flex; align-items:center; justify-content:center; width:1.05rem; height:1.05rem; border:1px solid currentColor; border-radius:50%; font-size:.68rem; font-weight:800; cursor:help; opacity:.82; }
 .range-tooltip { visibility:hidden; opacity:0; position:absolute; z-index:20; left:50%; bottom:calc(100% + .5rem); transform:translateX(-50%); width:250px; padding:.55rem .65rem; border-radius:8px; background:#071b2c; color:#f7fafb; font-size:.74rem; font-weight:500; line-height:1.35; text-align:left; box-shadow:0 8px 22px rgba(0,0,0,.22); transition:opacity .12s ease; }
 .range-help:hover .range-tooltip, .range-help:focus .range-tooltip, .range-help:focus-within .range-tooltip { visibility:visible; opacity:1; }
@@ -396,6 +399,7 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
   .verdict { min-height:0; padding:1rem; }
   .verdict .name { font-size:1.45rem; }
   .range-tooltip { left:0; transform:none; width:min(250px, 75vw); }
+  .label-help .label-tooltip { position:fixed; left:1rem; right:1rem; bottom:1rem; width:auto; }
   [data-testid="stSidebar"] { width:min(18.75rem, 88vw) !important; }
   .header-logo { width:min(170px,62vw); margin-bottom:.35rem; }
   .freshness-bar { flex-wrap:wrap; align-items:flex-start; }
@@ -820,18 +824,47 @@ if page == "Decision Room":
         st.markdown(verdict_intro, unsafe_allow_html=True)
         outlook_columns = st.columns(len(compare))
         top_gap = 0.0 if len(compare) == 1 else float(compare.iloc[0]["median_ppr"] - compare.iloc[1]["median_ppr"])
-        edge_confidence = "Solo view" if len(compare) == 1 else "Lean" if top_gap < 2.5 else "Moderate edge" if top_gap < 5 else "Strong edge"
         for index, (column, (_, row)) in enumerate(zip(outlook_columns, compare.iterrows())):
             with column:
                 limited_sample = bool(row.get("limited_sample_role", False)) or str(row.get("confidence", "")).casefold() == "limited sample"
+                player_gap = 0.0 if index == 0 else float(leader["median_ppr"] - row["median_ppr"])
+                if len(compare) == 1:
+                    card_edge_label = "Solo view"
+                    card_edge_help = "Add another player before treating this as a Start/Sit comparison."
+                elif index == 0 and top_gap < 2.5:
+                    card_edge_label = "Lean edge"
+                    card_edge_help = f"The preferred player leads the next-best option by {top_gap:.1f} PPR—less than our 2.5-point close-call threshold."
+                elif index == 0 and top_gap < 5:
+                    card_edge_label = "Moderate edge"
+                    card_edge_help = f"The preferred player leads the next-best option by {top_gap:.1f} PPR. This is meaningful, but not decisive."
+                elif index == 0:
+                    card_edge_label = "Strong edge"
+                    card_edge_help = f"The preferred player leads the next-best option by {top_gap:.1f} PPR."
+                elif player_gap < 2.5:
+                    card_edge_label = "Close call"
+                    card_edge_help = f"This player is only {player_gap:.1f} PPR behind the leader, inside our 2.5-point close-call threshold."
+                elif player_gap < 5:
+                    card_edge_label = "Moderate gap"
+                    card_edge_help = f"This player trails the leader by {player_gap:.1f} PPR."
+                else:
+                    card_edge_label = "Clear gap"
+                    card_edge_help = f"This player trails the leader by {player_gap:.1f} PPR."
+                confidence_badge = (
+                    f'<div class="confidence-label label-help" tabindex="0">{html.escape(card_edge_label)}'
+                    f'<span class="label-tooltip" role="tooltip">{html.escape(card_edge_help)} This label measures separation within this comparison—not certainty that any projection will hit.</span></div>'
+                )
                 if index == 0 and len(compare) > 1:
                     verdict = "START · PREFERRED"
+                    verdict_help = "Highest median projection among the players you selected."
                 elif len(compare) > 1 and float(leader["median_ppr"] - row["median_ppr"]) < 2.5:
                     verdict = "SIT · CLOSE ALTERNATIVE"
+                    verdict_help = "Lower only relative to the selected leader and still inside the 2.5-point close-call range—not an automatic bench recommendation."
                 elif len(compare) > 1:
                     verdict = "SIT · RISKIER OPTION"
+                    verdict_help = "Lower median projection than the selected leader, with a larger comparison gap—not necessarily a bench in every league."
                 else:
                     verdict = "ONLY PLAYER"
+                    verdict_help = "Add another player to create a true comparison."
                 card_class = "start" if index == 0 else "sit"
                 full_reason = build_player_outlook(row, index, len(compare), projection_spread, row.get("reporting_summary"))
                 if len(compare) == 1:
@@ -991,7 +1024,7 @@ if page == "Decision Room":
                     f'{html.escape(full_reason)}{injury_note}{market_note}{reporting_links}</div></details>'
                 )
                 st.markdown(
-                    f'<div class="verdict {card_class}"><div style="display:flex;align-items:center;gap:.45rem;flex-wrap:wrap"><div class="tag">{verdict}</div>{sample_badge}<div class="confidence-label">{edge_confidence}</div></div><div class="player-heading">{photo}<div class="name">{html.escape(str(row["player"]))}</div></div>'
+                    f'<div class="verdict {card_class}"><div style="display:flex;align-items:center;gap:.45rem;flex-wrap:wrap"><div class="tag label-help" tabindex="0">{verdict}<span class="label-tooltip" role="tooltip">{html.escape(verdict_help)}</span></div>{sample_badge}{confidence_badge}</div><div class="player-heading">{photo}<div class="name">{html.escape(str(row["player"]))}</div></div>'
                     f'<div class="opponent team-line">{logo}<span>{html.escape(player_details)}</span></div>'
                     f'<div class="game-detail-chips">{game_chips}</div>{game_guide}'
                     f'<div class="projection-primary"><strong>{median:.1f}</strong><span>projected PPR <span class="range-help" tabindex="0" aria-label="Range definition">i<span class="range-tooltip" role="tooltip">Floor is the P10 downside outcome, projection is the median estimate, and ceiling is the P90 upside outcome. About 80% of results should fall between floor and ceiling.</span></span></span></div>'
