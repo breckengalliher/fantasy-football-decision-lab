@@ -14,6 +14,8 @@ import pandas as pd
 import plotly.graph_objects as go
 import requests
 import streamlit as st
+from PIL import Image, ImageDraw, ImageFont
+from urllib.parse import urlencode
 
 try:
     from dashboard.providers.sportsdataio import context_freshness, format_injury_context
@@ -49,6 +51,7 @@ SNAPSHOT_BASE_URL = os.getenv(
     "SNAPSHOT_BASE_URL",
     "https://raw.githubusercontent.com/breckengalliher/fantasy-football-decision-lab/main/data/processed",
 ).rstrip("/")
+APP_BASE_URL = os.getenv("APP_BASE_URL", "https://thesundaydecisionlab.com/").rstrip("/") + "/"
 
 st.set_page_config(page_title="The Sunday Decision Lab", page_icon=str(BRAND_ICON), layout="wide", initial_sidebar_state="auto")
 st.markdown(
@@ -199,6 +202,10 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .game-detail-chip.team-total { background:#eaf2f6; border-color:#ccdde5; color:var(--navy); }
 .game-details-legend { display:flex; justify-content:flex-end; margin:.15rem 0 .48rem; color:var(--muted); font-size:.67rem; }
 .game-details-legend .explained-term { color:var(--navy); font-weight:800; }
+.share-panel { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.72rem .82rem; margin:.45rem 0 .65rem; border:1px solid #ccdde5; border-radius:12px; background:#eef4f7; }
+.share-panel strong { display:block; color:var(--navy); font-size:.78rem; }
+.share-panel span { display:block; color:var(--muted); font-size:.68rem; margin-top:.12rem; }
+.share-link-label { color:var(--navy); font-size:.68rem; font-weight:800; margin:.35rem 0 .18rem; }
 .limited-sample-pill { display:inline-flex; align-items:center; border-radius:999px; background:#fff1d6; border:1px solid #e3bd70; color:#744b00; padding:.22rem .46rem; font-size:.58rem; font-weight:850; letter-spacing:.045em; text-transform:uppercase; }
 .limited-sample-note { margin:.62rem 0 .12rem; padding:.62rem .68rem; border:1px solid #e3bd70; border-left:4px solid #d28a18; border-radius:9px; background:#fff8e8; color:var(--ink); font-size:.68rem; line-height:1.4; }
 .limited-sample-note strong { display:block; color:#744b00; font-size:.62rem; letter-spacing:.06em; text-transform:uppercase; margin-bottom:.18rem; }
@@ -543,6 +550,48 @@ def explained_term(label: object, explanation: object, class_name: str = "") -> 
     )
 
 
+def build_share_image(compare: pd.DataFrame, week: int, scoring_label: str, refreshed: str) -> bytes:
+    """Create a compact, social-friendly PNG for the current comparison."""
+    ordered = compare.sort_values("median_ppr", ascending=False).head(3).reset_index(drop=True)
+    leader = ordered.iloc[0]
+    margin = leader_margin(ordered["median_ppr"].tolist())
+    recommendation = (
+        f'{leader["player"]} is our preferred start'
+        if len(ordered) == 1
+        else f'{leader["player"]} leads by {margin:.1f} PPR'
+    )
+    image = Image.new("RGB", (1200, 630), "#002244")
+    draw = ImageDraw.Draw(image)
+    font_path = "C:/Windows/Fonts/arial.ttf"
+    bold_path = "C:/Windows/Fonts/arialbd.ttf"
+    def font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
+        try:
+            return ImageFont.truetype(bold_path if bold else font_path, size)
+        except OSError:
+            return ImageFont.load_default()
+    draw.text((65, 48), "THE SUNDAY DECISION LAB", fill="#9ee468", font=font(32, True))
+    draw.text((65, 96), f"WEEK {week} COMPARISON · {scoring_label.upper()}", fill="#cbd5da", font=font(16, True))
+    draw.text((65, 145), recommendation, fill="white", font=font(31, True))
+    if len(ordered) > 1:
+        draw.text((65, 188), "CLOSE CALL" if margin < 2.5 else "CLEARER PROJECTED EDGE", fill="#9ee468", font=font(15, True))
+    row_top = 250
+    for index, row in ordered.iterrows():
+        y = row_top + index * 98
+        draw.rounded_rectangle((60, y, 1140, y + 78), radius=12, fill="#f7fafb" if index else "#123a59")
+        primary = "white" if index == 0 else "#071b2c"
+        secondary = "#cbd5da" if index == 0 else "#4a5962"
+        accent = "#9ee468" if index == 0 else "#397f18"
+        draw.text((88, y + 12), str(row["player"]), fill=primary, font=font(22, True))
+        draw.text((88, y + 45), f'{row.get("team", "")} · {row.get("position", "")} vs {row.get("next_opponent", "")}', fill=secondary, font=font(14))
+        draw.text((835, y + 15), f'{float(row["median_ppr"]):.1f} PPR', fill=accent, font=font(25, True))
+        draw.text((1000, y + 48), f'{float(row["floor_ppr"]):.1f}–{float(row["ceiling_ppr"]):.1f}', fill=secondary, font=font(14, True))
+    draw.text((65, 555), "Floor–ceiling ranges are calibrated P10–P90 outcomes.", fill="#cbd5da", font=font(14))
+    draw.text((65, 585), f"Data snapshot: {refreshed}", fill="#a5acaf", font=font(13))
+    output = BytesIO()
+    image.save(output, format="PNG", optimize=True)
+    return output.getvalue()
+
+
 with st.sidebar:
     st.markdown(
         f'<div class="sidebar-logo"><img src="data:image/png;base64,{base64.b64encode(BRAND_ICON.read_bytes()).decode("ascii")}" '
@@ -567,6 +616,8 @@ header_checked = datetime.fromisoformat(str(header_metadata.get("refreshed_at", 
 header_age_minutes = max(0, int((datetime.now(timezone.utc) - header_checked.astimezone(timezone.utc)).total_seconds() // 60))
 context_checked = datetime.fromisoformat(str(header_metadata.get("context_refreshed_at", header_metadata.get("sportsdataio_refreshed_at", header_checked.isoformat()))).replace("Z", "+00:00"))
 context_age_minutes = max(0, int((datetime.now(timezone.utc) - context_checked.astimezone(timezone.utc)).total_seconds() // 60))
+shared_qb_points = str(st.query_params.get("qb", "4"))
+shared_qb_index = 1 if shared_qb_points == "6" else 0
 
 with st.container():
     st.markdown('<h1 class="sr-only">The Sunday Decision Lab</h1>', unsafe_allow_html=True)
@@ -585,7 +636,7 @@ with st.container():
             '<div class="settings-kicker">QB passing touchdown scoring</div></div>',
             unsafe_allow_html=True,
         )
-        qb_td_label = st.radio("QB passing touchdown scoring", ["4 points", "6 points"], horizontal=True, label_visibility="collapsed")
+        qb_td_label = st.radio("QB passing touchdown scoring", ["4 points", "6 points"], index=shared_qb_index, horizontal=True, label_visibility="collapsed")
         QB_PASS_TD_POINTS = int(qb_td_label.split()[0])
 
 try:
@@ -687,7 +738,10 @@ if page == "Decision Room":
     provider_issue = provider_issue_message(PROVIDER_STATUS)
     if provider_issue:
         st.warning(provider_issue)
-    position = st.segmented_control("Position", ["QB", "RB", "WR", "TE", "FLEX"], default="WR", key="position_selector")
+    shared_position = str(st.query_params.get("position", "WR")).upper()
+    if shared_position not in {"QB", "RB", "WR", "TE", "FLEX"}:
+        shared_position = "WR"
+    position = st.segmented_control("Position", ["QB", "RB", "WR", "TE", "FLEX"], default=shared_position, key="position_selector")
     selected_positions = eligible_positions(position)
     pool = BOARD.loc[
         BOARD["position"].isin(selected_positions)
@@ -710,7 +764,9 @@ if page == "Decision Room":
         replacement_key = f"smart_search_replace_{position}"
         valid_names = set(pool["player"].tolist())
         if selection_key not in st.session_state:
-            st.session_state[selection_key] = pool.sort_values("projected_ppr", ascending=False).head(3)["player"].tolist()
+            shared_players = [value.strip() for value in str(st.query_params.get("players", "")).split("|") if value.strip()]
+            valid_shared_players = [name for name in shared_players if name in valid_names][:3]
+            st.session_state[selection_key] = valid_shared_players or pool.sort_values("projected_ppr", ascending=False).head(3)["player"].tolist()
         st.session_state[selection_key] = [name for name in st.session_state[selection_key] if name in valid_names][:3]
         if replacement_key not in st.session_state:
             st.session_state[replacement_key] = None
@@ -783,6 +839,33 @@ if page == "Decision Room":
                 '</div>',
                 unsafe_allow_html=True,
             )
+            st.markdown(
+                '<div class="share-panel"><div><strong>Share this comparison</strong>'
+                '<span>Create a restorable link or download a ready-to-share image.</span></div></div>',
+                unsafe_allow_html=True,
+            )
+            with st.expander("Share comparison link or image"):
+                share_query = urlencode(
+                    {
+                        "position": position,
+                        "players": "|".join(names),
+                        "qb": QB_PASS_TD_POINTS,
+                    }
+                )
+                share_url = f"{APP_BASE_URL}?{share_query}"
+                st.markdown("**Shareable link**")
+                st.code(share_url, language=None)
+                st.caption("Opening this link restores the selected players, position, and quarterback touchdown scoring format.")
+                share_scoring = f"Full PPR · {QB_PASS_TD_POINTS}-point passing TDs"
+                share_image = build_share_image(preview_compare, NEXT_WEEK, share_scoring, REFRESHED)
+                st.download_button(
+                    "Download comparison image",
+                    data=share_image,
+                    file_name=f"sunday-decision-lab-week-{NEXT_WEEK}-comparison.png",
+                    mime="image/png",
+                    width="stretch",
+                )
+                st.caption(f"Includes the recommendation, projection ranges, and data snapshot timestamp ({REFRESHED}).")
 
         panel_label = "Replace a player" if replacement_index is not None else "Find a player"
         with st.expander(panel_label, expanded=len(names) < 3 or replacement_index is not None):
