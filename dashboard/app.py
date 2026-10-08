@@ -136,7 +136,7 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .verdict.start .outlook-label { color:#9ee468; }
 .verdict .reason { color:var(--ink); font-size:.84rem; line-height:1.42; margin-top:.28rem; min-height:2.4em; }
 .verdict.start .reason { color:#e0e6e8; }
-.decision-edge { display:flex; align-items:center; justify-content:space-between; gap:1rem; background:var(--navy); color:#f7fafb; border:1px solid rgba(105,190,40,.65); border-radius:13px; padding:.82rem 1rem; margin:1rem 0 .75rem; box-shadow:0 7px 18px rgba(0,34,68,.10); }
+.decision-edge { display:flex; align-items:center; justify-content:space-between; gap:1rem; background:var(--navy); color:#f7fafb; border:1px solid rgba(105,190,40,.65); border-radius:13px; padding:.68rem .9rem; margin:.55rem 0 .5rem; box-shadow:0 7px 18px rgba(0,34,68,.10); }
 .decision-edge-main { min-width:0; }
 .decision-edge-label { color:#9ee468; font-size:.62rem; font-weight:850; letter-spacing:.1em; text-transform:uppercase; margin-bottom:.16rem; }
 .decision-edge-title { font-size:1rem; font-weight:780; line-height:1.25; overflow-wrap:anywhere; }
@@ -178,15 +178,17 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .finder-copy { color:var(--muted); font-size:.78rem; margin:-.25rem 0 .55rem; }
 .selected-player-name { font-size:.94rem; font-weight:750; line-height:1.2; margin-top:.2rem; }
 .selected-player-meta { color:var(--muted); font-size:.72rem; line-height:1.3; }
-.compare-slot-kicker { color:#397f18; font-size:.61rem; font-weight:850; letter-spacing:.09em; text-transform:uppercase; margin-bottom:.55rem; }
-.compare-slot-top { display:flex; align-items:center; gap:.68rem; min-height:62px; }
+.comparison-count { margin:.22rem 0 .35rem; font-size:.75rem; }
+.compare-slot-kicker { color:#397f18; font-size:.57rem; font-weight:850; letter-spacing:.09em; text-transform:uppercase; margin-bottom:.3rem; }
+.compare-slot-top { display:flex; align-items:center; gap:.55rem; min-height:48px; }
+.compare-slot-top .player-photo { width:46px; height:46px; flex-basis:46px; }
 .compare-slot-main { min-width:0; }
-.compare-slot-name { color:var(--ink); font-size:1rem; font-weight:800; line-height:1.16; overflow-wrap:anywhere; }
-.compare-slot-team { display:flex; align-items:center; gap:.34rem; color:var(--muted); font-size:.72rem; margin-top:.22rem; }
-.compare-slot-team img { width:1.15rem; height:1.15rem; object-fit:contain; }
-.compare-slot-game { color:var(--muted); font-size:.72rem; line-height:1.3; margin-top:.52rem; }
-.compare-slot-footer { display:flex; align-items:center; justify-content:space-between; gap:.5rem; border-top:1px solid #e4e8ea; margin-top:.65rem; padding-top:.58rem; }
-.compare-slot-projection { color:var(--navy); font-size:.82rem; font-weight:800; }
+.compare-slot-name { color:var(--ink); font-size:.91rem; font-weight:800; line-height:1.12; overflow-wrap:anywhere; }
+.compare-slot-team { display:flex; align-items:center; gap:.3rem; color:var(--muted); font-size:.66rem; margin-top:.14rem; }
+.compare-slot-team img { width:1rem; height:1rem; object-fit:contain; }
+.compare-slot-game { color:var(--muted); font-size:.65rem; line-height:1.25; margin-top:.34rem; }
+.compare-slot-footer { display:flex; align-items:center; justify-content:space-between; gap:.4rem; border-top:1px solid #e4e8ea; margin-top:.4rem; padding-top:.38rem; }
+.compare-slot-projection { color:var(--navy); font-size:.75rem; font-weight:800; }
 .availability-pill { border-radius:999px; padding:.24rem .46rem; font-size:.63rem; font-weight:800; line-height:1.15; text-align:right; }
 .availability-ok { background:#edf4e8; color:#397f18; }
 .availability-alert { background:#fff0e6; color:#a33a13; border:1px solid #efb79f; }
@@ -541,8 +543,6 @@ if page == "Decision Room":
         '</div>',
         unsafe_allow_html=True,
     )
-    if context_is_stale:
-        st.markdown('<div class="freshness-alert"><b>Check before kickoff:</b> Some weather or depth-chart context may be stale.</div>', unsafe_allow_html=True)
     provider_issue = provider_issue_message(PROVIDER_STATUS)
     if provider_issue:
         st.warning(provider_issue)
@@ -579,7 +579,7 @@ if page == "Decision Room":
             replacement_index = None
             st.session_state[replacement_key] = None
 
-        st.markdown(f'<div class="section-copy">Comparison lineup · {len(names)} of 3 slots filled</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="comparison-count">Comparison lineup · {len(names)} of 3 slots filled</div>', unsafe_allow_html=True)
         slot_columns = st.columns(3)
         for slot_index, slot_column in enumerate(slot_columns):
             with slot_column:
@@ -614,6 +614,28 @@ if page == "Decision Room":
                             f'<div class="open-slot"><div class="open-slot-number">Player {slot_index + 1}</div><div class="open-slot-title">Open comparison slot</div><div class="open-slot-copy">Choose a player from the search panel below.</div></div>',
                             unsafe_allow_html=True,
                         )
+
+        preview_compare = pool.loc[pool["player"].isin(names)].sort_values("projected_ppr", ascending=False)
+        if not preview_compare.empty:
+            preview_leader = preview_compare.iloc[0]
+            preview_spread = leader_margin(preview_compare["median_ppr"].tolist())
+            if len(preview_compare) == 1:
+                preview_title = f'{preview_leader["player"]} · {float(preview_leader["median_ppr"]):.1f} projected PPR'
+                preview_copy = "Add another player to see the projected advantage."
+                preview_badge = "1 player selected"
+            else:
+                preview_title = f'{preview_leader["player"]} leads by {preview_spread:.1f} PPR'
+                preview_copy = "The projections are close—treat this as a lean." if preview_spread < 2.5 else "We see a meaningful projected advantage."
+                preview_badge = "Close call" if preview_spread < 2.5 else "Clearer edge"
+            st.markdown(
+                '<div class="decision-edge">'
+                f'<div class="decision-edge-main"><div class="decision-edge-label">Week {NEXT_WEEK} decision edge</div>'
+                f'<div class="decision-edge-title">{html.escape(preview_title)}</div>'
+                f'<div class="decision-edge-copy">{html.escape(preview_copy)}</div></div>'
+                f'<div class="decision-edge-badge">{html.escape(preview_badge)}</div>'
+                '</div>',
+                unsafe_allow_html=True,
+            )
 
         panel_label = "Replace a player" if replacement_index is not None else "Find a player"
         with st.expander(panel_label, expanded=len(names) < 3 or replacement_index is not None):
@@ -669,16 +691,6 @@ if page == "Decision Room":
             edge_title = f'{leader["player"]} leads by {projection_spread:.1f} PPR'
             edge_copy = "The projections are close—treat this as a lean and use the live context below to make your final call." if projection_spread < 2.5 else "We see a meaningful projected advantage, with live context below for your final decision."
             edge_badge = "Close call" if projection_spread < 2.5 else "Clearer edge"
-        st.markdown(
-            '<div class="decision-edge">'
-            f'<div class="decision-edge-main"><div class="decision-edge-label">Week {NEXT_WEEK} decision edge</div>'
-            f'<div class="decision-edge-title">{html.escape(edge_title)}</div>'
-            f'<div class="decision-edge-copy">{html.escape(edge_copy)}</div></div>'
-            f'<div class="decision-edge-badge">{html.escape(edge_badge)}</div>'
-            '</div>',
-            unsafe_allow_html=True,
-        )
-
         st.markdown('<div class="section-title">Start / Sit verdict</div><div class="section-copy">We build this ranking from current production, repeatable workload, a fading prior-season anchor, touchdown regression, and a sample-scaled matchup adjustment. When an active injury matters, an optional injury-adjusted outlook appears directly on that player’s card.</div>', unsafe_allow_html=True)
         outlook_columns = st.columns(len(compare))
         top_gap = 0.0 if len(compare) == 1 else float(compare.iloc[0]["median_ppr"] - compare.iloc[1]["median_ppr"])
