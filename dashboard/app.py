@@ -19,6 +19,7 @@ try:
     from dashboard.providers.sportsdataio import context_freshness, format_injury_context
     from dashboard.outlooks import build_player_outlook, leader_margin
     from dashboard.injury_impact import apply_injury_scenario
+    from dashboard.admin_refresh import authenticate as authenticate_refresh_admin, configured as admin_refresh_configured, refresh_status, trigger_refresh
     from dashboard.states import empty_player_pool_message, provider_issue_message
     from dashboard.methodology_copy import DISCLAIMER_LANGUAGE, METHODOLOGY_LANGUAGE, SOURCE_ATTRIBUTION
     from dashboard.presentation import filter_player_search, matchup_summary, role_summary, selection_availability_summary, team_logo_url, weather_summary
@@ -26,6 +27,7 @@ except ModuleNotFoundError:
     from providers.sportsdataio import context_freshness, format_injury_context
     from outlooks import build_player_outlook, leader_margin
     from injury_impact import apply_injury_scenario
+    from admin_refresh import authenticate as authenticate_refresh_admin, configured as admin_refresh_configured, refresh_status, trigger_refresh
     from states import empty_player_pool_message, provider_issue_message
     from methodology_copy import DISCLAIMER_LANGUAGE, METHODOLOGY_LANGUAGE, SOURCE_ATTRIBUTION
     from presentation import filter_player_search, matchup_summary, role_summary, selection_availability_summary, team_logo_url, weather_summary
@@ -454,9 +456,57 @@ with st.sidebar:
         st.caption(f"Weekly stats · {REFRESHED}")
         st.caption(f"SportsDataIO · {PROVIDER_STATUS}")
         st.caption(INJURY_SOURCE_STATUS)
-        if st.button("Check for latest update", width="stretch"):
+        if st.button("Check for latest updates", width="stretch"):
             st.cache_data.clear()
             st.rerun()
+        st.caption("Loads the newest validated cloud snapshot. It does not call providers or consume API quota.")
+        st.divider()
+        if st.toggle("Admin refresh center", key="show_admin_refresh"):
+            if not admin_refresh_configured():
+                st.info("Admin controls will activate after the protected refresh password and GitHub workflow token are added to the production environment.")
+            elif not st.session_state.get("refresh_admin_authenticated", False):
+                admin_password = st.text_input("Admin password", type="password", key="refresh_admin_password")
+                if st.button("Unlock refresh controls", width="stretch"):
+                    if authenticate_refresh_admin(admin_password):
+                        st.session_state["refresh_admin_authenticated"] = True
+                        st.session_state["refresh_admin_password"] = ""
+                        st.rerun()
+                    else:
+                        st.error("That admin password is not valid.")
+            else:
+                st.success("Admin controls unlocked")
+                st.caption("Refreshes run in the cloud, reject overlapping jobs, and enforce a 15-minute cooldown.")
+                refresh_actions = [
+                    ("injuries", "Refresh injuries / practice"),
+                    ("context", "Refresh live context"),
+                    ("projections", "Recalculate projections"),
+                    ("all", "Run everything"),
+                ]
+                for refresh_kind, refresh_label in refresh_actions:
+                    if st.button(refresh_label, key=f"admin_refresh_{refresh_kind}", width="stretch"):
+                        try:
+                            st.session_state["admin_refresh_message"] = trigger_refresh(refresh_kind)
+                            st.session_state["admin_refresh_kind"] = refresh_kind
+                        except Exception:
+                            st.session_state["admin_refresh_message"] = {"state": "error", "message": "The cloud refresh could not be requested. Confirm the protected GitHub token and try again."}
+                message = st.session_state.get("admin_refresh_message")
+                if message:
+                    if message["state"] in {"requested", "already_running"}:
+                        st.info(message["message"])
+                    elif message["state"] == "cooldown":
+                        st.warning(message["message"])
+                    elif message["state"] == "error":
+                        st.error(message["message"])
+                if st.button("Check refresh progress", width="stretch"):
+                    kind = st.session_state.get("admin_refresh_kind", "all")
+                    try:
+                        st.session_state["admin_refresh_message"] = refresh_status(kind)
+                        st.rerun()
+                    except Exception:
+                        st.error("Refresh status is temporarily unavailable.")
+                if st.button("Lock admin controls", width="stretch"):
+                    st.session_state["refresh_admin_authenticated"] = False
+                    st.rerun()
 
 if page == "Decision Room":
     context_age_minutes, context_is_stale = context_freshness(PROVIDER_REFRESHED_AT)

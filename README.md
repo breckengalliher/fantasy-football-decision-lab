@@ -122,6 +122,24 @@ The web container contains only the public application and committed snapshot
 files. It does not receive `SPORTSDATAIO_API_KEY` and cannot call production
 providers. GitHub Actions remains the only production snapshot writer.
 
+### Protected manual refresh center
+
+Visitors can use **Check for latest updates** to reload the newest validated
+cloud snapshot without calling a provider. The optional admin refresh center
+securely dispatches the existing GitHub Actions workflows from the hosted app.
+Configure these protected Render environment variables:
+
+- `ADMIN_REFRESH_PASSWORD`: the private password used to unlock admin controls.
+- `GITHUB_ACTIONS_TOKEN`: a fine-grained GitHub token with Actions write access
+  to `breckengalliher/fantasy-football-decision-lab`.
+- `REFRESH_GITHUB_REPOSITORY`: optional repository override; defaults to the
+  production repository above.
+
+The password and token stay server-side. The controls reject overlapping jobs
+and enforce a 15-minute cooldown. **Run everything** dispatches the full weekly
+workflow, rebuilding both scoring formats, refreshing context, running the test
+suite and publishing only validated snapshots.
+
 ## Project structure
 
 ```text
