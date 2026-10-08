@@ -345,7 +345,7 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .tool-section-badge { flex:0 0 auto; border-radius:999px; background:#edf4e8; color:#397f18 !important; padding:.34rem .58rem; font-size:.58rem !important; font-weight:850; letter-spacing:.055em; text-transform:uppercase; white-space:nowrap; }
 .st-key-comparison_view [data-testid="stButtonGroup"], .st-key-deep_dive_view [data-testid="stButtonGroup"] { margin-bottom:.55rem; }
 .st-key-comparison_view [role="radiogroup"], .st-key-deep_dive_view [role="radiogroup"] { display:grid !important; width:100%; gap:.32rem; padding:.34rem; border:1px solid #d4dcdf; border-radius:12px; background:#e8edef; box-sizing:border-box; }
-.st-key-comparison_view [role="radiogroup"] { grid-template-columns:repeat(4,minmax(0,1fr)); }
+.st-key-comparison_view [role="radiogroup"] { grid-template-columns:repeat(6,minmax(0,1fr)); }
 .st-key-deep_dive_view [role="radiogroup"] { grid-template-columns:repeat(3,minmax(0,1fr)); }
 .st-key-comparison_view button, .st-key-deep_dive_view button { width:100%; min-height:2.75rem; border:0 !important; border-radius:9px !important; background:transparent !important; color:var(--muted) !important; font-size:.72rem !important; font-weight:750 !important; box-shadow:none !important; }
 .st-key-position_selector button, [class*="st-key-remove_"] button, [class*="st-key-replace_"] button { min-height:44px !important; }
@@ -428,6 +428,7 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
   .card-outlook-full, .analysis-detail-section, .reporting-sources, .context-value, .detail-card-row b { overflow-wrap:anywhere; word-break:normal; }
   .reporting-sources a { display:inline-block; min-height:32px; padding:.3rem .1rem; }
   .stPlotlyChart, [data-testid="stPlotlyChart"] { width:100% !important; max-width:100% !important; overflow:hidden; }
+  .st-key-comparison_view [role="radiogroup"] { grid-template-columns:repeat(3,minmax(0,1fr)); }
   .freshness-reminder { font-size:.68rem; }
   .game-detail-chip { min-height:1.65rem; font-size:.68rem; }
   .driver-grid { grid-template-columns:1fr; }
@@ -1048,16 +1049,13 @@ if page == "Decision Room":
                 unsafe_allow_html=True,
             )
 
-        comparison_shell = st.expander(
-            "Comparison & advanced evidence" if no_clutter_mode else "Explore supporting comparison evidence",
-            expanded=False,
-        )
+        comparison_shell = st.expander("Analysis Hub", expanded=False)
         comparison_shell.markdown(
-            '<div class="tool-section-head"><div><h2>Comparison Tool</h2><span>Compare projection range, weekly form, repeatable usage, and supplemental market expectations.</span></div><span class="tool-section-badge">4 comparison views</span></div>',
+            '<div class="tool-section-head"><div><h2>Analysis Hub</h2><span>Projection, form, usage, matchup, market context, and methodology in one place.</span></div><span class="tool-section-badge">6 analysis views</span></div>',
             unsafe_allow_html=True,
         )
         comparison_view = comparison_shell.segmented_control(
-            "Comparison view", ["Projection", "Weekly form", "Usage", "Market"],
+            "Analysis view", ["Projection", "Weekly form", "Usage", "Matchup", "Market", "Methodology"],
             default="Projection", width="stretch", label_visibility="collapsed",
             key="comparison_view",
         )
@@ -1252,17 +1250,15 @@ if page == "Decision Room":
                 unsafe_allow_html=True,
             )
 
-        deep_dive_shell = st.expander("Open advanced evidence", expanded=False)
-        deep_dive_shell.markdown(
-            '<div class="tool-section-head"><div><h2>Deep Dive</h2><span>Explore the player profile, projection logic, and live matchup context behind the decision.</span></div><span class="tool-section-badge">3 analysis lenses</span></div>',
-            unsafe_allow_html=True,
-        )
-        deep_dive_view = deep_dive_shell.segmented_control(
-            "Deep dive view", ["Player details", "Projection drivers", "Matchup context"],
-            default="Player details", width="stretch", label_visibility="collapsed",
-            key="deep_dive_view",
-        )
-        if deep_dive_view == "Player details":
+        deep_dive_shell = comparison_shell
+        if comparison_view == "Projection":
+            show_projection_drivers = comparison_shell.toggle("Show projection drivers and detailed statistics", key=f"show_projection_drivers_{position}")
+            deep_dive_view = "Projection drivers" if show_projection_drivers else None
+        elif comparison_view == "Matchup":
+            deep_dive_view = "Matchup context"
+        else:
+            deep_dive_view = None
+        if deep_dive_view == "Matchup context":
             detail_cards = []
             for _, detail_row in compare.iterrows():
                 detail_total = detail_row.get("betting_total_live")
@@ -1479,6 +1475,18 @@ if page == "Decision Room":
                 )
             deep_dive_shell.markdown(f'<div class="context-grid">{"".join(context_cards)}</div>', unsafe_allow_html=True)
 
+        if comparison_view == "Methodology":
+            comparison_shell.markdown(
+                '<div class="comparison-panel-head"><div><h3>Sources & Methodology</h3>'
+                '<p>How the projection is built, what remains informational, and the limits users should understand.</p></div>'
+                '<div class="panel-key">Transparent by design</div></div>',
+                unsafe_allow_html=True,
+            )
+            comparison_shell.markdown(SOURCE_ATTRIBUTION)
+            comparison_shell.markdown(METHODOLOGY_LANGUAGE)
+            comparison_shell.info("The scoring-role touchdown exception remains disabled until reliable red-zone or goal-line opportunity data is integrated and validated.")
+            comparison_shell.markdown(DISCLAIMER_LANGUAGE)
+
 elif page == "Player Trends":
     selected_position = st.segmented_control("Position", ["QB", "RB", "WR", "TE"], default="WR")
     pool = BOARD.loc[
@@ -1529,8 +1537,9 @@ else:
     st.subheader("Responsible use")
     st.markdown(DISCLAIMER_LANGUAGE)
 
-st.divider()
-with st.expander("Sources, methodology & important disclaimer"):
-    st.markdown(SOURCE_ATTRIBUTION)
-    st.markdown(METHODOLOGY_LANGUAGE)
-    st.markdown(DISCLAIMER_LANGUAGE)
+if page != "Decision Room":
+    st.divider()
+    with st.expander("Sources, methodology & important disclaimer"):
+        st.markdown(SOURCE_ATTRIBUTION)
+        st.markdown(METHODOLOGY_LANGUAGE)
+        st.markdown(DISCLAIMER_LANGUAGE)
