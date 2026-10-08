@@ -57,6 +57,8 @@ st.markdown(
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Bungee&family=Inter:wght@400;600;700;800&display=swap');
 :root { --ink:#071b2c; --muted:#1b2730; --navy:#002244; --cream:#f3f6f7; --card:#ffffff; --line:#d7dde0; --teal:#397f18; --gold:#69be28; --action:#69be28; --wolf:#a5acaf; }
 .stApp { background:var(--cream); color:var(--ink); font-family:'Inter',Arial,sans-serif; }
+.sr-only { position:absolute !important; width:1px !important; height:1px !important; padding:0 !important; margin:-1px !important; overflow:hidden !important; clip:rect(0,0,0,0) !important; white-space:nowrap !important; border:0 !important; }
+button:focus-visible, summary:focus-visible, a:focus-visible, [tabindex="0"]:focus-visible { outline:3px solid #4b9fea !important; outline-offset:3px !important; border-radius:6px; }
 [data-testid="stMain"] [data-testid="stCaptionContainer"] { color:var(--ink); }
 [data-testid="stSidebar"] { background:var(--navy); }
 [data-testid="stSidebar"] * { color:#f7fafb; }
@@ -285,14 +287,15 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 [data-testid="stSegmentedControl"] { background:#e6ecef; border:1px solid #d4dde1; border-radius:12px; padding:.24rem; }
 [data-testid="stSegmentedControl"] button { min-height:2.35rem; border-radius:9px !important; font-family:'Inter',Arial,sans-serif; font-weight:750; }
 .tool-section-head { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin:1.15rem 0 .55rem; padding:.78rem .9rem; border:1px solid var(--line); border-left:4px solid var(--gold); border-radius:12px; background:var(--card); }
-.tool-section-head strong { display:block; color:var(--navy); font-family:'Barlow Condensed','Arial Narrow',sans-serif; font-size:1.28rem; letter-spacing:.01em; }
+.tool-section-head h2 { display:block; color:var(--navy); font-family:'Barlow Condensed','Arial Narrow',sans-serif; font-size:1.28rem; letter-spacing:.01em; line-height:1.1; margin:0; padding:0 !important; }
 .tool-section-head span { display:block; color:var(--muted); font-size:.7rem; margin-top:.08rem; line-height:1.35; }
 .tool-section-badge { flex:0 0 auto; border-radius:999px; background:#edf4e8; color:#397f18 !important; padding:.34rem .58rem; font-size:.58rem !important; font-weight:850; letter-spacing:.055em; text-transform:uppercase; white-space:nowrap; }
 .st-key-comparison_view [data-testid="stButtonGroup"], .st-key-deep_dive_view [data-testid="stButtonGroup"] { margin-bottom:.55rem; }
 .st-key-comparison_view [role="radiogroup"], .st-key-deep_dive_view [role="radiogroup"] { display:grid !important; width:100%; gap:.32rem; padding:.34rem; border:1px solid #d4dcdf; border-radius:12px; background:#e8edef; box-sizing:border-box; }
 .st-key-comparison_view [role="radiogroup"] { grid-template-columns:repeat(4,minmax(0,1fr)); }
 .st-key-deep_dive_view [role="radiogroup"] { grid-template-columns:repeat(3,minmax(0,1fr)); }
-.st-key-comparison_view button, .st-key-deep_dive_view button { width:100%; min-height:2.45rem; border:0 !important; border-radius:9px !important; background:transparent !important; color:var(--muted) !important; font-size:.72rem !important; font-weight:750 !important; box-shadow:none !important; }
+.st-key-comparison_view button, .st-key-deep_dive_view button { width:100%; min-height:2.75rem; border:0 !important; border-radius:9px !important; background:transparent !important; color:var(--muted) !important; font-size:.72rem !important; font-weight:750 !important; box-shadow:none !important; }
+.st-key-position_selector button, [class*="st-key-remove_"] button, [class*="st-key-replace_"] button { min-height:44px !important; }
 .st-key-comparison_view button:hover, .st-key-deep_dive_view button:hover { background:#f8fafb !important; color:var(--navy) !important; }
 .st-key-comparison_view button[aria-checked="true"], .st-key-deep_dive_view button[aria-checked="true"] { background:var(--navy) !important; color:#fff !important; box-shadow:0 4px 10px rgba(0,34,68,.18) !important; }
 .st-key-comparison_view button[aria-checked="true"] p, .st-key-deep_dive_view button[aria-checked="true"] p { color:#fff !important; }
@@ -356,6 +359,10 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
   .freshness-bar { flex-wrap:wrap; align-items:flex-start; }
   .freshness-item { flex:1 1 calc(50% - .35rem); border-right:0; padding:.18rem .3rem; white-space:normal; }
   .freshness-reminder { flex:1 0 100%; margin:0; padding:.18rem .3rem 0; text-align:left; border-top:1px solid #e3e8ea; }
+  .freshness-item { font-size:.72rem; }
+  .freshness-item b { font-size:.62rem; }
+  .freshness-reminder { font-size:.68rem; }
+  .game-detail-chip { min-height:1.65rem; font-size:.68rem; }
   .driver-grid { grid-template-columns:1fr; }
   .advanced-stat-grid { grid-template-columns:1fr; }
   .usage-player { grid-template-columns:minmax(170px,.9fr) minmax(160px,1.1fr) 78px; }
@@ -473,6 +480,7 @@ context_checked = datetime.fromisoformat(str(header_metadata.get("context_refres
 context_age_minutes = max(0, int((datetime.now(timezone.utc) - context_checked.astimezone(timezone.utc)).total_seconds() // 60))
 
 with st.container():
+    st.markdown('<h1 class="sr-only">The Sunday Decision Lab</h1>', unsafe_allow_html=True)
     header_left, header_right = st.columns([.48, 1.52], gap="medium", vertical_alignment="center")
     with header_left:
         brand_logo_uri = "data:image/png;base64," + base64.b64encode(BRAND_LOGO.read_bytes()).decode("ascii")
@@ -579,7 +587,7 @@ if page == "Decision Room":
     provider_issue = provider_issue_message(PROVIDER_STATUS)
     if provider_issue:
         st.warning(provider_issue)
-    position = st.segmented_control("Position", ["QB", "RB", "WR", "TE", "FLEX"], default="WR")
+    position = st.segmented_control("Position", ["QB", "RB", "WR", "TE", "FLEX"], default="WR", key="position_selector")
     selected_positions = eligible_positions(position)
     pool = BOARD.loc[
         BOARD["position"].isin(selected_positions)
@@ -863,7 +871,7 @@ if page == "Decision Room":
             )
 
         st.markdown(
-            '<div class="tool-section-head"><div><strong>Comparison Tool</strong><span>Compare projection range, weekly form, repeatable usage, and supplemental market expectations.</span></div><span class="tool-section-badge">4 comparison views</span></div>',
+            '<div class="tool-section-head"><div><h2>Comparison Tool</h2><span>Compare projection range, weekly form, repeatable usage, and supplemental market expectations.</span></div><span class="tool-section-badge">4 comparison views</span></div>',
             unsafe_allow_html=True,
         )
         comparison_view = st.segmented_control(
@@ -1063,7 +1071,7 @@ if page == "Decision Room":
             )
 
         st.markdown(
-            '<div class="tool-section-head"><div><strong>Deep Dive</strong><span>Explore the player profile, projection logic, and live matchup context behind the decision.</span></div><span class="tool-section-badge">3 analysis lenses</span></div>',
+            '<div class="tool-section-head"><div><h2>Deep Dive</h2><span>Explore the player profile, projection logic, and live matchup context behind the decision.</span></div><span class="tool-section-badge">3 analysis lenses</span></div>',
             unsafe_allow_html=True,
         )
         deep_dive_view = st.segmented_control(
