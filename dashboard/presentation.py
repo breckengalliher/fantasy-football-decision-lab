@@ -7,6 +7,15 @@ from typing import Any
 import pandas as pd
 
 
+POSITION_GROUPS = {"FLEX": ("RB", "WR", "TE")}
+
+
+def eligible_positions(selection: str) -> tuple[str, ...]:
+    """Return the real roster positions allowed by a comparison tab."""
+    normalized = str(selection).upper()
+    return POSITION_GROUPS.get(normalized, (normalized,))
+
+
 NFL_TEAMS = {
     "ARI", "ATL", "BAL", "BUF", "CAR", "CHI", "CIN", "CLE", "DAL", "DEN", "DET", "GB",
     "HOU", "IND", "JAX", "KC", "LV", "LAC", "LA", "LAR", "MIA", "MIN", "NE", "NO", "NYG",

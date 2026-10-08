@@ -1,6 +1,11 @@
 import pandas as pd
 
-from dashboard.presentation import comparison_summary, filter_player_search, matchup_summary, role_summary, selection_availability_summary, team_logo_url, weather_summary
+from dashboard.presentation import comparison_summary, eligible_positions, filter_player_search, matchup_summary, role_summary, selection_availability_summary, team_logo_url, weather_summary
+
+
+def test_flex_includes_only_rb_wr_and_te():
+    assert eligible_positions("FLEX") == ("RB", "WR", "TE")
+    assert eligible_positions("QB") == ("QB",)
 
 
 def test_context_summaries_are_brief_and_explanatory():

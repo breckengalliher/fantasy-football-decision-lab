@@ -23,7 +23,7 @@ try:
     from dashboard.admin_refresh import authenticate as authenticate_refresh_admin, configured as admin_refresh_configured, refresh_status, trigger_refresh
     from dashboard.states import empty_player_pool_message, provider_issue_message
     from dashboard.methodology_copy import DISCLAIMER_LANGUAGE, METHODOLOGY_LANGUAGE, SOURCE_ATTRIBUTION
-    from dashboard.presentation import filter_player_search, matchup_summary, role_summary, selection_availability_summary, team_logo_url, weather_summary
+    from dashboard.presentation import eligible_positions, filter_player_search, matchup_summary, role_summary, selection_availability_summary, team_logo_url, weather_summary
 except ModuleNotFoundError:
     from providers.sportsdataio import context_freshness, format_injury_context
     from outlooks import build_player_outlook, leader_margin
@@ -32,7 +32,7 @@ except ModuleNotFoundError:
     from admin_refresh import authenticate as authenticate_refresh_admin, configured as admin_refresh_configured, refresh_status, trigger_refresh
     from states import empty_player_pool_message, provider_issue_message
     from methodology_copy import DISCLAIMER_LANGUAGE, METHODOLOGY_LANGUAGE, SOURCE_ATTRIBUTION
-    from presentation import filter_player_search, matchup_summary, role_summary, selection_availability_summary, team_logo_url, weather_summary
+    from presentation import eligible_positions, filter_player_search, matchup_summary, role_summary, selection_availability_summary, team_logo_url, weather_summary
 
 try:
     from dashboard.data import current_nfl_season
@@ -543,9 +543,10 @@ if page == "Decision Room":
     provider_issue = provider_issue_message(PROVIDER_STATUS)
     if provider_issue:
         st.warning(provider_issue)
-    position = st.segmented_control("Position", ["QB", "RB", "WR", "TE"], default="WR")
+    position = st.segmented_control("Position", ["QB", "RB", "WR", "TE", "FLEX"], default="WR")
+    selected_positions = eligible_positions(position)
     pool = BOARD.loc[
-        BOARD["position"].eq(position)
+        BOARD["position"].isin(selected_positions)
         & BOARD["next_opponent"].notna()
         & BOARD["is_roster_relevant"]
         & BOARD["verified_qb_starter"]
@@ -904,20 +905,23 @@ if page == "Decision Room":
                 "RB": {"Carries": "ytd_carries", "Targets": "ytd_targets", "Rushing yards": "ytd_rushing_yards", "Receiving yards": "ytd_receiving_yards", "Total touchdowns": "ytd_total_tds"},
                 "WR": {"Targets": "ytd_targets", "Receptions": "ytd_receptions", "Receiving yards": "ytd_receiving_yards", "Receiving TDs": "ytd_receiving_tds", "Snap share": "latest_snap_pct"},
                 "TE": {"Targets": "ytd_targets", "Receptions": "ytd_receptions", "Receiving yards": "ytd_receiving_yards", "Receiving TDs": "ytd_receiving_tds", "Snap share": "latest_snap_pct"},
+                "FLEX": {"Opportunities": "recent_opportunities", "Carries": "ytd_carries", "Targets": "ytd_targets", "Receptions": "ytd_receptions", "Rushing yards": "ytd_rushing_yards", "Receiving yards": "ytd_receiving_yards", "Total touchdowns": "ytd_total_tds"},
             }[position]
             usage_left, usage_right = st.columns([1, 1])
             usage_label = usage_left.selectbox("Statistic", list(metric_options), key=f"comparison_usage_metric_{position}")
             usage_mode = usage_right.radio("Display", ["Per game", "Season total"], horizontal=True, key=f"comparison_usage_mode_{position}")
             usage_column = metric_options[usage_label]
             usage_values = compare.copy()
-            if usage_column == "ytd_total_tds":
+            if usage_column == "recent_opportunities":
+                usage_mode = "Per game"
+            elif usage_column == "ytd_total_tds":
                 usage_values[usage_column] = usage_values.get("ytd_rushing_tds", 0) + usage_values.get("ytd_receiving_tds", 0)
             values = pd.to_numeric(usage_values.get(usage_column, pd.Series(0, index=usage_values.index)), errors="coerce").fillna(0)
             is_share = usage_column == "latest_snap_pct"
             if is_share:
                 values = values * 100
                 usage_mode = "Latest week"
-            elif usage_mode == "Per game":
+            elif usage_mode == "Per game" and usage_column != "recent_opportunities":
                 values = values / pd.to_numeric(usage_values["games_played"], errors="coerce").clip(lower=1)
             usage_values["display_value"] = values
             ranked_usage = usage_values.sort_values(["display_value", "player"], ascending=[False, True]).reset_index(drop=True)
@@ -1040,6 +1044,7 @@ if page == "Decision Room":
             "RB": ["ytd_carries", "ytd_targets", "ytd_rushing_yards", "ytd_receiving_yards", "ytd_rushing_tds", "ytd_receiving_tds"],
             "WR": ["ytd_targets", "ytd_receptions", "ytd_receiving_yards", "ytd_receiving_tds"],
             "TE": ["ytd_targets", "ytd_receptions", "ytd_receiving_yards", "ytd_receiving_tds"],
+            "FLEX": ["ytd_carries", "ytd_targets", "ytd_receptions", "ytd_rushing_yards", "ytd_receiving_yards", "ytd_rushing_tds", "ytd_receiving_tds"],
         }
         if deep_dive_view == "Projection drivers":
             st.markdown(
@@ -1059,13 +1064,14 @@ if page == "Decision Room":
 
             driver_cards = []
             for _, driver_row in compare.iterrows():
+                player_position = str(driver_row.get("position", position))
                 limited_sample = bool(driver_row.get("limited_sample_role", False))
                 games_played = int(driver_row.get("games_played", 0) or 0)
                 games = max(1, games_played)
-                if position == "QB":
+                if player_position == "QB":
                     ytd_opportunities = float(driver_row.get("ytd_attempts", 0) or 0) + float(driver_row.get("ytd_carries", 0) or 0)
                     workload_copy = "Recent passing and rushing workload supports the current signal."
-                elif position == "RB":
+                elif player_position == "RB":
                     ytd_opportunities = float(driver_row.get("ytd_carries", 0) or 0) + float(driver_row.get("ytd_targets", 0) or 0)
                     workload_copy = "Recent carry and target volume supports the projection."
                 else:
@@ -1097,7 +1103,7 @@ if page == "Decision Room":
                 matchup_delta = matchup_base * (float(matchup_factor) - 1)
 
                 if limited_sample:
-                    depth_position = str(driver_row.get("depth_position_live", position))
+                    depth_position = str(driver_row.get("depth_position_live", player_position))
                     depth_order = driver_row.get("depth_order_live")
                     role_label = f'{depth_position}{int(depth_order)}' if depth_order is not None and pd.notna(depth_order) else "Verified role"
                     rows = [
