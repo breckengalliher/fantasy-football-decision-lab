@@ -911,11 +911,9 @@ if page == "Decision Room":
                 )
                 st.caption(f"Includes the recommendation, projection ranges, and data snapshot timestamp ({REFRESHED}).")
 
-        panel_label = "Replace a player" if replacement_index is not None else "Find a player"
-        with st.expander(panel_label, expanded=len(names) < 3 or replacement_index is not None):
-            if len(names) >= 3 and replacement_index is None:
-                st.markdown('<div class="replacement-note">All three comparison slots are filled. Select <b>Replace</b> on any player card to swap someone in without removing them first.</div>', unsafe_allow_html=True)
-            else:
+        if len(names) < 3 or replacement_index is not None:
+            panel_label = "Replace a player" if replacement_index is not None else "Find a player"
+            with st.expander(panel_label, expanded=True):
                 if replacement_index is not None:
                     st.markdown(f'<div class="replacement-note">Replacing <b>{html.escape(names[replacement_index])}</b>. Choose a player below to complete the swap.</div>', unsafe_allow_html=True)
                 query = st.text_input("Search eligible players", key=f"smart_search_query_{position}", placeholder="Search by player or team…")
