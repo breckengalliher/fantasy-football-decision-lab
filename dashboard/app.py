@@ -382,6 +382,18 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
   .freshness-item { font-size:.72rem; }
   .freshness-item b { font-size:.62rem; }
   .focused-status { align-items:flex-start; flex-direction:column; gap:.25rem; }
+  [data-testid="stExpander"] summary { min-height:44px; align-items:center; }
+  [data-testid="stButton"] button, [data-testid="stDownloadButton"] button, [data-testid="stLinkButton"] a { min-height:44px; }
+  [data-testid="stHorizontalBlock"] { min-width:0 !important; }
+  [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] { min-width:0 !important; }
+  [data-testid="stHorizontalBlock"]:has(.compare-slot-kicker),
+  [data-testid="stHorizontalBlock"]:has(.verdict) { flex-wrap:wrap !important; }
+  [data-testid="stHorizontalBlock"]:has(.compare-slot-kicker) > [data-testid="stColumn"],
+  [data-testid="stHorizontalBlock"]:has(.verdict) > [data-testid="stColumn"] { flex:1 1 100% !important; width:100% !important; }
+  .verdict, .projection-board, .form-board, .usage-board, .detail-card-grid, .context-grid { width:100%; max-width:100%; min-width:0; }
+  .card-outlook-full, .analysis-detail-section, .reporting-sources, .context-value, .detail-card-row b { overflow-wrap:anywhere; word-break:normal; }
+  .reporting-sources a { display:inline-block; min-height:32px; padding:.3rem .1rem; }
+  .stPlotlyChart, [data-testid="stPlotlyChart"] { width:100% !important; max-width:100% !important; overflow:hidden; }
   .freshness-reminder { font-size:.68rem; }
   .game-detail-chip { min-height:1.65rem; font-size:.68rem; }
   .driver-grid { grid-template-columns:1fr; }
@@ -404,6 +416,11 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
   .tool-section-badge { display:none; }
   .st-key-comparison_view [role="radiogroup"] { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .st-key-deep_dive_view [role="radiogroup"] { grid-template-columns:1fr; }
+  .range-tooltip { position:fixed; left:1rem; right:1rem; bottom:1rem; width:auto; max-width:none; transform:none; }
+  .actionable-alert-head { align-items:flex-start; flex-direction:column; gap:.18rem; }
+  .actionable-alert-time { text-align:left; }
+  .context-card-body { grid-template-columns:1fr; }
+  .context-item.wide { grid-column:auto; }
 }
 </style>
 """,
