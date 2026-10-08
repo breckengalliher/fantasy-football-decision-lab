@@ -189,15 +189,19 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .verdict.start .broadcast-context-item { background:transparent; border-top-color:rgba(255,255,255,.13); }
 .verdict.start .broadcast-context-item span { color:#9ee468; }
 .game-detail-chips { display:flex; flex-wrap:wrap; align-content:flex-start; gap:.3rem; margin-top:.48rem; min-height:3.25rem; }
-.game-detail-chip { display:inline-flex; align-items:center; min-height:1.45rem; border:1px solid #dce3e6; border-radius:999px; background:#f1f4f5; color:var(--muted); padding:.2rem .48rem; font-size:.61rem; font-weight:700; line-height:1.15; white-space:nowrap; }
+.game-detail-chip { display:inline-flex; align-items:center; min-height:1.45rem; border:1px solid #dce3e6; border-radius:999px; background:#f1f4f5; color:var(--muted); padding:.2rem .48rem; font-size:.61rem; font-weight:700; line-height:1.15; white-space:nowrap; cursor:help; }
 .game-detail-chip.matchup { background:#edf4e8; border-color:#cfe0c5; color:#315f1e; }
 .game-detail-chip.team-total { background:#eaf2f6; border-color:#ccdde5; color:var(--navy); }
+.game-detail-guide { color:var(--muted); font-size:.59rem; line-height:1.35; margin:.15rem 0 .18rem; }
+.game-detail-guide b { color:var(--navy); }
 .limited-sample-pill { display:inline-flex; align-items:center; border-radius:999px; background:#fff1d6; border:1px solid #e3bd70; color:#744b00; padding:.22rem .46rem; font-size:.58rem; font-weight:850; letter-spacing:.045em; text-transform:uppercase; }
 .limited-sample-note { margin:.62rem 0 .12rem; padding:.62rem .68rem; border:1px solid #e3bd70; border-left:4px solid #d28a18; border-radius:9px; background:#fff8e8; color:var(--ink); font-size:.68rem; line-height:1.4; }
 .limited-sample-note strong { display:block; color:#744b00; font-size:.62rem; letter-spacing:.06em; text-transform:uppercase; margin-bottom:.18rem; }
 .verdict.start .game-detail-chip { background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.17); color:#dbe3e6; }
 .verdict.start .game-detail-chip.matchup { background:rgba(105,190,40,.14); border-color:rgba(158,228,104,.28); color:#b7ed8e; }
 .verdict.start .game-detail-chip.team-total { background:rgba(75,120,143,.28); border-color:rgba(191,226,242,.24); color:#d6ecf5; }
+.verdict.start .game-detail-guide { color:#c7d2d8; }
+.verdict.start .game-detail-guide b { color:#f7fafb; }
 .verdict.start .limited-sample-pill { background:rgba(255,193,77,.14); border-color:rgba(255,213,130,.38); color:#ffd582; }
 .verdict.start .limited-sample-note { background:rgba(255,193,77,.10); border-color:rgba(255,213,130,.28); border-left-color:#ffd582; color:#f7fafb; }
 .verdict.start .limited-sample-note strong { color:#ffd582; }
@@ -871,9 +875,22 @@ if page == "Decision Room":
                 team_total = projected_team_total(row)
                 if team_total is not None:
                     game_detail_chips.append((f'Team {team_total:.1f}', "team-total"))
+                chip_explanations = {
+                    "record": "Current team win-loss record",
+                    "matchup": "Home or away and this week's opponent",
+                    "kickoff": "Scheduled kickoff day and time",
+                    "game-total": "Projected combined points scored by both teams",
+                    "team-total": "Implied points scored by this player's team",
+                }
                 game_chips = "".join(
-                    f'<span class="game-detail-chip {chip_class}">{html.escape(label)}</span>'
+                    f'<span class="game-detail-chip {chip_class}" tabindex="0" title="{html.escape(chip_explanations.get(chip_class, label), quote=True)}">{html.escape(label)}</span>'
                     for label, chip_class in game_detail_chips
+                )
+                game_guide = (
+                    '<div class="game-detail-guide"><b>Game</b> = projected combined score · '
+                    '<b>Team</b> = implied points for this player’s team</div>'
+                    if any(chip_class in {"game-total", "team-total"} for _, chip_class in game_detail_chips)
+                    else ""
                 )
                 practice = format_injury_context(row, "Connected" in INJURY_SOURCE_STATUS)
                 practice_alert = any(term in practice.casefold() for term in ("questionable", "doubtful", "out", "inactive", "ir", "did not practice"))
@@ -976,7 +993,7 @@ if page == "Decision Room":
                 st.markdown(
                     f'<div class="verdict {card_class}"><div style="display:flex;align-items:center;gap:.45rem;flex-wrap:wrap"><div class="tag">{verdict}</div>{sample_badge}<div class="confidence-label">{edge_confidence}</div></div><div class="player-heading">{photo}<div class="name">{html.escape(str(row["player"]))}</div></div>'
                     f'<div class="opponent team-line">{logo}<span>{html.escape(player_details)}</span></div>'
-                    f'<div class="game-detail-chips">{game_chips}</div>'
+                    f'<div class="game-detail-chips">{game_chips}</div>{game_guide}'
                     f'<div class="projection-primary"><strong>{median:.1f}</strong><span>projected PPR <span class="range-help" tabindex="0" aria-label="Range definition">i<span class="range-tooltip" role="tooltip">Floor is the P10 downside outcome, projection is the median estimate, and ceiling is the P90 upside outcome. About 80% of results should fall between floor and ceiling.</span></span></span></div>'
                     f'<div class="range-track"><span class="range-marker" style="left:{median_position:.1f}%"></span></div><div class="range-labels"><span>Floor {floor:.1f}</span><span>Ceiling {ceiling:.1f}</span></div>'
                     f'<div class="outlook-label">Player outlook</div><div class="reason">{html.escape(reason)}</div>{sample_note}{actionable_alert}<div class="broadcast-context">{quick_context}</div>'
