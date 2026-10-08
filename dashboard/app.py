@@ -180,9 +180,15 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .game-detail-chip { display:inline-flex; align-items:center; min-height:1.45rem; border:1px solid #dce3e6; border-radius:999px; background:#f1f4f5; color:var(--muted); padding:.2rem .48rem; font-size:.61rem; font-weight:700; line-height:1.15; white-space:nowrap; }
 .game-detail-chip.matchup { background:#edf4e8; border-color:#cfe0c5; color:#315f1e; }
 .game-detail-chip.team-total { background:#eaf2f6; border-color:#ccdde5; color:var(--navy); }
+.limited-sample-pill { display:inline-flex; align-items:center; border-radius:999px; background:#fff1d6; border:1px solid #e3bd70; color:#744b00; padding:.22rem .46rem; font-size:.58rem; font-weight:850; letter-spacing:.045em; text-transform:uppercase; }
+.limited-sample-note { margin:.62rem 0 .12rem; padding:.62rem .68rem; border:1px solid #e3bd70; border-left:4px solid #d28a18; border-radius:9px; background:#fff8e8; color:var(--ink); font-size:.68rem; line-height:1.4; }
+.limited-sample-note strong { display:block; color:#744b00; font-size:.62rem; letter-spacing:.06em; text-transform:uppercase; margin-bottom:.18rem; }
 .verdict.start .game-detail-chip { background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.17); color:#dbe3e6; }
 .verdict.start .game-detail-chip.matchup { background:rgba(105,190,40,.14); border-color:rgba(158,228,104,.28); color:#b7ed8e; }
 .verdict.start .game-detail-chip.team-total { background:rgba(75,120,143,.28); border-color:rgba(191,226,242,.24); color:#d6ecf5; }
+.verdict.start .limited-sample-pill { background:rgba(255,193,77,.14); border-color:rgba(255,213,130,.38); color:#ffd582; }
+.verdict.start .limited-sample-note { background:rgba(255,193,77,.10); border-color:rgba(255,213,130,.28); border-left-color:#ffd582; color:#f7fafb; }
+.verdict.start .limited-sample-note strong { color:#ffd582; }
 .comparison-relative-note { color:var(--muted); font-size:.7rem; line-height:1.4; margin:.45rem .1rem 0; font-style:italic; }
 .card-outlook-details { border-top:1px solid #e3e8ea; margin-top:auto; padding-top:.22rem; }
 .card-outlook-details summary { color:var(--navy); cursor:pointer; font-size:.74rem; font-weight:800; padding:.5rem .1rem .28rem; list-style-position:inside; }
@@ -684,6 +690,8 @@ if page == "Decision Room":
                     if slot_index < len(names):
                         selected_row = pool.loc[pool["player"].eq(names[slot_index])].iloc[0]
                         availability = selection_availability_summary(selected_row)
+                        limited_sample = bool(selected_row.get("limited_sample_role", False)) or str(selected_row.get("confidence", "")).casefold() == "limited sample"
+                        sample_badge = '<span class="limited-sample-pill">Limited sample</span>' if limited_sample else ""
                         availability_class = "availability-alert" if any(term in availability.casefold() for term in ("questionable", "doubtful", "out", "inactive", "ir", "did not practice")) else "availability-ok"
                         photo = player_photo_html(selected_row.get("headshot_url"), selected_row["player"])
                         logo_url = team_logo_url(selected_row.get("team"))
@@ -694,7 +702,7 @@ if page == "Decision Room":
                             f'<div class="compare-slot-top">{photo}<div class="compare-slot-main"><div class="compare-slot-name">{html.escape(str(selected_row["player"]))}</div>'
                             f'<div class="compare-slot-team">{logo}<span>{html.escape(str(selected_row["team"]))} · {html.escape(str(selected_row["position"]))}</span></div></div></div>'
                             f'<div class="compare-slot-game">{html.escape(str(selected_row["venue"]))} vs {html.escape(str(selected_row["next_opponent"]))}{" · " + html.escape(kickoff) if kickoff else ""}</div>'
-                            f'<div class="compare-slot-footer"><span class="compare-slot-projection">{float(selected_row["median_ppr"]):.1f} projected PPR</span><span class="availability-pill {availability_class}">{html.escape(availability)}</span></div>',
+                            f'<div class="compare-slot-footer"><span class="compare-slot-projection">{float(selected_row["median_ppr"]):.1f} projected PPR</span>{sample_badge}<span class="availability-pill {availability_class}">{html.escape(availability)}</span></div>',
                             unsafe_allow_html=True,
                         )
                         remove_column, replace_column = st.columns(2)
@@ -753,11 +761,13 @@ if page == "Decision Room":
                             if photo_url is not None and pd.notna(photo_url):
                                 photo_column.image(str(photo_url), width=52)
                             availability = selection_availability_summary(result_row)
+                            result_limited_sample = bool(result_row.get("limited_sample_role", False)) or str(result_row.get("confidence", "")).casefold() == "limited sample"
+                            sample_copy = " · Limited-sample role/position estimate" if result_limited_sample else ""
                             availability_prefix = "⚠ " if any(term in availability.casefold() for term in ("questionable", "doubtful", "out", "inactive", "ir", "did not practice")) else ""
                             details_column.markdown(
                                 f'<b>{html.escape(str(result_row["player"]))}</b><br>'
                                 f'{html.escape(str(result_row["team"]))} · {html.escape(str(result_row["position"]))} · {html.escape(str(result_row["venue"]))} vs {html.escape(str(result_row["next_opponent"]))}<br>'
-                                f'<span class="selected-player-meta">{availability_prefix}{html.escape(availability)}</span>', unsafe_allow_html=True,
+                                f'<span class="selected-player-meta">{availability_prefix}{html.escape(availability)}{html.escape(sample_copy)}</span>', unsafe_allow_html=True,
                             )
                             logo_url = team_logo_url(result_row.get("team"))
                             if logo_url:
@@ -797,6 +807,7 @@ if page == "Decision Room":
         edge_confidence = "Solo view" if len(compare) == 1 else "Lean" if top_gap < 2.5 else "Moderate edge" if top_gap < 5 else "Strong edge"
         for index, (column, (_, row)) in enumerate(zip(outlook_columns, compare.iterrows())):
             with column:
+                limited_sample = bool(row.get("limited_sample_role", False)) or str(row.get("confidence", "")).casefold() == "limited sample"
                 if index == 0 and len(compare) > 1:
                     verdict = "START · PREFERRED"
                 elif len(compare) > 1 and float(leader["median_ppr"] - row["median_ppr"]) < 2.5:
@@ -870,6 +881,17 @@ if page == "Decision Room":
                         f'<div class="actionable-alert-title">{html.escape(injury_alert["headline"])}</div>'
                         f'<div class="actionable-alert-verify"><b>Verify:</b> {html.escape(injury_alert["verify"])}</div></div>'
                     )
+                sample_note = ""
+                sample_badge = '<span class="limited-sample-pill">Limited sample</span>' if limited_sample else ""
+                if limited_sample:
+                    sample_reason = str(row.get("limited_sample_reason", "No usable current-season workload or production history"))
+                    prior_weights = str(row.get("limited_sample_prior_weights", "Position, team environment, and verified depth-chart role priors"))
+                    sample_note = (
+                        '<div class="limited-sample-note"><strong>Why this projection is uncertain</strong>'
+                        f'{html.escape(sample_reason)}. We use {html.escape(prior_weights)} instead of treating personal history as reliable. '
+                        'The range is wider because route/snap share, touches or targets, efficiency, and weekly role stability are not established yet.'
+                        '</div>'
+                    )
                 floor = float(row["floor_ppr"])
                 median = float(row["median_ppr"])
                 ceiling = float(row["ceiling_ppr"])
@@ -923,12 +945,12 @@ if page == "Decision Room":
                     f'{html.escape(full_reason)}{injury_note}{market_note}{reporting_links}</div></details>'
                 )
                 st.markdown(
-                    f'<div class="verdict {card_class}"><div style="display:flex;align-items:center;gap:.45rem"><div class="tag">{verdict}</div><div class="confidence-label">{edge_confidence}</div></div><div class="player-heading">{photo}<div class="name">{html.escape(str(row["player"]))}</div></div>'
+                    f'<div class="verdict {card_class}"><div style="display:flex;align-items:center;gap:.45rem;flex-wrap:wrap"><div class="tag">{verdict}</div>{sample_badge}<div class="confidence-label">{edge_confidence}</div></div><div class="player-heading">{photo}<div class="name">{html.escape(str(row["player"]))}</div></div>'
                     f'<div class="opponent team-line">{logo}<span>{html.escape(player_details)}</span></div>'
                     f'<div class="game-detail-chips">{game_chips}</div>'
                     f'<div class="projection-primary"><strong>{median:.1f}</strong><span>projected PPR <span class="range-help" tabindex="0" aria-label="Range definition">i<span class="range-tooltip" role="tooltip">Floor is the P10 downside outcome, projection is the median estimate, and ceiling is the P90 upside outcome. About 80% of results should fall between floor and ceiling.</span></span></span></div>'
                     f'<div class="range-track"><span class="range-marker" style="left:{median_position:.1f}%"></span></div><div class="range-labels"><span>Floor {floor:.1f}</span><span>Ceiling {ceiling:.1f}</span></div>'
-                    f'<div class="outlook-label">Player outlook</div><div class="reason">{html.escape(reason)}</div>{actionable_alert}<div class="broadcast-context">{quick_context}</div>'
+                    f'<div class="outlook-label">Player outlook</div><div class="reason">{html.escape(reason)}</div>{sample_note}{actionable_alert}<div class="broadcast-context">{quick_context}</div>'
                     f'{outlook_details}</div>',
                     unsafe_allow_html=True,
                 )

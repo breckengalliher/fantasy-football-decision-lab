@@ -55,3 +55,12 @@ def test_fourth_game_uses_last_two_average():
     text = build_player_outlook(player(games_played=4, season_ppr=18.0, recent_ppr=18.0, last_two_ppr=22.5), rank=0, total=2, spread=4)
     assert "last two games" in text
     assert "22.5 PPR" in text
+
+
+def test_limited_sample_outlook_discloses_prior_based_estimate_and_uncertainty():
+    text = build_player_outlook(
+        player(games_played=0, limited_sample_role=True), rank=1, total=2, spread=3
+    )
+    assert "not built a usable current-season sample" in text
+    assert "position and newly assigned depth-chart role" in text
+    assert "wider range reflects that uncertainty" in text

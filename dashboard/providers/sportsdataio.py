@@ -370,6 +370,7 @@ def add_depth_chart_promotions(board: pd.DataFrame, context: SportsDataIOContext
 
     relevant = result.get("is_roster_relevant", pd.Series(False, index=result.index)).fillna(False).astype(bool)
     position_anchor = result.loc[relevant].groupby("position")["median_ppr"].median()
+    team_position_anchor = result.loc[relevant].groupby(["team", "position"])["median_ppr"].median()
     opportunity_anchor = result.loc[relevant].groupby("position")["recent_opportunities"].median()
     fallback_projection = {"QB": 17.0, "RB": 9.0, "WR": 10.0, "TE": 7.0}
     fallback_opportunities = {"QB": 31.0, "RB": 11.0, "WR": 6.0, "TE": 4.5}
@@ -377,7 +378,14 @@ def add_depth_chart_promotions(board: pd.DataFrame, context: SportsDataIOContext
     additions = []
     for _, promoted in depth.iterrows():
         position = str(promoted["depth_position_live"])
-        median = float(position_anchor.get(position, fallback_projection[position]))
+        depth_order = int(promoted["depth_order_live"])
+        position_prior = float(position_anchor.get(position, fallback_projection[position]))
+        team_prior = float(team_position_anchor.get((str(promoted["team"]), position), position_prior))
+        role_multiplier = {1: 1.00, 2: .82, 3: .68}.get(depth_order, .60)
+        role_prior = position_prior * role_multiplier
+        # With no personal sample, the estimate is deliberately driven by independent priors:
+        # league position (50%), this team's positional environment (30%), and verified role (20%).
+        median = .50 * position_prior + .30 * team_prior + .20 * role_prior
         lower, upper = PROMOTION_INTERVAL_OFFSETS[position]
         row = {column: pd.NA for column in result.columns}
         row.update({
@@ -398,6 +406,11 @@ def add_depth_chart_promotions(board: pd.DataFrame, context: SportsDataIOContext
             "floor_ppr": max(0.0, median + interval_scale * lower),
             "ceiling_ppr": median + interval_scale * upper,
             "confidence": "Limited sample",
+            "limited_sample_reason": "No usable current-season workload or production history",
+            "limited_sample_position_prior": position_prior,
+            "limited_sample_team_prior": team_prior,
+            "limited_sample_role_prior": role_prior,
+            "limited_sample_prior_weights": "50% position · 30% team/position · 20% depth-chart role",
             "matchup_index": 1.0,
             "schedule_adjusted_index": 1.0,
             "matchup_label": "Neutral",

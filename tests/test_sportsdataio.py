@@ -134,4 +134,10 @@ def test_depth_chart_promotion_adds_zero_game_player_with_limited_sample_project
     assert "Practice Squad Receiver" not in result.index
     assert result.loc["Promoted Receiver", "games_played"] == 0
     assert result.loc["Promoted Receiver", "confidence"] == "Limited sample"
+    assert result.loc["Promoted Receiver", "limited_sample_reason"] == "No usable current-season workload or production history"
+    assert result.loc["Promoted Receiver", "limited_sample_prior_weights"] == "50% position · 30% team/position · 20% depth-chart role"
+    assert result.loc["Promoted Receiver", "limited_sample_position_prior"] == 12.0
+    assert result.loc["Promoted Receiver", "limited_sample_team_prior"] == 12.0
+    assert result.loc["Promoted Receiver", "limited_sample_role_prior"] == 9.84
+    assert round(float(result.loc["Promoted Receiver", "median_ppr"]), 3) == 11.568
     assert bool(result.loc["Promoted Receiver", "is_roster_relevant"])
