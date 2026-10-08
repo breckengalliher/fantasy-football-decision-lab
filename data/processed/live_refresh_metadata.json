@@ -2,9 +2,9 @@
   "season": 2026,
   "completed_week": 4,
   "next_week": 5,
-  "refreshed_at": "2026-10-07T22:42:07.507135+00:00",
-  "context_refreshed_at": "2026-10-07T22:43:17.975581+00:00",
-  "refresh_scope": "Live context only; projections preserved",
+  "refreshed_at": "2026-10-08T02:26:24.850266+00:00",
+  "context_refreshed_at": "2026-10-08T02:26:24.850277+00:00",
+  "refresh_scope": "Full weekly projection and context rebuild",
   "eligible_players": 210,
   "player_pool_audit": {
     "eligible_players": 210,
@@ -21,22 +21,24 @@
     "missing_opponents": 0,
     "invalid_positions": 0
   },
-  "injury_records": 326,
+  "injury_records": 340,
   "injury_source_status": {
     "nflverse": "Connected \u00b7 19 Week 5 records",
-    "sleeper": "Connected \u00b7 314 designated players"
+    "sleeper": "Connected \u00b7 328 designated players"
   },
-  "injury_refreshed_at": "2026-10-07T22:43:03.077454+00:00",
-  "sportsdataio_status": "Connected \u00b7 2026-10-07 22:43 UTC",
-  "sportsdataio_refreshed_at": "2026-10-07T22:43:02.503433+00:00",
-  "reporting_refreshed_at": "2026-10-07T22:43:03.086835+00:00",
+  "injury_refreshed_at": "2026-10-08T02:26:10.360712+00:00",
+  "sportsdataio_status": "Connected \u00b7 2026-10-08 02:26 UTC",
+  "sportsdataio_refreshed_at": "2026-10-08T02:26:09.703111+00:00",
+  "market_status": "No player props currently published",
+  "market_refreshed_at": "2026-10-08T02:26:09.703111+00:00",
+  "reporting_refreshed_at": "2026-10-08T02:26:10.367201+00:00",
   "journalism_status": "Connected \u00b7 0 matched items",
-  "reporter_social_status": "Connected \u00b7 15 reporter posts",
+  "reporter_social_status": "Connected \u00b7 11 reporter posts",
   "reporting_records": 11,
-  "headshot_refreshed_at": "2026-10-07T22:43:17.462557+00:00",
+  "headshot_refreshed_at": "2026-10-08T02:26:24.026031+00:00",
   "headshot_status": "Connected \u00b7 830 active roster photos",
   "headshot_coverage": 0.9095238095238095,
-  "depth_chart_players": 1860,
+  "depth_chart_players": 1861,
   "snap_coverage": 0.8761904761904762,
   "weather_coverage": 0.9238095238095239,
   "betting_total_coverage": 0.9714285714285714,
@@ -54,8 +56,5 @@
   "scoring_format_snapshots": {
     "4": "live_start_sit_board_4pt_current.parquet",
     "6": "live_start_sit_board_6pt_current.parquet"
-  },
-  "market_refreshed_at": "2026-10-08T00:41:24.489772+00:00",
-  "market_status": "No player props currently published",
-  "market_refresh_interval_minutes": 360
+  }
 }
