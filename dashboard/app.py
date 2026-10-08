@@ -204,9 +204,6 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .game-detail-chip.team-total { background:#eaf2f6; border-color:#ccdde5; color:var(--navy); }
 .game-details-legend { display:flex; justify-content:flex-end; margin:.15rem 0 .48rem; color:var(--muted); font-size:.67rem; }
 .game-details-legend .explained-term { color:var(--navy); font-weight:800; }
-.share-panel { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.72rem .82rem; margin:.45rem 0 .65rem; border:1px solid #ccdde5; border-radius:12px; background:#eef4f7; }
-.share-panel strong { display:block; color:var(--navy); font-size:.78rem; }
-.share-panel span { display:block; color:var(--muted); font-size:.68rem; margin-top:.12rem; }
 .share-link-label { color:var(--navy); font-size:.68rem; font-weight:800; margin:.35rem 0 .18rem; }
 .onboarding-intro { color:var(--muted); font-size:.82rem; line-height:1.45; margin:-.15rem 0 .75rem; }
 .onboarding-steps { display:grid; gap:.55rem; margin:.25rem 0 .8rem; }
@@ -890,12 +887,8 @@ if page == "Decision Room":
                 f'<div class="desktop-decision-edge">{decision_edge_markup}</div>',
                 unsafe_allow_html=True,
             )
-            st.markdown(
-                '<div class="share-panel"><div><strong>Share this comparison</strong>'
-                '<span>Create a restorable link or download a ready-to-share image.</span></div></div>',
-                unsafe_allow_html=True,
-            )
-            with st.expander("Share comparison link or image"):
+            with st.expander("Share this comparison"):
+                st.caption("Copy a restorable comparison link or download a ready-to-share image.")
                 share_query = urlencode(
                     {
                         "position": position,
