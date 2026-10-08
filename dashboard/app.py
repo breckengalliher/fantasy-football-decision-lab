@@ -152,6 +152,14 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .actionable-alert-time { color:var(--muted); font-size:.59rem; text-align:right; }
 .actionable-alert-title { font-size:.72rem; font-weight:800; line-height:1.32; margin-top:.28rem; }
 .actionable-alert-verify { color:var(--muted); font-size:.66rem; line-height:1.38; margin-top:.24rem; }
+.opportunity-details { border-top:1px solid rgba(57,127,24,.22); margin-top:.46rem; padding-top:.12rem; }
+.opportunity-details summary { cursor:pointer; list-style:none; color:#397f18; font-size:.65rem; font-weight:850; letter-spacing:.045em; text-transform:uppercase; padding:.36rem 0 .2rem; }
+.opportunity-details summary::-webkit-details-marker { display:none; }
+.opportunity-details summary::after { content:'+'; float:right; width:1.15rem; height:1.15rem; border:1px solid currentColor; border-radius:50%; text-align:center; line-height:1rem; font-size:.9rem; }
+.opportunity-details[open] summary::after { content:'−'; }
+.opportunity-details-body { color:var(--ink); font-size:.68rem; line-height:1.42; padding:.2rem 0 .18rem; }
+.opportunity-details-body strong { display:block; color:var(--navy); font-size:.67rem; margin-bottom:.16rem; }
+.opportunity-details-range { display:block; color:var(--muted); font-weight:700; margin-top:.22rem; }
 .actionable-alert.monitor { background:#fff9e8; border-color:#ead79e; border-left-color:#d39b29; }
 .actionable-alert.monitor .actionable-alert-label { color:#7a560c; }
 .actionable-alert.action { background:#fff2e8; border-color:#efc4a5; border-left-color:#d46b20; }
@@ -163,6 +171,10 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .verdict.start .actionable-alert { background:rgba(255,255,255,.09); border-color:rgba(255,255,255,.18); color:#f7fafb; }
 .verdict.start .actionable-alert-time,.verdict.start .actionable-alert-verify { color:#c7d2d8; }
 .verdict.start .actionable-alert-label { color:#9ee468; }
+.verdict.start .opportunity-details { border-top-color:rgba(255,255,255,.16); }
+.verdict.start .opportunity-details summary { color:#9ee468; }
+.verdict.start .opportunity-details-body,.verdict.start .opportunity-details-body strong { color:#f7fafb; }
+.verdict.start .opportunity-details-range { color:#c7d2d8; }
 .decision-edge { display:flex; align-items:center; justify-content:space-between; gap:1rem; background:var(--navy); color:#f7fafb; border:1px solid rgba(105,190,40,.65); border-radius:13px; padding:.68rem .9rem; margin:.55rem 0 .5rem; box-shadow:0 7px 18px rgba(0,34,68,.10); }
 .decision-edge-main { min-width:0; }
 .decision-edge-label { color:#9ee468; font-size:.62rem; font-weight:850; letter-spacing:.1em; text-transform:uppercase; margin-bottom:.16rem; }
@@ -874,12 +886,28 @@ if page == "Decision Room":
                 injury_alert = actionable_injury_alert(row)
                 actionable_alert = ""
                 if injury_alert:
+                    opportunity_details = ""
+                    if injury_alert["classification"] == "Teammate opportunity increase":
+                        opportunity_baseline = float(row.get("baseline_median_ppr", row["median_ppr"]))
+                        opportunity_adjusted = float(row.get("injury_adjusted_median_ppr", opportunity_baseline))
+                        opportunity_floor = float(row.get("injury_adjusted_floor_ppr", row["floor_ppr"]))
+                        opportunity_ceiling = float(row.get("injury_adjusted_ceiling_ppr", row["ceiling_ppr"]))
+                        opportunity_delta = opportunity_adjusted - opportunity_baseline
+                        opportunity_copy = str(row.get("injury_teammate_effect", "") or injury_alert["headline"])
+                        opportunity_details = (
+                            '<details class="opportunity-details"><summary>Opportunity impact</summary><div class="opportunity-details-body">'
+                            f'<strong>Adjusted outlook · {opportunity_adjusted:.1f} PPR ({opportunity_delta:+.1f})</strong>'
+                            f'{html.escape(opportunity_copy)}'
+                            f'<span class="opportunity-details-range">Adjusted range: {opportunity_floor:.1f}–{opportunity_ceiling:.1f} PPR</span>'
+                            '</div></details>'
+                        )
                     actionable_alert = (
                         f'<div class="actionable-alert {html.escape(injury_alert["level"], quote=True)}">'
                         f'<div class="actionable-alert-head"><span class="actionable-alert-label">{html.escape(injury_alert["classification"])}</span>'
                         f'<span class="actionable-alert-time">{html.escape(injury_alert["changed"])}</span></div>'
                         f'<div class="actionable-alert-title">{html.escape(injury_alert["headline"])}</div>'
-                        f'<div class="actionable-alert-verify"><b>Verify:</b> {html.escape(injury_alert["verify"])}</div></div>'
+                        f'<div class="actionable-alert-verify"><b>Verify:</b> {html.escape(injury_alert["verify"])}</div>'
+                        f'{opportunity_details}</div>'
                     )
                 sample_note = ""
                 sample_badge = '<span class="limited-sample-pill">Limited sample</span>' if limited_sample else ""
@@ -906,7 +934,8 @@ if page == "Decision Room":
                 teammate_effect = str(row.get("injury_teammate_effect", "") or "").strip()
                 if risk == "No adjustment" and abs(delta) < 0.10:
                     teammate_effect = ""
-                if risk != "No adjustment" or teammate_effect:
+                teammate_opportunity_alert = bool(injury_alert and injury_alert["classification"] == "Teammate opportunity increase")
+                if risk != "No adjustment" or (teammate_effect and not teammate_opportunity_alert):
                     impact_parts = []
                     if risk != "No adjustment":
                         impact_parts.append(str(row.get("injury_impact_summary", "")))
