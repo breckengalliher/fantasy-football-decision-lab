@@ -247,11 +247,11 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .advanced-stat-row span { color:var(--muted); }
 .advanced-stat-row b { color:var(--ink); text-align:right; }
 .detail-card-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.75rem; margin:.2rem 0 .35rem; }
-.detail-card { background:var(--card); border:1px solid var(--line); border-radius:13px; overflow:hidden; min-width:0; }
-.detail-card-head { display:flex; align-items:center; gap:.58rem; padding:.72rem .78rem; background:#eef2f3; border-bottom:3px solid var(--navy); }
+.detail-card { background:var(--card); border:1px solid var(--line); border-radius:13px; overflow:hidden; min-width:0; box-shadow:0 7px 18px rgba(0,34,68,.055); }
+.detail-card-head { display:flex; align-items:center; gap:.58rem; padding:.72rem .78rem; background:var(--navy); border-bottom:3px solid var(--gold); }
 .detail-card-head .player-photo { width:44px; height:44px; flex-basis:44px; border-width:1px; }
-.detail-card-name { color:var(--navy); font-family:'Barlow Condensed','Arial Narrow',sans-serif; font-size:1.02rem; font-weight:800; line-height:1.05; overflow-wrap:anywhere; }
-.detail-card-team { display:flex; align-items:center; gap:.3rem; color:var(--muted); font-size:.64rem; margin-top:.16rem; }
+.detail-card-name { color:white; font-family:'Barlow Condensed','Arial Narrow',sans-serif; font-size:1.02rem; font-weight:800; line-height:1.05; overflow-wrap:anywhere; }
+.detail-card-team { display:flex; align-items:center; gap:.3rem; color:#c7d2d8; font-size:.64rem; margin-top:.16rem; }
 .detail-card-team img { width:1rem; height:1rem; object-fit:contain; }
 .detail-card-status { margin-left:auto; border-radius:999px; padding:.25rem .42rem; background:#edf4e8; color:#397f18; font-size:.58rem; font-weight:800; text-align:center; line-height:1.15; }
 .detail-card-status.alert { background:#fff0e6; color:#a33a13; }
@@ -284,9 +284,18 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 [data-baseweb="tab-highlight"] { display:none; }
 [data-testid="stSegmentedControl"] { background:#e6ecef; border:1px solid #d4dde1; border-radius:12px; padding:.24rem; }
 [data-testid="stSegmentedControl"] button { min-height:2.35rem; border-radius:9px !important; font-family:'Inter',Arial,sans-serif; font-weight:750; }
-.deep-dive-head { display:flex; align-items:flex-end; justify-content:space-between; gap:1rem; margin:1.1rem 0 .55rem; }
-.deep-dive-head strong { display:block; color:var(--navy); font-family:'Barlow Condensed','Arial Narrow',sans-serif; font-size:1.28rem; letter-spacing:.01em; }
-.deep-dive-head span { display:block; color:var(--muted); font-size:.7rem; margin-top:.08rem; }
+.tool-section-head { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin:1.15rem 0 .55rem; padding:.78rem .9rem; border:1px solid var(--line); border-left:4px solid var(--gold); border-radius:12px; background:var(--card); }
+.tool-section-head strong { display:block; color:var(--navy); font-family:'Barlow Condensed','Arial Narrow',sans-serif; font-size:1.28rem; letter-spacing:.01em; }
+.tool-section-head span { display:block; color:var(--muted); font-size:.7rem; margin-top:.08rem; line-height:1.35; }
+.tool-section-badge { flex:0 0 auto; border-radius:999px; background:#edf4e8; color:#397f18 !important; padding:.34rem .58rem; font-size:.58rem !important; font-weight:850; letter-spacing:.055em; text-transform:uppercase; white-space:nowrap; }
+.st-key-comparison_view [data-testid="stButtonGroup"], .st-key-deep_dive_view [data-testid="stButtonGroup"] { margin-bottom:.55rem; }
+.st-key-comparison_view [role="radiogroup"], .st-key-deep_dive_view [role="radiogroup"] { display:grid !important; width:100%; gap:.32rem; padding:.34rem; border:1px solid #d4dcdf; border-radius:12px; background:#e8edef; box-sizing:border-box; }
+.st-key-comparison_view [role="radiogroup"] { grid-template-columns:repeat(4,minmax(0,1fr)); }
+.st-key-deep_dive_view [role="radiogroup"] { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.st-key-comparison_view button, .st-key-deep_dive_view button { width:100%; min-height:2.45rem; border:0 !important; border-radius:9px !important; background:transparent !important; color:var(--muted) !important; font-size:.72rem !important; font-weight:750 !important; box-shadow:none !important; }
+.st-key-comparison_view button:hover, .st-key-deep_dive_view button:hover { background:#f8fafb !important; color:var(--navy) !important; }
+.st-key-comparison_view button[aria-checked="true"], .st-key-deep_dive_view button[aria-checked="true"] { background:var(--navy) !important; color:#fff !important; box-shadow:0 4px 10px rgba(0,34,68,.18) !important; }
+.st-key-comparison_view button[aria-checked="true"] p, .st-key-deep_dive_view button[aria-checked="true"] p { color:#fff !important; }
 .usage-board { display:grid; gap:.58rem; margin:.7rem 0 .35rem; }
 .usage-player { display:grid; grid-template-columns:minmax(180px,.8fr) minmax(220px,1.45fr) 92px; gap:.9rem; align-items:center; background:var(--card); border:1px solid var(--line); border-radius:13px; padding:.72rem .82rem; }
 .usage-player.leader { border-color:var(--gold); box-shadow:0 7px 18px rgba(0,34,68,.08); }
@@ -304,9 +313,10 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .usage-score strong { display:block; color:var(--navy); font-size:1.55rem; line-height:1; letter-spacing:-.03em; }
 .usage-score span { color:var(--muted); font-size:.62rem; }
 .usage-insight { border-left:4px solid var(--gold); background:#edf4e8; color:var(--ink); padding:.66rem .8rem; border-radius:9px; font-size:.75rem; line-height:1.4; margin-top:.65rem; }
-.comparison-panel-head { display:flex; align-items:flex-end; justify-content:space-between; gap:1rem; margin:.72rem 0 .65rem; }
+.comparison-panel-head { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin:.72rem 0 .65rem; padding:.68rem .78rem; border:1px solid var(--line); border-radius:11px; background:var(--card); }
 .comparison-panel-head h3 { margin:0; color:var(--navy); font-size:1.05rem; }
 .comparison-panel-head p { margin:.12rem 0 0; color:var(--muted); font-size:.68rem; }
+.panel-key { flex:0 0 auto; border-radius:999px; background:#eef2f3; color:var(--muted); padding:.3rem .5rem; font-size:.58rem; font-weight:800; white-space:nowrap; }
 .panel-key { color:var(--muted); font-size:.62rem; white-space:nowrap; }
 .projection-board,.form-board { display:grid; gap:.58rem; }
 .projection-row,.form-row { display:grid; grid-template-columns:minmax(180px,.85fr) minmax(310px,1.55fr) 82px; align-items:center; gap:.9rem; padding:.72rem .82rem; background:var(--card); border:1px solid var(--line); border-radius:13px; }
@@ -362,6 +372,10 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
   .projection-row,.form-row { grid-template-columns:1fr 68px; gap:.55rem; }
   .projection-lane,.form-weeks { grid-column:1/-1; grid-row:2; }
   .panel-insight { align-items:flex-start; flex-direction:column; gap:.2rem; }
+  .tool-section-head { align-items:flex-start; }
+  .tool-section-badge { display:none; }
+  .st-key-comparison_view [role="radiogroup"] { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .st-key-deep_dive_view [role="radiogroup"] { grid-template-columns:1fr; }
 }
 </style>
 """,
@@ -848,7 +862,10 @@ if page == "Decision Room":
                 unsafe_allow_html=True,
             )
 
-        st.markdown('<div class="section-title">Comparison Tool</div><div class="section-copy">Compare each player’s projection, weekly form, repeatable usage, and supplemental market expectations in one place.</div>', unsafe_allow_html=True)
+        st.markdown(
+            '<div class="tool-section-head"><div><strong>Comparison Tool</strong><span>Compare projection range, weekly form, repeatable usage, and supplemental market expectations.</span></div><span class="tool-section-badge">4 comparison views</span></div>',
+            unsafe_allow_html=True,
+        )
         comparison_view = st.segmented_control(
             "Comparison view", ["Projection", "Weekly form", "Usage", "Market"],
             default="Projection", width="stretch", label_visibility="collapsed",
@@ -1046,7 +1063,7 @@ if page == "Decision Room":
             )
 
         st.markdown(
-            '<div class="deep-dive-head"><div><strong>Deep Dive</strong><span>Switch between the details behind this comparison.</span></div></div>',
+            '<div class="tool-section-head"><div><strong>Deep Dive</strong><span>Explore the player profile, projection logic, and live matchup context behind the decision.</span></div><span class="tool-section-badge">3 analysis lenses</span></div>',
             unsafe_allow_html=True,
         )
         deep_dive_view = st.segmented_control(
