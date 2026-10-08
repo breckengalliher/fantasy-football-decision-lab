@@ -14,6 +14,7 @@ REPOSITORY = os.getenv("REFRESH_GITHUB_REPOSITORY", "breckengalliher/fantasy-foo
 WORKFLOWS = {
     "injuries": "daily-injury-refresh.yml",
     "context": "general-context-refresh.yml",
+    "market": "market-data-refresh.yml",
     "projections": "weekly-production-refresh.yml",
     "all": "weekly-production-refresh.yml",
 }

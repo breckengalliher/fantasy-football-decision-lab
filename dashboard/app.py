@@ -492,6 +492,7 @@ with st.sidebar:
                 refresh_actions = [
                     ("injuries", "Refresh injuries / practice"),
                     ("context", "Refresh live context"),
+                    ("market", "Refresh market expectations"),
                     ("projections", "Recalculate projections"),
                     ("all", "Run everything"),
                 ]

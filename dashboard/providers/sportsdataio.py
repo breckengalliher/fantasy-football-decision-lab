@@ -149,20 +149,7 @@ class SportsDataIOClient:
             for item in teams or []
             if item.get("TeamID") is not None and item.get("Key")
         }
-        market_records: list[dict[str, Any]] = []
-        market_status = "No player props currently published"
-        game_ids = [item.get("GameKey") or item.get("GameID") or item.get("ScoreID") for item in games or []]
-        for game_id in dict.fromkeys(value for value in game_ids if value is not None):
-            try:
-                props = self._get(f"odds/json/BettingPlayerPropsByGameID/{game_id}")
-            except requests.RequestException as exc:
-                if getattr(exc.response, "status_code", None) in {401, 403}:
-                    market_status = "Player-prop feed is not included in the connected subscription"
-                continue
-            market_records.extend(flatten_player_props(props))
-        market_lines = normalize_market_lines(market_records)
-        if not market_lines.empty:
-            market_status = f"Connected · {len(market_lines)} players with validated lines"
+        market_lines, market_status = self._market_lines(games)
         return SportsDataIOContext(
             injuries=pd.DataFrame(),
             games=normalize_games(games),
@@ -171,6 +158,38 @@ class SportsDataIOClient:
             market_lines=market_lines,
             market_status=market_status,
         )
+
+    def weekly_market_lines(self, season: int, week: int) -> tuple[pd.DataFrame, str, str]:
+        """Fetch only the schedule and player props for a lightweight refresh."""
+        games = self._get(f"scores/json/ScoresByWeek/{season}REG/{week}")
+        lines, status = self._market_lines(games)
+        return lines, status, datetime.now(timezone.utc).isoformat()
+
+    def _market_lines(self, games: Any) -> tuple[pd.DataFrame, str]:
+        market_records: list[dict[str, Any]] = []
+        market_status = "No player props currently published"
+        eligible_games = [
+            item for item in games or []
+            if str(item.get("Status") or "Scheduled").casefold() in {"scheduled", "pregame", "time tbd"}
+        ]
+        score_ids = [item.get("ScoreID") for item in eligible_games]
+        temporary_errors = 0
+        for score_id in dict.fromkeys(value for value in score_ids if value is not None):
+            try:
+                props = self._get(f"odds/json/BettingPlayerPropsByScoreID/{score_id}")
+            except requests.RequestException as exc:
+                if getattr(exc.response, "status_code", None) in {401, 403}:
+                    market_status = "Player-prop feed is not included in the connected subscription"
+                elif getattr(exc.response, "status_code", None) != 404:
+                    temporary_errors += 1
+                continue
+            market_records.extend(flatten_player_props(props))
+        market_lines = normalize_market_lines(market_records)
+        if not market_lines.empty:
+            market_status = f"Connected · {len(market_lines)} players with validated lines"
+        elif temporary_errors:
+            market_status = "Temporarily unavailable · last validated market snapshot retained"
+        return market_lines, market_status
 
 
 def _market_key(value: Any) -> str | None:

@@ -104,6 +104,12 @@ secret named `SPORTSDATAIO_API_KEY`. The public Streamlit process reads only
 these committed snapshots and never calls an upstream provider on behalf of a
 visitor.
 
+`market-data-refresh.yml` checks every 30 minutes but uses an adaptive gate
+before calling the provider: every 6 hours Tuesday–Wednesday, every 2 hours
+Thursday–Friday, hourly Saturday, and every 30 minutes from 8:00 AM–11:00 PM
+Central on Sunday and Monday (six hours overnight). It updates only the
+supplemental player-prop fields and never recalculates the core projection.
+
 The same cloud refresh collects a limited set of recent journalism and public
 reporter posts for roster-relevant players. It stores short theme-based
 summaries and source links inside the published snapshot. This reporting layer
