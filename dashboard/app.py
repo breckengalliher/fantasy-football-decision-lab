@@ -157,8 +157,13 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .verdict.start .broadcast-context-item { background:rgba(255,255,255,.1); color:#f4f8fa; }
 .verdict.start .broadcast-context-item { background:transparent; border-top-color:rgba(255,255,255,.13); }
 .verdict.start .broadcast-context-item span { color:#9ee468; }
-.game-detail-line { color:var(--muted); font-size:.7rem; line-height:1.35; margin-top:.4rem; min-height:2.7em; }
-.verdict.start .game-detail-line { color:#c0c8cc; }
+.game-detail-chips { display:flex; flex-wrap:wrap; align-content:flex-start; gap:.3rem; margin-top:.48rem; min-height:3.25rem; }
+.game-detail-chip { display:inline-flex; align-items:center; min-height:1.45rem; border:1px solid #dce3e6; border-radius:999px; background:#f1f4f5; color:var(--muted); padding:.2rem .48rem; font-size:.61rem; font-weight:700; line-height:1.15; white-space:nowrap; }
+.game-detail-chip.matchup { background:#edf4e8; border-color:#cfe0c5; color:#315f1e; }
+.game-detail-chip.team-total { background:#eaf2f6; border-color:#ccdde5; color:var(--navy); }
+.verdict.start .game-detail-chip { background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.17); color:#dbe3e6; }
+.verdict.start .game-detail-chip.matchup { background:rgba(105,190,40,.14); border-color:rgba(158,228,104,.28); color:#b7ed8e; }
+.verdict.start .game-detail-chip.team-total { background:rgba(75,120,143,.28); border-color:rgba(191,226,242,.24); color:#d6ecf5; }
 .relative-sit-note { color:var(--muted); font-size:.68rem; line-height:1.35; margin-top:.62rem; font-style:italic; }
 .card-outlook-details { border-top:1px solid #e3e8ea; margin-top:auto; padding-top:.22rem; }
 .card-outlook-details summary { color:var(--navy); cursor:pointer; font-size:.74rem; font-weight:800; padding:.5rem .1rem .28rem; list-style-position:inside; }
@@ -740,22 +745,26 @@ if page == "Decision Room":
                 logo_url = team_logo_url(row.get("team"))
                 logo = f'<img class="team-logo" src="{html.escape(logo_url, quote=True)}" alt="{html.escape(str(row["team"]), quote=True)} logo">' if logo_url else ""
                 player_details = f'{row.get("team")} · {row.get("position")}'
-                game_details = []
+                game_detail_chips = []
                 team_record = row.get("team_record")
                 if team_record is not None and pd.notna(team_record) and str(team_record).strip():
-                    game_details.append(f'{row.get("team")} {team_record}')
-                game_details.append(f'{row.get("venue")} vs {row.get("next_opponent")}')
+                    game_detail_chips.append((f'{row.get("team")} {team_record}', "record"))
+                game_detail_chips.append((f'{row.get("venue")} vs {row.get("next_opponent")}', "matchup"))
                 kickoff = " · ".join(str(row.get(value)) for value in ("weekday", "gametime") if row.get(value) is not None and pd.notna(row.get(value)))
                 if kickoff:
-                    game_details.append(kickoff)
+                    game_detail_chips.append((kickoff, "kickoff"))
                 betting_total = row.get("betting_total_live")
                 if betting_total is None or pd.isna(betting_total):
                     betting_total = row.get("total_line")
                 if betting_total is not None and pd.notna(betting_total):
-                    game_details.append(f'{float(betting_total):.1f}-point game total')
+                    game_detail_chips.append((f'Game {float(betting_total):.1f}', "game-total"))
                 team_total = projected_team_total(row)
                 if team_total is not None:
-                    game_details.append(f'{team_total:.1f} projected team points')
+                    game_detail_chips.append((f'Team {team_total:.1f}', "team-total"))
+                game_chips = "".join(
+                    f'<span class="game-detail-chip {chip_class}">{html.escape(label)}</span>'
+                    for label, chip_class in game_detail_chips
+                )
                 practice = format_injury_context(row, "Connected" in INJURY_SOURCE_STATUS)
                 practice_alert = any(term in practice.casefold() for term in ("questionable", "doubtful", "out", "inactive", "ir", "did not practice"))
                 quick_context = "".join([
@@ -820,7 +829,7 @@ if page == "Decision Room":
                 st.markdown(
                     f'<div class="verdict {card_class}"><div style="display:flex;align-items:center;gap:.45rem"><div class="tag">{verdict}</div><div class="confidence-label">{edge_confidence}</div></div><div class="player-heading">{photo}<div class="name">{html.escape(str(row["player"]))}</div></div>'
                     f'<div class="opponent team-line">{logo}<span>{html.escape(player_details)}</span></div>'
-                    f'<div class="game-detail-line">{html.escape(" · ".join(game_details))}</div>'
+                    f'<div class="game-detail-chips">{game_chips}</div>'
                     f'<div class="projection-primary"><strong>{median:.1f}</strong><span>projected PPR <span class="range-help" tabindex="0" aria-label="Range definition">i<span class="range-tooltip" role="tooltip">Floor is the P10 downside outcome, projection is the median estimate, and ceiling is the P90 upside outcome. About 80% of results should fall between floor and ceiling.</span></span></span></div>'
                     f'<div class="range-track"><span class="range-marker" style="left:{median_position:.1f}%"></span></div><div class="range-labels"><span>Floor {floor:.1f}</span><span>Ceiling {ceiling:.1f}</span></div>'
                     f'<div class="outlook-label">Player outlook</div><div class="reason">{html.escape(reason)}</div>{injury_note}{market_note}<div class="broadcast-context">{quick_context}</div>'
