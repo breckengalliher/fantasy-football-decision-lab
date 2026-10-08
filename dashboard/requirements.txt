@@ -1,6 +1,7 @@
 # Minimal dependencies for the public Streamlit app.
 # The full root requirements.txt remains available for research and pipeline work.
 streamlit>=1.60,<2.0
+streamlit-local-storage==0.0.25
 pandas>=2.3,<4.0
 pyarrow>=17,<22
 plotly>=5.24,<7.0
