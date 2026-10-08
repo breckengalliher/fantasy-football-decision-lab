@@ -54,5 +54,8 @@
   "scoring_format_snapshots": {
     "4": "live_start_sit_board_4pt_current.parquet",
     "6": "live_start_sit_board_6pt_current.parquet"
-  }
+  },
+  "market_refreshed_at": "2026-10-08T00:41:24.489772+00:00",
+  "market_status": "No player props currently published",
+  "market_refresh_interval_minutes": 360
 }
