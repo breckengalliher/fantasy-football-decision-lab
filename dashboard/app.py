@@ -870,11 +870,12 @@ if page == "Decision Room":
                 unsafe_allow_html=True,
             )
 
-        st.markdown(
+        comparison_shell = st.expander("Explore supporting comparison evidence", expanded=False)
+        comparison_shell.markdown(
             '<div class="tool-section-head"><div><h2>Comparison Tool</h2><span>Compare projection range, weekly form, repeatable usage, and supplemental market expectations.</span></div><span class="tool-section-badge">4 comparison views</span></div>',
             unsafe_allow_html=True,
         )
-        comparison_view = st.segmented_control(
+        comparison_view = comparison_shell.segmented_control(
             "Comparison view", ["Projection", "Weekly form", "Usage", "Market"],
             default="Projection", width="stretch", label_visibility="collapsed",
             key="comparison_view",
@@ -907,7 +908,7 @@ if page == "Decision Room":
                 )
             overlap = max(0.0, min(compare["ceiling_ppr"]) - max(compare["floor_ppr"]))
             range_insight = f'{leader["player"]} leads by {projection_spread:.1f} PPR. The ranges overlap by {overlap:.1f}, so this is {"a close lean" if projection_spread < 2.5 else "a meaningful edge"}.'
-            st.markdown(
+            comparison_shell.markdown(
                 f'<div class="comparison-panel-head"><div><h3>Week {NEXT_WEEK} Projection</h3><p>Floor, median projection, and ceiling shown together.</p></div><div class="panel-key">Floor ← range → Ceiling</div></div>'
                 f'<div class="projection-board">{"".join(projection_rows)}</div><div class="panel-insight"><b>Quick read</b><span>{html.escape(range_insight)}</span></div>',
                 unsafe_allow_html=True,
@@ -917,7 +918,7 @@ if page == "Decision Room":
             weekly_name_column = "player_display_name" if "player_display_name" in WEEKLY.columns else "player_name"
             trend_history = WEEKLY.loc[WEEKLY[weekly_name_column].isin(compare["player"])].copy()
             if trend_history.empty:
-                st.info("Weekly production history is temporarily unavailable for these players.")
+                comparison_shell.info("Weekly production history is temporarily unavailable for these players.")
             else:
                 trend_history["display_ppr"] = pd.to_numeric(trend_history["fantasy_points_ppr"], errors="coerce")
                 if position == "QB" and QB_PASS_TD_POINTS != 4 and "passing_tds" in trend_history:
@@ -964,7 +965,7 @@ if page == "Decision Room":
                     )
                 recent_leaders.sort(reverse=True)
                 form_insight = f'{recent_leaders[0][1]} has the strongest two-game form at {recent_leaders[0][0]:.1f} PPR per game.'
-                st.markdown(
+                comparison_shell.markdown(
                     f'<div class="comparison-panel-head"><div><h3>Weekly Form</h3><p>Every current-season result, with recent direction at a glance.</p></div><div class="panel-key">Green 25+ · Orange under 15</div></div>'
                     f'<div class="form-board">{"".join(form_rows)}</div><div class="panel-insight"><b>Quick read</b><span>{html.escape(form_insight)}</span></div>',
                     unsafe_allow_html=True,
@@ -978,7 +979,7 @@ if page == "Decision Room":
                 "TE": {"Targets": "ytd_targets", "Receptions": "ytd_receptions", "Receiving yards": "ytd_receiving_yards", "Receiving TDs": "ytd_receiving_tds", "Snap share": "latest_snap_pct"},
                 "FLEX": {"Opportunities": "recent_opportunities", "Carries": "ytd_carries", "Targets": "ytd_targets", "Receptions": "ytd_receptions", "Rushing yards": "ytd_rushing_yards", "Receiving yards": "ytd_receiving_yards", "Total touchdowns": "ytd_total_tds"},
             }[position]
-            usage_left, usage_right = st.columns([1, 1])
+            usage_left, usage_right = comparison_shell.columns([1, 1])
             usage_label = usage_left.selectbox("Statistic", list(metric_options), key=f"comparison_usage_metric_{position}")
             usage_mode = usage_right.radio("Display", ["Per game", "Season total"], horizontal=True, key=f"comparison_usage_mode_{position}")
             usage_column = metric_options[usage_label]
@@ -1029,7 +1030,7 @@ if page == "Decision Room":
                     insight = f'{leader_usage["player"]} leads this comparison by {gap:.1f}{suffix} in {usage_label.lower()} ({usage_mode.lower()}).'
             else:
                 insight = f'{leader_usage["player"]} is shown at {float(leader_usage["display_value"]):.1f}{"%" if is_share else ""} for {usage_label.lower()}.'
-            st.markdown(
+            comparison_shell.markdown(
                 f'<div class="usage-board">{"".join(usage_rows)}</div><div class="usage-insight"><b>Quick read</b><span>{html.escape(insight)}</span></div>',
                 unsafe_allow_html=True,
             )
@@ -1064,17 +1065,18 @@ if page == "Decision Room":
                 if available_count else
                 "Sportsbooks usually publish most NFL player props 72–96 hours before kickoff. Check again closer to game time."
             )
-            st.markdown(
+            comparison_shell.markdown(
                 f'<div class="comparison-panel-head"><div><h3>Market Expectations</h3><p>Consensus receiving, rushing and passing lines translated to the selected fantasy scoring format.</p></div><div class="panel-key">Supplemental only</div></div>'
                 f'<div class="usage-board">{"".join(market_rows)}</div><div class="usage-insight"><b>Important</b><span>{html.escape(market_insight)} These values never change our ranking.</span></div>',
                 unsafe_allow_html=True,
             )
 
-        st.markdown(
+        deep_dive_shell = st.expander("Open advanced evidence", expanded=False)
+        deep_dive_shell.markdown(
             '<div class="tool-section-head"><div><h2>Deep Dive</h2><span>Explore the player profile, projection logic, and live matchup context behind the decision.</span></div><span class="tool-section-badge">3 analysis lenses</span></div>',
             unsafe_allow_html=True,
         )
-        deep_dive_view = st.segmented_control(
+        deep_dive_view = deep_dive_shell.segmented_control(
             "Deep dive view", ["Player details", "Projection drivers", "Matchup context"],
             default="Player details", width="stretch", label_visibility="collapsed",
             key="deep_dive_view",
@@ -1110,7 +1112,7 @@ if page == "Decision Room":
                     f'<div class="detail-card-projection"><div><span>Floor–ceiling</span><small>{float(detail_row["floor_ppr"]):.1f}–{float(detail_row["ceiling_ppr"]):.1f} PPR</small></div>'
                     f'<div><span>Median</span><strong>{float(detail_row["median_ppr"]):.1f}</strong></div></div></div></article>'
                 )
-            st.markdown(f'<div class="detail-card-grid">{"".join(detail_cards)}</div>', unsafe_allow_html=True)
+            deep_dive_shell.markdown(f'<div class="detail-card-grid">{"".join(detail_cards)}</div>', unsafe_allow_html=True)
 
         common = ["player", "team", "next_opponent", "games_played", "season_ppr", "recent_ppr", "recent_opportunities"]
         position_stats = {
@@ -1121,7 +1123,7 @@ if page == "Decision Room":
             "FLEX": ["ytd_carries", "ytd_targets", "ytd_receptions", "ytd_rushing_yards", "ytd_receiving_yards", "ytd_rushing_tds", "ytd_receiving_tds"],
         }
         if deep_dive_view == "Projection drivers":
-            st.markdown(
+            deep_dive_shell.markdown(
                 '<div class="projection-scope">'
                 '<div class="projection-scope-card included"><strong>Included in our calculation</strong><span>Current-season production, repeatable workload, fading prior-season influence, touchdown regression, and a capped matchup adjustment.</span></div>'
                 '<div class="projection-scope-card informational"><strong>Informational only</strong><span>Injuries, practice, weather, snap share, pace, betting totals, personnel changes, and journalism help your decision but never change our ranking.</span></div>'
@@ -1212,10 +1214,10 @@ if page == "Decision Room":
                     f'<article class="driver-card"><div class="driver-card-head"><strong>{html.escape(str(driver_row["player"]))}</strong>'
                     f'<span>{html.escape(str(driver_row["team"]))} · {html.escape(str(driver_row["position"]))} · vs {html.escape(str(driver_row["next_opponent"]))}</span></div>{driver_rows_html}</article>'
                 )
-            st.markdown(f'<div class="driver-grid">{"".join(driver_cards)}</div>', unsafe_allow_html=True)
-            st.caption("Arrows show whether a driver nudges the outlook up, leaves it essentially unchanged, or pulls it down. They do not represent separate point totals that should be added together.")
+            deep_dive_shell.markdown(f'<div class="driver-grid">{"".join(driver_cards)}</div>', unsafe_allow_html=True)
+            deep_dive_shell.caption("Arrows show whether a driver nudges the outlook up, leaves it essentially unchanged, or pulls it down. They do not represent separate point totals that should be added together.")
 
-            if st.toggle("View detailed statistics", key=f"advanced_projection_stats_{position}"):
+            if deep_dive_shell.toggle("View detailed statistics", key=f"advanced_projection_stats_{position}"):
                 stat_labels = {
                     "games_played": "Games played", "season_ppr": "Season PPR/G", "recent_ppr": "Recent PPR/G",
                     "recent_opportunities": "Last 3 opportunities/G", "ytd_attempts": "Pass attempts", "ytd_carries": "Carries",
@@ -1246,10 +1248,10 @@ if page == "Decision Room":
                         f'<article class="advanced-stat-card"><div class="advanced-stat-head"><strong>{html.escape(str(stat_row["player"]))}</strong>'
                         f'<span>{html.escape(str(stat_row["team"]))} · {html.escape(str(stat_row["position"]))} · vs {html.escape(str(stat_row["next_opponent"]))}</span></div>{stat_rows_html}</article>'
                     )
-                st.markdown(f'<div class="advanced-stat-grid">{"".join(advanced_cards)}</div>', unsafe_allow_html=True)
+                deep_dive_shell.markdown(f'<div class="advanced-stat-grid">{"".join(advanced_cards)}</div>', unsafe_allow_html=True)
 
         if deep_dive_view == "Matchup context":
-            st.caption("Live, informational context for your final call. These details never change our ranking.")
+            deep_dive_shell.caption("Live, informational context for your final call. These details never change our ranking.")
             context_cards = []
             for _, row in compare.iterrows():
                 provider_total = row.get("betting_total_live")
@@ -1294,7 +1296,7 @@ if page == "Decision Room":
                     f'<div class="context-card-game">{logo}<span>{html.escape(str(row["team"]))} · {html.escape(str(row.get("venue", "")))} vs {html.escape(str(row["next_opponent"]))} · {html.escape(kickoff)}</span></div></div></div>'
                     f'<div class="context-card-body">{rows_html}</div><div class="context-card-foot"><b>Context only:</b> use this alongside the projection, not as a ranking adjustment.</div></article>'
                 )
-            st.markdown(f'<div class="context-grid">{"".join(context_cards)}</div>', unsafe_allow_html=True)
+            deep_dive_shell.markdown(f'<div class="context-grid">{"".join(context_cards)}</div>', unsafe_allow_html=True)
 
 elif page == "Player Trends":
     selected_position = st.segmented_control("Position", ["QB", "RB", "WR", "TE"], default="WR")
