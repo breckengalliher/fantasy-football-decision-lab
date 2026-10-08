@@ -648,7 +648,11 @@ def show_onboarding() -> None:
         '</ul></div>',
         unsafe_allow_html=True,
     )
-    st.button("Got it — start comparing", type="primary", width="stretch", on_click=dismiss_onboarding)
+    if st.button("Got it — start comparing", type="primary", width="stretch"):
+        dismiss_onboarding()
+        # Dialog interactions rerun only the dialog fragment by default. Force a
+        # full-app rerun so the parent visibility condition closes it at once.
+        st.rerun(scope="app")
 
 
 browser_storage = LocalStorage(key="sdl_browser_preferences")
