@@ -210,6 +210,9 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .freshness-item:last-of-type { border-right:0; }
 .freshness-item b { color:var(--muted); font-size:.56rem; font-weight:850; letter-spacing:.055em; text-transform:uppercase; }
 .freshness-item.status-caution { color:#8a5a08; }
+.focused-status { display:flex; justify-content:space-between; align-items:center; gap:.75rem; background:#f7faf5; border:1px solid #dbe6d5; border-left:4px solid var(--green); border-radius:10px; padding:.48rem .72rem; margin:.45rem 0 .55rem; color:var(--ink); font-size:.72rem; line-height:1.35; }
+.focused-status > span { display:flex; align-items:center; gap:.28rem; }
+.focused-status.status-caution { background:#fff8e8; border-color:#ead4a4; border-left-color:#d28a18; }
 .freshness-reminder { margin-left:auto; color:var(--muted); font-size:.6rem; line-height:1.25; text-align:right; }
 .freshness-alert { display:flex; align-items:center; gap:.42rem; border-left:3px solid #d39b29; background:#fbf6df; color:#76520d; border-radius:8px; padding:.48rem .65rem; margin:0 0 .55rem; font-size:.7rem; line-height:1.35; }
 .player-finder { margin:.35rem 0 .8rem; }
@@ -378,6 +381,7 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
   .freshness-reminder { flex:1 0 100%; margin:0; padding:.18rem .3rem 0; text-align:left; border-top:1px solid #e3e8ea; }
   .freshness-item { font-size:.72rem; }
   .freshness-item b { font-size:.62rem; }
+  .focused-status { align-items:flex-start; flex-direction:column; gap:.25rem; }
   .freshness-reminder { font-size:.68rem; }
   .game-detail-chip { min-height:1.65rem; font-size:.68rem; }
   .driver-grid { grid-template-columns:1fr; }
@@ -487,6 +491,13 @@ with st.sidebar:
     st.markdown('<div class="sidebar-brand">THE SUNDAY <span>DECISION</span> LAB</div>', unsafe_allow_html=True)
     st.caption("Your weekly lineup call")
     page = st.radio("View", ["Decision Room", "Player Trends", "How It Works"], label_visibility="collapsed")
+    no_clutter_mode = st.toggle(
+        "No-clutter mode",
+        value=True,
+        help="Keeps the recommendation, player cards, essential status, and comparison up front. Reporting and advanced statistics stay available on request.",
+        key="no_clutter_mode",
+    )
+    st.caption("Answer first · deeper evidence when you want it" if no_clutter_mode else "Full dashboard view")
 season = SEASON
 
 header_metadata = get_snapshot_metadata()
@@ -591,16 +602,27 @@ if page == "Decision Room":
     context_detail = "Unavailable" if context_age_minutes is None else f"Checked {context_age_minutes} min ago"
     high_frequency_day = datetime.now().weekday() in {0, 3, 6}
     next_refresh_copy = "Game-window monitoring" if high_frequency_day else "6 AM / 5 PM Central"
-    st.markdown(
-        '<div class="freshness-bar">'
-        f'<div class="freshness-item"><span class="status-dot"></span><b>Projections</b><span>{header_age_minutes}m ago</span></div>'
-        f'<div class="freshness-item"><span class="status-dot"></span><b>Context</b><span>{context_age_minutes}m ago</span></div>'
-        f'<div class="freshness-item{" status-caution" if context_is_stale else ""}"><span class="status-dot"></span><b>Weather / depth</b><span>{context_value} · {context_detail}</span></div>'
-        f'<div class="freshness-item"><b>Next</b><span>{next_refresh_copy}</span></div>'
-        '<div class="freshness-reminder">Confirm official inactives before kickoff.</div>'
-        '</div>',
-        unsafe_allow_html=True,
-    )
+    if no_clutter_mode:
+        essential_status = (
+            f'<span class="status-dot"></span><b>Data checked:</b> projections {header_age_minutes}m ago · '
+            f'live context {context_age_minutes}m ago'
+        )
+        caution = '<b>Action:</b> Confirm weather, depth charts, and official inactives before kickoff.' if context_is_stale else 'Confirm official inactives before kickoff.'
+        st.markdown(
+            f'<div class="focused-status{" status-caution" if context_is_stale else ""}"><span>{essential_status}</span><span>{caution}</span></div>',
+            unsafe_allow_html=True,
+        )
+    else:
+        st.markdown(
+            '<div class="freshness-bar">'
+            f'<div class="freshness-item"><span class="status-dot"></span><b>Projections</b><span>{header_age_minutes}m ago</span></div>'
+            f'<div class="freshness-item"><span class="status-dot"></span><b>Context</b><span>{context_age_minutes}m ago</span></div>'
+            f'<div class="freshness-item{" status-caution" if context_is_stale else ""}"><span class="status-dot"></span><b>Weather / depth</b><span>{context_value} · {context_detail}</span></div>'
+            f'<div class="freshness-item"><b>Next</b><span>{next_refresh_copy}</span></div>'
+            '<div class="freshness-reminder">Confirm official inactives before kickoff.</div>'
+            '</div>',
+            unsafe_allow_html=True,
+        )
     provider_issue = provider_issue_message(PROVIDER_STATUS)
     if provider_issue:
         st.warning(provider_issue)
@@ -749,7 +771,10 @@ if page == "Decision Room":
             edge_title = f'{leader["player"]} leads by {projection_spread:.1f} PPR'
             edge_copy = "The projections are close—treat this as a lean and use the live context below to make your final call." if projection_spread < 2.5 else "We see a meaningful projected advantage, with live context below for your final decision."
             edge_badge = "Close call" if projection_spread < 2.5 else "Clearer edge"
-        st.markdown('<div class="section-title">Start / Sit verdict</div><div class="section-copy">We build this ranking from current production, repeatable workload, a fading prior-season anchor, touchdown regression, and a sample-scaled matchup adjustment. When an active injury matters, an optional injury-adjusted outlook appears directly on that player’s card.</div>', unsafe_allow_html=True)
+        verdict_intro = '<div class="section-title">Start / Sit verdict</div>'
+        if not no_clutter_mode:
+            verdict_intro += '<div class="section-copy">We build this ranking from current production, repeatable workload, a fading prior-season anchor, touchdown regression, and a sample-scaled matchup adjustment. When an active injury matters, an optional injury-adjusted outlook appears directly on that player’s card.</div>'
+        st.markdown(verdict_intro, unsafe_allow_html=True)
         outlook_columns = st.columns(len(compare))
         top_gap = 0.0 if len(compare) == 1 else float(compare.iloc[0]["median_ppr"] - compare.iloc[1]["median_ppr"])
         edge_confidence = "Solo view" if len(compare) == 1 else "Lean" if top_gap < 2.5 else "Moderate edge" if top_gap < 5 else "Strong edge"
@@ -897,7 +922,10 @@ if page == "Decision Room":
                 unsafe_allow_html=True,
             )
 
-        comparison_shell = st.expander("Explore supporting comparison evidence", expanded=False)
+        comparison_shell = st.expander(
+            "Comparison & advanced evidence" if no_clutter_mode else "Explore supporting comparison evidence",
+            expanded=False,
+        )
         comparison_shell.markdown(
             '<div class="tool-section-head"><div><h2>Comparison Tool</h2><span>Compare projection range, weekly form, repeatable usage, and supplemental market expectations.</span></div><span class="tool-section-badge">4 comparison views</span></div>',
             unsafe_allow_html=True,
