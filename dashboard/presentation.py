@@ -16,6 +16,27 @@ def eligible_positions(selection: str) -> tuple[str, ...]:
     return POSITION_GROUPS.get(normalized, (normalized,))
 
 
+def projected_team_total(row: Any) -> float | None:
+    """Return a team's market-implied points from the game total and home spread.
+
+    NFL schedule and provider spread fields are expressed from the home team's
+    perspective: a negative number means the home team is favored.
+    """
+    total = row.get("betting_total_live")
+    if total is None or pd.isna(total):
+        total = row.get("total_line")
+    spread = row.get("spread_line_live")
+    if spread is None or pd.isna(spread):
+        spread = row.get("spread_line")
+    venue = str(row.get("venue", "")).strip().casefold()
+    if total is None or pd.isna(total) or spread is None or pd.isna(spread) or venue not in {"home", "away"}:
+        return None
+    total_value = float(total)
+    home_spread = float(spread)
+    implied = (total_value - home_spread) / 2 if venue == "home" else (total_value + home_spread) / 2
+    return round(implied, 1)
+
+
 NFL_TEAMS = {
     "ARI", "ATL", "BAL", "BUF", "CAR", "CHI", "CIN", "CLE", "DAL", "DEN", "DET", "GB",
     "HOU", "IND", "JAX", "KC", "LV", "LAC", "LA", "LAR", "MIA", "MIN", "NE", "NO", "NYG",

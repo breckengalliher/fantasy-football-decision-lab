@@ -23,7 +23,7 @@ try:
     from dashboard.admin_refresh import authenticate as authenticate_refresh_admin, configured as admin_refresh_configured, refresh_status, trigger_refresh
     from dashboard.states import empty_player_pool_message, provider_issue_message
     from dashboard.methodology_copy import DISCLAIMER_LANGUAGE, METHODOLOGY_LANGUAGE, SOURCE_ATTRIBUTION
-    from dashboard.presentation import eligible_positions, filter_player_search, matchup_summary, role_summary, selection_availability_summary, team_logo_url, weather_summary
+    from dashboard.presentation import eligible_positions, filter_player_search, matchup_summary, projected_team_total, role_summary, selection_availability_summary, team_logo_url, weather_summary
 except ModuleNotFoundError:
     from providers.sportsdataio import context_freshness, format_injury_context
     from outlooks import build_player_outlook, leader_margin
@@ -32,7 +32,7 @@ except ModuleNotFoundError:
     from admin_refresh import authenticate as authenticate_refresh_admin, configured as admin_refresh_configured, refresh_status, trigger_refresh
     from states import empty_player_pool_message, provider_issue_message
     from methodology_copy import DISCLAIMER_LANGUAGE, METHODOLOGY_LANGUAGE, SOURCE_ATTRIBUTION
-    from presentation import eligible_positions, filter_player_search, matchup_summary, role_summary, selection_availability_summary, team_logo_url, weather_summary
+    from presentation import eligible_positions, filter_player_search, matchup_summary, projected_team_total, role_summary, selection_availability_summary, team_logo_url, weather_summary
 
 try:
     from dashboard.data import current_nfl_season
@@ -730,6 +730,9 @@ if page == "Decision Room":
                     betting_total = row.get("total_line")
                 if betting_total is not None and pd.notna(betting_total):
                     game_details.append(f'{float(betting_total):.1f}-point game total')
+                team_total = projected_team_total(row)
+                if team_total is not None:
+                    game_details.append(f'{team_total:.1f} projected team points')
                 practice = format_injury_context(row, "Connected" in INJURY_SOURCE_STATUS)
                 practice_alert = any(term in practice.casefold() for term in ("questionable", "doubtful", "out", "inactive", "ir", "did not practice"))
                 quick_context = "".join([
@@ -1025,6 +1028,8 @@ if page == "Decision Room":
                 logo_url = team_logo_url(detail_row.get("team"))
                 logo = f'<img src="{html.escape(logo_url, quote=True)}" alt="{html.escape(str(detail_row["team"]), quote=True)} logo">' if logo_url else ""
                 game_total = f"{float(detail_total):.1f} points" if detail_total is not None and pd.notna(detail_total) else "Not available"
+                detail_team_total = projected_team_total(detail_row)
+                team_total = f"{detail_team_total:.1f} points" if detail_team_total is not None else "Not available"
                 detail_cards.append(
                     f'<article class="detail-card"><div class="detail-card-head">{photo}<div><div class="detail-card-name">{html.escape(str(detail_row["player"]))}</div>'
                     f'<div class="detail-card-team">{logo}<span>{html.escape(str(detail_row["team"]))} · {html.escape(str(detail_row.get("position", position)))}</span></div></div>'
@@ -1033,6 +1038,7 @@ if page == "Decision Room":
                     f'<div class="detail-card-row"><span>Kickoff</span><b>{html.escape(kickoff)}</b></div>'
                     f'<div class="detail-card-row"><span>Team record</span><b>{html.escape(str(team_record))}</b></div>'
                     f'<div class="detail-card-row"><span>Game total</span><b>{html.escape(game_total)}</b></div>'
+                    f'<div class="detail-card-row"><span>Projected team total</span><b>{html.escape(team_total)}</b></div>'
                     f'<div class="detail-card-projection"><div><span>Floor–ceiling</span><small>{float(detail_row["floor_ppr"]):.1f}–{float(detail_row["ceiling_ppr"]):.1f} PPR</small></div>'
                     f'<div><span>Median</span><strong>{float(detail_row["median_ppr"]):.1f}</strong></div></div></div></article>'
                 )

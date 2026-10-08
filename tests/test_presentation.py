@@ -1,11 +1,23 @@
 import pandas as pd
 
-from dashboard.presentation import comparison_summary, eligible_positions, filter_player_search, matchup_summary, role_summary, selection_availability_summary, team_logo_url, weather_summary
+from dashboard.presentation import comparison_summary, eligible_positions, filter_player_search, matchup_summary, projected_team_total, role_summary, selection_availability_summary, team_logo_url, weather_summary
 
 
 def test_flex_includes_only_rb_wr_and_te():
     assert eligible_positions("FLEX") == ("RB", "WR", "TE")
     assert eligible_positions("QB") == ("QB",)
+
+
+def test_projected_team_total_uses_home_spread_convention():
+    home = {"venue": "Home", "betting_total_live": 47.5, "spread_line_live": -3.5}
+    away = {"venue": "Away", "betting_total_live": 47.5, "spread_line_live": -3.5}
+    assert projected_team_total(home) == 25.5
+    assert projected_team_total(away) == 22.0
+
+
+def test_projected_team_total_falls_back_and_handles_missing_line():
+    assert projected_team_total({"venue": "Home", "total_line": 44, "spread_line": 2}) == 21.0
+    assert projected_team_total({"venue": "Home", "total_line": 44}) is None
 
 
 def test_context_summaries_are_brief_and_explanatory():

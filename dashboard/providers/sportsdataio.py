@@ -288,6 +288,7 @@ def normalize_games(payload: Iterable[dict[str, Any]]) -> pd.DataFrame:
         temperature = _first(item, "ForecastTempLow", "Temperature")
         wind = _first(item, "ForecastWindSpeed", "WindSpeed")
         total = _first(item, "OverUnder", "OverUnderDisplay")
+        spread = _first(item, "PointSpread", "PointSpreadDisplay")
         for team, opponent in [(home, away), (away, home)]:
             rows.append(
                 {
@@ -297,6 +298,7 @@ def normalize_games(payload: Iterable[dict[str, Any]]) -> pd.DataFrame:
                     "temperature_live": temperature,
                     "wind_live": wind,
                     "betting_total_live": total,
+                    "spread_line_live": spread,
                     "game_status_live": _first(item, "Status"),
                     "game_updated_live": _first(item, "Updated", "DateTimeUTC", "DateTime"),
                     "provider_game_id": _first(item, "GameKey", "GameID", "ScoreID"),

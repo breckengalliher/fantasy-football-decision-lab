@@ -76,10 +76,11 @@ def test_no_injury_record_uses_plain_language():
 
 def test_game_context_is_available_to_both_teams():
     result = normalize_games([
-        {"HomeTeam": "AAA", "AwayTeam": "BBB", "ForecastDescription": "Rain", "ForecastWindSpeed": 18, "OverUnder": 44.5}
+        {"HomeTeam": "AAA", "AwayTeam": "BBB", "ForecastDescription": "Rain", "ForecastWindSpeed": 18, "OverUnder": 44.5, "PointSpread": -2.5}
     ])
     assert set(result["team"]) == {"AAA", "BBB"}
     assert result["betting_total_live"].eq(44.5).all()
+    assert result["spread_line_live"].eq(-2.5).all()
 
 
 def test_player_props_keep_only_unambiguous_lines_and_devig_touchdowns():
