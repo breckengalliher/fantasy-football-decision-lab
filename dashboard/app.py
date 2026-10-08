@@ -102,12 +102,20 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .verdict.start .market-note-meta { color:#c0c8cc; }
 .settings-kicker { color:#397f18; font-size:.64rem; font-weight:850; letter-spacing:.1em; text-transform:uppercase; }
 .status-dot { display:inline-block; width:.48rem; height:.48rem; border-radius:50%; background:var(--gold); }
-.verdict { background:#fbfcfc; color:var(--ink); border:1px solid #dfe4e6; border-radius:16px; padding:1.15rem 1.25rem; min-height:0; }
+[data-testid="stHorizontalBlock"]:has(.verdict) { align-items:stretch !important; }
+[data-testid="stHorizontalBlock"]:has(.verdict) > [data-testid="stColumn"] { display:flex !important; }
+[data-testid="stHorizontalBlock"]:has(.verdict) > [data-testid="stColumn"] > div,
+[data-testid="stHorizontalBlock"]:has(.verdict) > [data-testid="stColumn"] [data-testid="stVerticalBlock"],
+[data-testid="stHorizontalBlock"]:has(.verdict) > [data-testid="stColumn"] [data-testid="stElementContainer"],
+[data-testid="stHorizontalBlock"]:has(.verdict) > [data-testid="stColumn"] [data-testid="stMarkdown"],
+[data-testid="stHorizontalBlock"]:has(.verdict) > [data-testid="stColumn"] [data-testid="stMarkdown"] > div,
+[data-testid="stHorizontalBlock"]:has(.verdict) > [data-testid="stColumn"] [data-testid="stMarkdownContainer"] { width:100%; height:100%; box-sizing:border-box; }
+.verdict { background:#fbfcfc; color:var(--ink); border:1px solid #dfe4e6; border-radius:16px; padding:1.15rem 1.25rem; min-height:100%; height:100%; display:flex; flex-direction:column; box-sizing:border-box; }
 .verdict.start { background:var(--navy); color:white; border-color:var(--gold); box-shadow:0 12px 28px rgba(0,34,68,.18); }
 .verdict .tag { display:inline-block; background:#edf4e8; color:#397f18; border-radius:999px; padding:.28rem .52rem; letter-spacing:.12em; font-size:.67rem; font-weight:800; }
 .verdict.start .tag { background:rgba(105,190,40,.16); color:#9ee468; }
 .verdict .name { font-size:1.7rem; font-weight:750; margin:.65rem 0 .1rem; }
-.player-heading { display:flex; align-items:center; gap:.75rem; margin:.65rem 0 .1rem; min-width:0; }
+.player-heading { display:flex; align-items:center; gap:.75rem; margin:.65rem 0 .1rem; min-width:0; min-height:62px; }
 .player-heading .name { margin:0; overflow-wrap:anywhere; }
 .player-photo { width:58px; height:58px; flex:0 0 58px; border-radius:50%; background-size:cover; background-position:center top; background-repeat:no-repeat; background-color:#e8ecee; border:2px solid #d7dde0; }
 .verdict.start .player-photo { border-color:#69be28; background-color:#173854; }
@@ -149,10 +157,10 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .verdict.start .broadcast-context-item { background:rgba(255,255,255,.1); color:#f4f8fa; }
 .verdict.start .broadcast-context-item { background:transparent; border-top-color:rgba(255,255,255,.13); }
 .verdict.start .broadcast-context-item span { color:#9ee468; }
-.game-detail-line { color:var(--muted); font-size:.7rem; line-height:1.35; margin-top:.4rem; }
+.game-detail-line { color:var(--muted); font-size:.7rem; line-height:1.35; margin-top:.4rem; min-height:2.7em; }
 .verdict.start .game-detail-line { color:#c0c8cc; }
 .relative-sit-note { color:var(--muted); font-size:.68rem; line-height:1.35; margin-top:.62rem; font-style:italic; }
-.card-outlook-details { border-top:1px solid #e3e8ea; margin-top:.72rem; padding-top:.22rem; }
+.card-outlook-details { border-top:1px solid #e3e8ea; margin-top:auto; padding-top:.22rem; }
 .card-outlook-details summary { color:var(--navy); cursor:pointer; font-size:.74rem; font-weight:800; padding:.5rem .1rem .28rem; list-style-position:inside; }
 .card-outlook-details summary:hover { color:#397f18; }
 .card-outlook-full { color:var(--ink); font-size:.79rem; line-height:1.5; padding:.42rem .2rem .15rem; }
