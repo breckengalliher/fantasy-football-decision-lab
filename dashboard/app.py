@@ -189,6 +189,8 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .decision-edge-title { font-size:1rem; font-weight:780; line-height:1.25; overflow-wrap:anywhere; }
 .decision-edge-copy { color:#cbd5da; font-size:.76rem; line-height:1.35; margin-top:.18rem; }
 .decision-edge-badge { flex:0 0 auto; background:rgba(105,190,40,.16); color:#9ee468; border:1px solid rgba(158,228,104,.42); border-radius:999px; padding:.38rem .62rem; font-size:.66rem; font-weight:850; letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; }
+.mobile-decision-edge { display:none; }
+.desktop-decision-edge { display:block; }
 .broadcast-context { display:grid; grid-template-columns:1fr; gap:.3rem; margin-top:.78rem; }
 .broadcast-context-item { display:flex; align-items:flex-start; gap:.42rem; background:transparent; color:var(--ink); padding:.34rem 0; border-top:1px solid #e7eaec; min-width:0; font-size:.72rem; line-height:1.28; overflow-wrap:anywhere; }
 .broadcast-context-item span { color:var(--muted); min-width:5.25rem; font-size:.62rem; font-weight:800; letter-spacing:.04em; text-transform:uppercase; }
@@ -433,6 +435,8 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
   .freshness-item { font-size:.72rem; }
   .freshness-item b { font-size:.62rem; }
   .focused-status { align-items:flex-start; flex-direction:column; gap:.25rem; }
+  .mobile-decision-edge { display:block; }
+  .desktop-decision-edge { display:none; }
   [data-testid="stExpander"] summary { min-height:44px; align-items:center; }
   [data-testid="stButton"] button, [data-testid="stDownloadButton"] button, [data-testid="stLinkButton"] a { min-height:44px; }
   [data-testid="stHorizontalBlock"] { min-width:0 !important; }
@@ -816,6 +820,29 @@ if page == "Decision Room":
             replacement_index = None
             st.session_state[replacement_key] = None
 
+        preview_compare = pool.loc[pool["player"].isin(names)].sort_values("projected_ppr", ascending=False)
+        decision_edge_markup = ""
+        if not preview_compare.empty:
+            preview_leader = preview_compare.iloc[0]
+            preview_spread = leader_margin(preview_compare["median_ppr"].tolist())
+            if len(preview_compare) == 1:
+                preview_title = f'{preview_leader["player"]} · {float(preview_leader["median_ppr"]):.1f} projected PPR'
+                preview_copy = "Add another player to see the projected advantage."
+                preview_badge = "1 player selected"
+            else:
+                preview_title = f'{preview_leader["player"]} leads by {preview_spread:.1f} PPR'
+                preview_copy = "The projections are close—treat this as a lean." if preview_spread < 2.5 else "We see a meaningful projected advantage."
+                preview_badge = "Close call" if preview_spread < 2.5 else "Clearer edge"
+            decision_edge_markup = (
+                '<div class="decision-edge">'
+                f'<div class="decision-edge-main"><div class="decision-edge-label">Week {NEXT_WEEK} decision edge</div>'
+                f'<div class="decision-edge-title">{html.escape(preview_title)}</div>'
+                f'<div class="decision-edge-copy">{html.escape(preview_copy)}</div></div>'
+                f'<div class="decision-edge-badge">{html.escape(preview_badge)}</div>'
+                '</div>'
+            )
+            st.markdown(f'<div class="mobile-decision-edge">{decision_edge_markup}</div>', unsafe_allow_html=True)
+
         st.markdown(f'<div class="comparison-count">Comparison lineup · {len(names)} of 3 slots filled</div>', unsafe_allow_html=True)
         slot_columns = st.columns(3)
         for slot_index, slot_column in enumerate(slot_columns):
@@ -858,25 +885,9 @@ if page == "Decision Room":
                             unsafe_allow_html=True,
                         )
 
-        preview_compare = pool.loc[pool["player"].isin(names)].sort_values("projected_ppr", ascending=False)
         if not preview_compare.empty:
-            preview_leader = preview_compare.iloc[0]
-            preview_spread = leader_margin(preview_compare["median_ppr"].tolist())
-            if len(preview_compare) == 1:
-                preview_title = f'{preview_leader["player"]} · {float(preview_leader["median_ppr"]):.1f} projected PPR'
-                preview_copy = "Add another player to see the projected advantage."
-                preview_badge = "1 player selected"
-            else:
-                preview_title = f'{preview_leader["player"]} leads by {preview_spread:.1f} PPR'
-                preview_copy = "The projections are close—treat this as a lean." if preview_spread < 2.5 else "We see a meaningful projected advantage."
-                preview_badge = "Close call" if preview_spread < 2.5 else "Clearer edge"
             st.markdown(
-                '<div class="decision-edge">'
-                f'<div class="decision-edge-main"><div class="decision-edge-label">Week {NEXT_WEEK} decision edge</div>'
-                f'<div class="decision-edge-title">{html.escape(preview_title)}</div>'
-                f'<div class="decision-edge-copy">{html.escape(preview_copy)}</div></div>'
-                f'<div class="decision-edge-badge">{html.escape(preview_badge)}</div>'
-                '</div>',
+                f'<div class="desktop-decision-edge">{decision_edge_markup}</div>',
                 unsafe_allow_html=True,
             )
             st.markdown(
