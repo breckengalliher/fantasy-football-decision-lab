@@ -80,7 +80,12 @@ h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spac
 .header-details .hero-subtitle { font-family:'Barlow Condensed','Arial Narrow',sans-serif; color:var(--navy); font-size:1.42rem; letter-spacing:.035em; margin-bottom:.2rem; }
 .header-details p { color:var(--muted); margin:.15rem 0 .65rem; font-size:.9rem; line-height:1.45; }
 .injury-impact-note { margin:.75rem 0 0; padding:.72rem .8rem; border-radius:10px; background:#f3f7ee; border-left:4px solid var(--gold); color:var(--ink); font-size:.76rem; line-height:1.45; }
-.injury-impact-note strong { display:block; color:#397f18; font-size:.66rem; letter-spacing:.08em; text-transform:uppercase; margin-bottom:.2rem; }
+.injury-impact-note summary { cursor:pointer; color:#397f18; font-weight:800; letter-spacing:.035em; list-style:none; }
+.injury-impact-note summary::-webkit-details-marker { display:none; }
+.injury-impact-note summary::after { content:'+'; float:right; font-size:1rem; }
+.injury-impact-note[open] summary::after { content:'–'; }
+.injury-impact-body { padding-top:.55rem; }
+.injury-impact-range { display:block; margin-top:.35rem; font-weight:700; color:var(--navy); }
 .settings-kicker { color:#397f18; font-size:.64rem; font-weight:850; letter-spacing:.1em; text-transform:uppercase; }
 .status-dot { display:inline-block; width:.48rem; height:.48rem; border-radius:50%; background:var(--gold); }
 .verdict { background:#fbfcfc; color:var(--ink); border:1px solid #dfe4e6; border-radius:16px; padding:1.15rem 1.25rem; min-height:0; }
@@ -474,18 +479,6 @@ if page == "Decision Room":
     provider_issue = provider_issue_message(PROVIDER_STATUS)
     if provider_issue:
         st.warning(provider_issue)
-    projection_scenario = st.segmented_control(
-        "Projection scenario", ["Baseline", "Injury-adjusted"], default="Baseline",
-        width="stretch", key="projection_scenario",
-    )
-    if projection_scenario == "Injury-adjusted":
-        BOARD["median_ppr"] = BOARD["injury_adjusted_median_ppr"]
-        BOARD["projected_ppr"] = BOARD["injury_adjusted_median_ppr"]
-        BOARD["floor_ppr"] = BOARD["injury_adjusted_floor_ppr"]
-        BOARD["ceiling_ppr"] = BOARD["injury_adjusted_ceiling_ppr"]
-        st.caption("Optional scenario: active injuries, practice participation, quarterback availability, and teammate opportunity shifts are applied. The baseline model remains unchanged.")
-    else:
-        st.caption("Baseline model: injuries remain visible as decision context but do not alter the projection.")
     position = st.segmented_control("Position", ["QB", "RB", "WR", "TE"], default="WR")
     pool = BOARD.loc[
         BOARD["position"].eq(position)
@@ -618,8 +611,7 @@ if page == "Decision Room":
             unsafe_allow_html=True,
         )
 
-        scenario_copy = " This optional view also applies current injury and teammate-availability scenarios." if projection_scenario == "Injury-adjusted" else " The live context shown below helps you make the final call but does not change our ranking."
-        st.markdown(f'<div class="section-title">Start / Sit verdict</div><div class="section-copy">We build this ranking from current production, repeatable workload, a fading prior-season anchor, touchdown regression, and a sample-scaled matchup adjustment.{scenario_copy}</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-title">Start / Sit verdict</div><div class="section-copy">We build this ranking from current production, repeatable workload, a fading prior-season anchor, touchdown regression, and a sample-scaled matchup adjustment. When an active injury matters, an optional injury-adjusted outlook appears directly on that player’s card.</div>', unsafe_allow_html=True)
         outlook_columns = st.columns(len(compare))
         top_gap = 0.0 if len(compare) == 1 else float(compare.iloc[0]["median_ppr"] - compare.iloc[1]["median_ppr"])
         edge_confidence = "Solo view" if len(compare) == 1 else "Lean" if top_gap < 2.5 else "Moderate edge" if top_gap < 5 else "Strong edge"
@@ -691,23 +683,28 @@ if page == "Decision Room":
                     f'{html.escape(full_reason)}{reporting_links}</div></details>'
                 )
                 injury_note = ""
-                if projection_scenario == "Injury-adjusted":
-                    baseline = float(row.get("baseline_median_ppr", median))
-                    delta = median - baseline
-                    risk = str(row.get("injury_risk_label", "No adjustment"))
-                    teammate_effect = str(row.get("injury_teammate_effect", "") or "").strip()
-                    if risk != "No adjustment" or teammate_effect:
-                        impact_parts = []
-                        if risk != "No adjustment":
-                            impact_parts.append(str(row.get("injury_impact_summary", "")))
-                            impact_parts.append(str(row.get("injury_recovery_outlook", "")))
-                        if teammate_effect:
-                            impact_parts.append(teammate_effect)
-                        impact_label = f"Injury impact · {risk}" if risk != "No adjustment" else "Team opportunity shift"
-                        injury_note = (
-                            f'<div class="injury-impact-note"><strong>{html.escape(impact_label)} · {delta:+.1f} PPR</strong>'
-                            f'{html.escape(" ".join(part for part in impact_parts if part))}</div>'
-                        )
+                baseline = float(row.get("baseline_median_ppr", median))
+                adjusted = float(row.get("injury_adjusted_median_ppr", baseline))
+                adjusted_floor = float(row.get("injury_adjusted_floor_ppr", floor))
+                adjusted_ceiling = float(row.get("injury_adjusted_ceiling_ppr", ceiling))
+                delta = adjusted - baseline
+                risk = str(row.get("injury_risk_label", "No adjustment"))
+                teammate_effect = str(row.get("injury_teammate_effect", "") or "").strip()
+                if risk == "No adjustment" and abs(delta) < 0.10:
+                    teammate_effect = ""
+                if risk != "No adjustment" or teammate_effect:
+                    impact_parts = []
+                    if risk != "No adjustment":
+                        impact_parts.append(str(row.get("injury_impact_summary", "")))
+                        impact_parts.append(str(row.get("injury_recovery_outlook", "")))
+                    if teammate_effect:
+                        impact_parts.append(teammate_effect)
+                    impact_label = f"Injury impact · {risk}" if risk != "No adjustment" else "Team opportunity shift"
+                    injury_note = (
+                        f'<details class="injury-impact-note"><summary>{html.escape(impact_label)} · {adjusted:.1f} PPR ({delta:+.1f})</summary>'
+                        f'<div class="injury-impact-body">{html.escape(" ".join(part for part in impact_parts if part))}'
+                        f'<span class="injury-impact-range">Adjusted range: {adjusted_floor:.1f}–{adjusted_ceiling:.1f} PPR</span></div></details>'
+                    )
                 st.markdown(
                     f'<div class="verdict {card_class}"><div style="display:flex;align-items:center;gap:.45rem"><div class="tag">{verdict}</div><div class="confidence-label">{edge_confidence}</div></div><div class="player-heading">{photo}<div class="name">{html.escape(str(row["player"]))}</div></div>'
                     f'<div class="opponent team-line">{logo}<span>{html.escape(player_details)}</span></div>'

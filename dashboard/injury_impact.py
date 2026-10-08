@@ -141,7 +141,7 @@ def apply_injury_scenario(board: pd.DataFrame) -> pd.DataFrame:
     result["injury_adjusted_median_ppr"] = (result["baseline_median_ppr"] * direct * team_factor + boost).clip(lower=0)
     result["injury_adjusted_floor_ppr"] = (result["baseline_floor_ppr"] * direct * team_factor + boost * 0.50).clip(lower=0)
     result["injury_adjusted_ceiling_ppr"] = (result["baseline_ceiling_ppr"] * direct * team_factor + boost * 1.20).clip(lower=0)
-    result.loc[result["injury_teammate_boost"].abs().lt(0.05), "injury_teammate_effect"] = ""
+    result.loc[result["injury_teammate_boost"].abs().lt(0.10), "injury_teammate_effect"] = ""
     result["injury_risk_label"] = result.apply(lambda row: _risk_label(row, float(row["injury_direct_factor"])), axis=1)
     result["injury_recovery_outlook"] = result.apply(lambda row: _recovery_outlook(row, float(row["injury_direct_factor"])), axis=1)
     result["injury_impact_summary"] = result.apply(lambda row: _direct_summary(row, float(row["injury_direct_factor"])), axis=1)

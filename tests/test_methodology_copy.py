@@ -11,7 +11,7 @@ def test_sources_distinguish_provider_data_from_app_outputs():
 def test_methodology_preserves_context_separation_and_relative_verdict():
     assert "only the players selected" in METHODOLOGY_LANGUAGE
     assert "Injury-adjusted" in METHODOLOGY_LANGUAGE
-    assert "unchanged baseline" in METHODOLOGY_LANGUAGE
+    assert "individual player card" in METHODOLOGY_LANGUAGE
     assert "never infers an exact medical return date" in METHODOLOGY_LANGUAGE
     assert "P10, median and P90" in METHODOLOGY_LANGUAGE
     assert "narrative only" in METHODOLOGY_LANGUAGE
