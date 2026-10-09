@@ -281,6 +281,7 @@ def _toggle_fantasy_details(open_key: str) -> None:
     st.session_state[open_key] = not st.session_state.get(open_key, False)
 
 
+@st.fragment
 def _fantasy_details(player: dict[str, Any], pool: pd.DataFrame, weekly: pd.DataFrame, passing_td_points: int, key: str) -> None:
     open_key = f"{key}-open"
     st.button(

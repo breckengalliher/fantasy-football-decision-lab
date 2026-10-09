@@ -1,5 +1,14 @@
 from dashboard import auth_storage, auth_ui, command_center_v2
 from dashboard.supabase_api import SupabaseAPIError
+import ast
+from pathlib import Path
+
+
+def test_details_interaction_is_fragment_scoped():
+    tree = ast.parse(Path(command_center_v2.__file__).read_text(encoding='utf-8'))
+    function = next(node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == '_fantasy_details')
+    assert any(ast.unparse(node) == 'st.fragment' for node in function.decorator_list)
+    assert not any(isinstance(node, ast.Call) and ast.unparse(node.func) == 'st.rerun' for node in ast.walk(function))
 
 
 def test_details_callback_is_player_scoped(monkeypatch):
