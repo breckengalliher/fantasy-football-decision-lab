@@ -57,6 +57,15 @@ class SupabaseAPI:
             response.raise_for_status()
         except requests.RequestException as error:
             status = getattr(error.response, "status_code", None)
+            if status == 422 and method == "PUT" and path == "/auth/v1/user":
+                try:
+                    payload = error.response.json()
+                except ValueError:
+                    payload = {}
+                code = payload.get("code") if isinstance(payload, dict) else None
+                if code == "same_password":
+                    raise SupabaseAPIError("Choose a new password different from your current password.") from None
+                raise SupabaseAPIError("The new password was not accepted. Choose a different, strong password.") from None
             if status in {400, 401} and path.startswith("/auth/"):
                 raise SupabaseAPIError("The email or password was not accepted.") from None
             if status in {400, 403, 409} and path.startswith("/rest/"):
