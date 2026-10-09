@@ -64,6 +64,7 @@
   "depth_freshness_verified": false,
   "staging_certification_event": {
     "label": "concurrent-publisher-2",
+    "test_run_id": "2026-10-09T20:38:43.954152+00:00",
     "description": "QA concurrency test, same real provider retrieval and projections"
   }
 }
