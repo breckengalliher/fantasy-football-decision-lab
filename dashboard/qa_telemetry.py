@@ -63,7 +63,9 @@ def sample():
                 for label,caches in (('data',_data_caches),('resource',_resource_caches)):
                     stats=[s for family in caches.get_stats().values() for s in family]
                     extra[label+'_cache_bytes']=sum(s.byte_length for s in stats)
-                    extra[label+'_cache_entries']=len(stats)
+                    # Streamlit groups statistics by cache function; this is
+                    # not the number of individual cached objects.
+                    extra[label+'_cache_stat_groups']=len(stats)
                 if tracemalloc.is_tracing():
                     extra['traced_current_peak']=tracemalloc.get_traced_memory()
                     extra['allocation_top']=[{'file':str(s.traceback[0].filename).replace('/app/',''),
