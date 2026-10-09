@@ -16,7 +16,9 @@ ROOT=Path(__file__).resolve().parents[1]
 
 @pytest.mark.parametrize('points',[4,6])
 def test_stafford_duplicate_reconnects_real_four_game_sample(points):
-    raw=pd.read_parquet(ROOT/f'data/processed/live_start_sit_board_{points}pt_current.parquet')
+    # Pin the original defect evidence; refreshed publication data may already
+    # have removed the duplicate and must not serve as a historical fixture.
+    raw=pd.read_parquet(ROOT/f'tests/fixtures/football_repair_20261009/live_start_sit_board_{points}pt_current.parquet')
     repaired=reconcile_board_identities(raw)
     player=repaired.loc[repaired.player_id.eq('00-0026498')]
     assert len(player)==1 and player.iloc[0].games_played==4
