@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from dashboard.qa_telemetry import install as install_qa_telemetry
+install_qa_telemetry()
+
 import html
 import json
 import os
