@@ -94,7 +94,13 @@ class SupabaseAPI:
 
     def recover(self, email: str, redirect_to: str) -> None:
         # Always return the same UI response so callers cannot enumerate users.
-        self._request("POST", "/auth/v1/recover", json={"email": email, "redirect_to": redirect_to})
+        self._request("POST", "/auth/v1/recover", params={"redirect_to": redirect_to}, json={"email": email})
+
+    def update_password(self, access_token: str, password: str) -> None:
+        """Supabase validates the ordinary user's token; no admin credentials."""
+        if len(password) < 12:
+            raise ValueError("Use at least 12 characters")
+        self._request("PUT", "/auth/v1/user", access_token=access_token, json={"password": password})
 
     def sign_out(self, access_token: str) -> None:
         self._request("POST", "/auth/v1/logout?scope=local", access_token=access_token)

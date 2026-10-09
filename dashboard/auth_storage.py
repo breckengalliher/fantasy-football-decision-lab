@@ -9,9 +9,10 @@ _bridge = components.declare_component('sdl_auth_storage', path=str(Path(__file_
 
 
 class AuthStorage:
-    def __init__(self, values, available=True):
+    def __init__(self, values, available=True, recovery=None):
         self.storedItems = dict(values)
         self.available = available
+        self.recovery = recovery
 
     def getItem(self, key):
         return self.storedItems.get(key)
@@ -33,10 +34,12 @@ class AuthStorage:
 
 def browser_auth_storage():
     pending = st.session_state.get(PENDING_KEY, {})
-    result = _bridge(changes=pending.get('changes', {}), operation_id=pending.get('operation_id', ''), key='cc_acknowledged_auth_storage', default=None)
+    result = _bridge(changes=pending.get('changes', {}), operation_id=pending.get('operation_id', ''),
+                     clear_recovery=bool(st.session_state.get('cc_recovery_link_seen')),
+                     key='cc_acknowledged_auth_storage', default=None)
     if not result or (pending and result.get('operation_id') != pending['operation_id']):
         return None
     if not result.get('ok'):
         st.warning('Browser storage is unavailable. Sign-in will last for this visit only.')
     st.session_state.pop(PENDING_KEY, None)
-    return AuthStorage(result.get('values', {}), available=bool(result.get('ok')))
+    return AuthStorage(result.get('values', {}), available=bool(result.get('ok')), recovery=result.get('recovery'))

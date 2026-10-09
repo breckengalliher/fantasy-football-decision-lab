@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import asdict
 from datetime import datetime, timedelta, timezone
+import hashlib
 
 import streamlit as st
 from streamlit_local_storage import LocalStorage
@@ -140,6 +141,50 @@ def render_auth(api: SupabaseAPI, app_url: str) -> AuthSession | None:
     storage = browser_auth_storage()
     if storage is None:
         st.caption("Restoring your private session…")
+        return None
+    if st.session_state.pop("cc_clear_recovery_inputs", False):
+        st.session_state.pop("cc_new_password", None)
+        st.session_state.pop("cc_confirm_password", None)
+    # A verified recovery session must reach the password form, not the roster.
+    recovery = getattr(storage, "recovery", None)
+    if isinstance(recovery, dict) and recovery.get("error"):
+        st.session_state["cc_recovery_link_error"] = True
+    if isinstance(recovery, dict) and recovery.get("type") in {"recovery", "invite"}:
+        token = recovery.get("refresh_token")
+        fingerprint = hashlib.sha256(str(token).encode()).hexdigest()
+        if token and st.session_state.get("cc_recovery_link_seen") != fingerprint:
+            st.session_state["cc_recovery_link_seen"] = fingerprint
+            try:
+                verified = api.refresh(str(token))
+                st.session_state["cc_recovery_session"] = asdict(verified)
+            except SupabaseAPIError:
+                st.session_state["cc_recovery_link_error"] = True
+    if st.session_state.get("cc_recovery_link_error"):
+        st.warning("This account-access link could not be verified. Request a new recovery email.")
+    if st.session_state.get("cc_recovery_session"):
+        st.markdown("### Set your account password")
+        st.caption("Use a unique password with at least 12 characters. Your saved rosters will not change.")
+        with st.form("cc_set_recovery_password"):
+            password = st.text_input("New password", type="password", key="cc_new_password")
+            confirmation = st.text_input("Confirm new password", type="password", key="cc_confirm_password")
+            persistence = st.selectbox("After updating password", list(PERSISTENCE_OPTIONS), index=0)
+            submitted = st.form_submit_button("Save new password", type="primary")
+        if submitted:
+            if len(password) < 12:
+                st.error("Use at least 12 characters.")
+            elif password != confirmation:
+                st.error("The passwords do not match.")
+            else:
+                recovered = AuthSession(**st.session_state["cc_recovery_session"])
+                try:
+                    api.update_password(recovered.access_token, password)
+                    _save(recovered, storage, PERSISTENCE_OPTIONS[persistence])
+                    st.session_state.pop("cc_recovery_session", None)
+                    st.session_state.pop("cc_recovery_link_error", None)
+                    st.session_state["cc_clear_recovery_inputs"] = True
+                    st.rerun()
+                except SupabaseAPIError as error:
+                    st.error(str(error))
         return None
     session = restore_session(api, storage)
     # Recover a successful sign-in whose persistence write previously failed.
