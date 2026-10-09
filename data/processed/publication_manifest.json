@@ -1,19 +1,19 @@
 {
   "schema_version": 1,
-  "version": "7b2f7382da8dd62e2a4f56ea676d9162a942ed56860c98048b4c9f52f3affcf6",
-  "revision": "5862d961fe1d2f14d91adf830ec7eb04bd33684a",
+  "version": "dd8e88ce7eaabedc0192d37d1a837f62ae1be65da1da9c432292924e67481bac",
+  "revision": "f0b3a26d40316e7b3f5ea8a9fb8995cc44565e37",
   "season": 2026,
   "week": 5,
   "validation_status": "passed",
-  "validated_at": "2026-10-09T18:50:43.683322+00:00",
-  "prepared_at": "2026-10-09T18:50:43.683322+00:00",
+  "validated_at": "2026-10-09T20:28:00.697085+00:00",
+  "prepared_at": "2026-10-09T20:28:00.697085+00:00",
   "files": {
     "live_start_sit_board_4pt_current.parquet": {
-      "sha256": "b5536bbfc04769f4765ee7ab81b108ec937dc1c8a936b9a9e1923be77dd6c850",
+      "sha256": "12a55490d20c311d836d3dfa3fa7660c3745b4b49b03b2ca7f4982a5623d81ae",
       "record_count": 478
     },
     "live_start_sit_board_6pt_current.parquet": {
-      "sha256": "d723e61038c694a804aeec6981bd355d1c6992463abf52d06e4412a90d671e4d",
+      "sha256": "1333b05dc94f03c77441ed545cdc1550cb0fb5c4378962bd6b45a67359f6192e",
       "record_count": 478
     },
     "live_weekly_current.parquet": {
@@ -21,12 +21,12 @@
       "record_count": 4449
     },
     "live_refresh_metadata.json": {
-      "sha256": "f9d5c221d4f2ff17bea3a1f5c056fda32ad61f72e6dcb055954e94cb00c2ba2d",
+      "sha256": "df0c489a7c4b15b53582f37a6d713e5b8b236b4853a51f7d6efa0a3d765201c7",
       "record_count": null
     }
   },
   "projection_source_retrieved_at": "2026-10-08T23:31:43.711159+00:00",
-  "availability_source_retrieved_at": "2026-10-09T18:45:36.486857+00:00",
+  "availability_source_retrieved_at": "2026-10-09T20:27:59.066479+00:00",
   "availability_source_updated_at": null,
   "depth_source_updated_at": null,
   "source_freshness": {
