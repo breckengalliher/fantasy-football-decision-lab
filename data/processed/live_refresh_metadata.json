@@ -63,8 +63,7 @@
   "depth_source_updated_at": null,
   "depth_freshness_verified": false,
   "staging_certification_event": {
-    "label": "scheduled-edit-protection",
-    "description": "QA refresh delivery test; real provider retrieval, not an official injury-change claim",
-    "retrieved_at": "2026-10-09T18:45:36.742419+00:00"
+    "label": "concurrent-publisher-1",
+    "description": "QA concurrency test, same real provider retrieval and projections"
   }
 }
