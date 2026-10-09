@@ -3,8 +3,8 @@
   "completed_week": 4,
   "next_week": 5,
   "refreshed_at": "2026-10-08T23:31:43.711159+00:00",
-  "context_refreshed_at": "2026-10-08T23:31:43.711172+00:00",
-  "refresh_scope": "Full weekly projection and context rebuild",
+  "context_refreshed_at": "2026-10-09T00:43:40.313701+00:00",
+  "refresh_scope": "Live context only; projections preserved",
   "eligible_players": 210,
   "player_pool_audit": {
     "eligible_players": 210,
@@ -21,16 +21,16 @@
     "missing_opponents": 0,
     "invalid_positions": 0
   },
-  "injury_records": 418,
+  "injury_records": 419,
   "injury_source_status": {
     "nflverse": "Connected \u00b7 222 Week 5 records",
-    "sleeper": "Connected \u00b7 321 designated players"
+    "sleeper": "Connected \u00b7 323 designated players"
   },
-  "injury_refreshed_at": "2026-10-08T23:31:28.861423+00:00",
-  "sportsdataio_status": "Connected \u00b7 2026-10-08 23:31 UTC",
-  "sportsdataio_refreshed_at": "2026-10-08T23:31:28.218859+00:00",
+  "injury_refreshed_at": "2026-10-09T00:43:40.102207+00:00",
+  "sportsdataio_status": "Connected \u00b7 2026-10-09 00:43 UTC",
+  "sportsdataio_refreshed_at": "2026-10-09T00:43:39.399367+00:00",
   "market_status": "No player props currently published",
-  "market_refreshed_at": "2026-10-08T23:31:28.218859+00:00",
+  "market_refreshed_at": "2026-10-09T00:43:39.399367+00:00",
   "reporting_refreshed_at": "2026-10-08T23:31:28.871816+00:00",
   "journalism_status": "Connected \u00b7 0 matched items",
   "reporter_social_status": "Connected \u00b7 11 reporter posts",
