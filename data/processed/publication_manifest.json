@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
-  "version": "dd8e88ce7eaabedc0192d37d1a837f62ae1be65da1da9c432292924e67481bac",
-  "revision": "f0b3a26d40316e7b3f5ea8a9fb8995cc44565e37",
+  "version": "d7ff3285db52463b9a1216370890a5476a5737ad254e9c33509b2afab413bd41",
+  "revision": "6935de8c50939e029b1ed7e60574a26193ef9ffc",
   "season": 2026,
   "week": 5,
   "validation_status": "passed",
-  "validated_at": "2026-10-09T20:28:00.697085+00:00",
-  "prepared_at": "2026-10-09T20:28:00.697085+00:00",
+  "validated_at": "2026-10-09T20:33:23.204637+00:00",
+  "prepared_at": "2026-10-09T20:33:23.204637+00:00",
   "files": {
     "live_start_sit_board_4pt_current.parquet": {
       "sha256": "12a55490d20c311d836d3dfa3fa7660c3745b4b49b03b2ca7f4982a5623d81ae",
@@ -21,7 +21,7 @@
       "record_count": 4449
     },
     "live_refresh_metadata.json": {
-      "sha256": "df0c489a7c4b15b53582f37a6d713e5b8b236b4853a51f7d6efa0a3d765201c7",
+      "sha256": "82320571d647629ea155349d7298b00cd1b7863a9bb577abd55900cb5511590b",
       "record_count": null
     }
   },
