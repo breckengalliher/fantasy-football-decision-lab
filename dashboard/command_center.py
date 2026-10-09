@@ -88,9 +88,9 @@ def _roster_manager(team: dict[str, Any], roster: list[dict[str, Any]], reposito
                 left.markdown(f"**{html.escape(label)}**  \\n{html.escape(player_name)} · {html.escape(detail)}")
                 if right.button("Remove", key=f"cc_remove_{assignment['id']}", width="stretch"):
                     try:
-                        repository.remove_player(str(assignment["id"]))
+                        repository.remove_player(str(assignment["id"]), expected={**assignment, "slot_id": str(slot["id"])})
                         st.rerun()
-                    except SupabaseAPIError as error:
+                    except (SupabaseAPIError, ValueError) as error:
                         st.error(str(error))
                 continue
             eligible = SLOT_ELIGIBILITY[slot_type]

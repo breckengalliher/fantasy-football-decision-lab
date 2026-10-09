@@ -249,7 +249,10 @@ def _roster_editor(team: dict[str, Any], roster: list[dict[str, Any]], repo: Ros
             player = lookup.get(str(current["player_id"]), {})
             left.markdown(f"**{label}**  \\n{html.escape(_text(player.get('player'), str(current['player_id'])))} · {html.escape(_text(player.get('team')))} {_text(player.get('position'), '')}")
             if right.button("Remove", key=f"cc_v2_remove_{current['id']}", width="stretch"):
-                repo.remove_player(str(current["id"])); st.rerun()
+                try:
+                    repo.remove_player(str(current["id"]), expected={**current, "slot_id": slot_id}); st.rerun()
+                except (SupabaseAPIError, ValueError) as error:
+                    st.error(str(error))
             continue
         candidates = pool[pool["position"].astype(str).isin(ELIGIBLE[slot_type]) & ~pool["player_id"].astype(str).isin(used)].sort_values("median_ppr", ascending=False)
         options, rows = candidates["player_id"].astype(str).tolist(), {str(row["player_id"]): row.to_dict() for _, row in candidates.iterrows()}
@@ -394,7 +397,10 @@ def _manage_player(team: dict[str, Any], roster: list[dict[str, Any]], source_sl
         st.rerun()
     confirmed_remove = st.checkbox("Confirm removal from this SDL roster", key=f"cc_confirm_remove_{current['id']}", disabled=locked)
     if c2.button("Remove", key=f"cc_remove_{current['id']}", width="stretch", disabled=locked or not confirmed_remove):
-        repo.remove_player(str(current["id"])); st.rerun()
+        try:
+            repo.remove_player(str(current["id"]), expected={**current, "slot_id": str(source_slot["id"])}); st.rerun()
+        except (SupabaseAPIError, ValueError) as error:
+            st.error(str(error))
     if locked:
         st.caption("Game started — lineup moves and removal are locked. Research remains available.")
     if target_slots and not locked:
@@ -406,9 +412,9 @@ def _manage_player(team: dict[str, Any], roster: list[dict[str, Any]], source_sl
                 if other:
                     repo.swap_players({**current, "slot_id": str(source_slot["id"])}, {**other, "slot_id": str(target["id"])}, str(team["id"]))
                 else:
-                    repo.move_player(str(current["id"]), str(target["id"]))
+                    repo.move_player(str(current["id"]), str(target["id"]), expected={**current, "slot_id": str(source_slot["id"])})
                 st.rerun()
-            except SupabaseAPIError as error:
+            except (SupabaseAPIError, ValueError) as error:
                 st.error(str(error))
 
 

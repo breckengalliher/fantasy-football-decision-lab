@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any
 from urllib.parse import quote
 
-from dashboard.supabase_api import SupabaseAPI
+from dashboard.supabase_api import SupabaseAPI, SupabaseAPIError
 
 
 class RosterRepository:
@@ -193,16 +193,31 @@ class RosterRepository:
         )
         return rows[0]
 
-    def remove_player(self, assignment_id: str) -> None:
-        self.api.table(self.access_token, "roster_assignments", method="DELETE", query=f"id=eq.{quote(assignment_id, safe='')}")
+    @staticmethod
+    def _assignment_precondition(assignment_id: str, expected: dict[str, Any]) -> str:
+        """Compare-and-set in the database statement, not a racy pre-read."""
+        fields = {"id": assignment_id, "slot_id": expected.get("slot_id"),
+                  "player_id": expected.get("player_id"), "updated_at": expected.get("updated_at")}
+        if any(not value for value in fields.values()):
+            raise ValueError("Reload the roster before editing this assignment")
+        return "&".join(f"{field}=eq.{quote(str(value), safe='')}" for field, value in fields.items())
 
-    def move_player(self, assignment_id: str, destination_slot_id: str) -> None:
+    def remove_player(self, assignment_id: str, *, expected: dict[str, Any]) -> None:
+        rows = self.api.table(self.access_token, "roster_assignments", method="DELETE",
+                              query=self._assignment_precondition(assignment_id, expected),
+                              prefer="return=representation")
+        if not rows:
+            raise SupabaseAPIError("Roster changed; reload before saving")
+
+    def move_player(self, assignment_id: str, destination_slot_id: str, *, expected: dict[str, Any]) -> None:
         """Move an assignment into an empty slot owned by the current user."""
-        self.api.table(
+        rows = self.api.table(
             self.access_token, "roster_assignments", method="PATCH",
-            query=f"id=eq.{quote(assignment_id, safe='')}", prefer="return=minimal",
+            query=self._assignment_precondition(assignment_id, expected), prefer="return=representation",
             payload={"slot_id": destination_slot_id},
         )
+        if not rows:
+            raise SupabaseAPIError("Roster changed; reload before saving")
 
     def swap_players(self, first: dict[str, Any], second: dict[str, Any], team_id: str) -> None:
         """One authorized transaction; stale displayed assignments are rejected."""

@@ -76,3 +76,35 @@ def test_swap_is_one_atomic_rpc_and_never_deletes_in_python():
     assert len(api.calls) == 1
     assert api.calls[0][1] == "swap_roster_players"
     assert api.calls[0][2]["payload"]["p_first_player"] == "p1"
+
+
+@pytest.mark.parametrize("operation", ["move", "remove"])
+def test_stale_assignment_writes_are_rejected(operation):
+    from dashboard.supabase_api import SupabaseAPIError
+
+    class NoMatchingRow(API):
+        def table(self, token, table, **kwargs):
+            super().table(token, table, **kwargs)
+            return []
+
+    api = NoMatchingRow()
+    repo = RosterRepository(api, "access", "user-1")
+    expected = {"slot_id": "original-slot", "player_id": "p1", "updated_at": "2026-10-09T18:00:00+00:00"}
+    with pytest.raises(SupabaseAPIError, match="Roster changed"):
+        if operation == "move":
+            repo.move_player("a1", "bench", expected=expected)
+        else:
+            repo.remove_player("a1", expected=expected)
+    call = api.calls[0][2]
+    assert "slot_id=eq.original-slot" in call["query"]
+    assert "player_id=eq.p1" in call["query"]
+    assert "updated_at=eq.2026-10-09T18%3A00%3A00%2B00%3A00" in call["query"]
+    assert call["prefer"] == "return=representation"
+
+
+def test_edit_precondition_requires_timestamp_before_sending_request():
+    api = API()
+    repo = RosterRepository(api, "access", "user-1")
+    with pytest.raises(ValueError, match="Reload"):
+        repo.move_player("a1", "bench", expected={"slot_id": "original-slot", "player_id": "p1"})
+    assert not api.calls
