@@ -156,6 +156,40 @@ def player_card_stat_summary(row: Any) -> dict[str, str]:
     }
 
 
+def opponent_position_ranks(board: pd.DataFrame) -> dict[tuple[str, str], dict[str, Any]]:
+    """Compute the unchanged defensive ranking policy once per position.
+
+    Pure public-data transformation: no roster or authenticated state is cached.
+    Callers rendering many cards can reuse the result within that render.
+    """
+    required = {"position", "next_opponent", "schedule_adjusted_index"}
+    if not required.issubset(board.columns):
+        return {}
+    values = board.loc[:, ["position", "next_opponent", "schedule_adjusted_index"]].copy()
+    values["position"] = values["position"].astype(str).str.upper()
+    values["next_opponent"] = values["next_opponent"].astype(str).str.upper()
+    values["schedule_adjusted_index"] = pd.to_numeric(values["schedule_adjusted_index"], errors="coerce")
+    result = {}
+    for position, group in values.groupby("position", sort=False):
+        peers = group.dropna().groupby("next_opponent", as_index=False)["schedule_adjusted_index"].median()
+        if peers.empty:
+            continue
+        peers = peers.sort_values(["schedule_adjusted_index", "next_opponent"], ascending=[True, True]).reset_index(drop=True)
+        peers["rank"] = peers["schedule_adjusted_index"].rank(method="min", ascending=True).astype(int)
+        total = len(peers)
+        edge_band = max(1, round(total * .31))
+        for opponent, rank in zip(peers["next_opponent"], peers["rank"]):
+            rank = int(rank)
+            if rank <= edge_band:
+                tone, label = "tough", "Tough matchup"
+            elif rank > total - edge_band:
+                tone, label = "favorable", "Favorable matchup"
+            else:
+                tone, label = "neutral", "Neutral matchup"
+            result[(position, opponent)] = {"rank": rank, "total": total, "tone": tone, "label": label, "position": position, "opponent": opponent}
+    return result
+
+
 def opponent_position_rank(board: pd.DataFrame, row: Any) -> dict[str, Any] | None:
     """Rank the upcoming defense from toughest to easiest for a position."""
     position = str(row.get("position", "")).upper()
@@ -163,27 +197,8 @@ def opponent_position_rank(board: pd.DataFrame, row: Any) -> dict[str, Any] | No
     required = {"position", "next_opponent", "schedule_adjusted_index"}
     if not position or not opponent or not required.issubset(board.columns):
         return None
-    peers = board.loc[board["position"].astype(str).str.upper().eq(position), ["next_opponent", "schedule_adjusted_index"]].copy()
-    peers["next_opponent"] = peers["next_opponent"].astype(str).str.upper()
-    peers["schedule_adjusted_index"] = pd.to_numeric(peers["schedule_adjusted_index"], errors="coerce")
-    peers = peers.dropna().groupby("next_opponent", as_index=False)["schedule_adjusted_index"].median()
-    if peers.empty or opponent not in set(peers["next_opponent"]):
-        return None
-    # A lower adjusted PPR index means a stronger defense, so No. 1 is toughest.
-    peers = peers.sort_values(["schedule_adjusted_index", "next_opponent"], ascending=[True, True]).reset_index(drop=True)
-    # Equal opponent signals must not acquire different strength by team name.
-    peers["rank"] = peers["schedule_adjusted_index"].rank(method="min", ascending=True).astype(int)
-    match = peers.loc[peers["next_opponent"].eq(opponent)].iloc[0]
-    rank = int(match["rank"])
-    total = len(peers)
-    edge_band = max(1, round(total * .31))
-    if rank <= edge_band:
-        tone, label = "tough", "Tough matchup"
-    elif rank > total - edge_band:
-        tone, label = "favorable", "Favorable matchup"
-    else:
-        tone, label = "neutral", "Neutral matchup"
-    return {"rank": rank, "total": total, "tone": tone, "label": label, "position": position, "opponent": opponent}
+    subset = board.loc[board["position"].astype(str).str.upper().eq(position)]
+    return opponent_position_ranks(subset).get((position, opponent))
 
 
 def player_weekly_history(weekly: pd.DataFrame, row: Any) -> pd.DataFrame:

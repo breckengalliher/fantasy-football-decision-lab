@@ -14,7 +14,7 @@ from streamlit_local_storage import LocalStorage
 from dashboard.auth_ui import render_auth, sign_out
 from dashboard.availability import kickoff_utc, status_key
 from dashboard.lineup_rules import LineupAction, build_lineup_actions, lineup_status
-from dashboard.presentation import fantasy_game_log, opponent_position_rank, player_card_stat_summary, player_photo_html, projected_team_total
+from dashboard.presentation import fantasy_game_log, opponent_position_rank, opponent_position_ranks, player_card_stat_summary, player_photo_html, projected_team_total
 from dashboard.replacement_optimizer import optimize_replacements
 from dashboard.repositories.rosters import RosterRepository
 from dashboard.sleeper_client import SleeperClient, SleeperError, map_player_records, map_players, passing_td_points, roster_shape
@@ -266,8 +266,17 @@ def _ordered_slots(roster: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return sorted(roster, key=lambda slot: (0 if slot.get("is_starter") else 1, SLOT_RANK.get(str(slot["slot_type"]), 99), int(slot.get("slot_order", 0))))
 
 
-def _matchup_chip(pool: pd.DataFrame, player: dict[str, Any]) -> str:
-    rank = opponent_position_rank(pool, player)
+def _player_lookup(pool: pd.DataFrame, player_ids: set[str] | None = None) -> dict[str, dict[str, Any]]:
+    # Batch conversion avoids creating a Pandas Series for every player on
+    # every full rerun. Duplicate IDs retain the previous last-row-wins behavior.
+    if player_ids is not None:
+        pool = pool.loc[pool["player_id"].astype(str).isin(player_ids)]
+    return {str(row["player_id"]): row for row in pool.to_dict(orient="records")}
+
+
+def _matchup_chip(pool: pd.DataFrame, player: dict[str, Any], ranks=None) -> str:
+    rank = (ranks.get((str(player.get("position", "")).upper(), str(player.get("next_opponent", "")).upper()))
+            if ranks is not None else opponent_position_rank(pool, player))
     if not rank:
         return '<span class="cc-stat-chip neutral"><b>Matchup</b><em>Rank unavailable</em></span>'
     return (
@@ -320,9 +329,9 @@ def _fantasy_details(player: dict[str, Any], pool: pd.DataFrame, weekly: pd.Data
         st.markdown(f'<div class="cc-game-log" id="{html.escape(key, quote=True)}">{rows}</div>', unsafe_allow_html=True)
 
 
-def _compact_roster_editor(team: dict[str, Any], all_roster: list[dict[str, Any]], visible_slots: list[dict[str, Any]], repo: RosterRepository, pool: pd.DataFrame, weekly: pd.DataFrame, passing_td_points: int, lookup: dict[str, dict[str, Any]] | None = None) -> None:
+def _compact_roster_editor(team: dict[str, Any], all_roster: list[dict[str, Any]], visible_slots: list[dict[str, Any]], repo: RosterRepository, pool: pd.DataFrame, weekly: pd.DataFrame, passing_td_points: int, lookup: dict[str, dict[str, Any]] | None = None, ranks=None) -> None:
     used = {str(item["player_id"]) for slot in all_roster if (item := _assignment(slot))}
-    lookup = lookup or {str(row["player_id"]): row.to_dict() for _, row in pool.iterrows()}
+    lookup = lookup if lookup is not None else _player_lookup(pool)
     for slot in _ordered_slots(visible_slots):
         slot_id, slot_type = str(slot["id"]), str(slot["slot_type"])
         label = f"{slot_type} {int(slot.get('slot_order', 0)) + 1}"
@@ -350,7 +359,7 @@ def _compact_roster_editor(team: dict[str, Any], all_roster: list[dict[str, Any]
                 f'<span class="cc-stat-chip"><b>{html.escape(summary["season_label"])}</b><em>{html.escape(summary["season_value"])} PPR</em></span>'
                 f'<span class="cc-stat-chip"><b>{html.escape(summary["form_label"])}</b><em>{html.escape(summary["form_value"])} PPR</em></span>'
                 f'<span class="cc-stat-chip"><b>{html.escape(summary["workload_label"])}</b><em>{html.escape(summary["workload_value"])}</em></span>'
-                f'{_matchup_chip(pool, player)}</div>'
+                f'{_matchup_chip(pool, player, ranks)}</div>'
             )
             left.markdown(
                 f'<article class="cc-roster-row"><span class="cc-roster-slot">{html.escape(label)}</span>'
@@ -619,7 +628,11 @@ def _sleeper_sync_panel(team: dict[str, Any], repo: RosterRepository, roster: li
 
 def _dashboard(team: dict[str, Any], repo: RosterRepository, pool: pd.DataFrame, weekly: pd.DataFrame, metadata: dict[str, Any], now: datetime) -> None:
     league, roster = team.get("fantasy_leagues") or {}, _ordered_slots(repo.team_roster(str(team["id"])))
-    lookup = {str(row["player_id"]): row.to_dict() for _, row in pool.iterrows()}
+    # Entries, replacements, and management only need saved roster identities.
+    # Add/search controls still receive the complete eligible player pool.
+    roster_ids = {str(item["player_id"]) for slot in roster if (item := _assignment(slot))}
+    lookup = _player_lookup(pool, roster_ids)
+    ranks = opponent_position_ranks(pool)
     entries = [_entry(slot, lookup, now) for slot in roster]
     starters, bench = [e for e in entries if e["is_starter"]], [e for e in entries if not e["is_starter"] and e.get("player_id")]
     all_actions = build_lineup_actions(starters, now)
@@ -650,13 +663,13 @@ def _dashboard(team: dict[str, Any], repo: RosterRepository, pool: pd.DataFrame,
     st.markdown('<div class="cc-section-heading cc-tight-heading"><span>STARTING LINEUP</span><h2>Build your starters</h2><p>QB · RB · RB · WR · WR · TE · FLEX / SUPERFLEX</p></div>', unsafe_allow_html=True)
     for slot in _ordered_slots(starter_slots):
         if _assignment(slot):
-            _compact_roster_editor(team, roster, [slot], repo, pool, weekly, passing_td_points, lookup)
+            _compact_roster_editor(team, roster, [slot], repo, pool, weekly, passing_td_points, lookup, ranks)
         else:
             _add_player_slot(team, roster, slot, repo, pool)
     st.markdown(f'<div class="cc-section-heading cc-tight-heading"><span>BENCH</span><h2>{len(bench_slots)} roster spots</h2></div>', unsafe_allow_html=True)
     for slot in _ordered_slots(bench_slots):
         if _assignment(slot):
-            _compact_roster_editor(team, roster, [slot], repo, pool, weekly, passing_td_points, lookup)
+            _compact_roster_editor(team, roster, [slot], repo, pool, weekly, passing_td_points, lookup, ranks)
         else:
             _add_player_slot(team, roster, slot, repo, pool)
 
