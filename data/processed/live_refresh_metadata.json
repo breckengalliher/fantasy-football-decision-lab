@@ -3,7 +3,7 @@
   "completed_week": 4,
   "next_week": 5,
   "refreshed_at": "2026-10-08T23:31:43.711159+00:00",
-  "context_refreshed_at": "2026-10-09T18:45:36.742419+00:00",
+  "context_refreshed_at": "2026-10-09T20:27:59.468183+00:00",
   "refresh_scope": "Full weekly projection and context rebuild",
   "eligible_players": 210,
   "player_pool_audit": {
@@ -26,9 +26,9 @@
     "nflverse": "Connected \u00b7 222 Week 5 records",
     "sleeper": "Connected \u00b7 321 designated players"
   },
-  "injury_refreshed_at": "2026-10-09T18:45:36.486857+00:00",
+  "injury_refreshed_at": "2026-10-09T20:27:59.066479+00:00",
   "sportsdataio_status": "Connected \u00b7 2026-10-08 23:31 UTC",
-  "sportsdataio_refreshed_at": "2026-10-09T18:45:35.742357+00:00",
+  "sportsdataio_refreshed_at": "2026-10-09T20:27:58.166985+00:00",
   "market_status": "No player props currently published",
   "market_refreshed_at": "2026-10-08T23:31:28.218859+00:00",
   "reporting_refreshed_at": "2026-10-08T23:31:28.871816+00:00",
@@ -63,7 +63,8 @@
   "depth_source_updated_at": null,
   "depth_freshness_verified": false,
   "staging_certification_event": {
-    "label": "concurrent-publisher-1",
-    "description": "QA concurrency test, same real provider retrieval and projections"
+    "label": "mission1-open-browser",
+    "description": "QA refresh delivery test; real provider retrieval, not an official injury-change claim",
+    "retrieved_at": "2026-10-09T20:27:59.468183+00:00"
   }
 }
