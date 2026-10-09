@@ -15,6 +15,10 @@ import requests
 class SupabaseAPIError(RuntimeError):
     """A sanitized provider failure safe to show in application UI."""
 
+    def __init__(self, message: str, *, retryable: bool = False) -> None:
+        super().__init__(message)
+        self.retryable = retryable
+
 
 @dataclass(frozen=True)
 class AuthSession:
@@ -58,8 +62,8 @@ class SupabaseAPI:
             if status in {400, 403, 409} and path.startswith("/rest/"):
                 raise SupabaseAPIError("The roster could not be saved. Reload it and verify position eligibility; another visit may have changed it.") from None
             if status == 429:
-                raise SupabaseAPIError("Too many attempts. Please wait before trying again.") from None
-            raise SupabaseAPIError("The account service is temporarily unavailable.") from None
+                raise SupabaseAPIError("Too many attempts. Please wait before trying again.", retryable=True) from None
+            raise SupabaseAPIError("The account service is temporarily unavailable.", retryable=status is None or status >= 500) from None
         if not response.content:
             return None
         try:

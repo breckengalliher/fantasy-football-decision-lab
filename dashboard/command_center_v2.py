@@ -276,14 +276,20 @@ def _matchup_chip(pool: pd.DataFrame, player: dict[str, Any]) -> str:
     )
 
 
+def _toggle_fantasy_details(open_key: str) -> None:
+    """Update state before rendering so the button matches the visible content."""
+    st.session_state[open_key] = not st.session_state.get(open_key, False)
+
+
 def _fantasy_details(player: dict[str, Any], pool: pd.DataFrame, weekly: pd.DataFrame, passing_td_points: int, key: str) -> None:
     open_key = f"{key}-open"
-    if st.button(
+    st.button(
         "Hide fantasy details" if st.session_state.get(open_key, False) else "Fantasy details & game log",
         key=f"{key}-toggle",
         width="stretch",
-    ):
-        st.session_state[open_key] = not st.session_state.get(open_key, False)
+        on_click=_toggle_fantasy_details,
+        args=(open_key,),
+    )
     if st.session_state.get(open_key, False):
         summary = player_card_stat_summary(player)
         game_total = player.get("betting_total_live")

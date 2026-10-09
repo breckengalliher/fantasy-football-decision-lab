@@ -77,6 +77,13 @@ def restore_session(api: SupabaseAPI, storage: LocalStorage) -> AuthSession | No
     existing = current_session()
     if existing:
         return existing
+    if st.session_state.get("command_center_restore_retryable"):
+        st.warning("Sign-in restoration is temporarily unavailable. Your remembered sign-in has been retained.")
+        if st.button("Retry restoring sign-in", key="cc_retry_restore"):
+            st.session_state.pop(RESTORE_KEY, None)
+            st.session_state.pop("command_center_restore_retryable", None)
+        else:
+            return None
     if st.session_state.get(RESTORE_KEY):
         return None
     refresh_token = storage.getItem(STORAGE_KEY)
@@ -96,7 +103,13 @@ def restore_session(api: SupabaseAPI, storage: LocalStorage) -> AuthSession | No
         return None
     try:
         session = api.refresh(str(refresh_token))
-    except SupabaseAPIError:
+    except SupabaseAPIError as error:
+        if error.retryable:
+            # A timeout/outage does not revoke the user's remembered credential.
+            # Retry only on an explicit user action, not on every Streamlit rerun.
+            st.session_state["command_center_restore_retryable"] = True
+            st.rerun()
+            return None
         _delete_if_present(storage, STORAGE_KEY, component_key="clear_invalid_command_center_session")
         return None
     _save(session, storage, str(persistence))
