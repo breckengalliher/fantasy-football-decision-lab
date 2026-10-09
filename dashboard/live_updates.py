@@ -1,6 +1,10 @@
 """Lightweight publication polling, with conservative edit protection."""
 import requests
 import streamlit as st
+try:
+    from dashboard.publication_client import publication_pointer_url
+except ModuleNotFoundError:
+    from publication_client import publication_pointer_url
 
 
 def editing_roster(state) -> bool:
@@ -23,7 +27,7 @@ def update_decision(current_version, candidate, *, command_center=False, state=N
 
 @st.cache_data(ttl=30, max_entries=1, show_spinner=False)
 def publication_pointer(base_url):
-    response = requests.get(f"{base_url}/publication_manifest.json", timeout=(2, 4))
+    response = requests.get(publication_pointer_url(base_url), timeout=(2, 4))
     if response.status_code == 404:
         return {}
     response.raise_for_status()

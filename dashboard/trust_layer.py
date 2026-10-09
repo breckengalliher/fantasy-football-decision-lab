@@ -61,6 +61,12 @@ def render_trust_strip(metadata: dict[str, Any], *, compact: bool = True) -> Non
         f'<span><b>Validated ordering</b>{ordering_label(metrics)}</span>'
         '</div>', unsafe_allow_html=True,
     )
+    publication = metadata.get("_publication", {})
+    if publication.get("version"):
+        st.caption(f"Published data {str(publication['version'])[:12]} · Context retrieved {context}")
+        event = metadata.get("staging_certification_event", {})
+        if isinstance(event, dict) and event.get("label"):
+            st.caption(f"QA delivery test: {event['label']} · This is not an official injury-change claim.")
     if not compact:
         with st.expander("How reliable are these projections?"):
             if metrics:

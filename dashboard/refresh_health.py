@@ -74,7 +74,8 @@ def cron_matches(expression, moment):
 
 def expected_slots(workflow_text, start, end):
     # SDL uses explicit five-field crons and a timezone for every schedule.
-    schedules = re.findall(r'- cron:\s*"([^"]+)"\s*\n\s*timezone:\s*"([^"]+)"', workflow_text)
+    schedules = [(cron, zone or "UTC") for cron, zone in re.findall(
+        r'- cron:\s*[\"\']([^\"\']+)[\"\'](?:\s*\n\s*timezone:\s*[\"\']([^\"\']+)[\"\'])?', workflow_text)]
     if not schedules:
         raise ValueError("Schedule unavailable or unsupported; do not infer healthy")
     cursor = start.astimezone(timezone.utc).replace(second=0, microsecond=0)

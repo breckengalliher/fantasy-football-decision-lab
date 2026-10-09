@@ -43,6 +43,19 @@ def test_nflverse_wins_and_disagreement_is_visible():
     assert result.loc[0, "injury_status_live"] == "Doubtful"
     assert bool(result.loc[0, "injury_conflict_live"])
     assert "disagreement" in result.loc[0, "injury_source_live"]
+    assert pd.isna(result.loc[0, "injury_updated_live"])
+
+
+def test_matching_third_party_news_does_not_date_the_primary_report():
+    raw = pd.DataFrame([{"season_type": "REG", "week": 5, "full_name": "Example QB", "team": "BUF",
+        "report_status": "Out", "practice_status": "DNP", "report_primary_injury": "Knee",
+        "practice_primary_injury": "Knee"}])
+    primary = normalize_nflverse_injuries(raw, 5)
+    secondary = normalize_sleeper_players({"1": {"full_name": "Example QB", "team": "BUF",
+        "injury_status": "Out", "news_updated": 1000}}, now_ms=1000)
+    result = combine_injury_sources(primary, secondary)
+    assert result.loc[0, "injury_status_live"] == "Out"
+    assert pd.isna(result.loc[0, "injury_updated_live"])
 
 
 def test_stale_or_unsupported_sleeper_labels_are_rejected():

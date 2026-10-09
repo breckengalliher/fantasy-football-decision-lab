@@ -2,6 +2,17 @@
 import hashlib
 import json
 import re
+import time
+
+
+def publication_pointer_url(base_url: str, now: float | None = None) -> str:
+    """Bound GitHub CDN age without bypassing immutable-asset caching.
+
+    One shared URL per minute, not a unique request per user. GitHub raw
+    responses otherwise advertise five minutes of cache lifetime.
+    """
+    bucket = int((time.time() if now is None else now) // 60)
+    return f"{base_url}/publication_manifest.json?sdl_minute={bucket}"
 
 
 def immutable_base(base_url: str, revision: str) -> str:
@@ -31,7 +42,7 @@ def verified_payload(session, base_url: str, manifest: dict, filename: str) -> b
 
 
 def read_metadata(session, base_url: str) -> dict:
-    response = session.get(f"{base_url}/publication_manifest.json", timeout=(3.05, 8))
+    response = session.get(publication_pointer_url(base_url), timeout=(3.05, 8))
     if response.status_code == 404:
         # Legacy snapshots remain usable but cannot be release-certified.
         legacy = session.get(f"{base_url}/live_refresh_metadata.json", timeout=(3.05, 8))

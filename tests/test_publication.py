@@ -8,6 +8,14 @@ import pytest
 from src.publication import FILES, build_manifest, verify_file, write_manifest
 from dashboard.publication_client import immutable_base, read_metadata, verified_payload
 from dashboard.football_integrity import guard_forecasts
+from dashboard.publication_client import publication_pointer_url
+
+
+def test_pointer_cache_busting_is_shared_and_assets_remain_immutable():
+    base = "https://raw.githubusercontent.com/owner/repo/qa/data/processed"
+    assert publication_pointer_url(base, 120) == publication_pointer_url(base, 179)
+    assert publication_pointer_url(base, 180) != publication_pointer_url(base, 179)
+    assert immutable_base(base, "a" * 40).endswith("/data/processed")
 
 
 @pytest.fixture
@@ -71,7 +79,7 @@ def test_client_downloads_pinned_revision_and_rejects_hash_mismatch(snapshot):
     class Session:
         def get(self, url, **kwargs):
             urls.append(url)
-            if url.endswith("publication_manifest.json"):
+            if url.split("?")[0].endswith("publication_manifest.json"):
                 return Response(json.dumps(manifest).encode())
             return Response((snapshot / url.rsplit("/", 1)[-1]).read_bytes())
     base = "https://raw.githubusercontent.com/owner/repo/main/data/processed"

@@ -64,3 +64,8 @@ def test_schedule_is_central_time_and_independent_of_traffic():
     slots = expected_slots(workflow, datetime(2026, 10, 9, tzinfo=timezone.utc),
                            datetime(2026, 10, 10, tzinfo=timezone.utc))
     assert [slot.hour for slot in slots] == [11, 22]
+
+
+def test_historical_cron_without_timezone_defaults_to_utc():
+    slots = expected_slots("schedule:\n  - cron: '0 6 * * *'", NOW.replace(hour=0), NOW)
+    assert len(slots) == 1 and slots[0].hour == 6

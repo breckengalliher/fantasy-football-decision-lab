@@ -105,7 +105,10 @@ def combine_injury_sources(nflverse: pd.DataFrame, sleeper: pd.DataFrame) -> pd.
         result.loc[nflverse_record & fallback, "injury_source_live"] = "nflverse + Sleeper fallback"
         result["injury_conflict_live"] = nflverse_status.notna() & sleeper_status.notna() & nflverse_status.astype(str).ne(sleeper_status.astype(str))
         result.loc[result["injury_conflict_live"], "injury_source_live"] = "nflverse · Sleeper disagreement"
-        result["injury_updated_live"] = result["injury_updated_live"].fillna(result["sleeper_news_updated"])
+        # Sleeper's general-news timestamp belongs only to the fallback status.
+        # It is not the date of the winning nflverse report, even when both
+        # providers agree. Keep that report timestamp unknown unless supplied.
+        result.loc[fallback, "injury_updated_live"] = result.loc[fallback, "sleeper_news_updated"]
     keep = ["player_key", "team", "injury_record_live", "injury_status_live", "practice_status_live", "injury_body_part_live", "injury_note_live", "injury_updated_live", "injury_source_live", "injury_conflict_live"]
     return result[keep].drop_duplicates(["player_key", "team"], keep="last")
 
