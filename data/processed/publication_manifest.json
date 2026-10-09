@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
-  "version": "d7ff3285db52463b9a1216370890a5476a5737ad254e9c33509b2afab413bd41",
-  "revision": "6935de8c50939e029b1ed7e60574a26193ef9ffc",
+  "version": "b9f23fa340d98996d80c7d56f07db05a3b440eb1226ead78870c229509856344",
+  "revision": "1354371fbab312eb8df11a4296167dde8d2e3561",
   "season": 2026,
   "week": 5,
   "validation_status": "passed",
-  "validated_at": "2026-10-09T20:33:23.204637+00:00",
-  "prepared_at": "2026-10-09T20:33:23.204637+00:00",
+  "validated_at": "2026-10-09T20:38:45.563328+00:00",
+  "prepared_at": "2026-10-09T20:38:45.563328+00:00",
   "files": {
     "live_start_sit_board_4pt_current.parquet": {
       "sha256": "12a55490d20c311d836d3dfa3fa7660c3745b4b49b03b2ca7f4982a5623d81ae",
@@ -21,7 +21,7 @@
       "record_count": 4449
     },
     "live_refresh_metadata.json": {
-      "sha256": "82320571d647629ea155349d7298b00cd1b7863a9bb577abd55900cb5511590b",
+      "sha256": "ee156f86e656f4d250c7b59398dc453bde3270d02f88d9bbbbaa25c56c531543",
       "record_count": null
     }
   },
