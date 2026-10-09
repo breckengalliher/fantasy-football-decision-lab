@@ -1,0 +1,60 @@
+{
+  "season": 2026,
+  "completed_week": 4,
+  "next_week": 5,
+  "refreshed_at": "2026-10-08T23:31:43.711159+00:00",
+  "context_refreshed_at": "2026-10-08T23:31:43.711172+00:00",
+  "refresh_scope": "Full weekly projection and context rebuild",
+  "eligible_players": 210,
+  "player_pool_audit": {
+    "eligible_players": 210,
+    "eligible_by_position": {
+      "WR": 80,
+      "RB": 64,
+      "TE": 36,
+      "QB": 30
+    },
+    "duplicate_player_ids": 0,
+    "duplicate_player_names_by_position": 0,
+    "missing_player_names": 0,
+    "missing_teams": 0,
+    "missing_opponents": 0,
+    "invalid_positions": 0
+  },
+  "injury_records": 418,
+  "injury_source_status": {
+    "nflverse": "Connected \u00b7 222 Week 5 records",
+    "sleeper": "Connected \u00b7 321 designated players"
+  },
+  "injury_refreshed_at": "2026-10-08T23:31:28.861423+00:00",
+  "sportsdataio_status": "Connected \u00b7 2026-10-08 23:31 UTC",
+  "sportsdataio_refreshed_at": "2026-10-08T23:31:28.218859+00:00",
+  "market_status": "No player props currently published",
+  "market_refreshed_at": "2026-10-08T23:31:28.218859+00:00",
+  "reporting_refreshed_at": "2026-10-08T23:31:28.871816+00:00",
+  "journalism_status": "Connected \u00b7 0 matched items",
+  "reporter_social_status": "Connected \u00b7 11 reporter posts",
+  "reporting_records": 11,
+  "headshot_refreshed_at": "2026-10-08T23:31:42.610216+00:00",
+  "headshot_status": "Connected \u00b7 832 active roster photos",
+  "headshot_coverage": 0.9095238095238095,
+  "depth_chart_players": 1866,
+  "snap_coverage": 0.8761904761904762,
+  "weather_coverage": 0.9714285714285714,
+  "betting_total_coverage": 0.9714285714285714,
+  "depth_chart_coverage": 0.919047619047619,
+  "verified_qb_starters": 32,
+  "unverified_relevant_qbs": 8,
+  "projection_model": "Approved round-three live model",
+  "scoring_role_td_exception_enabled": false,
+  "scoring_role_td_exception_requirement": "verified red-zone or goal-line opportunity data",
+  "default_qb_passing_td_points": 4,
+  "refreshed_qb_passing_td_formats": [
+    4,
+    6
+  ],
+  "scoring_format_snapshots": {
+    "4": "live_start_sit_board_4pt_current.parquet",
+    "6": "live_start_sit_board_6pt_current.parquet"
+  }
+}
