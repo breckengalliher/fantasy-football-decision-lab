@@ -353,7 +353,7 @@ def _compact_roster_editor(team: dict[str, Any], all_roster: list[dict[str, Any]
             team_total = projected_team_total(player)
             context_parts = [
                 f'{_text(player.get("team"))} {_text(player.get("team_record"), "")}'.strip(),
-                f'{_text(player.get("venue"), "Site TBD").title()} vs {_text(player.get("next_opponent"), "BYE")}',
+                f'{_text(player.get("venue"), "Site TBD").title()} vs {_text(player.get("next_opponent"), "Opponent unavailable")}',
             ]
             if game_total is not None and not pd.isna(game_total):
                 context_parts.append(f"Game {float(game_total):.1f}")
