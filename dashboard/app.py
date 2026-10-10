@@ -1258,6 +1258,18 @@ def _navigation_changed() -> None:
     st.session_state["_last_requested_route"] = st.query_params["view"]
 
 
+def _comparison_position(shared_position: str) -> str:
+    # Streamlit removes an unrendered widget's state when visiting another page.
+    # Keep the user's position separately so their stored comparison returns.
+    remembered = st.session_state.get("_comparison_position", shared_position)
+    position = st.segmented_control(
+        "Position", ["QB", "RB", "WR", "TE", "FLEX", "SUPERFLEX"],
+        default=remembered, key="position_selector",
+    )
+    st.session_state["_comparison_position"] = position
+    return position
+
+
 with st.sidebar:
     with st.container(key="sidebar_brand_mark"):
         st.image(str(BRAND_ICON), width=78)
@@ -1492,7 +1504,7 @@ elif page == "Decision Room":
     shared_position = str(st.query_params.get("position", "WR")).upper()
     if shared_position not in {"QB", "RB", "WR", "TE", "FLEX", "SUPERFLEX"}:
         shared_position = "WR"
-    position = st.segmented_control("Position", ["QB", "RB", "WR", "TE", "FLEX", "SUPERFLEX"], default=shared_position, key="position_selector")
+    position = _comparison_position(shared_position)
     selected_positions = eligible_positions(position)
     pool = comparison_pool(BOARD, selected_positions, PUBLIC_DISPLAY_VERSION)
     excluded_qbs = BOARD.iloc[0:0]

@@ -157,7 +157,7 @@ def test_mobile_pilot_navigation_does_not_offer_excluded_routes(monkeypatch):
         query_params={}, markdown=lambda value, **kwargs: output.append(value)))
     product_experience.mobile_navigation()
     assert 'command-center' in output[0] and 'decision-room' in output[0]
-    assert 'player-trends' not in output[0] and 'how-it-works' not in output[0]
+    assert 'player-trends' in output[0] and 'how-it-works' not in output[0]
 
 
 def test_uninvited_successful_login_is_not_persisted(monkeypatch):
@@ -198,10 +198,10 @@ def test_restricted_direct_route_cannot_render_public_model_before_login(monkeyp
     app.query_params['view'] = route
     app.run()
     assert not app.exception
-    assert app.sidebar.radio[0].options == ['Sunday Command Center', 'Decision Room']
+    assert app.sidebar.radio[0].options == ['Sunday Command Center', 'Decision Room', 'Player Trends']
     assert not app.dataframe
     assert any('Restoring your private session' in item.value for item in app.caption)
-    if route != 'decision-room':
+    if route not in ('decision-room', 'player-trends'):
         assert app.query_params['view'] == 'command-center'
 
 

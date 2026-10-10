@@ -3,7 +3,7 @@ import os
 import re
 from uuid import UUID
 
-PAGES = ('Sunday Command Center', 'Decision Room')
+PAGES = ('Sunday Command Center', 'Decision Room', 'Player Trends')
 
 
 def invited_accounts(environ=None):
