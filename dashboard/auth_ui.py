@@ -274,7 +274,22 @@ def sign_out(api: SupabaseAPI, storage: LocalStorage | None = None) -> None:
     _clear_private_session(storage)
 
 
+def _retain_pending_roster_inputs() -> None:
+    """Detach editable roster widgets from cleanup during a temporary auth gate.
+
+    Streamlit otherwise deletes widget values when the waiting screen omits
+    them. Only editable inputs are retained, never buttons or auth credentials.
+    Account switching and logout still clear these account-scoped keys.
+    """
+    prefixes = ('cc_target_', 'cc_slot_pick_', 'cc_compact_pick_', 'cc_v2_pick_',
+                'cc_confirm_remove_', 'cc_confirm_swap_', 'cc_edit_', 'cc_v2_new_')
+    for key in list(st.session_state):
+        if key == 'cc_selected_team' or str(key).startswith(prefixes):
+            st.session_state[key] = st.session_state[key]
+
+
 def render_auth(api: SupabaseAPI, app_url: str) -> AuthSession | None:
+    _retain_pending_roster_inputs()
     storage = browser_auth_storage(api)
     if storage is None:
         st.caption("Restoring your private session…")

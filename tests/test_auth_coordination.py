@@ -30,6 +30,28 @@ def test_imports_are_exact_isolated_source():
     assert Path(auth_ui.__file__).resolve().parents[1] == Path(__file__).resolve().parents[1]
 
 
+def test_pending_widget_survives_temporary_auth_gate():
+    from streamlit.testing.v1 import AppTest
+    app = AppTest.from_string('''
+import streamlit as st
+from dashboard.auth_ui import _retain_pending_roster_inputs
+_retain_pending_roster_inputs()
+if not st.session_state.get('auth_waiting', False):
+    st.selectbox('Pending destination', ['bench-1', 'bench-2'], key='cc_target_assignment')
+    st.button('Save', key='cc_move_assignment')
+else:
+    st.caption('Restoring your private session')
+''').run()
+    app.selectbox[0].select('bench-2').run()
+    app.session_state['auth_waiting'] = True
+    app.run()
+    assert not app.exception
+    app.session_state['auth_waiting'] = False
+    app.run()
+    assert not app.exception
+    assert app.selectbox[0].value == 'bench-2'
+
+
 def test_stale_tab_adopts_latest_verified_session_and_preserves_edits(monkeypatch):
     old=session(exp=1,refresh='old');new=session()
     state,storage,api=setup(monkeypatch,old,new)
