@@ -16,3 +16,15 @@ def test_verified_zero_remains_zero():
 
 def test_verified_ordering_is_preserved():
     assert ordering_label({"ordering": 0.743}) == "74.3% in 2025"
+
+
+def test_fresh_retrieval_without_official_verification_discloses_missing_report(monkeypatch):
+    from dashboard import trust_layer
+    captions = []
+    monkeypatch.setattr(trust_layer.st, 'markdown', lambda *args, **kwargs: None)
+    monkeypatch.setattr(trust_layer.st, 'caption', captions.append)
+    monkeypatch.setattr(trust_layer, 'validation_summary', lambda: {})
+    trust_layer.render_trust_strip({'context_refreshed_at': '2026-10-10T20:00:00Z',
+                                  'injury_freshness_verified': False,
+                                  'depth_freshness_verified': False})
+    assert captions == ['Last verified official injury/depth report: unavailable. Context retrieval time is not official report time.']

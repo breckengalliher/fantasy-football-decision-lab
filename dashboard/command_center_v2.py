@@ -215,6 +215,10 @@ def _manual_team_setup(repo: RosterRepository, season: int) -> None:
 
 
 def _edit_team_settings(team: dict[str, Any], repo: RosterRepository) -> None:
+    # Reject even an editor left open before the pilot restriction was enabled.
+    if os.environ.get('SDL_RESTRICTED_PILOT') == '1':
+        st.info("League settings are fixed for this pilot. Use Manage to edit your lineup.")
+        return
     league = team.get("fantasy_leagues") or {}
     roster = repo.team_roster(str(team["id"]))
     current_counts = {slot: sum(1 for row in roster if str(row["slot_type"]) == slot) for slot in DEFAULT_SLOTS}
@@ -727,6 +731,10 @@ def render_command_center(api: SupabaseAPI, app_url: str, season: int, player_po
         st.query_params["qb"] = scoring
         st.rerun()
     _dashboard(selected_team, repo, player_pool, weekly, metadata, datetime.now(timezone.utc))
+    if os.environ.get('SDL_RESTRICTED_PILOT') == '1':
+        st.session_state.pop("cc_team_settings_open", None)
+        st.caption("League settings are fixed for this pilot. Use Manage to edit your lineup.")
+        return
     settings_key = "cc_team_settings_open"
     st.button(
         "Close team settings" if st.session_state.get(settings_key, False) else ('Team settings' if os.environ.get('SDL_RESTRICTED_PILOT') == '1' else 'Team settings and additional teams'),

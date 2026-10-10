@@ -3,6 +3,20 @@ from datetime import datetime, timezone
 from dashboard.command_center_v2 import _entry, _kickoff, _ordered_slots
 
 
+def test_pilot_rejects_previously_open_settings_before_any_repository_call(monkeypatch):
+    from dashboard import command_center_v2
+
+    class NoRepositoryAccess:
+        def __getattr__(self, name):
+            raise AssertionError(f"Pilot settings attempted repository access: {name}")
+
+    notices = []
+    monkeypatch.setenv('SDL_RESTRICTED_PILOT', '1')
+    monkeypatch.setattr(command_center_v2.st, 'info', notices.append)
+    command_center_v2._edit_team_settings({}, NoRepositoryAccess())
+    assert notices == ["League settings are fixed for this pilot. Use Manage to edit your lineup."]
+
+
 NOW = datetime(2026, 10, 8, 18, tzinfo=timezone.utc)
 
 

@@ -61,6 +61,8 @@ def render_trust_strip(metadata: dict[str, Any], *, compact: bool = True) -> Non
         f'<span><b>Validated ordering</b>{ordering_label(metrics)}</span>'
         '</div>', unsafe_allow_html=True,
     )
+    if not (metadata.get("injury_freshness_verified") is True and metadata.get("depth_freshness_verified") is True):
+        st.caption("Last verified official injury/depth report: unavailable. Context retrieval time is not official report time.")
     publication = metadata.get("_publication", {})
     if publication.get("version"):
         st.caption(f"Published data {str(publication['version'])[:12]} · Context retrieved {context}")
