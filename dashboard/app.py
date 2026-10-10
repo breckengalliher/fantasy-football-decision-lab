@@ -1377,6 +1377,10 @@ else:
             )
             qb_td_label = st.radio("QB passing touchdown scoring", ["4 points", "6 points"], index=shared_qb_index, horizontal=True, label_visibility="collapsed")
             QB_PASS_TD_POINTS = int(qb_td_label.split()[0])
+            # Same-tab navigation must carry the scoring choice just rendered,
+            # rather than the older value used to initialize this radio.
+            if str(st.query_params.get("qb", "")) != str(QB_PASS_TD_POINTS):
+                st.query_params["qb"] = str(QB_PASS_TD_POINTS)
 
 try:
     with st.spinner("Updating weekly stats and matchups…"):
