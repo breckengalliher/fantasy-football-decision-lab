@@ -449,7 +449,10 @@ def _manage_player(team: dict[str, Any], roster: list[dict[str, Any]], source_sl
                     repo.swap_players({**current, "slot_id": str(source_slot["id"])}, {**other, "slot_id": str(target["id"])}, str(team["id"]))
                 else:
                     repo.move_player(str(current["id"]), str(target["id"]), expected={**current, "slot_id": str(source_slot["id"])})
+                st.toast("Lineup saved")
+                st.session_state[f"cc_manage_{current['id']}"] = False
                 st.session_state.pop(revision_key, None)
+                st.session_state.pop(f"cc_target_{current['id']}", None)
                 st.rerun()
             except (SupabaseAPIError, ValueError) as error:
                 st.error(str(error))

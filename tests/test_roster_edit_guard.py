@@ -53,6 +53,7 @@ class RosterEditGuardTests(unittest.TestCase):
         ui = SimpleNamespace(session_state=state,warning=lambda text:calls.append(('warning',text)),
             caption=lambda *a:None,columns=lambda *a:[column,column],checkbox=lambda *a,**k:False,
             selectbox=lambda label,options,**k:options[0],button=lambda *a,**k:click,
+            toast=lambda text:calls.append(('toast',text)),
             rerun=lambda:(_ for _ in ()).throw(Rerun()))
         repo = SimpleNamespace(swap_players=lambda *a:calls.append(('swap',a)))
         namespace = dict(st=ui,edit_is_current=edit_is_current,_player_locked=lambda p:False,
@@ -81,7 +82,9 @@ class RosterEditGuardTests(unittest.TestCase):
         self.state = {}
         self.render_manager(self.roster,False)
         calls = self.render_manager(self.roster,True)
-        self.assertEqual([c[0] for c in calls],['swap'])
+        self.assertEqual([c[0] for c in calls],['swap','toast'])
+        self.assertEqual(calls[1][1], 'Lineup saved')
+        self.assertFalse(self.state['cc_manage_a'])
         self.assertEqual(calls[0][1][0]['slot_id'],'qb')
         self.assertEqual(calls[0][1][1]['slot_id'],'bench')
         self.assertNotIn('cc_edit_revision_team_a', self.state)
