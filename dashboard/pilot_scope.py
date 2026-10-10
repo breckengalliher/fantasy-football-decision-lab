@@ -1,4 +1,4 @@
-"""Explicit, fail-closed access configuration for the invited two-user pilot."""
+"""Explicit, fail-closed access configuration for the invited five-user pilot."""
 import os
 import re
 from uuid import UUID
@@ -15,8 +15,8 @@ def invited_accounts(environ=None):
         accounts = frozenset(str(UUID(value.strip())) for value in raw)
     except (ValueError, AttributeError) as error:
         raise ValueError('pilot-account-configuration-invalid') from error
-    if len(raw) != 2 or len(accounts) != 2:
-        raise ValueError('pilot-requires-two-distinct-accounts')
+    if len(raw) != 5 or len(accounts) != 5:
+        raise ValueError('pilot-requires-five-distinct-accounts')
     base = env.get('SNAPSHOT_BASE_URL', '').rstrip('/')
     if not re.fullmatch(r'https://raw\.githubusercontent\.com/breckengalliher/fantasy-football-decision-lab/[0-9a-f]{40}/data/processed', base):
         raise ValueError('pilot-requires-immutable-publication')

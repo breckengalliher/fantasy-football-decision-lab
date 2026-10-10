@@ -10,6 +10,10 @@ from dashboard.pilot_scope import invited_accounts, account_allowed
 
 FIRST = '11111111-1111-4111-8111-111111111111'
 SECOND = '22222222-2222-4222-8222-222222222222'
+THIRD = '33333333-3333-4333-8333-333333333333'
+FOURTH = '44444444-4444-4444-8444-444444444444'
+FIFTH = '55555555-5555-4555-8555-555555555555'
+INVITES = ','.join((FIRST, SECOND, THIRD, FOURTH, FIFTH))
 PIN = 'https://raw.githubusercontent.com/breckengalliher/fantasy-football-decision-lab/' + 'a' * 40 + '/data/processed'
 
 
@@ -87,14 +91,17 @@ def test_existing_pilot_session_remains_usable(monkeypatch):
 
 
 def test_invited_scope_fails_closed_for_missing_duplicate_or_unpinned_config():
-    env = {'SDL_RESTRICTED_PILOT': '1', 'SDL_PILOT_ACCOUNT_IDS': FIRST + ',' + SECOND,
+    env = {'SDL_RESTRICTED_PILOT': '1', 'SDL_PILOT_ACCOUNT_IDS': INVITES,
            'SNAPSHOT_BASE_URL': PIN}
     accounts = invited_accounts(env)
     assert account_allowed(FIRST, accounts) and account_allowed(SECOND, accounts)
-    assert not account_allowed('33333333-3333-4333-8333-333333333333', accounts)
+    assert all(account_allowed(value, accounts) for value in (FIRST, SECOND, THIRD, FOURTH, FIFTH))
+    assert not account_allowed('66666666-6666-4666-8666-666666666666', accounts)
     assert invited_accounts({}) is None
     for broken in ({**env, 'SDL_PILOT_ACCOUNT_IDS': ''},
-                   {**env, 'SDL_PILOT_ACCOUNT_IDS': FIRST + ',' + FIRST},
+                   {**env, 'SDL_PILOT_ACCOUNT_IDS': ','.join((FIRST, SECOND, THIRD, FOURTH, FIRST))},
+                   {**env, 'SDL_PILOT_ACCOUNT_IDS': ','.join((FIRST, SECOND))},
+                   {**env, 'SDL_PILOT_ACCOUNT_IDS': INVITES + ',66666666-6666-4666-8666-666666666666'},
                    {**env, 'SNAPSHOT_BASE_URL': PIN.replace('a' * 40, 'main')}):
         with pytest.raises(ValueError):
             invited_accounts(broken)
@@ -103,7 +110,7 @@ def test_invited_scope_fails_closed_for_missing_duplicate_or_unpinned_config():
 def test_uninvited_restored_account_clears_private_state_before_access(monkeypatch):
     screen, api = setup(monkeypatch, session=SimpleNamespace(user_id='uninvited'))
     monkeypatch.setenv('SDL_RESTRICTED_PILOT', '1')
-    monkeypatch.setenv('SDL_PILOT_ACCOUNT_IDS', FIRST + ',' + SECOND)
+    monkeypatch.setenv('SDL_PILOT_ACCOUNT_IDS', INVITES)
     monkeypatch.setenv('SNAPSHOT_BASE_URL', PIN)
     cleared = []
     monkeypatch.setattr(auth_ui, '_clear_private_session', lambda storage: cleared.append(True))
@@ -125,7 +132,7 @@ def test_mobile_pilot_navigation_does_not_offer_excluded_routes(monkeypatch):
 def test_uninvited_successful_login_is_not_persisted(monkeypatch):
     screen, api = setup(monkeypatch)
     monkeypatch.setenv('SDL_RESTRICTED_PILOT', '1')
-    monkeypatch.setenv('SDL_PILOT_ACCOUNT_IDS', FIRST + ',' + SECOND)
+    monkeypatch.setenv('SDL_PILOT_ACCOUNT_IDS', INVITES)
     monkeypatch.setenv('SNAPSHOT_BASE_URL', PIN)
     screen.form_submit_button = lambda *args, **kwargs: True
     revoked, cleared = [], []
@@ -151,7 +158,7 @@ def test_pilot_team_setup_cannot_reach_creation_or_import(monkeypatch):
 def test_restricted_direct_route_cannot_render_public_model_before_login(monkeypatch, route):
     from streamlit.testing.v1 import AppTest
     monkeypatch.setenv('SDL_RESTRICTED_PILOT', '1')
-    monkeypatch.setenv('SDL_PILOT_ACCOUNT_IDS', FIRST + ',' + SECOND)
+    monkeypatch.setenv('SDL_PILOT_ACCOUNT_IDS', INVITES)
     monkeypatch.setenv('SNAPSHOT_BASE_URL', PIN)
     monkeypatch.setenv('SUPABASE_URL', 'https://qa.example')
     monkeypatch.setenv('SUPABASE_PUBLISHABLE_KEY', 'test-only')
@@ -165,3 +172,10 @@ def test_restricted_direct_route_cannot_render_public_model_before_login(monkeyp
     assert any('Restoring your private session' in item.value for item in app.caption)
     if route != 'decision-room':
         assert app.query_params['view'] == 'command-center'
+
+
+def test_pilot_excludes_sleeper_sync_without_reading_or_changing_saved_roster(monkeypatch):
+    from dashboard import command_center_v2
+    monkeypatch.setenv("SDL_RESTRICTED_PILOT", "1")
+    # No repository or provider operation is available in the pilot.
+    command_center_v2._sleeper_sync_panel({"id": "disposable-test-only"}, object(), [], None)

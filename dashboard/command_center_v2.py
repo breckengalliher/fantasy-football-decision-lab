@@ -585,6 +585,8 @@ def _render_sync_review(team: dict[str, Any], repo: RosterRepository, connection
 
 
 def _sleeper_sync_panel(team: dict[str, Any], repo: RosterRepository, roster: list[dict[str, Any]], pool: pd.DataFrame) -> None:
+    if os.getenv("SDL_RESTRICTED_PILOT") == "1":
+        return
     try:
         connection = repo.sleeper_connection(str(team["id"]))
     except SupabaseAPIError:
