@@ -115,7 +115,24 @@ def test_uninvited_restored_account_clears_private_state_before_access(monkeypat
     cleared = []
     monkeypatch.setattr(auth_ui, '_clear_private_session', lambda storage: cleared.append(True))
     assert auth_ui.render_auth(api, 'https://qa.example/') is None
-    assert cleared == [True] and screen.forms == []
+    assert cleared == [True] and screen.forms == ['command_center_sign_in']
+
+
+def test_uninvited_remembered_session_dispatches_clear_before_restore(monkeypatch):
+    screen, api = setup(monkeypatch, session=SimpleNamespace(user_id='uninvited'))
+    monkeypatch.setenv('SDL_RESTRICTED_PILOT', '1')
+    monkeypatch.setenv('SDL_PILOT_ACCOUNT_IDS', INVITES)
+    monkeypatch.setenv('SNAPSHOT_BASE_URL', PIN)
+    def queue_clear(storage):
+        screen.session_state[auth_ui.PENDING_KEY] = {'clear': True}
+    monkeypatch.setattr(auth_ui, '_clear_private_session', queue_clear)
+    def rerun():
+        raise RuntimeError('dispatch pending browser clear')
+    screen.rerun = rerun
+    with pytest.raises(RuntimeError, match='dispatch pending browser clear'):
+        auth_ui.render_auth(api, 'https://qa.example/')
+    assert screen.session_state[auth_ui.PENDING_KEY]['clear'] is True
+    assert screen.forms == []
 
 
 def test_mobile_pilot_navigation_does_not_offer_excluded_routes(monkeypatch):

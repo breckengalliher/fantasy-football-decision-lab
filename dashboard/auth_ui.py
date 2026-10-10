@@ -351,11 +351,15 @@ def render_auth(api: SupabaseAPI, app_url: str) -> AuthSession | None:
     # Honor the user's explicit choice; never persist session-only sign-ins.
     if st.session_state.get(PENDING_KEY):
         st.rerun()
+    if session and not account_allowed(getattr(session, 'user_id', None), pilot_accounts):
+        _clear_private_session(storage)
+        session = None
+        # Send the queued browser clear and await its acknowledgment before
+        # restoring again. A warning-only return leaves the clear unsent.
+        if st.session_state.get(PENDING_KEY):
+            st.rerun()
+        st.warning('This pilot is available to invited accounts only.')
     if session:
-        if not account_allowed(getattr(session, 'user_id', None), pilot_accounts):
-            _clear_private_session(storage)
-            st.warning('This pilot is available to invited accounts only.')
-            return None
         # Non-privileged refresh rehearsal, only on the named isolated QA service.
         # No auth bypass, token changes, provider-setting changes or production UI.
         from dashboard.qa_telemetry import enabled as qa_enabled
