@@ -63,6 +63,26 @@ def roster_pool(board, version=None):
     return _valid_roster_pool(board) if version is None else _cached_roster_pool(version, board)
 
 
+def _comparison_pool(board, positions):
+    return board.loc[
+        board['position'].isin(positions) & board['next_opponent'].notna()
+        & board['is_roster_relevant'] & board['verified_qb_starter']
+    ].copy()
+
+
+@st.cache_resource(max_entries=12, show_spinner=False)
+def _cached_comparison_pool(version, positions, _board):
+    # Six public position choices in each of two supported scoring formats.
+    # Entries stay bounded across revisions; callers only read these frames.
+    return _comparison_pool(_board, positions)
+
+
+def comparison_pool(board, positions, version=None):
+    positions = tuple(sorted(positions))
+    return (_comparison_pool(board, positions) if version is None
+            else _cached_comparison_pool(version, positions, board))
+
+
 @st.cache_data(max_entries=128, ttl=300, show_spinner=False)
 def _cached_game_log(version, player_id, passing_td_points, _weekly, _row):
     return fantasy_game_log(_weekly, _row, passing_td_points)
@@ -86,4 +106,5 @@ def clear_public_display_cache():
     _cached_ranks.clear()
     _cached_game_log.clear()
     _cached_roster_pool.clear()
+    _cached_comparison_pool.clear()
 

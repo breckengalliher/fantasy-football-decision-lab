@@ -39,9 +39,9 @@ except ModuleNotFoundError:
     from availability import recommendation_restriction
 import streamlit.components.v1 as components
 try:
-    from dashboard.public_display_cache import public_display_version, display_opponent_rank, display_game_log, clear_public_display_cache
+    from dashboard.public_display_cache import public_display_version, display_opponent_rank, display_game_log, clear_public_display_cache, comparison_pool
 except ModuleNotFoundError:
-    from public_display_cache import public_display_version, display_opponent_rank, display_game_log, clear_public_display_cache
+    from public_display_cache import public_display_version, display_opponent_rank, display_game_log, clear_public_display_cache, comparison_pool
 from urllib.parse import urlencode
 from streamlit_local_storage import LocalStorage
 
@@ -1479,12 +1479,7 @@ elif page == "Decision Room":
         shared_position = "WR"
     position = st.segmented_control("Position", ["QB", "RB", "WR", "TE", "FLEX", "SUPERFLEX"], default=shared_position, key="position_selector")
     selected_positions = eligible_positions(position)
-    pool = BOARD.loc[
-        BOARD["position"].isin(selected_positions)
-        & BOARD["next_opponent"].notna()
-        & BOARD["is_roster_relevant"]
-        & BOARD["verified_qb_starter"]
-    ].copy()
+    pool = comparison_pool(BOARD, selected_positions, PUBLIC_DISPLAY_VERSION)
     excluded_qbs = BOARD.iloc[0:0]
     if position == "QB":
         excluded_qbs = BOARD.loc[
@@ -1552,7 +1547,7 @@ elif page == "Decision Room":
                 with slot_column:
                     with st.container(border=True):
                         if slot_index < len(names):
-                            selected_row = pool.loc[pool["player"].eq(names[slot_index])].iloc[0]
+                            selected_row = preview_compare.loc[preview_compare["player"].eq(names[slot_index])].iloc[0]
                             availability = selection_availability_summary(selected_row)
                             limited_sample = bool(selected_row.get("limited_sample_role", False)) or str(selected_row.get("confidence", "")).casefold() == "limited sample"
                             sample_badge = explained_term(
@@ -1661,7 +1656,10 @@ elif page == "Decision Room":
                 )
                 st.caption(f"Includes the recommendation, projection ranges, and data snapshot timestamp ({REFRESHED}).")
 
-        available_pool = pool.loc[~pool["player"].isin(names)].sort_values(
+        # Search needs only display fields. Exclude and sort the narrow frame,
+        # rather than copying every projection/context column on each rerun.
+        search_pool = pool[["player_id", "player", "team", "position", "next_opponent", "median_ppr", "projected_ppr"]]
+        available_pool = search_pool.loc[~search_pool["player"].isin(names)].sort_values(
             ["projected_ppr", "player"], ascending=[False, True]
         )
         st.markdown(
@@ -1694,7 +1692,7 @@ elif page == "Decision Room":
                 help="Suggestions filter immediately as you type. Only eligible players for the selected position are shown.",
             )
             if chosen_player_id is not None:
-                result_row = available_pool.loc[available_pool["player_id"].astype(str).eq(str(chosen_player_id))].iloc[0]
+                result_row = pool.loc[pool["player_id"].astype(str).eq(str(chosen_player_id))].iloc[0]
                 availability = selection_availability_summary(result_row)
                 st.markdown(
                     f'<div class="smart-search-result"><b>{html.escape(str(result_row["player"]))}</b> · '
@@ -1740,7 +1738,9 @@ elif page == "Decision Room":
                             st.session_state[replacement_key] = None
                             st.session_state[search_version_key] += 1
                             st.rerun()
-    compare = pool.loc[pool["player"].isin(names)].sort_values("projected_ppr", ascending=False)
+    # Mutating selection actions rerun immediately; the settled selection is
+    # therefore exactly the same subset already prepared for the preview.
+    compare = preview_compare if not pool.empty else pool
 
     if compare.empty:
         if not pool.empty:

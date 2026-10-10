@@ -98,6 +98,37 @@ def test_roster_filter_and_rank_scope_do_not_cross_public_views(monkeypatch):
     cache.clear_public_display_cache()
 
 
+def test_comparison_public_pool_preserves_gates_and_separates_formats():
+    cache.clear_public_display_cache()
+    board = pd.DataFrame(dict(player_id=['qb', 'backup', 'rb', 'bye', 'irrelevant'],
+                              position=['QB', 'QB', 'RB', 'WR', 'TE'],
+                              next_opponent=['A', 'A', 'B', None, 'C'],
+                              is_roster_relevant=[True, True, True, True, False],
+                              verified_qb_starter=[True, False, True, True, True],
+                              median_ppr=[10., 20., 30., 40., 50.]))
+    original = board.copy(deep=True)
+    version4 = cache.public_display_version(metadata(), 4)
+    version6 = cache.public_display_version(metadata(), 6)
+    four = cache.comparison_pool(board, ['QB'], version4)
+    assert four.player_id.tolist() == ['qb']
+    assert cache.comparison_pool(board, ('QB',), version4) is four
+    six_board = board.copy(deep=True)
+    six_board.loc[0, 'median_ppr'] = 14.
+    six = cache.comparison_pool(six_board, ['QB'], version6)
+    assert six.median_ppr.tolist() == [14.] and four.median_ppr.tolist() == [10.]
+    flex = cache.comparison_pool(board, ['TE', 'RB', 'WR'], version4)
+    assert flex.player_id.tolist() == ['rb']
+    assert cache.comparison_pool(board, ['WR', 'RB', 'TE'], version4) is flex
+    assert cache.comparison_pool(board, ['QB']) is not cache.comparison_pool(board, ['QB'])
+    for index in range(12):
+        cache.comparison_pool(board, ['QB'], version4 + str(index))
+    assert cache.comparison_pool(board, ['QB'], version4) is not four
+    cache.clear_public_display_cache()
+    assert cache.comparison_pool(board, ['QB'], version6) is not six
+    pd.testing.assert_frame_equal(board, original)
+    cache.clear_public_display_cache()
+
+
 def test_closed_add_panel_does_not_build_or_retain_player_choices():
     app = AppTest.from_string('''
 from dashboard.command_center_v2 import _add_player_slot

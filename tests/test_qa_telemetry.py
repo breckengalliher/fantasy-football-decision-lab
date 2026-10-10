@@ -1,6 +1,106 @@
 from dashboard import qa_telemetry
 
 
+def test_raw_session_ownership_does_not_reap_expired_or_log_values():
+    from types import SimpleNamespace
+    from streamlit.runtime.caching.ttl_cache import TTLCache
+    clock = [0.0]
+    cache = TTLCache(maxsize=128, ttl=120, timer=lambda: clock[0])
+    cache['private-session'] = {'private-token': 'secret'}
+    clock[0] = 425.0
+    manager = SimpleNamespace(_active_session_info_by_id={},
+                              _session_storage=SimpleNamespace(_cache=cache))
+    result = qa_telemetry._session_ownership(manager)
+    assert result == {'active_session_count': 0, 'disconnected_raw_count': 1,
+                      'disconnected_expired_count': 1, 'disconnected_live_count': 0}
+    assert len(cache._data) == 1
+    assert 'private' not in str(result) and 'secret' not in str(result)
+
+
+def test_diagnostic_flag_registers_aggregates_and_removes_callback(monkeypatch, tmp_path):
+    flag = tmp_path / 'diagnostic'
+    monkeypatch.setattr(qa_telemetry, 'DIAGNOSTIC_FLAG', flag)
+    monkeypatch.setattr(qa_telemetry, 'enabled', lambda: True)
+    monkeypatch.setattr(qa_telemetry.gc, 'callbacks', [])
+    monkeypatch.setattr(qa_telemetry, '_diagnostic_active', False)
+    assert not qa_telemetry._sync_diagnostic()
+    assert qa_telemetry.gc.callbacks == []
+    flag.touch()
+    assert qa_telemetry._sync_diagnostic()
+    assert qa_telemetry.gc.callbacks == [qa_telemetry._gc_callback]
+    qa_telemetry._sync_diagnostic()
+    assert len(qa_telemetry.gc.callbacks) == 1
+    qa_telemetry._gc_callback('start', {'generation': 2})
+    qa_telemetry._gc_callback('stop', {'generation': 2, 'collected': 7, 'uncollectable': 0})
+    assert qa_telemetry._gc_totals[2]['count'] == 1
+    assert qa_telemetry._gc_totals[2]['collected'] == 7
+    assert qa_telemetry._gc_totals[2]['duration_ms'] >= 0
+    flag.unlink()
+    assert not qa_telemetry._sync_diagnostic()
+    assert qa_telemetry.gc.callbacks == []
+    assert qa_telemetry.diagnostic_counts() == {}
+
+
+def test_diagnostic_flag_cannot_enable_outside_qa(monkeypatch, tmp_path):
+    flag = tmp_path / 'diagnostic'
+    flag.touch()
+    monkeypatch.setattr(qa_telemetry, 'DIAGNOSTIC_FLAG', flag)
+    monkeypatch.setattr(qa_telemetry, 'enabled', lambda: False)
+    monkeypatch.setattr(qa_telemetry.gc, 'callbacks', [])
+    monkeypatch.setattr(qa_telemetry, '_diagnostic_active', False)
+    assert not qa_telemetry._sync_diagnostic()
+    assert qa_telemetry.gc.callbacks == []
+
+
+def test_diagnostic_sink_disabled_and_nonqa_never_writes(monkeypatch, tmp_path):
+    path = tmp_path / 'receipt.jsonl'
+    monkeypatch.setattr(qa_telemetry, 'DIAGNOSTIC_SINK', path)
+    monkeypatch.setattr(qa_telemetry, '_diagnostic_active', False)
+    monkeypatch.setattr(qa_telemetry, 'enabled', lambda: True)
+    qa_telemetry.emit('run_end', state_key_count=1)
+    assert not path.exists()
+    monkeypatch.setattr(qa_telemetry, '_diagnostic_active', True)
+    monkeypatch.setattr(qa_telemetry, 'enabled', lambda: False)
+    qa_telemetry.emit('run_end', state_key_count=1)
+    assert not path.exists()
+
+
+def test_diagnostic_sink_preserves_prior_receipt_and_stops_at_bound(monkeypatch, tmp_path, capsys):
+    import json
+    path = tmp_path / 'receipt.jsonl'
+    path.write_bytes(b'prior-receipt\n')
+    monkeypatch.setattr(qa_telemetry, 'DIAGNOSTIC_SINK', path)
+    monkeypatch.setattr(qa_telemetry, 'DIAGNOSTIC_SINK_LIMIT', 220)
+    monkeypatch.setattr(qa_telemetry, '_diagnostic_active', True)
+    monkeypatch.setattr(qa_telemetry, '_sink_stopped', False)
+    monkeypatch.setattr(qa_telemetry, 'enabled', lambda: True)
+    qa_telemetry._write_diagnostic_record({'kind':'run_end', 'epoch':1,
+        'state_key_count':2, 'private-token':'do-not-record'})
+    first = path.read_bytes()
+    assert first.startswith(b'prior-receipt\n')
+    assert b'private-token' not in first and b'do-not-record' not in first
+    assert json.loads(first.splitlines()[1])['state_key_count'] == 2
+    for _ in range(10):
+        qa_telemetry._write_diagnostic_record({'kind':'run_end', 'epoch':1,
+            'state_key_count':2})
+    assert path.stat().st_size <= 220
+    assert qa_telemetry._sink_stopped
+    before = path.read_bytes()
+    qa_telemetry._write_diagnostic_record({'kind':'run_end', 'epoch':2})
+    assert path.read_bytes() == before
+    assert capsys.readouterr().out.count('diagnostic_sink_stopped') == 1
+
+
+def test_diagnostic_sink_failure_does_not_break_emit(monkeypatch, tmp_path, capsys):
+    monkeypatch.setattr(qa_telemetry, 'DIAGNOSTIC_SINK', tmp_path / 'missing' / 'receipt')
+    monkeypatch.setattr(qa_telemetry, '_diagnostic_active', True)
+    monkeypatch.setattr(qa_telemetry, '_sink_stopped', False)
+    monkeypatch.setattr(qa_telemetry, 'enabled', lambda: True)
+    qa_telemetry.emit('run_end', state_key_count=1)
+    qa_telemetry.emit('run_end', state_key_count=2)
+    assert capsys.readouterr().out.count('diagnostic_sink_stopped') == 1
+
+
 def test_instrumentation_requires_exact_qa_service_and_database(monkeypatch):
     monkeypatch.delenv('RENDER_SERVICE_ID',raising=False)
     monkeypatch.setenv('SUPABASE_URL',qa_telemetry.QA_URL)
