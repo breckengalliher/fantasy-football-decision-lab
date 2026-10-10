@@ -17,6 +17,7 @@ from dashboard.lineup_rules import LineupAction, build_lineup_actions, lineup_st
 from dashboard.presentation import fantasy_game_log, opponent_position_rank, opponent_position_ranks, player_card_stat_summary, player_photo_html, projected_team_total
 from dashboard.replacement_optimizer import optimize_replacements
 from dashboard.repositories.rosters import RosterRepository
+from dashboard.roster_edit_guard import edit_is_current
 from dashboard.sleeper_client import SleeperClient, SleeperError, map_player_records, map_players, passing_td_points, roster_shape
 from dashboard.sleeper_sync import build_snapshot, detect_changes, external_name, local_starter_ids
 from dashboard.supabase_api import SupabaseAPI, SupabaseAPIError
@@ -371,6 +372,7 @@ def _compact_roster_editor(team: dict[str, Any], all_roster: list[dict[str, Any]
             if right.button("Manage", key=f"cc_compact_manage_{current['id']}", width="stretch", help="Compare, move, swap, or remove this player."):
                 key = f"cc_manage_{current['id']}"
                 st.session_state[key] = not st.session_state.get(key, False)
+                st.session_state.pop(f"cc_edit_revision_{team['id']}_{current['id']}", None)
             if st.session_state.get(f"cc_manage_{current['id']}", False):
                 _manage_player(team, all_roster, slot, current, repo, pool, lookup)
             _fantasy_details(player, pool, weekly, passing_td_points, f"cc-log-{current['id']}")
@@ -385,6 +387,14 @@ def _compact_roster_editor(team: dict[str, Any], all_roster: list[dict[str, Any]
 
 
 def _manage_player(team: dict[str, Any], roster: list[dict[str, Any]], source_slot: dict[str, Any], current: dict[str, Any], repo: RosterRepository, pool: pd.DataFrame, lookup: dict[str, dict[str, Any]] | None = None) -> None:
+    revision_key = f"cc_edit_revision_{team['id']}_{current['id']}"
+    if not edit_is_current(st.session_state, revision_key, roster):
+        st.warning("Your lineup changed in another visit. Review the updated lineup and reopen Manage before saving.")
+        st.session_state[f"cc_manage_{current['id']}"] = False
+        st.session_state.pop(revision_key, None)
+        st.session_state.pop(f"cc_target_{current['id']}", None)
+        st.session_state.pop(f"cc_confirm_remove_{current['id']}", None)
+        return
     lookup = lookup or {str(row["player_id"]): row.to_dict() for _, row in pool.iterrows()}
     player = lookup.get(str(current["player_id"]), {})
     position = str(player.get("position") or "")
@@ -414,7 +424,9 @@ def _manage_player(team: dict[str, Any], roster: list[dict[str, Any]], source_sl
     confirmed_remove = st.checkbox("Confirm removal from this SDL roster", key=f"cc_confirm_remove_{current['id']}", disabled=locked)
     if c2.button("Remove", key=f"cc_remove_{current['id']}", width="stretch", disabled=locked or not confirmed_remove):
         try:
-            repo.remove_player(str(current["id"]), expected={**current, "slot_id": str(source_slot["id"])}); st.rerun()
+            repo.remove_player(str(current["id"]), expected={**current, "slot_id": str(source_slot["id"])})
+            st.session_state.pop(revision_key, None)
+            st.rerun()
         except (SupabaseAPIError, ValueError) as error:
             st.error(str(error))
     if locked:
@@ -429,6 +441,7 @@ def _manage_player(team: dict[str, Any], roster: list[dict[str, Any]], source_sl
                     repo.swap_players({**current, "slot_id": str(source_slot["id"])}, {**other, "slot_id": str(target["id"])}, str(team["id"]))
                 else:
                     repo.move_player(str(current["id"]), str(target["id"]), expected={**current, "slot_id": str(source_slot["id"])})
+                st.session_state.pop(revision_key, None)
                 st.rerun()
             except (SupabaseAPIError, ValueError) as error:
                 st.error(str(error))
