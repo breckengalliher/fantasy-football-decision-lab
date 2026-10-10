@@ -8,6 +8,7 @@ import base64
 import hashlib
 import json
 import math
+import os
 from uuid import uuid4
 
 import streamlit as st
@@ -15,6 +16,7 @@ from streamlit_local_storage import LocalStorage
 
 from dashboard.supabase_api import AuthSession, SupabaseAPI, SupabaseAPIError
 from dashboard.auth_storage import AuthStorage, browser_auth_storage, PENDING_KEY, RECORD_KEY
+from dashboard.pilot_scope import invited_accounts, account_allowed
 
 
 SESSION_KEY = "command_center_auth_session"
@@ -289,6 +291,9 @@ def _retain_pending_roster_inputs() -> None:
 
 
 def render_auth(api: SupabaseAPI, app_url: str) -> AuthSession | None:
+    pilot_only = (os.environ.get('SDL_PILOT_PREPROVISIONED_ONLY') == '1'
+                  or os.environ.get('SDL_RESTRICTED_PILOT') == '1')
+    pilot_accounts = invited_accounts()
     _retain_pending_roster_inputs()
     storage = browser_auth_storage(api)
     if storage is None:
@@ -299,6 +304,9 @@ def render_auth(api: SupabaseAPI, app_url: str) -> AuthSession | None:
         st.session_state.pop("cc_confirm_password", None)
     # A verified recovery session must reach the password form, not the roster.
     recovery = getattr(storage, "recovery", None)
+    if pilot_only and (isinstance(recovery, dict) or st.session_state.get('cc_recovery_session')):
+        st.warning('Account setup is managed for this pilot. Use your provided sign-in account.')
+        return None
     if isinstance(recovery, dict) and recovery.get("error"):
         st.session_state["cc_recovery_link_error"] = True
     if isinstance(recovery, dict) and recovery.get("type") in {"recovery", "invite"}:
@@ -344,11 +352,16 @@ def render_auth(api: SupabaseAPI, app_url: str) -> AuthSession | None:
     if st.session_state.get(PENDING_KEY):
         st.rerun()
     if session:
+        if not account_allowed(getattr(session, 'user_id', None), pilot_accounts):
+            _clear_private_session(storage)
+            st.warning('This pilot is available to invited accounts only.')
+            return None
         # Non-privileged refresh rehearsal, only on the named isolated QA service.
         # No auth bypass, token changes, provider-setting changes or production UI.
         from dashboard.qa_telemetry import enabled as qa_enabled
         if qa_enabled() and api.url == 'https://deburhwrnuqeyexpezzo.supabase.co':
             with st.expander('QA session check'):
+                st.caption(f'QA account identifier: {session.user_id}')
                 st.caption('QA only: rehearse the same locked refresh path used before access expiry.')
                 if st.button('QA: Rotate sign-in safely', key='cc_qa_rotate'):
                     storage.refresh_session(force=True)
@@ -361,7 +374,10 @@ def render_auth(api: SupabaseAPI, app_url: str) -> AuthSession | None:
         '<p>Save teams, monitor every starter, and see the lineup actions that matter before kickoff.</p></section>',
         unsafe_allow_html=True,
     )
-    sign_in_tab, register_tab, recover_tab = st.tabs(["Sign in", "Create account", "Recover access"])
+    if pilot_only:
+        sign_in_tab = st.tabs(['Sign in'])[0]
+    else:
+        sign_in_tab, register_tab, recover_tab = st.tabs(["Sign in", "Create account", "Recover access"])
     with sign_in_tab:
         with st.form("command_center_sign_in"):
             email = st.text_input("Email", key="cc_login_email")
@@ -377,10 +393,21 @@ def render_auth(api: SupabaseAPI, app_url: str) -> AuthSession | None:
         if submitted:
             try:
                 session = api.sign_in(email.strip(), password)
+                if not account_allowed(session.user_id, pilot_accounts):
+                    try:
+                        api.sign_out(session.access_token)
+                    except SupabaseAPIError:
+                        pass
+                    _clear_private_session(storage)
+                    st.warning('This pilot is available to invited accounts only.')
+                    return None
                 _save(session, storage, PERSISTENCE_OPTIONS[persistence_label])
                 st.rerun()
             except SupabaseAPIError as error:
                 st.error(str(error))
+    if pilot_only:
+        st.caption('Account setup is managed for this pilot. Use your provided sign-in account.')
+        return None
     with register_tab:
         with st.form("command_center_register"):
             email = st.text_input("Email", key="cc_register_email")

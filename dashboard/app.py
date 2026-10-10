@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from dashboard.qa_cleanup import install as install_cleanup, inhibit as inhibit_cleanup
+install_cleanup()
+from dashboard.qa_session_maintenance import install as install_session_maintenance
+install_session_maintenance(fallback=inhibit_cleanup)
 from dashboard.qa_telemetry import install as install_qa_telemetry
 install_qa_telemetry()
 
@@ -1229,8 +1233,20 @@ PAGE_ROUTES = {
     "player-trends": "Player Trends", "how-it-works": "How It Works",
 }
 ROUTE_BY_PAGE = {value: key for key, value in PAGE_ROUTES.items()}
+from dashboard.pilot_scope import invited_accounts, PAGES as PILOT_PAGES
+try:
+    pilot_accounts = invited_accounts()
+except ValueError:
+    st.error('The invited pilot is temporarily unavailable. Please contact the pilot organizer.')
+    st.stop()
 requested_route = str(st.query_params.get("view", "home"))
 requested_page = PAGE_ROUTES.get(requested_route, "Home")
+if pilot_accounts is not None and requested_page not in PILOT_PAGES:
+    requested_route = 'command-center'
+    requested_page = 'Sunday Command Center'
+    st.query_params['view'] = requested_route
+if pilot_accounts is not None and st.session_state.get('main_navigation') not in PILOT_PAGES:
+    st.session_state['main_navigation'] = requested_page
 if st.session_state.get("_last_requested_route") != requested_route:
     st.session_state["main_navigation"] = requested_page
     st.session_state["_last_requested_route"] = requested_route
@@ -1247,7 +1263,7 @@ with st.sidebar:
         st.image(str(BRAND_ICON), width=78)
     st.markdown('<div class="sidebar-brand">THE SUNDAY <span>DECISION</span> LAB</div>', unsafe_allow_html=True)
     st.caption("Your weekly lineup call")
-    page = st.radio("View", ["Home", "Sunday Command Center", "Decision Room", "Player Trends", "How It Works"], key="main_navigation", on_change=_navigation_changed, label_visibility="collapsed")
+    page = st.radio("View", list(PILOT_PAGES) if pilot_accounts is not None else ["Home", "Sunday Command Center", "Decision Room", "Player Trends", "How It Works"], key="main_navigation", on_change=_navigation_changed, label_visibility="collapsed")
     no_clutter_mode = st.toggle(
         "No-clutter mode",
         value=True,
@@ -1261,6 +1277,22 @@ with st.sidebar:
         if page != "Decision Room":
             st.query_params["view"] = "decision-room"
         st.rerun()
+
+# Authenticate before comparison preferences/onboarding as well as model data
+# in the invited pilot. Browser preference components must not delay this gate.
+command_center_api_client = None
+command_center_session = None
+if page == "Sunday Command Center" or pilot_accounts is not None:
+    supabase_url, supabase_key = account_config(st.secrets)
+    if not supabase_url or not supabase_key:
+        st.error("The account service has not been configured for this environment.")
+        mobile_navigation()
+        st.stop()
+    command_center_api_client = command_center_api(supabase_url, supabase_key)
+    command_center_session = authenticate_command_center(command_center_api_client, APP_BASE_URL)
+    if not command_center_session:
+        mobile_navigation()
+        st.stop()
 
 browser_storage = None
 persisted_onboarding_seen = True
@@ -1287,23 +1319,6 @@ if persisted_onboarding_seen and not st.session_state["onboarding_force_open"]:
 if page == "Decision Room" and (st.session_state["onboarding_force_open"] or not st.session_state["onboarding_seen"]):
     show_onboarding()
 season = SEASON
-
-# Authentication is the only data needed for a signed-out Command Center.
-# Gate here so login/recovery does not download and deserialize the board and
-# weekly history before the user has a private roster to view.
-command_center_api_client = None
-command_center_session = None
-if page == "Sunday Command Center":
-    supabase_url, supabase_key = account_config(st.secrets)
-    if not supabase_url or not supabase_key:
-        st.error("The account service has not been configured for this environment.")
-        mobile_navigation()
-        st.stop()
-    command_center_api_client = command_center_api(supabase_url, supabase_key)
-    command_center_session = authenticate_command_center(command_center_api_client, APP_BASE_URL)
-    if not command_center_session:
-        mobile_navigation()
-        st.stop()
 
 header_metadata = get_snapshot_metadata()
 header_week = int(header_metadata.get("next_week", 0))

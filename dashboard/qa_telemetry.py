@@ -82,7 +82,7 @@ def _write_diagnostic_record(record):
               'resource_cache_bytes', 'data_cache_stat_groups',
               'resource_cache_stat_groups', 'traced_current_peak', 'allocation_top',
               'trace_snapshot_wall_ms', 'trace_snapshot_cpu_ms', 'trace_table_bytes',
-              'error_type', 'cleanup', 'receipt_mode', 'receipt_writer_cost'}
+              'error_type', 'cleanup', 'session_maintenance', 'receipt_mode', 'receipt_writer_cost'}
     if not diagnostic:
         fields -= {'diagnostic', 'traced_current_peak', 'allocation_top',
                    'trace_snapshot_wall_ms', 'trace_snapshot_cpu_ms', 'trace_table_bytes'}
@@ -228,8 +228,8 @@ def diagnostic_counts():
 
 def _sync_cleanup():
     # Normal sampler/install path only; never invoked from a GC callback.
-    # Persistent activation requires the explicit QA environment flag. The
-    # separate file is a reversible lead-controlled same-process experiment.
+    # The shared resolver honors guarded persistent activation independently
+    # of telemetry; the separate file remains an exact-QA experiment only.
     if not enabled():
         return {'policy': 'framework-default'}
     try:
@@ -239,11 +239,26 @@ def _sync_cleanup():
     return configure(experiment=CLEANUP_EXPERIMENT_FLAG.exists())
 
 
+def _sync_session_maintenance():
+    if not enabled():
+        return {'policy': 'disabled'}
+    try:
+        from dashboard.qa_session_maintenance import install as configure
+        from dashboard.qa_cleanup import inhibit
+    except ModuleNotFoundError:
+        from qa_session_maintenance import install as configure
+        from qa_cleanup import inhibit
+    return configure(fallback=inhibit)
+
+
 def sample():
     ticks=0
     while True:
         try:
             cleanup = _sync_cleanup()
+            maintenance = _sync_session_maintenance()
+            if maintenance.get('failure_latched'):
+                cleanup = _sync_cleanup()
             _sync_diagnostic()
             _sync_resource_receipt()
             if PROFILE_FLAG.exists() and not tracemalloc.is_tracing():
@@ -251,7 +266,7 @@ def sample():
             elif not PROFILE_FLAG.exists() and tracemalloc.is_tracing():
                 tracemalloc.stop();emit('profile_stopped')
             with _lock:counts={'completed_runs':_runs,'active_runs':_active}
-            extra={'cleanup':cleanup}
+            extra={'cleanup':cleanup, 'session_maintenance':maintenance}
             if _diagnostic_active or _resource_receipt_active:
                 extra['receipt_writer_cost'] = receipt_writer_cost()
             if _diagnostic_active:
@@ -286,6 +301,7 @@ def install():
     if _installed or not enabled():return
     _installed=True
     _sync_cleanup()
+    _sync_session_maintenance()
     from streamlit.runtime.scriptrunner.script_runner import ScriptRunner
     original=ScriptRunner._run_script
     @functools.wraps(original)

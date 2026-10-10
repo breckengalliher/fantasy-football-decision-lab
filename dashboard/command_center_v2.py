@@ -179,6 +179,9 @@ def _sleeper_import(repo: RosterRepository, season: int, pool: pd.DataFrame) -> 
 
 
 def _team_setup(repo: RosterRepository, season: int, pool: pd.DataFrame) -> None:
+    if os.environ.get('SDL_RESTRICTED_PILOT') == '1':
+        st.caption('Teams are provided for this pilot. Use your existing fantasy team.')
+        return
     st.markdown('<section class="cc-empty"><span>FIRST TEAM</span><h2>Build your lineup monitor</h2><p>Add league settings and your roster shape. Player selection follows immediately.</p></section>', unsafe_allow_html=True)
     import_tab, manual_tab = st.tabs(["Import from Sleeper", "Create manually"])
     with import_tab:
@@ -724,7 +727,7 @@ def render_command_center(api: SupabaseAPI, app_url: str, season: int, player_po
     _dashboard(selected_team, repo, player_pool, weekly, metadata, datetime.now(timezone.utc))
     settings_key = "cc_team_settings_open"
     if st.button(
-        "Close team settings" if st.session_state.get(settings_key, False) else "Team settings and additional teams",
+        "Close team settings" if st.session_state.get(settings_key, False) else ('Team settings' if os.environ.get('SDL_RESTRICTED_PILOT') == '1' else 'Team settings and additional teams'),
         key="cc_team_settings_toggle",
         width="stretch",
     ):
@@ -733,5 +736,6 @@ def render_command_center(api: SupabaseAPI, app_url: str, season: int, player_po
         selected_team = next(t for t in teams if str(t["id"]) == selected_id)
         st.caption(f"Signed in as {session.email}")
         _edit_team_settings(selected_team, repo)
-        st.divider()
-        _team_setup(repo, season, player_pool)
+        if os.environ.get('SDL_RESTRICTED_PILOT') != '1':
+            st.divider()
+            _team_setup(repo, season, player_pool)

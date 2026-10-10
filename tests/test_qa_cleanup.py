@@ -179,3 +179,129 @@ def test_config_read_failure_remains_default_without_starting_worker():
     result=cleanup.install(environ=environment(),config_api=config,version=cleanup.SUPPORTED_STREAMLIT)
     assert result['reason']=='configuration-read-failed' and result['failure_type']=='KeyError'
     assert not result['enabled'] and not config.changes
+
+
+def configured_environment():
+    return dict(SDL_CLEANUP_POLICY='periodic', SDL_CLEANUP_SERVICE_ID='explicit-service',
+                SDL_CLEANUP_DATABASE_URL='https://explicit.supabase.co',
+                RENDER_SERVICE_ID='explicit-service', SUPABASE_URL='https://explicit.supabase.co')
+
+
+@pytest.mark.parametrize('field,value', [
+    ('SDL_CLEANUP_SERVICE_ID', ''), ('SDL_CLEANUP_SERVICE_ID', ' other '),
+    ('SDL_CLEANUP_DATABASE_URL', ''), ('SDL_CLEANUP_DATABASE_URL', 'http://explicit.supabase.co'),
+    ('SDL_CLEANUP_DATABASE_URL', 'https://user:secret@explicit.supabase.co'),
+    ('RENDER_SERVICE_ID', 'different-service'), ('SUPABASE_URL', 'https://different.supabase.co')])
+def test_generic_incomplete_or_mismatched_identity_preserves_framework(field, value):
+    env = {**configured_environment(), field: value}; config = Config()
+    result = cleanup.install(environ=env, config_api=config, version=cleanup.SUPPORTED_STREAMLIT)
+    assert result['reason'] == 'configured-identity-mismatch'
+    assert config.value is True and config.changes == []
+
+
+def test_generic_nonqa_install_and_telemetry_false_experiment_share_same_worker():
+    config = Config(); env = configured_environment()
+    cleanup.install(environ=env, config_api=config, version=cleanup.SUPPORTED_STREAMLIT)
+    policy = sys.modules[cleanup._REGISTRY].policy
+    cleanup.install(environ=env, config_api=config, version=cleanup.SUPPORTED_STREAMLIT, experiment=False)
+    assert sys.modules[cleanup._REGISTRY].policy is policy and config.changes == [False]
+    assert gc.isenabled()
+
+
+def test_qa_experiment_cannot_enable_configured_nonqa_identity_without_policy():
+    env = configured_environment(); env.pop('SDL_CLEANUP_POLICY'); config = Config()
+    result = cleanup.install(environ=env, config_api=config, version=cleanup.SUPPORTED_STREAMLIT, experiment=True)
+    assert result['reason'] == 'qa-identity-mismatch' and config.changes == []
+
+
+def test_inhibit_restores_framework_and_latches_across_reinstall():
+    env = configured_environment(); config = Config()
+    cleanup.install(environ=env, config_api=config, version=cleanup.SUPPORTED_STREAMLIT)
+    result = cleanup.inhibit()
+    assert result['inhibited'] and config.value is True
+    result = cleanup.install(environ=env, config_api=config, version=cleanup.SUPPORTED_STREAMLIT)
+    assert result['inhibited'] and config.changes == [False, True]
+
+
+def test_failure_logging_is_coarse_and_deduplicated(caplog):
+    class Reject(Config):
+        def get_option(self, key): raise KeyError('secret-account-and-database')
+    for _ in range(2):
+        cleanup.install(environ=configured_environment(), config_api=Reject(), version=cleanup.SUPPORTED_STREAMLIT)
+    assert len(caplog.records) == 1
+    assert 'configuration-read-failed' in caplog.text and 'KeyError' in caplog.text
+    assert 'secret-account' not in caplog.text and 'explicit.supabase' not in caplog.text
+
+
+def test_generic_runtime_guard_and_identity_drift_restore_framework():
+    config = Config(); env = configured_environment()
+    cleanup.install(environ=env, config_api=config, version='unsupported')
+    assert not config.changes
+    cleanup.install(environ=env, config_api=config, version=cleanup.SUPPORTED_STREAMLIT)
+    result = cleanup.install(environ={**env, 'RENDER_SERVICE_ID': 'changed'},
+                             config_api=config, version=cleanup.SUPPORTED_STREAMLIT)
+    assert result['reason'] == 'configured-identity-mismatch'
+    assert config.value is True and config.changes == [False, True]
+
+
+def test_app_startup_installs_policy_even_when_qa_telemetry_is_inactive(monkeypatch):
+    import ast
+    from pathlib import Path
+    import types
+    calls = []
+    config = Config()
+    original = cleanup.install
+    def install():
+        calls.append('cleanup')
+        return original(environ=configured_environment(), config_api=config,
+                        version=cleanup.SUPPORTED_STREAMLIT)
+    monkeypatch.setattr(cleanup, 'install', install)
+    telemetry = types.ModuleType('dashboard.qa_telemetry')
+    telemetry.install = lambda: calls.append('inactive-qa-telemetry')
+    monkeypatch.setitem(sys.modules, 'dashboard.qa_telemetry', telemetry)
+    maintenance = types.ModuleType('dashboard.qa_session_maintenance')
+    maintenance.install = lambda **kwargs: calls.append('maintenance')
+    monkeypatch.setitem(sys.modules, 'dashboard.qa_session_maintenance', maintenance)
+    tree = ast.parse((Path(__file__).parents[1] / 'dashboard/app.py').read_text(encoding='utf8'))
+    startup = []
+    for statement in tree.body:
+        if isinstance(statement, ast.Import):
+            break
+        startup.append(statement)
+    exec(compile(ast.fix_missing_locations(ast.Module(body=startup, type_ignores=[])),
+                 'app-startup', 'exec'), {})
+    assert calls == ['cleanup', 'maintenance', 'inactive-qa-telemetry']
+    assert config.value is False and sys.modules[cleanup._REGISTRY].policy.stats()['enabled']
+
+
+def test_inhibit_is_rechecked_before_worker_install(monkeypatch):
+    config = Config()
+    original = cleanup._registry
+    def inhibited_registry():
+        registry = original()
+        registry.inhibited = True
+        return registry
+    monkeypatch.setattr(cleanup, '_registry', inhibited_registry)
+    result = cleanup.install(environ=configured_environment(), config_api=config,
+                             version=cleanup.SUPPORTED_STREAMLIT)
+    assert result['inhibited'] and config.changes == []
+
+
+def test_maintenance_failure_inhibits_periodic_through_telemetry_resolver(monkeypatch):
+    from dashboard import qa_session_maintenance as maintenance
+    from dashboard import qa_telemetry as telemetry
+    env = {**environment(), 'SDL_QA_SESSION_MAINTENANCE': 'expired'}
+    config = Config()
+    original_cleanup = cleanup.install
+    original_maintenance = maintenance.install
+    monkeypatch.setattr(maintenance, '_REGISTRY', '_sdl_maintenance_cleanup_integration')
+    monkeypatch.setattr(cleanup, 'install', lambda **kwargs: original_cleanup(
+        environ=env, config_api=config, version=cleanup.SUPPORTED_STREAMLIT, **kwargs))
+    monkeypatch.setattr(maintenance, 'install', lambda **kwargs: original_maintenance(
+        environ=env, verifier=lambda: False, **kwargs))
+    monkeypatch.setattr(telemetry, 'enabled', lambda: True)
+    assert telemetry._sync_cleanup()['enabled'] and config.value is False
+    assert telemetry._sync_session_maintenance()['failure_latched']
+    result = telemetry._sync_cleanup()
+    assert result['inhibited'] and config.value is True
+    assert config.changes == [False, True]

@@ -171,6 +171,22 @@ def test_disabled_install_does_not_start_thread_or_trace(monkeypatch):
     qa_telemetry.install()
 
 
+def test_resource_receipt_preserves_coarse_session_maintenance_status(monkeypatch, tmp_path):
+    import json
+    path = tmp_path / 'maintenance-resources.jsonl'
+    monkeypatch.setattr(qa_telemetry, 'RESOURCE_RECEIPT_SINK', path)
+    monkeypatch.setattr(qa_telemetry, '_resource_receipt_active', True)
+    monkeypatch.setattr(qa_telemetry, '_resource_sink_stopped', False)
+    monkeypatch.setattr(qa_telemetry, '_diagnostic_active', False)
+    monkeypatch.setattr(qa_telemetry, 'enabled', lambda: True)
+    status = {'policy': 'expired-disconnected', 'expired_removed': 2, 'shutdown_count': 2}
+    qa_telemetry._write_diagnostic_record({'kind': 'resource', 'session_maintenance': status,
+                                         'private-account': 'exclude-me'})
+    record = json.loads(path.read_text())
+    assert record['session_maintenance'] == status
+    assert 'private-account' not in record and 'exclude-me' not in path.read_text()
+
+
 def test_enabled_instrumentation_preserves_return_and_logs_bounded_state(monkeypatch):
     from types import SimpleNamespace
     from streamlit.runtime.scriptrunner.script_runner import ScriptRunner
