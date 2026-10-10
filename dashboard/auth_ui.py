@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from dataclasses import asdict
 from datetime import datetime, timedelta, timezone
+import base64
 import hashlib
+import json
+import math
 
 import streamlit as st
 from streamlit_local_storage import LocalStorage
@@ -74,10 +77,24 @@ def current_session() -> AuthSession | None:
         return None
 
 
+def access_refresh_due(session: AuthSession, now: datetime | None = None) -> bool:
+    """Read expiry only to schedule refresh; never trust JWT claims for access.
+
+    Supabase still verifies every token/refresh server-side. A malformed or
+    missing expiry cannot justify returning a potentially stale credential.
+    """
+    try:
+        payload = session.access_token.split('.')[1]
+        decoded = json.loads(base64.urlsafe_b64decode(payload + '=' * (-len(payload) % 4)))
+        expiry = decoded['exp']
+        if isinstance(expiry, bool) or not isinstance(expiry, (int, float)) or not math.isfinite(expiry):
+            return True
+    except (IndexError, KeyError, ValueError, TypeError, UnicodeError):
+        return True
+    return expiry <= (now or datetime.now(timezone.utc)).timestamp() + 60
+
+
 def restore_session(api: SupabaseAPI, storage: LocalStorage) -> AuthSession | None:
-    existing = current_session()
-    if existing:
-        return existing
     if st.session_state.get("command_center_restore_retryable"):
         st.warning("Sign-in restoration is temporarily unavailable. Your remembered sign-in has been retained.")
         if st.button("Retry restoring sign-in", key="cc_retry_restore"):
@@ -85,6 +102,27 @@ def restore_session(api: SupabaseAPI, storage: LocalStorage) -> AuthSession | No
             st.session_state.pop("command_center_restore_retryable", None)
         else:
             return None
+    existing = current_session()
+    if existing and not access_refresh_due(existing):
+        return existing
+    if existing:
+        # An open Streamlit session must rotate expired access credentials too,
+        # not only a new tab restoring from browser storage. Preserve pending
+        # edits on a transient outage but do not render private UI until retry.
+        try:
+            refreshed = api.refresh(existing.refresh_token)
+            if refreshed.user_id != existing.user_id:
+                raise SupabaseAPIError("The saved sign-in no longer matches this session.")
+        except SupabaseAPIError as error:
+            if error.retryable:
+                st.session_state["command_center_restore_retryable"] = True
+                st.rerun()
+                return None
+            _clear_private_session(storage)
+            st.warning("Your sign-in has expired. Sign in again to access your saved teams.")
+            return None
+        _save(refreshed, storage, st.session_state.get("command_center_persistence_mode", "session"))
+        return refreshed
     if st.session_state.get(RESTORE_KEY):
         return None
     refresh_token = storage.getItem(STORAGE_KEY)
@@ -117,15 +155,8 @@ def restore_session(api: SupabaseAPI, storage: LocalStorage) -> AuthSession | No
     return session
 
 
-def sign_out(api: SupabaseAPI, storage: LocalStorage | None = None) -> None:
-    # render_auth already mounted the bridge. Queue deletion for its next run.
-    storage = AuthStorage({})
-    session = current_session()
-    if session:
-        try:
-            api.sign_out(session.access_token)
-        except SupabaseAPIError:
-            pass
+def _clear_private_session(storage) -> None:
+    """Clear account-scoped UI and remembered credentials after invalidation."""
     st.session_state.pop(SESSION_KEY, None)
     st.session_state.pop(RESTORE_KEY, None)
     _delete_if_present(storage, STORAGE_KEY, component_key="clear_command_center_session")
@@ -135,6 +166,18 @@ def sign_out(api: SupabaseAPI, storage: LocalStorage | None = None) -> None:
         if str(key).startswith(("cc_", "command_center_")):
             st.session_state.pop(key, None)
     st.query_params.pop("team", None)
+
+
+def sign_out(api: SupabaseAPI, storage: LocalStorage | None = None) -> None:
+    # render_auth already mounted the bridge. Queue deletion for its next run.
+    storage = AuthStorage({})
+    session = current_session()
+    if session:
+        try:
+            api.sign_out(session.access_token)
+        except SupabaseAPIError:
+            pass
+    _clear_private_session(storage)
 
 
 def render_auth(api: SupabaseAPI, app_url: str) -> AuthSession | None:

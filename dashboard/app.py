@@ -38,6 +38,10 @@ except ModuleNotFoundError:
     from football_integrity import guard_forecasts, reconcile_board_identities
     from availability import recommendation_restriction
 import streamlit.components.v1 as components
+try:
+    from dashboard.public_display_cache import public_display_version, display_opponent_rank, display_game_log, clear_public_display_cache
+except ModuleNotFoundError:
+    from public_display_cache import public_display_version, display_opponent_rank, display_game_log, clear_public_display_cache
 from urllib.parse import urlencode
 from streamlit_local_storage import LocalStorage
 
@@ -1319,6 +1323,7 @@ try:
                 snapshot_season, scoring, json.dumps(metadata, sort_keys=True)),
         )
         BOARD, WEEKLY, NEXT_WEEK, REFRESHED, PROVIDER_STATUS, PROVIDER_REFRESHED_AT, INJURY_SOURCE_STATUS = snapshot
+        PUBLIC_DISPLAY_VERSION = public_display_version(header_metadata, QB_PASS_TD_POINTS)
         # Freshness indicators must describe the recovered data, not the failed
         # candidate whose metadata was inspected before loading the assets.
         header_week = int(header_metadata.get("next_week", NEXT_WEEK))
@@ -1341,6 +1346,7 @@ with st.sidebar:
         if st.button("Check for latest updates", width="stretch"):
             get_snapshot_metadata.clear()
             get_published_snapshot.clear()
+            clear_public_display_cache()
             st.rerun()
         st.caption("Loads the newest validated cloud snapshot. It does not call providers or consume API quota.")
         st.divider()
@@ -1906,8 +1912,8 @@ elif page == "Decision Room":
                     f'<div class="player-season-line"><strong>Season totals · {html.escape(card_stats["games_label"])}</strong><span>{html.escape(card_stats["season_line"])}</span></div>'
                     '</div>'
                 )
-                defense_rank = opponent_position_rank(BOARD, row)
-                game_log = fantasy_game_log(WEEKLY, row, QB_PASS_TD_POINTS)
+                defense_rank = display_opponent_rank(BOARD, row, PUBLIC_DISPLAY_VERSION)
+                game_log = display_game_log(WEEKLY, row, QB_PASS_TD_POINTS, PUBLIC_DISPLAY_VERSION)
                 matchup_rank_html = ""
                 if defense_rank:
                     matchup_rank_html = (
@@ -2703,7 +2709,7 @@ elif page == "Player Trends":
         matchup_direction = "favorable" if adjustment > 1 else "unfavorable" if adjustment < -1 else "neutral"
         schedule_index = float(player.get("schedule_adjusted_index", 1.0)) if pd.notna(player.get("schedule_adjusted_index")) else 1.0
         schedule_delta = (schedule_index - 1) * 100
-        defense_rank = opponent_position_rank(BOARD, player)
+        defense_rank = display_opponent_rank(BOARD, player, PUBLIC_DISPLAY_VERSION)
         opponent_record_rows = BOARD.loc[BOARD["team"].eq(player["next_opponent"]), "team_record"].dropna()
         opponent_record = str(opponent_record_rows.iloc[0]) if not opponent_record_rows.empty else "Unavailable"
         pace = player.get("combined_recent_plays")
