@@ -18,7 +18,7 @@ from urllib.parse import urlsplit
 QA_SERVICE = 'srv-db4ir249v7es7389sshg'
 QA_DATABASE = 'https://deburhwrnuqeyexpezzo.supabase.co'
 SUPPORTED_STREAMLIT = '1.65.0'
-INTERVAL_SECONDS = 10.0
+INTERVAL_SECONDS = 30.0
 _REGISTRY = '_sdl_qa_cleanup_registry'
 EXPERIMENT_FLAG = Path('/tmp/sdl-qa-cleanup-periodic')
 
