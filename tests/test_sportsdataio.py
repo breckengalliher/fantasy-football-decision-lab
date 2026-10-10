@@ -2,7 +2,30 @@ from datetime import datetime, timezone
 
 import pandas as pd
 
-from dashboard.providers.sportsdataio import SportsDataIOContext, add_depth_chart_promotions, canonical_injury_status, context_freshness, flatten_player_props, format_injury_context, normalize_depth_charts, normalize_games, normalize_injuries
+from dashboard.providers.sportsdataio import SportsDataIOClient, SportsDataIOContext, add_depth_chart_promotions, canonical_injury_status, context_freshness, flatten_player_props, format_injury_context, normalize_depth_charts, normalize_games, normalize_injuries, provider_update_utc
+
+
+def test_provider_change_time_uses_eastern_dst_and_rejects_ambiguous_times():
+    assert provider_update_utc("2026-10-10T14:31:56") == "2026-10-10T18:31:56+00:00"
+    assert provider_update_utc("2026-12-10T14:31:56") == "2026-12-10T19:31:56+00:00"
+    assert provider_update_utc("2026-10-10T14:31:56Z") == "2026-10-10T14:31:56+00:00"
+    for invalid in (None, "Scrambled", "2026-10-10", "2026-11-01T01:30:00", "2026-03-08T02:30:00"):
+        assert provider_update_utc(invalid) is None
+
+
+def test_depth_change_provenance_is_retained_without_claiming_official_freshness(monkeypatch):
+    depth = [{"TeamID": 1, "Offense": [{"Name": "Example QB", "PlayerID": 3, "TeamID": 1,
+              "Position": "QB", "DepthOrder": 1, "Updated": "2026-10-10T14:31:56"}]}]
+    payloads = {"scores/json/DepthChartsAll": depth, "scores/json/Teams": [{"TeamID": 1, "Key": "SEA"}],
+                "scores/json/ScoresByWeek/2026REG/5": []}
+    client = SportsDataIOClient("test-only")
+    monkeypatch.setattr(client, "_get", lambda path: payloads[path])
+    monkeypatch.setattr(client, "_market_lines", lambda games: (pd.DataFrame(), "Not requested"))
+    context = client.weekly_context(2026, 5)
+    assert context.depth_charts.loc[0, "depth_updated_live"] == "2026-10-10T18:31:56+00:00"
+    assert context.depth_source_updated_at == context.depth_oldest_source_updated_at == "2026-10-10T18:31:56+00:00"
+    assert context.depth_timestamp_records == 1 and len(context.depth_source_version) == 64
+    assert context.depth_freshness_verified is False
 
 
 def test_context_freshness_flags_old_or_missing_data():

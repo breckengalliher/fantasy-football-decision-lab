@@ -45,11 +45,17 @@ def main():
         "injury_refreshed_at": injuries.checked_at, "injury_source_updated_at": injuries.provider_updated_at,
         "injury_official_report_at": injuries.official_report_at, "injury_freshness_verified": injuries.freshness_verified,
         "depth_source_updated_at": provider.depth_source_updated_at, "depth_freshness_verified": provider.depth_freshness_verified,
+        "depth_source_version": provider.depth_source_version, "depth_source_version_kind": "sha256-provider-payload",
+        "depth_oldest_source_updated_at": provider.depth_oldest_source_updated_at,
+        "depth_timestamp_records": provider.depth_timestamp_records, "depth_records": int(len(provider.depth_charts)),
         "sportsdataio_refreshed_at": provider.refreshed_at})
     (destination / "live_refresh_metadata.json").write_text(json.dumps(metadata, indent=2))
     validated = validate_snapshot(destination)
     evidence.update({"validation": "passed", "counts": validated["record_counts"],
         "injury_freshness_verified": injuries.freshness_verified, "depth_freshness_verified": provider.depth_freshness_verified,
+        "depth_source_updated_at": provider.depth_source_updated_at, "depth_source_version": provider.depth_source_version,
+        "depth_oldest_source_updated_at": provider.depth_oldest_source_updated_at,
+        "depth_timestamp_records": provider.depth_timestamp_records, "depth_records": int(len(provider.depth_charts)),
         "destination": str(destination), "completed_at": datetime.now(timezone.utc).isoformat()})
     (destination / "evidence.json").write_text(json.dumps(evidence, indent=2))
     print(json.dumps(evidence, indent=2))

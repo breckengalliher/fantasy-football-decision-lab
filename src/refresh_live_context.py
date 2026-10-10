@@ -139,6 +139,11 @@ def main() -> None:
         "injury_official_report_at": injury_context.official_report_at,
         "injury_freshness_verified": injury_context.freshness_verified,
         "depth_source_updated_at": provider_context.depth_source_updated_at,
+        "depth_source_version": provider_context.depth_source_version,
+        "depth_source_version_kind": "sha256-provider-payload",
+        "depth_oldest_source_updated_at": provider_context.depth_oldest_source_updated_at,
+        "depth_timestamp_records": provider_context.depth_timestamp_records,
+        "depth_records": int(len(provider_context.depth_charts)),
         "depth_freshness_verified": provider_context.depth_freshness_verified,
         "injury_records": int(len(injury_context.records)),
         "injury_source_status": {

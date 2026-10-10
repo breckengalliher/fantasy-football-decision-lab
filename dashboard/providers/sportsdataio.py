@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+import hashlib
+import json
 from typing import Any, Iterable
 
 import pandas as pd
@@ -47,6 +49,9 @@ class SportsDataIOContext:
     market_status: str = "Not requested"
     depth_source_updated_at: str | None = None
     depth_freshness_verified: bool = False
+    depth_source_version: str | None = None
+    depth_oldest_source_updated_at: str | None = None
+    depth_timestamp_records: int = 0
 
 
 def context_freshness(
@@ -78,6 +83,25 @@ def _first(record: dict[str, Any], *names: str) -> Any:
 
 def _key(value: Any) -> str:
     return str(value).strip().casefold()
+
+
+def provider_update_utc(value: Any) -> str | None:
+    """Preserve documented Eastern provider change times, not retrieval/report times."""
+    if not isinstance(value, (str, datetime)):
+        return None
+    if isinstance(value, str) and not ("T" in value or " " in value):
+        return None
+    try:
+        stamp = pd.Timestamp(value)
+        if pd.isna(stamp):
+            return None
+        if stamp.tzinfo is None:
+            stamp = stamp.tz_localize("America/New_York", ambiguous="NaT", nonexistent="NaT")
+        if pd.isna(stamp):
+            return None
+        return stamp.tz_convert("UTC").isoformat()
+    except (TypeError, ValueError, OverflowError):
+        return None
 
 
 def _usable(value: Any) -> Any:
@@ -166,14 +190,23 @@ class SportsDataIOClient:
             for item in teams or []
             if item.get("TeamID") is not None and item.get("Key")
         }
+        depth_frame = normalize_depth_charts(depth, team_map)
+        timestamps = depth_frame.get("depth_updated_live", pd.Series(dtype=object)).dropna()
         market_lines, market_status = self._market_lines(games)
         return SportsDataIOContext(
             injuries=pd.DataFrame(),
             games=normalize_games(games),
-            depth_charts=normalize_depth_charts(depth, team_map),
+            depth_charts=depth_frame,
             refreshed_at=datetime.now(timezone.utc).isoformat(),
             market_lines=market_lines,
             market_status=market_status,
+            depth_source_updated_at=max(timestamps) if len(timestamps) else None,
+            depth_oldest_source_updated_at=min(timestamps) if len(timestamps) else None,
+            depth_timestamp_records=int(len(timestamps)),
+            depth_source_version=hashlib.sha256(json.dumps(depth, sort_keys=True, separators=(",", ":")).encode()).hexdigest(),
+            # Latest changed player and complete timestamp fields are not proof
+            # of every team's latest official report. Keep verification false.
+            depth_freshness_verified=False,
         )
 
     def weekly_market_lines(self, season: int, week: int) -> tuple[pd.DataFrame, str, str]:
@@ -357,6 +390,7 @@ def normalize_depth_charts(
                 "team": pair[1],
                 "depth_position_live": _first(item, "Position", "DepthChartPosition"),
                 "depth_order_live": _first(item, "DepthOrder", "DepthChartOrder"),
+                "depth_updated_live": provider_update_utc(_first(item, "Updated", "LastUpdated")),
                 "provider_player_id": _first(item, "PlayerID"),
                 "provider_gsis_id": _first(item, "GSISID"),
             }
