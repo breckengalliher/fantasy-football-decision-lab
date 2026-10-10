@@ -47,8 +47,13 @@ st.write('Navigation scoring: ' + str(st.query_params.get('qb', '4')))
     app = AppTest.from_string(script)
     app.query_params['qb'] = '6'
     app.run()
+    scoring_widget_id = app.radio[1].proto.id
     app.radio[1].set_value('4 points').run()
     assert app.query_params['qb'] == '4'
+    # URL synchronization changes the default index. It must not replace the
+    # visible control and discard another choice sent during that rerender.
+    app.run()
+    assert app.radio[1].proto.id == scoring_widget_id
     app.radio[0].set_value('Command').run()
     app.radio[0].set_value('Trends').run()
     assert not app.exception

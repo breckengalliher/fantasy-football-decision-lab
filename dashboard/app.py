@@ -1375,7 +1375,7 @@ else:
                 '<div class="settings-kicker">QB passing touchdown scoring</div></div>',
                 unsafe_allow_html=True,
             )
-            qb_td_label = st.radio("QB passing touchdown scoring", ["4 points", "6 points"], index=shared_qb_index, horizontal=True, label_visibility="collapsed")
+            qb_td_label = st.radio("QB passing touchdown scoring", ["4 points", "6 points"], index=shared_qb_index, key="qb_passing_touchdown_scoring", horizontal=True, label_visibility="collapsed")
             QB_PASS_TD_POINTS = int(qb_td_label.split()[0])
             # Same-tab navigation must carry the scoring choice just rendered,
             # rather than the older value used to initialize this radio.
