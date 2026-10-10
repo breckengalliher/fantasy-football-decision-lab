@@ -304,7 +304,8 @@ def render_auth(api: SupabaseAPI, app_url: str) -> AuthSession | None:
         st.session_state.pop("cc_confirm_password", None)
     # A verified recovery session must reach the password form, not the roster.
     recovery = getattr(storage, "recovery", None)
-    if pilot_only and (isinstance(recovery, dict) or st.session_state.get('cc_recovery_session')):
+    if os.environ.get('SDL_PILOT_PREPROVISIONED_ONLY') == '1' and (
+            isinstance(recovery, dict) or st.session_state.get('cc_recovery_session')):
         st.warning('Account setup is managed for this pilot. Use your provided sign-in account.')
         return None
     if isinstance(recovery, dict) and recovery.get("error"):
@@ -316,12 +317,26 @@ def render_auth(api: SupabaseAPI, app_url: str) -> AuthSession | None:
             st.session_state["cc_recovery_link_seen"] = fingerprint
             try:
                 verified = api.refresh(str(token))
+                if not account_allowed(verified.user_id, pilot_accounts):
+                    st.session_state.pop('cc_recovery_session', None)
+                    _clear_private_session(storage)
+                    if st.session_state.get(PENDING_KEY):
+                        st.rerun()
+                    st.warning('This pilot is available to invited accounts only.')
+                    return None
                 st.session_state["cc_recovery_session"] = asdict(verified)
             except SupabaseAPIError:
                 st.session_state["cc_recovery_link_error"] = True
     if st.session_state.get("cc_recovery_link_error"):
         st.warning("This account-access link could not be verified. Request a new recovery email.")
     if st.session_state.get("cc_recovery_session"):
+        if not account_allowed(st.session_state['cc_recovery_session'].get('user_id'), pilot_accounts):
+            st.session_state.pop('cc_recovery_session', None)
+            _clear_private_session(storage)
+            if st.session_state.get(PENDING_KEY):
+                st.rerun()
+            st.warning('This pilot is available to invited accounts only.')
+            return None
         st.markdown("### Set your account password")
         st.caption("Use a unique password with at least 12 characters. Your saved rosters will not change.")
         with st.form("cc_set_recovery_password"):

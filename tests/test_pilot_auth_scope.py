@@ -1,4 +1,4 @@
-"""The restricted pilot offers existing-account sign-in, never account setup."""
+"""Restricted registration and verified, allowlisted account setup."""
 from contextlib import nullcontext
 from types import SimpleNamespace
 from pathlib import Path
@@ -78,6 +78,68 @@ def test_pilot_blocks_already_pending_password_submission(monkeypatch):
     screen, api = setup(monkeypatch, state={'cc_recovery_session': {'access_token': 'test-only'}})
     assert auth_ui.render_auth(api, 'https://qa.example/') is None
     assert screen.forms == []
+
+
+@pytest.mark.parametrize('link_type', ['invite', 'recovery'])
+@pytest.mark.parametrize('allowed', [True, False])
+def test_restricted_link_requires_provider_verified_allowlisted_account(monkeypatch, link_type, allowed):
+    from dashboard.supabase_api import AuthSession
+    screen, api = setup(monkeypatch, recovery={'type': link_type, 'refresh_token': 'test-only'})
+    monkeypatch.setenv('SDL_PILOT_PREPROVISIONED_ONLY', '0')
+    monkeypatch.setenv('SDL_RESTRICTED_PILOT', '1')
+    monkeypatch.setenv('SDL_PILOT_ACCOUNT_IDS', INVITES)
+    monkeypatch.setenv('SNAPSHOT_BASE_URL', PIN)
+    identity = FIRST if allowed else '66666666-6666-4666-8666-666666666666'
+    calls, cleared = [], []
+    def refresh(token):
+        calls.append(token)
+        return AuthSession('test-access', 'test-refresh', 3600, identity, 'qa@example.invalid')
+    api.refresh = refresh
+    monkeypatch.setattr(auth_ui, '_clear_private_session', lambda storage: cleared.append(True))
+    assert auth_ui.render_auth(api, 'https://qa.example/') is None
+    assert calls == ['test-only']
+    assert screen.forms == (['cc_set_recovery_password'] if allowed else [])
+    assert bool(screen.session_state.get('cc_recovery_session')) is allowed
+    assert cleared == ([] if allowed else [True])
+
+
+def test_restricted_pending_link_is_rechecked_before_password_form(monkeypatch):
+    screen, api = setup(monkeypatch, state={'cc_recovery_session': {'user_id': FIFTH}})
+    monkeypatch.setenv('SDL_PILOT_PREPROVISIONED_ONLY', '0')
+    monkeypatch.setenv('SDL_RESTRICTED_PILOT', '1')
+    monkeypatch.setenv('SDL_PILOT_ACCOUNT_IDS', ','.join((FIRST, SECOND, THIRD, FOURTH)))
+    monkeypatch.setenv('SNAPSHOT_BASE_URL', PIN)
+    cleared = []
+    monkeypatch.setattr(auth_ui, '_clear_private_session', lambda storage: cleared.append(True))
+    assert auth_ui.render_auth(api, 'https://qa.example/') is None
+    assert screen.forms == [] and cleared == [True]
+    assert 'cc_recovery_session' not in screen.session_state
+
+
+def test_restricted_invitation_mode_still_hides_registration_and_public_recovery(monkeypatch):
+    screen, api = setup(monkeypatch)
+    monkeypatch.setenv('SDL_PILOT_PREPROVISIONED_ONLY', '0')
+    monkeypatch.setenv('SDL_RESTRICTED_PILOT', '1')
+    monkeypatch.setenv('SDL_PILOT_ACCOUNT_IDS', INVITES)
+    monkeypatch.setenv('SNAPSHOT_BASE_URL', PIN)
+    assert auth_ui.render_auth(api, 'https://qa.example/') is None
+    assert screen.offered_tabs == ['Sign in']
+    assert screen.forms == ['command_center_sign_in']
+
+
+def test_restricted_rejected_link_cannot_reach_password_form(monkeypatch):
+    screen, api = setup(monkeypatch, recovery={'type': 'invite', 'refresh_token': 'expired-test-only'})
+    monkeypatch.setenv('SDL_PILOT_PREPROVISIONED_ONLY', '0')
+    monkeypatch.setenv('SDL_RESTRICTED_PILOT', '1')
+    monkeypatch.setenv('SDL_PILOT_ACCOUNT_IDS', INVITES)
+    monkeypatch.setenv('SNAPSHOT_BASE_URL', PIN)
+    def rejected(token):
+        raise auth_ui.SupabaseAPIError('Account link could not be verified')
+    api.refresh = rejected
+    assert auth_ui.render_auth(api, 'https://qa.example/') is None
+    assert screen.forms == ['command_center_sign_in']
+    assert 'cc_recovery_session' not in screen.session_state
+    assert screen.session_state['cc_recovery_link_error'] is True
 
 
 def test_existing_pilot_session_remains_usable(monkeypatch):
