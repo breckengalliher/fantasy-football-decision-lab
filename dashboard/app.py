@@ -207,6 +207,18 @@ button:focus-visible, summary:focus-visible, a:focus-visible, [tabindex="0"]:foc
 .trust-strip { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:.45rem; margin:.75rem 0; }.trust-strip span { padding:.55rem .65rem; background:#fff; border:1px solid #d7dde0; border-radius:10px; color:#52606a; font-size:.68rem; }.trust-strip b { display:block; color:#285b16; font-size:.65rem; text-transform:uppercase; letter-spacing:.05em; }
 .landing-section { margin:1.35rem 0 .5rem; }.landing-section h2 { color:#002244; margin:.12rem 0; }.landing-player { min-height:155px; padding:1rem; background:#fff; border:1px solid #d7dde0; border-top:4px solid #69be28; border-radius:15px; }.landing-player span { color:#315f20; font-size:.65rem; font-weight:900; }.landing-player h3 { color:#002244; margin:.18rem 0; }.landing-player>strong { display:block; margin-top:.55rem; color:#285b16; font-size:2rem; }.landing-player small,.landing-player p { font-size:.7rem; color:#56636b; }.landing-steps { display:grid; grid-template-columns:repeat(3,1fr); gap:.65rem; margin:1rem 0; }.landing-steps>div { display:grid; grid-template-columns:34px 1fr; gap:.1rem .55rem; padding:.85rem; background:#eaf0f2; border-radius:12px; }.landing-steps b { grid-row:1/3; display:grid; place-items:center; width:34px; height:34px; border-radius:50%; background:#002244; color:#9ee468; }.landing-steps strong { color:#002244; }.landing-steps span { color:#53616b; font-size:.7rem; }
 .mobile-nav { display:none; }
+@media(max-width:1050px) {
+  [class*="st-key-comparison_slot_actions_"] [data-testid="stHorizontalBlock"] { flex-direction:column; gap:.35rem !important; }
+  [class*="st-key-comparison_slot_actions_"] [data-testid="stColumn"] { width:100% !important; min-width:100% !important; flex:1 1 100% !important; }
+  [class*="st-key-comparison_slot_actions_"] [data-testid="stButton"] button { min-height:44px !important; height:auto; padding:.4rem .5rem !important; }
+  [class*="st-key-comparison_slot_actions_"] button p { white-space:normal !important; text-overflow:clip !important; overflow:visible !important; overflow-wrap:anywhere; }
+}
+@media(min-width:701px) and (max-width:1024px) {
+  .mobile-nav { box-sizing:border-box; position:fixed; z-index:999999; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); left:8px; width:calc(100vw - 16px); bottom:8px; padding:.35rem; background:#002244; border:1px solid #69be28; border-radius:16px; box-shadow:0 8px 26px rgba(0,34,68,.28); }
+  .mobile-nav a { min-width:0; display:flex; flex-direction:column; align-items:center; color:#fff !important; text-decoration:none; font-size:.7rem; min-height:44px; }
+  .mobile-nav b { color:#9ee468; font-size:1rem; }
+  .stMainBlockContainer { padding-bottom:5.3rem !important; }
+}
 @media(max-width:700px) { .landing-hero { display:block; width:100%; max-width:100%; min-width:0; padding:1.15rem; }.landing-hero p,.landing-hero span { overflow-wrap:anywhere; }.landing-hero aside { box-sizing:border-box; width:100%; min-width:0; margin-top:1rem; }.trust-strip { grid-template-columns:minmax(0,1fr) minmax(0,1fr); }.landing-steps { grid-template-columns:1fr; }.mobile-nav { box-sizing:border-box; position:fixed; z-index:999999; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); left:8px; width:calc(100vw - 16px); bottom:8px; padding:.35rem; background:#002244; border:1px solid #69be28; border-radius:16px; box-shadow:0 8px 26px rgba(0,34,68,.28); }.mobile-nav a { min-width:0; display:flex; flex-direction:column; align-items:center; color:#fff !important; text-decoration:none; font-size:.58rem; }.mobile-nav b { color:#9ee468; font-size:1rem; }.stMainBlockContainer { box-sizing:border-box; width:100vw !important; max-width:100vw !important; padding-left:.8rem !important; padding-right:.8rem !important; padding-bottom:5.3rem !important; } }
 h1,h2,h3 { font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spacing:-.01em; font-weight:800; }
 .hero { display:flex; align-items:flex-end; justify-content:space-between; gap:2rem; padding:0; margin:0; }
@@ -828,8 +840,7 @@ def _read_snapshot_parquet(filename: str, publication: dict | None = None) -> pd
         return pd.read_parquet(path)
 
 
-@st.cache_resource(ttl=300, max_entries=4, show_spinner=False)
-def get_published_snapshot(season: int, passing_td_points: int, metadata_json: str) -> tuple[pd.DataFrame, pd.DataFrame, int, str, str, str | None, str]:
+def _load_published_snapshot(season: int, passing_td_points: int, metadata_json: str) -> tuple[pd.DataFrame, pd.DataFrame, int, str, str, str | None, str]:
     """Load one immutable public snapshot shared safely by all sessions.
 
     Callers only select or copy rows; they never mutate these frames. Resource
@@ -862,6 +873,31 @@ def get_published_snapshot(season: int, passing_td_points: int, metadata_json: s
     checked_at = metadata.get("refreshed_at", datetime.now(timezone.utc).isoformat())
     refreshed = datetime.fromisoformat(str(checked_at).replace("Z", "+00:00")).strftime("%b %d, %Y · %H:%M UTC")
     return board, weekly, int(metadata["next_week"]), refreshed, provider_status, provider_refreshed_at, injury_status
+
+
+@st.cache_resource(max_entries=2, show_spinner=False)
+def _immutable_published_snapshot(version: str, season: int, passing_td_points: int, _metadata_json: str):
+    # The version includes the verified metadata/board/history digests. Repeated
+    # reads of the same immutable assets need no time-based reconstruction.
+    return _load_published_snapshot(season, passing_td_points, _metadata_json)
+
+
+@st.cache_resource(ttl=300, max_entries=2, show_spinner=False)
+def _legacy_published_snapshot(season: int, passing_td_points: int, metadata_json: str):
+    return _load_published_snapshot(season, passing_td_points, metadata_json)
+
+
+def get_published_snapshot(season: int, passing_td_points: int, metadata_json: str):
+    metadata = json.loads(metadata_json)
+    version = public_display_version(metadata, passing_td_points)
+    if metadata.get("publication_status") == "validated" and version is not None:
+        return _immutable_published_snapshot(version, season, passing_td_points, metadata_json)
+    return _legacy_published_snapshot(season, passing_td_points, metadata_json)
+
+
+def clear_published_snapshot():
+    _immutable_published_snapshot.clear()
+    _legacy_published_snapshot.clear()
 
 
 @st.cache_resource(show_spinner=False)
@@ -1345,7 +1381,7 @@ with st.sidebar:
         st.caption(INJURY_SOURCE_STATUS)
         if st.button("Check for latest updates", width="stretch"):
             get_snapshot_metadata.clear()
-            get_published_snapshot.clear()
+            clear_published_snapshot()
             clear_public_display_cache()
             st.rerun()
         st.caption("Loads the newest validated cloud snapshot. It does not call providers or consume API quota.")
@@ -1537,15 +1573,16 @@ elif page == "Decision Room":
                                 f'<div class="compare-slot-footer"><span class="compare-slot-projection">{float(selected_row["median_ppr"]):.1f} projected PPR</span>{sample_badge}<span class="availability-pill {availability_class}">{html.escape(availability)}</span></div>',
                                 unsafe_allow_html=True,
                             )
-                            remove_column, replace_column = st.columns(2)
-                            if remove_column.button("Remove", key=f"remove_{position}_{selected_row['player_id']}", width="stretch"):
-                                st.session_state[selection_key] = [value for value in names if value != names[slot_index]]
-                                st.session_state[replacement_key] = None
-                                st.rerun()
-                            replace_label = "Replacing…" if replacement_index == slot_index else "Replace"
-                            if replace_column.button(replace_label, key=f"replace_{position}_{selected_row['player_id']}", width="stretch"):
-                                st.session_state[replacement_key] = None if replacement_index == slot_index else slot_index
-                                st.rerun()
+                            with st.container(key=f"comparison_slot_actions_{slot_index}"):
+                                remove_column, replace_column = st.columns(2)
+                                if remove_column.button("Remove", key=f"remove_{position}_{selected_row['player_id']}", width="stretch"):
+                                    st.session_state[selection_key] = [value for value in names if value != names[slot_index]]
+                                    st.session_state[replacement_key] = None
+                                    st.rerun()
+                                replace_label = "Replacing…" if replacement_index == slot_index else "Replace"
+                                if replace_column.button(replace_label, key=f"replace_{position}_{selected_row['player_id']}", width="stretch"):
+                                    st.session_state[replacement_key] = None if replacement_index == slot_index else slot_index
+                                    st.rerun()
                         else:
                             st.markdown(
                                 f'<div class="open-slot"><div class="open-slot-number">Player {slot_index + 1}</div><div class="open-slot-title">Open comparison slot</div><div class="open-slot-copy">Choose a player from the search panel below.</div></div>',
@@ -1641,30 +1678,24 @@ elif page == "Decision Room":
         if available_pool.empty:
             st.info("Every eligible player in this position is already selected.")
         else:
-            candidate_lookup = {
-                str(row["player_id"]): row for _, row in available_pool.iterrows()
+            # Widget serializers retain format_func. Keep only labels, not full
+            # Pandas rows or this script's globals, reachable through that hook.
+            candidate_labels = {
+                str(pid): f'{name} · {team} {pos}' + ('' if opponent is None or pd.isna(opponent) else f' vs {opponent}') + f' · {float(projection):.1f} PPR'
+                for pid, name, team, pos, opponent, projection in available_pool[["player_id", "player", "team", "position", "next_opponent", "median_ppr"]].itertuples(index=False, name=None)
             }
-
-            def format_search_candidate(player_id: str) -> str:
-                row = candidate_lookup[str(player_id)]
-                opponent = row.get("next_opponent")
-                opponent_text = "" if opponent is None or pd.isna(opponent) else f" vs {opponent}"
-                return (
-                    f'{row["player"]} · {row["team"]} {row["position"]}{opponent_text}'
-                    f' · {float(row["median_ppr"]):.1f} PPR'
-                )
 
             chosen_player_id = st.selectbox(
                 "Search players by name or team",
-                options=list(candidate_lookup),
+                options=list(candidate_labels),
                 index=None,
-                format_func=format_search_candidate,
+                format_func=candidate_labels.__getitem__,
                 placeholder="Type a player name or team…",
                 key=f'smart_search_candidate_{position}_{st.session_state[search_version_key]}',
                 help="Suggestions filter immediately as you type. Only eligible players for the selected position are shown.",
             )
             if chosen_player_id is not None:
-                result_row = candidate_lookup[str(chosen_player_id)]
+                result_row = available_pool.loc[available_pool["player_id"].astype(str).eq(str(chosen_player_id))].iloc[0]
                 availability = selection_availability_summary(result_row)
                 st.markdown(
                     f'<div class="smart-search-result"><b>{html.escape(str(result_row["player"]))}</b> · '

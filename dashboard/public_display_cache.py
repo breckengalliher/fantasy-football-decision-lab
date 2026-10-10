@@ -38,10 +38,29 @@ def public_display_version(metadata, passing_td_points):
 
 
 @st.cache_data(max_entries=4, ttl=300, show_spinner=False)
-def _cached_ranks(version, _board):
+def _cached_ranks(version, _board, scope='comparison'):
     # Underscored data frames are intentionally not rehashed on every rerun.
     # The key includes immutable revision + exact verified asset digests.
     return opponent_position_ranks(_board)
+
+
+def display_ranks(board, version=None, *, scope='comparison'):
+    return opponent_position_ranks(board) if version is None else _cached_ranks(version, board, scope)
+
+
+@st.cache_resource(max_entries=2, show_spinner=False)
+def _cached_roster_pool(version, _board):
+    return _valid_roster_pool(_board)
+
+
+def _valid_roster_pool(board):
+    return board.loc[board.forecast_valid.eq(True)].copy() if 'forecast_valid' in board else board
+
+
+def roster_pool(board, version=None):
+    # Only public, verified immutable assets enter the cross-session cache.
+    # No assignment, owner, preference, or authenticated state is accepted.
+    return _valid_roster_pool(board) if version is None else _cached_roster_pool(version, board)
 
 
 @st.cache_data(max_entries=128, ttl=300, show_spinner=False)
@@ -66,4 +85,5 @@ def display_game_log(weekly, row, passing_td_points, version=None):
 def clear_public_display_cache():
     _cached_ranks.clear()
     _cached_game_log.clear()
+    _cached_roster_pool.clear()
 

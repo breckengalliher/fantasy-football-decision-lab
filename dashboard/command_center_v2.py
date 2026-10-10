@@ -15,6 +15,7 @@ from dashboard.auth_ui import render_auth, sign_out
 from dashboard.availability import kickoff_utc, status_key
 from dashboard.lineup_rules import LineupAction, build_lineup_actions, lineup_status
 from dashboard.presentation import fantasy_game_log, opponent_position_rank, opponent_position_ranks, player_card_stat_summary, player_photo_html, projected_team_total
+from dashboard.public_display_cache import public_display_version, display_ranks, display_game_log, roster_pool
 from dashboard.replacement_optimizer import optimize_replacements
 from dashboard.repositories.rosters import RosterRepository
 from dashboard.roster_edit_guard import edit_is_current
@@ -292,7 +293,7 @@ def _toggle_fantasy_details(open_key: str) -> None:
 
 
 @st.fragment
-def _fantasy_details(player: dict[str, Any], pool: pd.DataFrame, weekly: pd.DataFrame, passing_td_points: int, key: str) -> None:
+def _fantasy_details(player: dict[str, Any], pool: pd.DataFrame, weekly: pd.DataFrame, passing_td_points: int, key: str, version=None) -> None:
     open_key = f"{key}-open"
     st.button(
         "Hide fantasy details" if st.session_state.get(open_key, False) else "Fantasy details & game log",
@@ -319,7 +320,7 @@ def _fantasy_details(player: dict[str, Any], pool: pd.DataFrame, weekly: pd.Data
             f'<div class="cc-detail-summary"><strong>{html.escape(summary["season_line"])}</strong><span>{html.escape(" · ".join(context))}</span></div>',
             unsafe_allow_html=True,
         )
-        log = fantasy_game_log(weekly, player, passing_td_points=passing_td_points, limit=5)
+        log = display_game_log(weekly, player, passing_td_points, version)
         if not log["rows"]:
             st.caption("Fantasy-relevant game log is not available for this player yet.")
             return
@@ -330,7 +331,7 @@ def _fantasy_details(player: dict[str, Any], pool: pd.DataFrame, weekly: pd.Data
         st.markdown(f'<div class="cc-game-log" id="{html.escape(key, quote=True)}">{rows}</div>', unsafe_allow_html=True)
 
 
-def _compact_roster_editor(team: dict[str, Any], all_roster: list[dict[str, Any]], visible_slots: list[dict[str, Any]], repo: RosterRepository, pool: pd.DataFrame, weekly: pd.DataFrame, passing_td_points: int, lookup: dict[str, dict[str, Any]] | None = None, ranks=None) -> None:
+def _compact_roster_editor(team: dict[str, Any], all_roster: list[dict[str, Any]], visible_slots: list[dict[str, Any]], repo: RosterRepository, pool: pd.DataFrame, weekly: pd.DataFrame, passing_td_points: int, lookup: dict[str, dict[str, Any]] | None = None, ranks=None, version=None) -> None:
     used = {str(item["player_id"]) for slot in all_roster if (item := _assignment(slot))}
     lookup = lookup if lookup is not None else _player_lookup(pool)
     for slot in _ordered_slots(visible_slots):
@@ -375,7 +376,7 @@ def _compact_roster_editor(team: dict[str, Any], all_roster: list[dict[str, Any]
                 st.session_state.pop(f"cc_edit_revision_{team['id']}_{current['id']}", None)
             if st.session_state.get(f"cc_manage_{current['id']}", False):
                 _manage_player(team, all_roster, slot, current, repo, pool, lookup)
-            _fantasy_details(player, pool, weekly, passing_td_points, f"cc-log-{current['id']}")
+            _fantasy_details(player, pool, weekly, passing_td_points, f"cc-log-{current['id']}", version)
             continue
         candidates = pool[pool["position"].astype(str).isin(ELIGIBLE[slot_type]) & ~pool["player_id"].astype(str).isin(used)].sort_values("median_ppr", ascending=False)
         options = candidates["player_id"].astype(str).tolist()
@@ -450,14 +451,16 @@ def _manage_player(team: dict[str, Any], roster: list[dict[str, Any]], source_sl
 def _add_player_slot(team: dict[str, Any], all_roster: list[dict[str, Any]], slot: dict[str, Any], repo: RosterRepository, pool: pd.DataFrame, *, title: str | None = None) -> None:
     slot_id, slot_type = str(slot["id"]), str(slot["slot_type"])
     slot_number = int(slot.get("slot_order", 0)) + 1
-    used = {str(item["player_id"]) for existing in all_roster if (item := _assignment(existing))}
-    candidates = pool[pool["position"].astype(str).isin(ELIGIBLE[slot_type]) & ~pool["player_id"].astype(str).isin(used)].sort_values("median_ppr", ascending=False)
-    options = candidates["player_id"].astype(str).tolist()
-    rows = {str(row["player_id"]): row.to_dict() for _, row in candidates.iterrows()}
     expander_title = title or f"{slot_type} {slot_number} · + Add player"
-    with st.expander(expander_title, expanded=False):
+    panel = st.expander(expander_title, expanded=False, key=f"cc_add_panel_{team['id']}_{slot_id}", on_change="rerun")
+    if not panel.open:
+        return
+    used = {str(item["player_id"]) for existing in all_roster if (item := _assignment(existing))}
+    candidates = pool.loc[pool["position"].astype(str).isin(ELIGIBLE[slot_type]) & ~pool["player_id"].astype(str).isin(used), ["player_id", "player", "team", "position", "median_ppr"]].sort_values("median_ppr", ascending=False)
+    labels = {str(pid): f"{name} · {nfl_team} {position} · {float(projection):.1f} PPR" for pid, name, nfl_team, position, projection in candidates.itertuples(index=False, name=None)}
+    with panel:
         left, right = st.columns([5, 1], vertical_alignment="bottom")
-        chosen = left.selectbox("Find a player", options, index=None, placeholder=f"Search eligible {slot_type} players…", format_func=lambda pid: f"{rows[pid]['player']} · {rows[pid]['team']} {rows[pid]['position']} · {float(rows[pid]['median_ppr']):.1f} PPR", key=f"cc_slot_pick_{team['id']}_{slot_id}")
+        chosen = left.selectbox("Find a player", list(labels), index=None, placeholder=f"Search eligible {slot_type} players…", format_func=labels.__getitem__, key=f"cc_slot_pick_{team['id']}_{slot_id}")
         if right.button("Add", key=f"cc_slot_add_{team['id']}_{slot_id}", disabled=chosen is None, width="stretch"):
             try: repo.assign_player(str(team["id"]), slot_id, str(chosen)); st.rerun()
             except SupabaseAPIError as error: st.error(str(error))
@@ -645,7 +648,8 @@ def _dashboard(team: dict[str, Any], repo: RosterRepository, pool: pd.DataFrame,
     # Add/search controls still receive the complete eligible player pool.
     roster_ids = {str(item["player_id"]) for slot in roster if (item := _assignment(slot))}
     lookup = _player_lookup(pool, roster_ids)
-    ranks = opponent_position_ranks(pool)
+    version = public_display_version(metadata, int((team.get('fantasy_leagues') or {}).get('passing_td_points', 4)))
+    ranks = display_ranks(pool, version, scope='valid-roster')
     entries = [_entry(slot, lookup, now) for slot in roster]
     starters, bench = [e for e in entries if e["is_starter"]], [e for e in entries if not e["is_starter"] and e.get("player_id")]
     all_actions = build_lineup_actions(starters, now)
@@ -676,13 +680,13 @@ def _dashboard(team: dict[str, Any], repo: RosterRepository, pool: pd.DataFrame,
     st.markdown('<div class="cc-section-heading cc-tight-heading"><span>STARTING LINEUP</span><h2>Build your starters</h2><p>QB · RB · RB · WR · WR · TE · FLEX / SUPERFLEX</p></div>', unsafe_allow_html=True)
     for slot in _ordered_slots(starter_slots):
         if _assignment(slot):
-            _compact_roster_editor(team, roster, [slot], repo, pool, weekly, passing_td_points, lookup, ranks)
+            _compact_roster_editor(team, roster, [slot], repo, pool, weekly, passing_td_points, lookup, ranks, version)
         else:
             _add_player_slot(team, roster, slot, repo, pool)
     st.markdown(f'<div class="cc-section-heading cc-tight-heading"><span>BENCH</span><h2>{len(bench_slots)} roster spots</h2></div>', unsafe_allow_html=True)
     for slot in _ordered_slots(bench_slots):
         if _assignment(slot):
-            _compact_roster_editor(team, roster, [slot], repo, pool, weekly, passing_td_points, lookup, ranks)
+            _compact_roster_editor(team, roster, [slot], repo, pool, weekly, passing_td_points, lookup, ranks, version)
         else:
             _add_player_slot(team, roster, slot, repo, pool)
 
@@ -694,8 +698,8 @@ def authenticate_command_center(api: SupabaseAPI, app_url: str):
 
 def render_command_center(api: SupabaseAPI, app_url: str, season: int, player_pool: pd.DataFrame, weekly: pd.DataFrame, metadata: dict[str, Any], session=None) -> None:
     # Invalid saved forecasts remain in audit files, never in add/compare/swap pools.
-    if "forecast_valid" in player_pool:
-        player_pool = player_pool.loc[player_pool.forecast_valid.eq(True)].copy()
+    version = public_display_version(metadata, int(st.query_params.get('qb', '4')) if str(st.query_params.get('qb', '4')) in ('4', '6') else 4)
+    player_pool = roster_pool(player_pool, version)
     session = session or render_auth(api, app_url)
     if not session: return
     repo = RosterRepository(api, session.access_token, session.user_id)
