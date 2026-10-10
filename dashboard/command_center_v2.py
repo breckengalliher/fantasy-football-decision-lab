@@ -449,7 +449,7 @@ def _manage_player(team: dict[str, Any], roster: list[dict[str, Any]], source_sl
                     repo.swap_players({**current, "slot_id": str(source_slot["id"])}, {**other, "slot_id": str(target["id"])}, str(team["id"]))
                 else:
                     repo.move_player(str(current["id"]), str(target["id"]), expected={**current, "slot_id": str(source_slot["id"])})
-                st.toast("Lineup saved")
+                st.session_state["cc_save_notice"] = {"team_id": str(team["id"])}
                 st.session_state[f"cc_manage_{current['id']}"] = False
                 st.session_state.pop(revision_key, None)
                 st.session_state.pop(f"cc_target_{current['id']}", None)
@@ -708,6 +708,13 @@ def authenticate_command_center(api: SupabaseAPI, app_url: str):
     return render_auth(api, app_url)
 
 
+def _show_save_notice(selected_team_id: str) -> None:
+    """Render the committed-write receipt on the next authenticated rerun."""
+    notice = st.session_state.pop("cc_save_notice", None)
+    if isinstance(notice, dict) and notice.get("team_id") == str(selected_team_id):
+        st.success("Lineup saved")
+
+
 def render_command_center(api: SupabaseAPI, app_url: str, season: int, player_pool: pd.DataFrame, weekly: pd.DataFrame, metadata: dict[str, Any], session=None) -> None:
     # Invalid saved forecasts remain in audit files, never in add/compare/swap pools.
     version = public_display_version(metadata, int(st.query_params.get('qb', '4')) if str(st.query_params.get('qb', '4')) in ('4', '6') else 4)
@@ -733,6 +740,7 @@ def render_command_center(api: SupabaseAPI, app_url: str, season: int, player_po
     if str(st.query_params.get("qb", "4")) != scoring:
         st.query_params["qb"] = scoring
         st.rerun()
+    _show_save_notice(selected_id)
     _dashboard(selected_team, repo, player_pool, weekly, metadata, datetime.now(timezone.utc))
     if os.environ.get('SDL_RESTRICTED_PILOT') == '1':
         st.session_state.pop("cc_team_settings_open", None)

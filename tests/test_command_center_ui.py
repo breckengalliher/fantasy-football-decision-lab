@@ -77,11 +77,13 @@ def test_save_acknowledgement_requires_database_commit(monkeypatch, write_succee
         {'player-a': {'position': 'QB'}, 'player-b': {'position': 'QB'}},
     )
     if write_succeeds:
-        assert events == [('committed', None), ('ack', 'Lineup saved'), ('rerun', None)]
+        assert events == [('committed', None), ('rerun', None)]
+        assert screen.session_state['cc_save_notice'] == {'team_id': 'team'}
         assert screen.session_state['cc_manage_assignment-a'] is False
         assert 'cc_target_assignment-a' not in screen.session_state
     else:
         assert events == [('error', 'Save rejected: stale edit')]
+        assert 'cc_save_notice' not in screen.session_state
         assert screen.session_state['cc_manage_assignment-a'] is True
 
 
@@ -124,3 +126,16 @@ def test_roster_slots_use_fantasy_lineup_order_before_bench():
         {"slot_type": "WR", "slot_order": 0, "is_starter": True},
     ]
     assert [slot["slot_type"] for slot in _ordered_slots(slots)] == ["QB", "RB", "RB", "WR", "WR", "TE", "FLEX", "BENCH"]
+
+
+@pytest.mark.parametrize('selected_team,expected', [('team', ['Lineup saved']), ('other', [])])
+def test_committed_notice_survives_rerun_but_not_team_switch(monkeypatch, selected_team, expected):
+    from dashboard import command_center_v2
+    from types import SimpleNamespace
+    notices = []
+    state = {'cc_save_notice': {'team_id': 'team'}}
+    monkeypatch.setattr(command_center_v2, 'st', SimpleNamespace(session_state=state, success=notices.append))
+    command_center_v2._show_save_notice(selected_team)
+    command_center_v2._show_save_notice(selected_team)
+    assert notices == expected
+    assert 'cc_save_notice' not in state

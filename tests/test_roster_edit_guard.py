@@ -82,8 +82,8 @@ class RosterEditGuardTests(unittest.TestCase):
         self.state = {}
         self.render_manager(self.roster,False)
         calls = self.render_manager(self.roster,True)
-        self.assertEqual([c[0] for c in calls],['swap','toast'])
-        self.assertEqual(calls[1][1], 'Lineup saved')
+        self.assertEqual([c[0] for c in calls],['swap'])
+        self.assertEqual(self.state['cc_save_notice'], {'team_id': 'team'})
         self.assertFalse(self.state['cc_manage_a'])
         self.assertEqual(calls[0][1][0]['slot_id'],'qb')
         self.assertEqual(calls[0][1][1]['slot_id'],'bench')
