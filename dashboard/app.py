@@ -1574,13 +1574,12 @@ elif page == "Decision Room":
                                 unsafe_allow_html=True,
                             )
                             with st.container(key=f"comparison_slot_actions_{slot_index}"):
-                                remove_column, replace_column = st.columns(2)
-                                if remove_column.button("Remove", key=f"remove_{position}_{selected_row['player_id']}", width="stretch"):
+                                if st.button("Remove", key=f"remove_{position}_{selected_row['player_id']}", width="stretch"):
                                     st.session_state[selection_key] = [value for value in names if value != names[slot_index]]
                                     st.session_state[replacement_key] = None
                                     st.rerun()
                                 replace_label = "Replacing…" if replacement_index == slot_index else "Replace"
-                                if replace_column.button(replace_label, key=f"replace_{position}_{selected_row['player_id']}", width="stretch"):
+                                if st.button(replace_label, key=f"replace_{position}_{selected_row['player_id']}", width="stretch"):
                                     st.session_state[replacement_key] = None if replacement_index == slot_index else slot_index
                                     st.rerun()
                         else:
