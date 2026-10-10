@@ -101,6 +101,60 @@ def test_diagnostic_sink_failure_does_not_break_emit(monkeypatch, tmp_path, caps
     assert capsys.readouterr().out.count('diagnostic_sink_stopped') == 1
 
 
+def test_resource_receipt_flag_is_independent_and_records_only_resources(monkeypatch, tmp_path):
+    import json
+    path = tmp_path / 'resources.jsonl'
+    flag = tmp_path / 'resource-flag'
+    flag.touch()
+    monkeypatch.setattr(qa_telemetry, 'RESOURCE_RECEIPT_FLAG', flag)
+    monkeypatch.setattr(qa_telemetry, 'RESOURCE_RECEIPT_SINK', path)
+    monkeypatch.setattr(qa_telemetry, '_resource_receipt_active', False)
+    monkeypatch.setattr(qa_telemetry, '_resource_sink_stopped', False)
+    monkeypatch.setattr(qa_telemetry, '_diagnostic_active', False)
+    monkeypatch.setattr(qa_telemetry, 'enabled', lambda: True)
+    callbacks = list(qa_telemetry.gc.callbacks)
+    assert qa_telemetry._sync_resource_receipt()
+    assert not qa_telemetry._diagnostic_active
+    assert list(qa_telemetry.gc.callbacks) == callbacks
+    assert qa_telemetry.diagnostic_counts() == {}
+    qa_telemetry.emit('run_start', session='private-session')
+    assert not path.exists()
+    qa_telemetry.emit('resource', completed_runs=42, profiling=False,
+                      cleanup={'policy':'framework-default'},
+                      diagnostic={'do-not-record':'secret'}, private_token='secret')
+    record = json.loads(path.read_text())
+    assert record['receipt_mode'] == 'resource-only'
+    assert record['completed_runs'] == 42
+    assert record['cleanup']['policy'] == 'framework-default'
+    assert 'diagnostic' not in record and 'secret' not in path.read_text()
+    assert qa_telemetry.receipt_writer_cost()['resource-only']['writes'] >= 1
+    assert qa_telemetry.receipt_writer_cost()['resource-only']['cpu_ms'] >= 0
+    flag.unlink()
+    assert not qa_telemetry._sync_resource_receipt()
+    before = path.read_bytes()
+    qa_telemetry.emit('resource', completed_runs=43)
+    assert path.read_bytes() == before
+
+
+def test_resource_receipt_nonqa_and_size_limit_preserve_prior(monkeypatch, tmp_path, capsys):
+    path = tmp_path / 'resources.jsonl'
+    path.write_bytes(b'prior\n')
+    monkeypatch.setattr(qa_telemetry, 'RESOURCE_RECEIPT_SINK', path)
+    monkeypatch.setattr(qa_telemetry, 'RESOURCE_RECEIPT_LIMIT', 12)
+    monkeypatch.setattr(qa_telemetry, '_resource_receipt_active', True)
+    monkeypatch.setattr(qa_telemetry, '_resource_sink_stopped', False)
+    monkeypatch.setattr(qa_telemetry, '_diagnostic_active', False)
+    monkeypatch.setattr(qa_telemetry, 'enabled', lambda: False)
+    qa_telemetry._write_diagnostic_record({'kind':'resource'})
+    assert path.read_bytes() == b'prior\n'
+    monkeypatch.setattr(qa_telemetry, 'enabled', lambda: True)
+    qa_telemetry._write_diagnostic_record({'kind':'resource'})
+    qa_telemetry._write_diagnostic_record({'kind':'resource'})
+    assert path.read_bytes() == b'prior\n'
+    assert capsys.readouterr().out.count('diagnostic_sink_stopped') == 1
+    assert qa_telemetry._resource_sink_stopped
+
+
 def test_instrumentation_requires_exact_qa_service_and_database(monkeypatch):
     monkeypatch.delenv('RENDER_SERVICE_ID',raising=False)
     monkeypatch.setenv('SUPABASE_URL',qa_telemetry.QA_URL)

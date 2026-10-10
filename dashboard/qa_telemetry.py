@@ -22,6 +22,13 @@ DIAGNOSTIC_FLAG = Path('/tmp/sdl-qa-diagnostic')
 CLEANUP_EXPERIMENT_FLAG = Path('/tmp/sdl-qa-cleanup-periodic')
 DIAGNOSTIC_SINK = Path('/tmp/sdl-qa-diagnostic.jsonl')
 DIAGNOSTIC_SINK_LIMIT = 8 * 1024 * 1024
+RESOURCE_RECEIPT_FLAG = Path('/tmp/sdl-qa-resource-receipt')
+RESOURCE_RECEIPT_SINK = Path('/tmp/sdl-qa-resource-receipt.jsonl')
+RESOURCE_RECEIPT_LIMIT = 16 * 1024 * 1024
+_resource_receipt_active = False
+_resource_sink_stopped = False
+_writer_cost = {mode: {'writes': 0, 'cpu_ms': 0.0, 'wall_ms': 0.0}
+                for mode in ('diagnostic', 'resource-only')}
 _sink_lock = threading.Lock()
 _sink_stopped = False
 _diagnostic_active = False
@@ -49,9 +56,19 @@ def emit(kind, **values):
 
 def _write_diagnostic_record(record):
     """Preserve bounded QA receipt. Never overwrites prior diagnostics."""
-    global _sink_stopped
-    if not _diagnostic_active or not enabled() or _sink_stopped:
+    global _sink_stopped, _resource_sink_stopped
+    if not (_diagnostic_active or _resource_receipt_active) or not enabled():
         return
+    diagnostic = _diagnostic_active
+    if (diagnostic and _sink_stopped) or (not diagnostic and _resource_sink_stopped):
+        return
+    if not diagnostic and record.get('kind') != 'resource':
+        return
+    wall_start = time.perf_counter()
+    cpu_start = time.thread_time()
+    mode = 'diagnostic' if diagnostic else 'resource-only'
+    path = DIAGNOSTIC_SINK if diagnostic else RESOURCE_RECEIPT_SINK
+    limit = DIAGNOSTIC_SINK_LIMIT if diagnostic else RESOURCE_RECEIPT_LIMIT
     # Only telemetry call sites supply these coarse records. No widget values,
     # environment dump, credentials, rows or exception messages are accepted.
     allowed = {'resource', 'run_start', 'run_end', 'profile_started',
@@ -65,23 +82,46 @@ def _write_diagnostic_record(record):
               'resource_cache_bytes', 'data_cache_stat_groups',
               'resource_cache_stat_groups', 'traced_current_peak', 'allocation_top',
               'trace_snapshot_wall_ms', 'trace_snapshot_cpu_ms', 'trace_table_bytes',
-              'error_type', 'cleanup'}
+              'error_type', 'cleanup', 'receipt_mode', 'receipt_writer_cost'}
+    if not diagnostic:
+        fields -= {'diagnostic', 'traced_current_peak', 'allocation_top',
+                   'trace_snapshot_wall_ms', 'trace_snapshot_cpu_ms', 'trace_table_bytes'}
     bounded = {key: value for key, value in record.items() if key in fields}
+    bounded['receipt_mode'] = mode
     encoded = (json.dumps(bounded, separators=(',', ':')) + '\n').encode('utf8')
     with _sink_lock:
-        if _sink_stopped:
+        if (diagnostic and _sink_stopped) or (not diagnostic and _resource_sink_stopped):
             return
         try:
-            size = DIAGNOSTIC_SINK.stat().st_size if DIAGNOSTIC_SINK.exists() else 0
-            if size + len(encoded) > DIAGNOSTIC_SINK_LIMIT:
+            size = path.stat().st_size if path.exists() else 0
+            if size + len(encoded) > limit:
                 raise OverflowError('diagnostic sink limit')
-            with DIAGNOSTIC_SINK.open('ab') as output:
+            with path.open('ab') as output:
                 output.write(encoded)
+            _writer_cost[mode]['writes'] += 1
         except (OSError, OverflowError) as error:
-            _sink_stopped = True
+            if diagnostic:
+                _sink_stopped = True
+            else:
+                _resource_sink_stopped = True
             # Do not recurse through emit/the failed sink or propagate into app.
             print('SDL_QA_TELEMETRY ' + json.dumps({'kind':'diagnostic_sink_stopped',
-                  'epoch':time.time(),'error_type':type(error).__name__}), flush=True)
+                  'epoch':time.time(),'error_type':type(error).__name__,
+                  'receipt_mode':mode}), flush=True)
+        finally:
+            _writer_cost[mode]['cpu_ms'] += (time.thread_time()-cpu_start)*1000
+            _writer_cost[mode]['wall_ms'] += (time.perf_counter()-wall_start)*1000
+
+
+def _sync_resource_receipt():
+    global _resource_receipt_active
+    _resource_receipt_active = enabled() and RESOURCE_RECEIPT_FLAG.exists()
+    return _resource_receipt_active
+
+
+def receipt_writer_cost():
+    with _sink_lock:
+        return {mode: dict(value) for mode, value in _writer_cost.items()}
 
 
 def resources():
@@ -205,12 +245,15 @@ def sample():
         try:
             cleanup = _sync_cleanup()
             _sync_diagnostic()
+            _sync_resource_receipt()
             if PROFILE_FLAG.exists() and not tracemalloc.is_tracing():
                 tracemalloc.start(1); emit('profile_started')
             elif not PROFILE_FLAG.exists() and tracemalloc.is_tracing():
                 tracemalloc.stop();emit('profile_stopped')
             with _lock:counts={'completed_runs':_runs,'active_runs':_active}
             extra={'cleanup':cleanup}
+            if _diagnostic_active or _resource_receipt_active:
+                extra['receipt_writer_cost'] = receipt_writer_cost()
             if _diagnostic_active:
                 extra['diagnostic'] = diagnostic_counts()
             if ticks % 6 == 0:
