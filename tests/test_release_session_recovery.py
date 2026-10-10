@@ -26,7 +26,9 @@ def test_temporary_restore_failure_preserves_credentials(monkeypatch):
     monkeypatch.setattr(auth_ui.st, "rerun", lambda: None)
     monkeypatch.setattr(auth_ui.st, "warning", lambda *args: None)
     monkeypatch.setattr(auth_ui.st, "button", lambda *args, **kwargs: False)
-    storage = auth_storage.AuthStorage({auth_ui.STORAGE_KEY: "test-token"})
+    # Provider rotation now runs under the browser lock. Simulate its acknowledged
+    # outage, not the removed per-tab server refresh path (JS tests cover fetch).
+    storage = auth_storage.AuthStorage({auth_ui.STORAGE_KEY: "test-token"}, auth_result={'status':'retryable'})
     class API:
         calls = 0
         def refresh(self, token):
@@ -37,15 +39,17 @@ def test_temporary_restore_failure_preserves_credentials(monkeypatch):
     assert storage.getItem(auth_ui.STORAGE_KEY) == "test-token"
     assert auth_storage.PENDING_KEY not in state
     assert auth_ui.restore_session(api, storage) is None
-    assert api.calls == 1
+    assert api.calls == 0
     monkeypatch.setattr(auth_ui.st, "button", lambda *args, **kwargs: True)
+    storage.auth_result = None
     auth_ui.restore_session(api, storage)
-    assert api.calls == 2
+    assert api.calls == 0
+    assert state[auth_storage.PENDING_KEY]['refresh'] is True
 
 
 def test_rejected_restore_credentials_are_removed(monkeypatch):
     monkeypatch.setattr(auth_ui.st, "session_state", {})
-    storage = auth_storage.AuthStorage({auth_ui.STORAGE_KEY: "revoked-test-token"})
+    storage = auth_storage.AuthStorage({auth_ui.STORAGE_KEY: "revoked-test-token"}, auth_result={'status':'rejected'})
     class API:
         def refresh(self, token):
             raise SupabaseAPIError("Rejected credential")

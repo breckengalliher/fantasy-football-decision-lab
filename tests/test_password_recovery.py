@@ -35,16 +35,18 @@ def test_bridge_keeps_recovery_separate_from_persistent_storage(monkeypatch):
 
 
 def test_bridge_rejects_cross_origin_and_removes_link_credentials():
-    html=(Path(__file__).parents[1]/'dashboard/components/auth_storage/index.html').read_text()
-    assert 'event.origin !== location.origin' in html
-    assert "...extra}, location.origin)" in html
-    assert 'parent.history.replaceState' in html
-    assert 'if (args.clear_recovery) recovery = undefined' in html
+    directory=Path(__file__).parents[1]/'dashboard/components/auth_storage'
+    assert 'src="auth.js"' in (directory/'index.html').read_text()
+    script=(directory/'auth.js').read_text().replace(' ', '')
+    assert 'event.origin!==location.origin' in script
+    assert "...extra},location.origin)" in script
+    assert 'parent.history.replaceState' in script
+    assert 'if(args.clear_recovery)recovery=undefined' in script
 
 
 def test_verified_link_shows_password_form_without_roster_access(monkeypatch):
     from streamlit.testing.v1 import AppTest
-    monkeypatch.setattr(auth_ui,'browser_auth_storage',lambda:
+    monkeypatch.setattr(auth_ui,'browser_auth_storage',lambda *args:
         auth_storage.AuthStorage({},recovery={'type':'recovery','refresh_token':'fixture-only'}))
     script='''
 import streamlit as st

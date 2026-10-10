@@ -8,12 +8,13 @@ import base64
 import hashlib
 import json
 import math
+from uuid import uuid4
 
 import streamlit as st
 from streamlit_local_storage import LocalStorage
 
 from dashboard.supabase_api import AuthSession, SupabaseAPI, SupabaseAPIError
-from dashboard.auth_storage import AuthStorage, browser_auth_storage, PENDING_KEY
+from dashboard.auth_storage import AuthStorage, browser_auth_storage, PENDING_KEY, RECORD_KEY
 
 
 SESSION_KEY = "command_center_auth_session"
@@ -37,17 +38,24 @@ def _delete_if_present(storage: LocalStorage, item_key: str, *, component_key: s
 
 
 def _save(session: AuthSession, storage: LocalStorage, persistence: str = "always") -> None:
+    previous = current_session()
+    if previous and previous.user_id != session.user_id:
+        _clear_private_ui()
     st.session_state[SESSION_KEY] = asdict(session)
     st.session_state["command_center_persistence_mode"] = persistence
     if persistence == "session":
+        _delete_if_present(storage, RECORD_KEY, component_key="clear_session_only_record")
         _delete_if_present(storage, STORAGE_KEY, component_key="clear_session_only_token")
         _delete_if_present(storage, PERSISTENCE_KEY, component_key="clear_session_only_mode")
         _delete_if_present(storage, EXPIRY_KEY, component_key="clear_session_only_expiry")
         return
+    expiry = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat() if persistence == 'remember' else None
+    record = {'version': 2, 'revision': str(uuid4()), 'session': asdict(session), 'mode': persistence, 'expires_at': expiry}
+    storage.setItem(RECORD_KEY, record)
+    st.session_state['command_center_browser_record'] = record
     storage.setItem(STORAGE_KEY, session.refresh_token, key="persist_command_center_session")
     storage.setItem(PERSISTENCE_KEY, persistence, key="persist_command_center_mode")
     if persistence == "remember":
-        expiry = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
         storage.setItem(EXPIRY_KEY, expiry, key="persist_command_center_expiry")
     else:
         _delete_if_present(storage, EXPIRY_KEY, component_key="clear_command_center_expiry")
@@ -95,6 +103,8 @@ def access_refresh_due(session: AuthSession, now: datetime | None = None) -> boo
 
 
 def restore_session(api: SupabaseAPI, storage: LocalStorage) -> AuthSession | None:
+    if isinstance(storage, AuthStorage):
+        return _restore_coordinated(api, storage)
     if st.session_state.get("command_center_restore_retryable"):
         st.warning("Sign-in restoration is temporarily unavailable. Your remembered sign-in has been retained.")
         if st.button("Retry restoring sign-in", key="cc_retry_restore"):
@@ -155,22 +165,106 @@ def restore_session(api: SupabaseAPI, storage: LocalStorage) -> AuthSession | No
     return session
 
 
+def _clear_private_ui() -> None:
+    for key in list(st.session_state):
+        if str(key).startswith(("cc_", "command_center_")):
+            st.session_state.pop(key, None)
+    st.query_params.pop('team', None)
+
+
+def _restore_coordinated(api, storage):
+    """Never rotate a remembered token from a tab's stale Python state."""
+    existing = current_session()
+    if st.session_state.get('command_center_restore_retryable'):
+        st.warning('Sign-in restoration is temporarily unavailable. Your saved sign-in and pending edits have been retained.')
+        if not st.button('Retry restoring sign-in', key='cc_retry_restore'):
+            return None
+        st.session_state.pop('command_center_restore_retryable', None)
+    record = storage.getItem(RECORD_KEY)
+    mode = st.session_state.get('command_center_persistence_mode')
+    if not storage.available:
+        # No shared browser credential: explicitly degrade to visit-only mode.
+        st.session_state['command_center_persistence_mode'] = 'session'
+        mode = 'session'
+    if existing and mode == 'session' and not record:
+        if not access_refresh_due(existing):
+            return existing
+        try:
+            refreshed = api.refresh(existing.refresh_token)
+            if refreshed.user_id != existing.user_id:
+                raise SupabaseAPIError('Session identity mismatch')
+            st.session_state[SESSION_KEY] = asdict(refreshed)
+            return refreshed
+        except SupabaseAPIError as error:
+            if error.retryable:
+                st.session_state['command_center_restore_retryable'] = True
+            else:
+                _clear_private_ui()
+            return None
+    if isinstance(record, dict):
+        if persistence_expired(record.get('mode'), record.get('expires_at')):
+            storage.clear_session()
+            _clear_private_ui()
+            return None
+        try:
+            shared = AuthSession(**record['session'])
+        except (KeyError, TypeError):
+            shared = None
+        if shared and not access_refresh_due(shared):
+            if existing and shared == existing:
+                st.session_state['command_center_browser_record'] = record
+                return existing
+            try:
+                user = api.user(shared.access_token)
+                if user.get('id') != shared.user_id:
+                    raise SupabaseAPIError('Session identity mismatch')
+            except SupabaseAPIError as error:
+                if error.retryable:
+                    st.session_state['command_center_restore_retryable'] = True
+                else:
+                    storage.clear_session()
+                    _clear_private_ui()
+                return None
+            if existing and existing.user_id != shared.user_id:
+                _clear_private_ui()
+            st.session_state[SESSION_KEY] = asdict(shared)
+            st.session_state['command_center_persistence_mode'] = record.get('mode', 'always')
+            st.session_state['command_center_browser_record'] = record
+            return shared
+    result = storage.auth_result or {}
+    if result.get('status') in {'rejected', 'expired'}:
+        storage.clear_session()
+        _clear_private_ui()
+        return None
+    if result.get('status') in {'retryable', 'unsupported'}:
+        st.session_state['command_center_restore_retryable'] = True
+        st.warning('Sign-in could not be restored safely. Retry, or sign in again. Your saved teams are unchanged.')
+        return None
+    if not record and not storage.getItem(STORAGE_KEY):
+        if existing:
+            _clear_private_ui()
+        return None
+    storage.refresh_session()
+    return None
+
+
 def _clear_private_session(storage) -> None:
     """Clear account-scoped UI and remembered credentials after invalidation."""
     st.session_state.pop(SESSION_KEY, None)
     st.session_state.pop(RESTORE_KEY, None)
-    _delete_if_present(storage, STORAGE_KEY, component_key="clear_command_center_session")
-    _delete_if_present(storage, PERSISTENCE_KEY, component_key="clear_command_center_mode")
-    _delete_if_present(storage, EXPIRY_KEY, component_key="clear_command_center_expiry")
-    for key in list(st.session_state):
-        if str(key).startswith(("cc_", "command_center_")):
-            st.session_state.pop(key, None)
-    st.query_params.pop("team", None)
+    if isinstance(storage, AuthStorage):
+        storage.clear_session()
+    else:
+        _delete_if_present(storage, STORAGE_KEY, component_key="clear_command_center_session")
+        _delete_if_present(storage, PERSISTENCE_KEY, component_key="clear_command_center_mode")
+        _delete_if_present(storage, EXPIRY_KEY, component_key="clear_command_center_expiry")
+    _clear_private_ui()
 
 
 def sign_out(api: SupabaseAPI, storage: LocalStorage | None = None) -> None:
     # render_auth already mounted the bridge. Queue deletion for its next run.
-    storage = AuthStorage({})
+    storage = storage or AuthStorage({RECORD_KEY: st.session_state.get('command_center_browser_record'),
+                                    STORAGE_KEY: current_session().refresh_token if current_session() else None})
     session = current_session()
     if session:
         try:
@@ -181,7 +275,7 @@ def sign_out(api: SupabaseAPI, storage: LocalStorage | None = None) -> None:
 
 
 def render_auth(api: SupabaseAPI, app_url: str) -> AuthSession | None:
-    storage = browser_auth_storage()
+    storage = browser_auth_storage(api)
     if storage is None:
         st.caption("Restoring your private session…")
         return None
@@ -232,16 +326,18 @@ def render_auth(api: SupabaseAPI, app_url: str) -> AuthSession | None:
     session = restore_session(api, storage)
     # Recover a successful sign-in whose persistence write previously failed.
     # Honor the user's explicit choice; never persist session-only sign-ins.
-    selected_mode = st.session_state.get("command_center_persistence_mode") or PERSISTENCE_OPTIONS.get(st.session_state.get("cc_login_persistence"))
-    if session and storage.available and not storage.getItem(STORAGE_KEY) and selected_mode in {"always", "remember"}:
-        _save(session, storage, selected_mode)
     if st.session_state.get(PENDING_KEY):
         st.rerun()
     if session:
-        if storage.available and not storage.getItem(STORAGE_KEY) and selected_mode is None:
-            if st.button("Remember this sign-in", help="Keep this existing sign-in on this device until you sign out. Do not use on a shared device."):
-                _save(session, storage, "always")
-                st.rerun()
+        # Non-privileged refresh rehearsal, only on the named isolated QA service.
+        # No auth bypass, token changes, provider-setting changes or production UI.
+        from dashboard.qa_telemetry import enabled as qa_enabled
+        if qa_enabled() and api.url == 'https://deburhwrnuqeyexpezzo.supabase.co':
+            with st.expander('QA session check'):
+                st.caption('QA only: rehearse the same locked refresh path used before access expiry.')
+                if st.button('QA: Rotate sign-in safely', key='cc_qa_rotate'):
+                    storage.refresh_session(force=True)
+                    st.rerun()
         return session
 
     st.markdown(
