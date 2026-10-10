@@ -14,9 +14,9 @@ def test_details_interaction_is_fragment_scoped():
 def test_details_callback_is_player_scoped(monkeypatch):
     state = {"other-open": True}
     monkeypatch.setattr(command_center_v2.st, "session_state", state)
-    command_center_v2._toggle_fantasy_details("selected-open")
+    command_center_v2._toggle_panel("selected-open")
     assert state == {"other-open": True, "selected-open": True}
-    command_center_v2._toggle_fantasy_details("selected-open")
+    command_center_v2._toggle_panel("selected-open")
     assert state["selected-open"] is False
 
 

@@ -290,7 +290,7 @@ def _matchup_chip(pool: pd.DataFrame, player: dict[str, Any], ranks=None) -> str
     )
 
 
-def _toggle_fantasy_details(open_key: str) -> None:
+def _toggle_panel(open_key: str) -> None:
     """Update state before rendering so the button matches the visible content."""
     st.session_state[open_key] = not st.session_state.get(open_key, False)
 
@@ -302,7 +302,7 @@ def _fantasy_details(player: dict[str, Any], pool: pd.DataFrame, weekly: pd.Data
         "Hide fantasy details" if st.session_state.get(open_key, False) else "Fantasy details & game log",
         key=f"{key}-toggle",
         width="stretch",
-        on_click=_toggle_fantasy_details,
+        on_click=_toggle_panel,
         args=(open_key,),
     )
     if st.session_state.get(open_key, False):
@@ -728,12 +728,13 @@ def render_command_center(api: SupabaseAPI, app_url: str, season: int, player_po
         st.rerun()
     _dashboard(selected_team, repo, player_pool, weekly, metadata, datetime.now(timezone.utc))
     settings_key = "cc_team_settings_open"
-    if st.button(
+    st.button(
         "Close team settings" if st.session_state.get(settings_key, False) else ('Team settings' if os.environ.get('SDL_RESTRICTED_PILOT') == '1' else 'Team settings and additional teams'),
         key="cc_team_settings_toggle",
         width="stretch",
-    ):
-        st.session_state[settings_key] = not st.session_state.get(settings_key, False)
+        on_click=_toggle_panel,
+        args=(settings_key,),
+    )
     if st.session_state.get(settings_key, False):
         selected_team = next(t for t in teams if str(t["id"]) == selected_id)
         st.caption(f"Signed in as {session.email}")
