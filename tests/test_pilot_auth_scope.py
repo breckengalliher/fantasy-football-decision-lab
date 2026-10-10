@@ -107,6 +107,20 @@ def test_invited_scope_fails_closed_for_missing_duplicate_or_unpinned_config():
             invited_accounts(broken)
 
 
+def test_four_launch_invitees_exclude_fifth_capacity_tester():
+    env = {'SDL_RESTRICTED_PILOT': '1',
+           'SDL_PILOT_ACCOUNT_IDS': ','.join((FIRST, SECOND, THIRD, FOURTH)),
+           'SNAPSHOT_BASE_URL': PIN}
+    accounts = invited_accounts(env)
+    assert all(account_allowed(value, accounts) for value in (FIRST, SECOND, THIRD, FOURTH))
+    assert not account_allowed(FIFTH, accounts)
+    for invalid in (','.join((FIRST, SECOND, THIRD)),
+                    ','.join((FIRST, SECOND, THIRD, FIRST)),
+                    ','.join((FIRST, SECOND, THIRD, 'null'))):
+        with pytest.raises(ValueError):
+            invited_accounts({**env, 'SDL_PILOT_ACCOUNT_IDS': invalid})
+
+
 def test_uninvited_restored_account_clears_private_state_before_access(monkeypatch):
     screen, api = setup(monkeypatch, session=SimpleNamespace(user_id='uninvited'))
     monkeypatch.setenv('SDL_RESTRICTED_PILOT', '1')
