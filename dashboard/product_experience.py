@@ -26,15 +26,15 @@ def mobile_navigation() -> None:
     context = {key: str(st.query_params[key]) for key in ("team", "qb") if key in st.query_params}
     def link(view):
         return html.escape("?" + urlencode({"view": view, **context}), quote=True)
-    extra_links = f'<a href="{link("player-trends")}"><b>↗</b><span>Trends</span></a>'
+    extra_links = f'<a href="{link("player-trends")}" target="_self"><b>↗</b><span>Trends</span></a>'
     if os.environ.get('SDL_RESTRICTED_PILOT') != '1':
         extra_links += (
-        f'<a href="{link("how-it-works")}"><b>ⓘ</b><span>Method</span></a>'
+        f'<a href="{link("how-it-works")}" target="_self"><b>ⓘ</b><span>Method</span></a>'
         )
     st.markdown(
         '<nav class="mobile-nav" aria-label="Primary">'
-        f'<a href="{link("command-center")}"><b>⌂</b><span>Command</span></a>'
-        f'<a href="{link("decision-room")}"><b>⇄</b><span>Compare</span></a>'
+        f'<a href="{link("command-center")}" target="_self"><b>⌂</b><span>Command</span></a>'
+        f'<a href="{link("decision-room")}" target="_self"><b>⇄</b><span>Compare</span></a>'
         f'{extra_links}'
         '</nav>', unsafe_allow_html=True,
     )

@@ -158,6 +158,7 @@ def test_mobile_pilot_navigation_does_not_offer_excluded_routes(monkeypatch):
     product_experience.mobile_navigation()
     assert 'command-center' in output[0] and 'decision-room' in output[0]
     assert 'player-trends' in output[0] and 'how-it-works' not in output[0]
+    assert output[0].count('target="_self"') == 3
 
 
 def test_uninvited_successful_login_is_not_persisted(monkeypatch):
