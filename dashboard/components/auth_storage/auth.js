@@ -80,7 +80,7 @@ try {
   if(['recovery','invite'].includes(params.get('type'))&&params.get('refresh_token')){
     recovery={type:params.get('type'),refresh_token:params.get('refresh_token')};
     parent.history.replaceState(null,'',parent.location.pathname+parent.location.search);
-  }else if(params.get('error')&&new URLSearchParams(parent.location.search).get('recovery')==='1'){
+  }else if(params.get('error')){
     recovery={error:true};parent.history.replaceState(null,'',parent.location.pathname+parent.location.search);
   }
 }catch{}

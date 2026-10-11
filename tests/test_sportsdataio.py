@@ -94,7 +94,7 @@ def test_full_practice_is_concise_and_omits_body_part_noise():
 
 
 def test_no_injury_record_uses_plain_language():
-    assert format_injury_context({}, provider_connected=True) == "No injury designation"
+    assert format_injury_context({}, provider_connected=True) == "No provider injury record · verify availability"
 
 
 def test_game_context_is_available_to_both_teams():

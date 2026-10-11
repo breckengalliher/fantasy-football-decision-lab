@@ -38,9 +38,11 @@ except ModuleNotFoundError:
 try:
     from dashboard.football_integrity import guard_forecasts, reconcile_board_identities
     from dashboard.availability import recommendation_restriction
+    from dashboard.lineup_rules import critical_data_fresh
 except ModuleNotFoundError:
     from football_integrity import guard_forecasts, reconcile_board_identities
     from availability import recommendation_restriction
+    from lineup_rules import critical_data_fresh
 import streamlit.components.v1 as components
 try:
     from dashboard.public_display_cache import public_display_version, display_opponent_rank, display_game_log, clear_public_display_cache, comparison_pool
@@ -1149,7 +1151,7 @@ def explained_term(label: object, explanation: object, class_name: str = "") -> 
 
 
 @st.cache_data(ttl=60, max_entries=24, show_spinner=False)
-def build_share_image(compare: pd.DataFrame, week: int, scoring_label: str, refreshed: str) -> bytes:
+def build_share_image(compare: pd.DataFrame, week: int, scoring_label: str, refreshed: str, context_verified: bool = False) -> bytes:
     """Create a compact, social-friendly PNG for the current comparison."""
     # Pillow is only needed after the user opens sharing and requests the card.
     from PIL import Image, ImageDraw, ImageFont
@@ -1164,6 +1166,8 @@ def build_share_image(compare: pd.DataFrame, week: int, scoring_label: str, refr
     )
     if recommendation_restriction(leader):
         recommendation = 'Baseline only · verify eligibility before starting'
+    elif not context_verified:
+        recommendation = 'VERIFY DATA · baseline projections only'
     image = Image.new("RGB", (1200, 630), "#002244")
     draw = ImageDraw.Draw(image)
     font_path = "C:/Windows/Fonts/arial.ttf"
@@ -1476,7 +1480,7 @@ elif page == "Sunday Command Center":
 elif page == "Decision Room":
     context_age_minutes, context_is_stale = context_freshness(PROVIDER_REFRESHED_AT)
     source_verified = header_metadata.get("injury_freshness_verified") is True and header_metadata.get("depth_freshness_verified") is True
-    context_is_stale = context_is_stale or not source_verified
+    context_is_stale = context_is_stale or not critical_data_fresh(header_metadata, datetime.now(timezone.utc))
     context_value = "Needs confirmation" if context_is_stale else "Current"
     context_detail = "Unavailable" if context_age_minutes is None else f"Retrieved {context_age_minutes} min ago; report freshness {'verified' if source_verified else 'unverified'}"
     high_frequency_day = datetime.now().weekday() in {0, 3, 6}
@@ -1553,6 +1557,10 @@ elif page == "Decision Room":
                 preview_title = f'{preview_leader["player"]} is unavailable · baseline comparison only'
                 preview_copy = "Do not start an unavailable player. These unchanged point estimates are not an actionable lineup recommendation."
                 preview_badge = "Lineup action needed"
+            elif context_is_stale:
+                preview_title = "VERIFY DATA · baseline projections only"
+                preview_copy = "Start/Sit recommendations are paused until official availability and data freshness are verified. These point estimates are for research."
+                preview_badge = "Research only"
             elif len(preview_compare) == 1:
                 preview_title = f'{preview_leader["player"]} · {float(preview_leader["median_ppr"]):.1f} projected PPR'
                 preview_copy = "Add another player to see the projected advantage."
@@ -1677,7 +1685,7 @@ elif page == "Decision Room":
                 )
                 st.caption("Opening this link restores the selected players, position, and quarterback touchdown scoring format.")
                 share_scoring = f"Full PPR · {QB_PASS_TD_POINTS}-point passing TDs"
-                share_image = build_share_image(preview_compare, NEXT_WEEK, share_scoring, REFRESHED)
+                share_image = build_share_image(preview_compare, NEXT_WEEK, share_scoring, REFRESHED, context_verified=not context_is_stale)
                 st.download_button(
                     "Download comparison image",
                     data=share_image,
@@ -1787,7 +1795,7 @@ elif page == "Decision Room":
             edge_title = f'{leader["player"]} leads by {projection_spread:.1f} PPR'
             edge_copy = "The projections are close—treat this as a lean and use the live context below to make your final call." if projection_spread < CLOSE_CALL_THRESHOLD_PPR else "We see a meaningful projected advantage, with live context below for your final decision."
             edge_badge = "Close call" if projection_spread < CLOSE_CALL_THRESHOLD_PPR else "Clearer edge"
-        verdict_intro = '<div class="section-title">Start / Sit verdict</div>'
+        verdict_intro = '<div class="section-title">Baseline projection comparison · VERIFY DATA</div>' if context_is_stale else '<div class="section-title">Start / Sit verdict</div>'
         if not no_clutter_mode:
             verdict_intro += '<div class="section-copy">We build this ranking from current production, repeatable workload, a fading prior-season anchor, touchdown regression, and a sample-scaled matchup adjustment. When an active injury matters, an optional injury-adjusted outlook appears directly on that player’s card.</div>'
         st.markdown(verdict_intro, unsafe_allow_html=True)
@@ -1827,10 +1835,15 @@ elif page == "Decision Room":
                     f'<div class="confidence-label label-help explained-term" tabindex="0">{html.escape(card_edge_label)}'
                     f'<span class="label-tooltip" role="tooltip">{html.escape(card_edge_help)} This label measures separation within this comparison—not certainty that any projection will hit.</span></div>'
                 )
+                if context_is_stale:
+                    confidence_badge = '<div class="confidence-label">Baseline difference only</div>'
                 unavailable = bool(recommendation_restriction(row))
                 if unavailable:
                     verdict = "UNAVAILABLE · BASELINE ONLY"
                     verdict_help = "Do not start this player. The unchanged forecast is retained only for research comparison."
+                elif context_is_stale:
+                    verdict = "VERIFY DATA · BASELINE ONLY"
+                    verdict_help = "Official availability and data freshness are unverified. No Start/Sit recommendation is available."
                 elif index == 0 and len(compare) > 1:
                     verdict = "START · PREFERRED"
                     verdict_help = "Highest median projection among the players you selected."
@@ -1843,7 +1856,7 @@ elif page == "Decision Room":
                 else:
                     verdict = "ONLY PLAYER"
                     verdict_help = "Add another player to create a true comparison."
-                card_class = "start" if index == 0 else "sit"
+                card_class = "baseline" if context_is_stale or unavailable else ("start" if index == 0 else "sit")
                 full_reason = build_player_outlook(row, index, len(compare), projection_spread, row.get("reporting_summary"))
                 if len(compare) == 1:
                     reason = "Add another player to turn this into a true Start/Sit comparison."
@@ -1855,6 +1868,9 @@ elif page == "Decision Room":
                     reason = "A close alternative with a nearly identical projection."
                 else:
                     reason = "The riskier option relative to the other players in this comparison."
+                if context_is_stale:
+                    reason = "Baseline forecast for research only. Verify official availability and current data before choosing a starter."
+                    full_reason = reason
                 try:
                     reporting_sources = json.loads(str(row.get("reporting_sources_json", "[]")))
                 except (TypeError, ValueError, json.JSONDecodeError):
@@ -2840,3 +2856,7 @@ def _prepare_idle_update(candidate):
 
 watch_publication(SNAPSHOT_BASE_URL, header_metadata.get("_publication", {}).get("version"),
                   page == "Sunday Command Center", _prepare_idle_update)
+
+# Native UI receipts are opt-in and hard-bound to the isolated QA service/database.
+from dashboard.qa_browser_timing import render_completion
+render_completion(page)

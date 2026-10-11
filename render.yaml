@@ -2,7 +2,8 @@ services:
   - type: web
     name: fantasy-football-decision-lab
     runtime: docker
-    plan: 0.5c-512mb
+    # Required pilot capacity; apply only with the approved production rollout.
+    plan: 2c-4g
     branch: main
     # Data-only commits are read from the validated cloud snapshot URL, so they
     # no longer need to restart the web service. Deploy application code manually.

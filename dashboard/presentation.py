@@ -92,7 +92,7 @@ def selection_availability_summary(row: Any) -> str:
     elif practice_text.casefold() in {"dnp", "did not participate", "did not participate in practice"}:
         practice_text = "Did not practice"
     values = [value for value in (status_text, practice_text) if value]
-    return " · ".join(values) if values else "No injury designation"
+    return " · ".join(values) if values else "No provider injury record · verify availability"
 
 
 def player_card_stat_summary(row: Any) -> dict[str, str]:

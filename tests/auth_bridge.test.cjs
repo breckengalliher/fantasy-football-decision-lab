@@ -7,8 +7,8 @@ const record=(exp=1,id='family-a',user='a')=>({version:2,revision:'revision-'+id
 function env(initial=record(),fetchImpl){
  const store=new Map(initial?[['sdl_auth_session_v2',JSON.stringify(initial)]]:[]); let requests=0,lockTail=Promise.resolve();
  const locks={request:(_name,work)=>{let next=lockTail.then(work);lockTail=next.catch(()=>{});return next;}};
- const create=(supported=true)=>{
-  const messages=[],events={},parent={postMessage:message=>messages.push(message),location:{hash:'',search:'',pathname:'/'},history:{replaceState(){}}};
+ const create=(supported=true,hash='',search='')=>{
+  const messages=[],events={},parent={postMessage:message=>messages.push(message),location:{hash,search,pathname:'/'},history:{replaceState(_state,_title,url){parent.replaced=url;}}};
   const context=vm.createContext({parent,location:{origin:'https://qa.example.test'},navigator:supported?{locks}:{},URL,URLSearchParams,AbortController,setTimeout,clearTimeout,Date,Map,JSON,Number,Promise,Object,
    crypto:{randomUUID:()=>require('node:crypto').randomUUID()},atob:x=>Buffer.from(x,'base64').toString(),
    addEventListener:(kind,handler)=>events[kind]=handler,
@@ -19,6 +19,19 @@ function env(initial=record(),fetchImpl){
  return {store,create,requests:()=>requests,read:()=>JSON.parse(store.get('sdl_auth_session_v2')||'null')};
 }
 const args=id=>({operation_id:id,auth_url:'https://qa.supabase.co',publishable_key:'sb_publishable_unit_test',refresh:true});
+
+for(const search of ['', '?view=command-center', '?view=command-center&recovery=1']) {
+ test('reused or expired recovery error is visible without depending on a query flag: '+search,async()=>{
+  const e=env(null),tab=e.create(true,'#error=access_denied&error_code=otp_expired',search);
+  await tab.process({});
+  const value=tab.messages.findLast(x=>x.value).value;
+  assert.equal(value.recovery.error,true);
+  assert.equal(value.recovery.refresh_token,undefined);
+  assert.equal(tab.context.parent.replaced,'/'+search);
+  assert.equal(e.requests(),0);
+  assert.deepEqual(Object.keys(value.values),[]);
+ });
+}
 test('two tabs expire together: one provider rotation, both acknowledge newest record',async()=>{
  const e=env(),a=e.create(),b=e.create();await Promise.all([a.process(args('a')),b.process(args('b'))]);assert.equal(e.requests(),1);assert.equal(e.read().session.refresh_token,'rotated-once');assert.equal(a.messages.at(-2).value.values.sdl_auth_session_v2.session.refresh_token,'rotated-once');
 });

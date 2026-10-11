@@ -13,12 +13,12 @@ from streamlit_local_storage import LocalStorage
 
 from dashboard.auth_ui import render_auth, sign_out
 from dashboard.availability import kickoff_utc, status_key
-from dashboard.lineup_rules import LineupAction, build_lineup_actions, lineup_status
+from dashboard.lineup_rules import LineupAction, build_lineup_actions, lineup_status, critical_data_fresh
 from dashboard.presentation import fantasy_game_log, opponent_position_rank, opponent_position_ranks, player_card_stat_summary, player_photo_html, projected_team_total
 from dashboard.public_display_cache import public_display_version, display_ranks, display_game_log, roster_pool
 from dashboard.replacement_optimizer import optimize_replacements
 from dashboard.repositories.rosters import RosterRepository
-from dashboard.roster_edit_guard import edit_is_current
+from dashboard.roster_edit_guard import edit_is_current, clear_team_edit_state, reject_changed_editors
 from dashboard.sleeper_client import SleeperClient, SleeperError, map_player_records, map_players, passing_td_points, roster_shape
 from dashboard.sleeper_sync import build_snapshot, detect_changes, external_name, local_starter_ids
 from dashboard.supabase_api import SupabaseAPI, SupabaseAPIError
@@ -66,7 +66,7 @@ def _kickoff(player: dict[str, Any]) -> datetime | None:
 
 def _availability(player: dict[str, Any]) -> str:
     status = status_key(player.get("injury_status_live"))
-    return status.title() if status else "No reported designation"
+    return status.title() if status else "Verify availability · no provider designation"
 
 
 def _player_locked(player: dict[str, Any], now: datetime | None = None) -> bool:
@@ -83,7 +83,7 @@ def _entry(slot: dict[str, Any], lookup: dict[str, dict[str, Any]], now: datetim
     player = lookup.get(player_id or "", {})
     kickoff = _kickoff(player)
     game_status = _text(player.get("game_status_live"), "").casefold()
-    return {**player, "slot_id": str(slot["id"]), "assignment_id": str(assignment["id"]) if assignment else None, "slot_type": str(slot["slot_type"]), "slot_order": int(slot.get("slot_order", 0)), "is_starter": bool(slot.get("is_starter")), "player_id": player_id, "availability": _availability(player) if player_id else "Empty", "kickoff_at": kickoff, "game_started": _player_locked(player, now), "bye_week": bool(player.get("bye_week", False)) or _text(player.get("next_opponent"), "").casefold() == "bye", "data_unavailable": bool(player_id and (not player or pd.isna(player.get("median_ppr"))))}
+    return {**player, "slot_id": str(slot["id"]), "assignment_id": str(assignment["id"]) if assignment else None, "assignment_updated_at": assignment.get("updated_at") if assignment else None, "slot_type": str(slot["slot_type"]), "slot_order": int(slot.get("slot_order", 0)), "is_starter": bool(slot.get("is_starter")), "player_id": player_id, "availability": _availability(player) if player_id else "Empty", "kickoff_at": kickoff, "game_started": _player_locked(player, now), "bye_week": bool(player.get("bye_week", False)) or _text(player.get("next_opponent"), "").casefold() == "bye", "data_unavailable": bool(player_id and (not player or pd.isna(player.get("median_ppr"))))}
 
 
 def _assign_imported_roster(repo: RosterRepository, team_id: str, slots: list[dict[str, Any]], starters: list[str], players: list[str], pool: pd.DataFrame) -> None:
@@ -267,7 +267,10 @@ def _roster_editor(team: dict[str, Any], roster: list[dict[str, Any]], repo: Ros
         options, rows = candidates["player_id"].astype(str).tolist(), {str(row["player_id"]): row.to_dict() for _, row in candidates.iterrows()}
         chosen = left.selectbox(label, options, index=None, placeholder=f"Search eligible {slot_type} players…", format_func=lambda pid: f"{rows[pid]['player']} · {rows[pid]['team']} {rows[pid]['position']} · {float(rows[pid]['median_ppr']):.1f} PPR", key=f"cc_v2_pick_{team['id']}_{slot_id}")
         if right.button("Add", key=f"cc_v2_add_{team['id']}_{slot_id}", disabled=chosen is None, width="stretch"):
-            try: repo.assign_player(str(team["id"]), slot_id, str(chosen)); st.rerun()
+            try:
+                repo.assign_player(str(team["id"]), slot_id, str(chosen))
+                st.session_state["cc_save_notice"] = {"team_id": str(team["id"])}
+                st.rerun()
             except SupabaseAPIError as error: st.error(str(error))
 
 
@@ -390,7 +393,10 @@ def _compact_roster_editor(team: dict[str, Any], all_roster: list[dict[str, Any]
         rows = {str(row["player_id"]): row.to_dict() for _, row in candidates.iterrows()}
         chosen = left.selectbox(label, options, index=None, placeholder=f"Search and add an eligible {slot_type}…", format_func=lambda pid: f"{rows[pid]['player']} · {rows[pid]['team']} {rows[pid]['position']} · {float(rows[pid]['median_ppr']):.1f} PPR", key=f"cc_compact_pick_{team['id']}_{slot_id}")
         if right.button("Add", key=f"cc_compact_add_{team['id']}_{slot_id}", disabled=chosen is None, width="stretch"):
-            try: repo.assign_player(str(team["id"]), slot_id, str(chosen)); st.rerun()
+            try:
+                repo.assign_player(str(team["id"]), slot_id, str(chosen))
+                st.session_state["cc_save_notice"] = {"team_id": str(team["id"])}
+                st.rerun()
             except SupabaseAPIError as error: st.error(str(error))
 
 
@@ -433,7 +439,7 @@ def _manage_player(team: dict[str, Any], roster: list[dict[str, Any]], source_sl
     if c2.button("Remove", key=f"cc_remove_{current['id']}", width="stretch", disabled=locked or not confirmed_remove):
         try:
             repo.remove_player(str(current["id"]), expected={**current, "slot_id": str(source_slot["id"])})
-            st.session_state.pop(revision_key, None)
+            st.session_state["cc_save_notice"] = {"team_id": str(team["id"])}
             st.rerun()
         except (SupabaseAPIError, ValueError) as error:
             st.error(str(error))
@@ -465,6 +471,7 @@ def _add_player_slot(team: dict[str, Any], all_roster: list[dict[str, Any]], slo
     panel = st.expander(expander_title, expanded=False, key=f"cc_add_panel_{team['id']}_{slot_id}", on_change="rerun")
     if not panel.open:
         return
+    edit_is_current(st.session_state, f"cc_add_revision_{team['id']}_{slot_id}", all_roster)
     used = {str(item["player_id"]) for existing in all_roster if (item := _assignment(existing))}
     candidates = pool.loc[pool["position"].astype(str).isin(ELIGIBLE[slot_type]) & ~pool["player_id"].astype(str).isin(used), ["player_id", "player", "team", "position", "median_ppr"]].sort_values("median_ppr", ascending=False)
     labels = {str(pid): f"{name} · {nfl_team} {position} · {float(projection):.1f} PPR" for pid, name, nfl_team, position, projection in candidates.itertuples(index=False, name=None)}
@@ -472,7 +479,10 @@ def _add_player_slot(team: dict[str, Any], all_roster: list[dict[str, Any]], slo
         left, right = st.columns([5, 1], vertical_alignment="bottom")
         chosen = left.selectbox("Find a player", list(labels), index=None, placeholder=f"Search eligible {slot_type} players…", format_func=labels.__getitem__, key=f"cc_slot_pick_{team['id']}_{slot_id}")
         if right.button("Add", key=f"cc_slot_add_{team['id']}_{slot_id}", disabled=chosen is None, width="stretch"):
-            try: repo.assign_player(str(team["id"]), slot_id, str(chosen)); st.rerun()
+            try:
+                repo.assign_player(str(team["id"]), slot_id, str(chosen))
+                st.session_state["cc_save_notice"] = {"team_id": str(team["id"])}
+                st.rerun()
             except SupabaseAPIError as error: st.error(str(error))
 
 
@@ -490,7 +500,7 @@ def _player_card(entry: dict[str, Any], compact: bool = False) -> str:
     projection = float(entry.get("median_ppr", 0) or 0)
     kickoff = entry.get("kickoff_at")
     when = kickoff.astimezone(CENTRAL).strftime("%a %I:%M %p CT").replace(" 0", " ") if kickoff else "Kickoff unavailable"
-    css = "safe" if status == "No reported designation" else "warn"
+    css = "warn"
     return f'<article class="cc-player-card {"compact" if compact else ""}"><div class="cc-player-top"><span class="cc-slot">{entry["slot_type"]} {entry["slot_order"] + 1}</span><span class="cc-availability {css}">{html.escape(status)}</span></div><div class="cc-player-main"><div><h3>{html.escape(name)}</h3><p>{html.escape(_text(entry.get("team")))} · {html.escape(_text(entry.get("position"), entry["slot_type"]))} vs {html.escape(_text(entry.get("next_opponent"), "BYE / unavailable"))} · {html.escape(when)}</p></div><div class="cc-projection"><strong>{projection:.1f}</strong><span>projected PPR</span></div></div><div class="cc-range">{float(entry.get("floor_ppr", 0) or 0):.1f}–{float(entry.get("ceiling_ppr", 0) or 0):.1f} projection range</div></article>'
 
 
@@ -501,7 +511,10 @@ def _action_card(action: LineupAction, starters: list[dict[str, Any]], now: date
     st.markdown(f'<article class="cc-action {action.severity}"><span>{label} · {html.escape(_countdown(action.kickoff_at, now))}</span><h3>{html.escape(headline)}</h3><p>{html.escape(action.explanation)}</p></article>', unsafe_allow_html=True)
 
 
-def _replacements(team: dict[str, Any], repo: RosterRepository, actions: list[LineupAction], starters: list[dict[str, Any]], bench: list[dict[str, Any]], lookup: dict[str, dict[str, Any]]) -> None:
+def _replacements(team: dict[str, Any], repo: RosterRepository, actions: list[LineupAction], starters: list[dict[str, Any]], bench: list[dict[str, Any]], lookup: dict[str, dict[str, Any]], *, context_verified: bool = False) -> None:
+    if not context_verified:
+        st.info("VERIFY DATA — replacement recommendations are paused until official availability and data freshness are verified. Baseline projections remain available for research.")
+        return
     open_slots = []
     for action in actions:
         if action.mandatory or action.severity == "urgent":
@@ -509,6 +522,12 @@ def _replacements(team: dict[str, Any], repo: RosterRepository, actions: list[Li
             if entry and not entry.get("game_started"): open_slots.append({"slot_id": entry["slot_id"], "slot_type": entry["slot_type"], "current_projection": float(entry.get("median_ppr", 0) or 0)})
     results = optimize_replacements(open_slots, bench)
     if not results: return
+    displayed_roster = [
+        {"id": e["slot_id"], "slot_type": e["slot_type"], "slot_order": e.get("slot_order", 0), "is_starter": e.get("is_starter", False),
+         "roster_assignments": [{"id": e["assignment_id"], "player_id": e["player_id"], "updated_at": e.get("assignment_updated_at")}] if e.get("assignment_id") else []}
+        for e in starters + bench
+    ]
+    edit_is_current(st.session_state, f"cc_replacement_revision_{team['id']}", displayed_roster)
     st.markdown('<div class="cc-section-heading"><span>RECOMMENDED REPLACEMENTS</span><h2>Best eligible bench options</h2></div>', unsafe_allow_html=True)
     for result in results:
         player, edge = lookup.get(result.player_id, {}), result.difference_ppr
@@ -523,12 +542,13 @@ def _replacements(team: dict[str, Any], repo: RosterRepository, actions: list[Li
         if apply_col.button("Apply lineup swap", key=f"cc_apply_replacement_{result.slot_id}_{result.player_id}", disabled=not can_apply or not confirmed, type="primary", width="stretch"):
             try:
                 repo.swap_players(
-                    {"id": current["assignment_id"], "slot_id": current["slot_id"], "player_id": current["player_id"]},
-                    {"id": replacement["assignment_id"], "slot_id": replacement["slot_id"], "player_id": replacement["player_id"]},
+                    {"id": current["assignment_id"], "slot_id": current["slot_id"], "player_id": current["player_id"], "updated_at": current.get("assignment_updated_at")},
+                    {"id": replacement["assignment_id"], "slot_id": replacement["slot_id"], "player_id": replacement["player_id"], "updated_at": replacement.get("assignment_updated_at")},
                     str(team["id"]),
                 )
+                st.session_state["cc_save_notice"] = {"team_id": str(team["id"])}
                 st.rerun()
-            except SupabaseAPIError as error:
+            except (SupabaseAPIError, ValueError) as error:
                 st.error(str(error))
         current_player = lookup.get(str(current.get("player_id")), {}) if current else {}
         if compare_col.button("Compare players", key=f"cc_compare_replacement_{result.slot_id}_{result.player_id}", width="stretch"):
@@ -656,6 +676,11 @@ def _sleeper_sync_panel(team: dict[str, Any], repo: RosterRepository, roster: li
 
 def _dashboard(team: dict[str, Any], repo: RosterRepository, pool: pd.DataFrame, weekly: pd.DataFrame, metadata: dict[str, Any], now: datetime) -> None:
     league, roster = team.get("fantasy_leagues") or {}, _ordered_slots(repo.team_roster(str(team["id"])))
+    if reject_changed_editors(st.session_state, str(team["id"]), roster):
+        st.session_state["cc_conflict_notice"] = str(team["id"])
+        st.rerun()
+    if st.session_state.pop("cc_conflict_notice", None) == str(team["id"]):
+        st.warning("Your lineup changed in another visit. Review the updated lineup and reopen the editor before saving. Your stale edit was not applied.")
     # Entries, replacements, and management only need saved roster identities.
     # Add/search controls still receive the complete eligible player pool.
     roster_ids = {str(item["player_id"]) for slot in roster if (item := _assignment(slot))}
@@ -685,7 +710,7 @@ def _dashboard(team: dict[str, Any], repo: RosterRepository, pool: pd.DataFrame,
         for action in actions:
             _action_card(action, starters, now)
     elif status == "READY": st.success("YOUR LINEUP LOOKS READY — No actionable lineup issues detected based on the latest available information.")
-    _replacements(team, repo, actions, starters, bench, lookup)
+    _replacements(team, repo, actions, starters, bench, lookup, context_verified=critical_data_fresh(metadata, now))
     starter_slots = [slot for slot in roster if slot.get("is_starter")]
     bench_slots = [slot for slot in roster if not slot.get("is_starter")]
     passing_td_points = int(league.get("passing_td_points", 4))
@@ -712,6 +737,7 @@ def _show_save_notice(selected_team_id: str) -> None:
     """Render the committed-write receipt on the next authenticated rerun."""
     notice = st.session_state.pop("cc_save_notice", None)
     if isinstance(notice, dict) and notice.get("team_id") == str(selected_team_id):
+        clear_team_edit_state(st.session_state, str(selected_team_id))
         st.toast("Lineup saved")
 
 

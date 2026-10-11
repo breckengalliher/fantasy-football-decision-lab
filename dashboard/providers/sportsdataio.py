@@ -161,7 +161,7 @@ def format_injury_context(row: Any, provider_connected: bool = True) -> str:
     record = row.get("injury_record_live")
     if pd.notna(record) and bool(record):
         return "Provider record present · status unavailable"
-    return "No injury designation" if provider_connected else "Injury sources unavailable"
+    return "No provider injury record · verify availability" if provider_connected else "Injury sources unavailable"
 
 
 class SportsDataIOClient:
