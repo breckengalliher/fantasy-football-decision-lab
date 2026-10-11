@@ -117,27 +117,27 @@
     "4": "live_start_sit_board_4pt_current.parquet",
     "6": "live_start_sit_board_6pt_current.parquet"
   },
-  "availability_evidence_retrieved_at": "2026-10-11T13:59:21.542053+00:00",
+  "availability_evidence_retrieved_at": "2026-10-11T14:20:49.528498+00:00",
   "availability_coverage": {
-    "evaluated_at": "2026-10-11T13:59:21.542053+00:00",
+    "evaluated_at": "2026-10-11T14:20:49.528498+00:00",
     "eligible_forecast_players": 207,
     "actionable_time_scope_players": 177,
     "classifications": {
-      "UNKNOWN": 150,
+      "UNKNOWN": 123,
       "OUTSIDE ACTIONABLE SCOPE": 30,
-      "VERIFIED": 23,
-      "PENDING OFFICIAL REPORT": 4
+      "PENDING OFFICIAL REPORT": 28,
+      "VERIFIED": 26
     },
     "verified_unavailable_statuses": 26,
-    "pending_official_reports": 4,
+    "pending_official_reports": 28,
     "unresolved_identity": 0,
-    "missing_dated_roster_evidence": 187,
+    "missing_dated_roster_evidence": 151,
     "missing_current_game_injury_coverage": 0,
-    "missing_current_depth_date": 163,
+    "missing_current_depth_date": 133,
     "blocked_from_actionable_recommendations": 207,
     "publication_policy": "all_availability_actions_blocked",
     "fully_verified_availability": false,
-    "unknown_status_rows": 180
+    "unknown_status_rows": 177
   },
   "availability_certificate": {
     "schema_version": 2,
@@ -203,6 +203,48 @@
         "report_at": "2026-10-09T04:09:10.593Z",
         "original_published_at": "2026-10-09T04:01:34.437Z",
         "report_time_description": "Publisher last-updated time for this captured article revision"
+      },
+      "lv_week5_notes": {
+        "url": "https://media.patriots.1rmg.com/wp-content/uploads/2026/03/07061312/raiders_oct_11_2026_at_new-england-patriots_weekly_release.pdf",
+        "sha256": "6993d49e6ea65194730bbd2e859902e9aab29811e03531c84d136521b38ba537",
+        "authority": "official",
+        "retrieved_at": "2026-10-11T14:07:16.514969+00:00",
+        "timestamp_basis": "undated_observation"
+      },
+      "jax_week5_notes": {
+        "url": "https://media.eagles.1rmg.com/wp-content/uploads/2026/03/06141927/gecvyvtnatndohemegav.pdf",
+        "sha256": "67864be9e3a39e65ee9719c54f7569ea110a9f2ae17a571966dec58a48c6786d",
+        "authority": "official",
+        "retrieved_at": "2026-10-11T14:07:38.203982+00:00",
+        "timestamp_basis": "undated_observation"
+      },
+      "lac_den_flipcard": {
+        "url": "https://static.clubs.nfl.com/image/upload/chargers/to4gu0b1eev1urmuldsv",
+        "sha256": "7112baab613c0e05b2e4d532c5c10a9921dac84f22a02e3e25ecf4855aa7d039",
+        "authority": "official",
+        "retrieved_at": "2026-10-11T14:15:00.830978+00:00",
+        "timestamp_basis": "undated_observation"
+      },
+      "lac_week5_notes": {
+        "url": "https://static.clubs.nfl.com/image/upload/chargers/uad3cswuxhq5kyvntjot",
+        "sha256": "d885cbee861e000c6c8d250086f049a1584624e1cf2045ceae7d4240b26159c7",
+        "authority": "official",
+        "retrieved_at": "2026-10-11T14:15:01.879896+00:00",
+        "timestamp_basis": "undated_observation"
+      },
+      "cin_week5_notes": {
+        "url": "https://static.clubs.nfl.com/image/upload/bengals/weqhhfp37ytkddzpbwyl",
+        "sha256": "50e59231112b7ecb132fd804f3468c51e1c4c81a712c5a12c838c1ae68380e41",
+        "authority": "official",
+        "retrieved_at": "2026-10-11T14:18:54.456383+00:00",
+        "timestamp_basis": "undated_observation"
+      },
+      "cle_week5_roster": {
+        "url": "https://media.browns.1rmg.com/wp-content/uploads/2026/03/06145420/rosters-and-depth-7.pdf",
+        "sha256": "ea94ed03efb42305f23604b7ca63aed75c3e00b38c44e37958ae748ebef6ec5c",
+        "authority": "official",
+        "retrieved_at": "2026-10-11T14:18:57.068470+00:00",
+        "timestamp_basis": "undated_observation"
       },
       "ne_dated_roster": {
         "url": "https://media.patriots.1rmg.com/wp-content/uploads/2026/03/06052927/100626-Rosters.pdf",
@@ -867,6 +909,210 @@
         "effective_date": "2026-08-30",
         "report_timezone": "America/New_York",
         "claim": "Dated reserve designation; current NFL roster corroborates"
+      },
+      "lv_week5_notes_roster": {
+        "url": "https://media.patriots.1rmg.com/wp-content/uploads/2026/03/07061312/raiders_oct_11_2026_at_new-england-patriots_weekly_release.pdf",
+        "sha256": "6993d49e6ea65194730bbd2e859902e9aab29811e03531c84d136521b38ba537",
+        "authority": "official",
+        "retrieved_at": "2026-10-11T14:07:16.514969+00:00",
+        "season": 2026,
+        "week": 5,
+        "publisher": "LV official club media",
+        "pdf_modified_at": "2026-10-06T17:27:40-07:00",
+        "http_last_modified": "Wed, 07 Oct 2026 10:13:14 GMT",
+        "limitation": "Roster membership as of weekly document; not health, current activation, or an individual transaction effective date.",
+        "page": 87,
+        "claim": "Active roster membership",
+        "timestamp_basis": "published",
+        "report_at": "2026-10-06T17:27:40-07:00",
+        "report_time_description": "Official current-game PDF modification timestamp; corroborated by same/next-day origin Last-Modified. Document publication basis, not player transaction time."
+      },
+      "lv_week5_notes_depth": {
+        "url": "https://media.patriots.1rmg.com/wp-content/uploads/2026/03/07061312/raiders_oct_11_2026_at_new-england-patriots_weekly_release.pdf",
+        "sha256": "6993d49e6ea65194730bbd2e859902e9aab29811e03531c84d136521b38ba537",
+        "authority": "official",
+        "retrieved_at": "2026-10-11T14:07:16.514969+00:00",
+        "season": 2026,
+        "week": 5,
+        "publisher": "LV official club media",
+        "pdf_modified_at": "2026-10-06T17:27:40-07:00",
+        "http_last_modified": "Wed, 07 Oct 2026 10:13:14 GMT",
+        "limitation": "Roster membership as of weekly document; not health, current activation, or an individual transaction effective date.",
+        "page": 89,
+        "claim": "Club unofficial projected role; no confirmed starter claim",
+        "timestamp_basis": "effective",
+        "effective_date": "2026-10-06",
+        "report_timezone": "America/New_York"
+      },
+      "jax_week5_notes_roster": {
+        "url": "https://media.eagles.1rmg.com/wp-content/uploads/2026/03/06141927/gecvyvtnatndohemegav.pdf",
+        "sha256": "67864be9e3a39e65ee9719c54f7569ea110a9f2ae17a571966dec58a48c6786d",
+        "authority": "official",
+        "retrieved_at": "2026-10-11T14:07:38.203982+00:00",
+        "season": 2026,
+        "week": 5,
+        "publisher": "JAX official club media",
+        "pdf_modified_at": "2026-10-06T13:19:54-04:00",
+        "http_last_modified": "Tue, 06 Oct 2026 18:19:28 GMT",
+        "limitation": "Roster membership as of weekly document; not health, current activation, or an individual transaction effective date.",
+        "page": 37,
+        "claim": "Active roster membership",
+        "timestamp_basis": "published",
+        "report_at": "2026-10-06T13:19:54-04:00",
+        "report_time_description": "Official current-game PDF modification timestamp; corroborated by same/next-day origin Last-Modified. Document publication basis, not player transaction time."
+      },
+      "jax_week5_notes_depth": {
+        "url": "https://media.eagles.1rmg.com/wp-content/uploads/2026/03/06141927/gecvyvtnatndohemegav.pdf",
+        "sha256": "67864be9e3a39e65ee9719c54f7569ea110a9f2ae17a571966dec58a48c6786d",
+        "authority": "official",
+        "retrieved_at": "2026-10-11T14:07:38.203982+00:00",
+        "season": 2026,
+        "week": 5,
+        "publisher": "JAX official club media",
+        "pdf_modified_at": "2026-10-06T13:19:54-04:00",
+        "http_last_modified": "Tue, 06 Oct 2026 18:19:28 GMT",
+        "limitation": "Roster membership as of weekly document; not health, current activation, or an individual transaction effective date.",
+        "page": 39,
+        "claim": "Club unofficial projected role; no confirmed starter claim",
+        "timestamp_basis": "effective",
+        "effective_date": "2026-10-06",
+        "report_timezone": "America/New_York"
+      },
+      "lac_week5_notes_roster": {
+        "url": "https://static.clubs.nfl.com/image/upload/chargers/uad3cswuxhq5kyvntjot",
+        "sha256": "d885cbee861e000c6c8d250086f049a1584624e1cf2045ceae7d4240b26159c7",
+        "authority": "official",
+        "retrieved_at": "2026-10-11T14:15:01.879896+00:00",
+        "season": 2026,
+        "week": 5,
+        "publisher": "LAC official club media",
+        "pdf_modified_at": "2026-10-06T13:53:30-07:00",
+        "http_last_modified": "Tue, 06 Oct 2026 20:54:21 GMT",
+        "limitation": "Roster membership as of weekly document; not health, current activation, or an individual transaction effective date.",
+        "page": 50,
+        "claim": "Active roster membership",
+        "timestamp_basis": "published",
+        "report_at": "2026-10-06T13:53:30-07:00",
+        "report_time_description": "Official current-game PDF modification timestamp; corroborated by same/next-day origin Last-Modified. Document publication basis, not player transaction time."
+      },
+      "lac_week5_notes_depth": {
+        "url": "https://static.clubs.nfl.com/image/upload/chargers/uad3cswuxhq5kyvntjot",
+        "sha256": "d885cbee861e000c6c8d250086f049a1584624e1cf2045ceae7d4240b26159c7",
+        "authority": "official",
+        "retrieved_at": "2026-10-11T14:15:01.879896+00:00",
+        "season": 2026,
+        "week": 5,
+        "publisher": "LAC official club media",
+        "pdf_modified_at": "2026-10-06T13:53:30-07:00",
+        "http_last_modified": "Tue, 06 Oct 2026 20:54:21 GMT",
+        "limitation": "Roster membership as of weekly document; not health, current activation, or an individual transaction effective date.",
+        "page": 53,
+        "claim": "Club unofficial projected role; no confirmed starter claim",
+        "timestamp_basis": "published",
+        "report_at": "2026-10-06T13:53:30-07:00",
+        "report_time_description": "Official current-game PDF modification timestamp; corroborated by same/next-day origin Last-Modified. Document publication basis, not player transaction time."
+      },
+      "lac_den_flipcard_roster": {
+        "url": "https://static.clubs.nfl.com/image/upload/chargers/to4gu0b1eev1urmuldsv",
+        "sha256": "7112baab613c0e05b2e4d532c5c10a9921dac84f22a02e3e25ecf4855aa7d039",
+        "authority": "official",
+        "retrieved_at": "2026-10-11T14:15:00.830978+00:00",
+        "season": 2026,
+        "week": 5,
+        "publisher": "DEN official club media",
+        "pdf_modified_at": "2026-10-06T12:59:18-07:00",
+        "http_last_modified": "Tue, 06 Oct 2026 20:01:07 GMT",
+        "limitation": "Roster membership as of weekly document; not health, current activation, or an individual transaction effective date.",
+        "page": 2,
+        "claim": "Active roster membership",
+        "timestamp_basis": "published",
+        "report_at": "2026-10-06T12:59:18-07:00",
+        "report_time_description": "Official current-game PDF modification timestamp; corroborated by same/next-day origin Last-Modified. Document publication basis, not player transaction time."
+      },
+      "lac_den_flipcard_depth": {
+        "url": "https://static.clubs.nfl.com/image/upload/chargers/to4gu0b1eev1urmuldsv",
+        "sha256": "7112baab613c0e05b2e4d532c5c10a9921dac84f22a02e3e25ecf4855aa7d039",
+        "authority": "official",
+        "retrieved_at": "2026-10-11T14:15:00.830978+00:00",
+        "season": 2026,
+        "week": 5,
+        "publisher": "DEN official club media",
+        "pdf_modified_at": "2026-10-06T12:59:18-07:00",
+        "http_last_modified": "Tue, 06 Oct 2026 20:01:07 GMT",
+        "limitation": "Roster membership as of weekly document; not health, current activation, or an individual transaction effective date.",
+        "page": 1,
+        "claim": "Club unofficial projected role; no confirmed starter claim",
+        "timestamp_basis": "published",
+        "report_at": "2026-10-06T12:59:18-07:00",
+        "report_time_description": "Official current-game PDF modification timestamp; corroborated by same/next-day origin Last-Modified. Document publication basis, not player transaction time."
+      },
+      "cin_week5_notes_roster": {
+        "url": "https://static.clubs.nfl.com/image/upload/bengals/weqhhfp37ytkddzpbwyl",
+        "sha256": "50e59231112b7ecb132fd804f3468c51e1c4c81a712c5a12c838c1ae68380e41",
+        "authority": "official",
+        "retrieved_at": "2026-10-11T14:18:54.456383+00:00",
+        "season": 2026,
+        "week": 5,
+        "publisher": "CIN official club media",
+        "pdf_modified_at": "2026-10-06T14:37:28-04:00",
+        "http_last_modified": "Tue, 06 Oct 2026 18:49:23 GMT",
+        "limitation": "Roster membership as of weekly document; not health, current activation, or an individual transaction effective date.",
+        "page": 22,
+        "claim": "Active roster membership",
+        "timestamp_basis": "effective",
+        "effective_date": "2026-10-06",
+        "report_timezone": "America/New_York"
+      },
+      "cin_week5_notes_depth": {
+        "url": "https://static.clubs.nfl.com/image/upload/bengals/weqhhfp37ytkddzpbwyl",
+        "sha256": "50e59231112b7ecb132fd804f3468c51e1c4c81a712c5a12c838c1ae68380e41",
+        "authority": "official",
+        "retrieved_at": "2026-10-11T14:18:54.456383+00:00",
+        "season": 2026,
+        "week": 5,
+        "publisher": "CIN official club media",
+        "pdf_modified_at": "2026-10-06T14:37:28-04:00",
+        "http_last_modified": "Tue, 06 Oct 2026 18:49:23 GMT",
+        "limitation": "Roster membership as of weekly document; not health, current activation, or an individual transaction effective date.",
+        "page": 21,
+        "claim": "Club unofficial projected role; no confirmed starter claim",
+        "timestamp_basis": "effective",
+        "effective_date": "2026-10-06",
+        "report_timezone": "America/New_York"
+      },
+      "cle_week5_roster_roster": {
+        "url": "https://media.browns.1rmg.com/wp-content/uploads/2026/03/06145420/rosters-and-depth-7.pdf",
+        "sha256": "ea94ed03efb42305f23604b7ca63aed75c3e00b38c44e37958ae748ebef6ec5c",
+        "authority": "official",
+        "retrieved_at": "2026-10-11T14:18:57.068470+00:00",
+        "season": 2026,
+        "week": 5,
+        "publisher": "CLE official club media",
+        "pdf_modified_at": "2026-10-06T14:49:42-04:00",
+        "http_last_modified": "Tue, 06 Oct 2026 18:54:22 GMT",
+        "limitation": "Roster membership as of weekly document; not health, current activation, or an individual transaction effective date.",
+        "page": 1,
+        "claim": "Active roster membership",
+        "timestamp_basis": "effective",
+        "effective_date": "2026-10-05",
+        "report_timezone": "America/New_York"
+      },
+      "cle_week5_roster_depth": {
+        "url": "https://media.browns.1rmg.com/wp-content/uploads/2026/03/06145420/rosters-and-depth-7.pdf",
+        "sha256": "ea94ed03efb42305f23604b7ca63aed75c3e00b38c44e37958ae748ebef6ec5c",
+        "authority": "official",
+        "retrieved_at": "2026-10-11T14:18:57.068470+00:00",
+        "season": 2026,
+        "week": 5,
+        "publisher": "CLE official club media",
+        "pdf_modified_at": "2026-10-06T14:49:42-04:00",
+        "http_last_modified": "Tue, 06 Oct 2026 18:54:22 GMT",
+        "limitation": "Roster membership as of weekly document; not health, current activation, or an individual transaction effective date.",
+        "page": 6,
+        "claim": "Club unofficial projected role; no confirmed starter claim",
+        "timestamp_basis": "effective",
+        "effective_date": "2026-10-05",
+        "report_timezone": "America/New_York"
       }
     },
     "players": [
@@ -1678,7 +1924,7 @@
         "team": "LV",
         "position": "TE",
         "identity_verified": true,
-        "classification": "UNKNOWN",
+        "classification": "PENDING OFFICIAL REPORT",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -1693,9 +1939,22 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "published",
+            "report_at": "2026-10-06T17:27:40-07:00",
+            "player_id": "00-0039338",
+            "team": "LV",
+            "game_id": "aa6b6286-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "lv_week5_notes_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_las-vegas-raiders",
+          "source_id": "lv_week5_notes_depth",
           "effective_date": "2026-10-06",
           "date_evidence": "as of October 6, 2026 | Week 5",
           "classification": "club_unofficial",
@@ -1711,13 +1970,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": null
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_las-vegas-raiders",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "lv_week5_notes_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -1733,20 +1993,20 @@
           "source_id": null
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "lv_week5_notes_roster"
+          ]
         }
       },
       {
@@ -2563,7 +2823,7 @@
         "team": "LV",
         "position": "QB",
         "identity_verified": true,
-        "classification": "UNKNOWN",
+        "classification": "PENDING OFFICIAL REPORT",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -2578,9 +2838,22 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "published",
+            "report_at": "2026-10-06T17:27:40-07:00",
+            "player_id": "00-0029604",
+            "team": "LV",
+            "game_id": "aa6b6286-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "lv_week5_notes_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_las-vegas-raiders",
+          "source_id": "lv_week5_notes_depth",
           "effective_date": "2026-10-06",
           "date_evidence": "as of October 6, 2026 | Week 5",
           "classification": "club_unofficial",
@@ -2596,13 +2869,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": null
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_las-vegas-raiders",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "lv_week5_notes_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -2618,20 +2892,20 @@
           "source_id": null
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "lv_week5_notes_roster"
+          ]
         }
       },
       {
@@ -2795,7 +3069,7 @@
         "team": "CIN",
         "position": "QB",
         "identity_verified": true,
-        "classification": "UNKNOWN",
+        "classification": "PENDING OFFICIAL REPORT",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -2810,14 +3084,28 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "effective",
+            "effective_date": "2026-10-06",
+            "report_timezone": "America/New_York",
+            "player_id": "00-0036442",
+            "team": "CIN",
+            "game_id": "aa6b5f66-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "cin_week5_notes_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_cincinnati-bengals",
-          "effective_date": null,
+          "source_id": "cin_week5_notes_depth",
+          "effective_date": "2026-10-06",
           "date_evidence": null,
           "classification": "club_unofficial",
           "confirmed_starters": false,
-          "current_week_date_verified": false,
+          "current_week_date_verified": true,
           "date_precision": "unknown",
           "matched_chart_rows": [
             [
@@ -2827,13 +3115,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": null
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_cincinnati-bengals",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "cin_week5_notes_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -2849,21 +3138,20 @@
           "source_id": null
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "cin_week5_notes_roster"
+          ]
         }
       },
       {
@@ -3027,8 +3315,8 @@
         "team": "LV",
         "position": "RB",
         "identity_verified": true,
-        "classification": "UNKNOWN",
-        "availability": "Unknown",
+        "classification": "VERIFIED",
+        "availability": "Questionable",
         "conflicts": [],
         "recommendation_allowed": false,
         "game": {
@@ -3046,6 +3334,18 @@
           {
             "authority": "official",
             "timestamp_basis": "published",
+            "report_at": "2026-10-06T17:27:40-07:00",
+            "player_id": "00-0040122",
+            "team": "LV",
+            "game_id": "aa6b6286-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "lv_week5_notes_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          },
+          {
+            "authority": "official",
+            "timestamp_basis": "published",
             "report_at": "2026-10-10T21:23:47.29Z",
             "player_id": "00-0040122",
             "team": "LV",
@@ -3057,7 +3357,7 @@
           }
         ],
         "depth": {
-          "source_id": "depth_las-vegas-raiders",
+          "source_id": "lv_week5_notes_depth",
           "effective_date": "2026-10-06",
           "date_evidence": "as of October 6, 2026 | Week 5",
           "classification": "club_unofficial",
@@ -3073,13 +3373,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": null
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_las-vegas-raiders",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "lv_week5_notes_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -3094,21 +3395,16 @@
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
-        "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
-          "No verified game availability; not converted from absence of injury designation"
-        ],
+        "blockers": [],
         "resolved": {
-          "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "availability": "Questionable",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
-          "recommendation_allowed": false,
-          "restrictions": [
-            "roster eligibility unverified",
-            "verify availability"
-          ],
+          "recommendation_allowed": true,
+          "restrictions": [],
           "source_ids": [
-            "injuries"
+            "injuries",
+            "lv_week5_notes_roster"
           ]
         }
       },
@@ -3118,8 +3414,8 @@
         "team": "CIN",
         "position": "WR",
         "identity_verified": true,
-        "classification": "UNKNOWN",
-        "availability": "Unknown",
+        "classification": "VERIFIED",
+        "availability": "Questionable",
         "conflicts": [],
         "recommendation_allowed": false,
         "game": {
@@ -3136,6 +3432,19 @@
         "events": [
           {
             "authority": "official",
+            "timestamp_basis": "effective",
+            "effective_date": "2026-10-06",
+            "report_timezone": "America/New_York",
+            "player_id": "00-0036410",
+            "team": "CIN",
+            "game_id": "aa6b5f66-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "cin_week5_notes_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          },
+          {
+            "authority": "official",
             "timestamp_basis": "published",
             "report_at": "2026-10-10T21:23:47.29Z",
             "player_id": "00-0036410",
@@ -3148,12 +3457,12 @@
           }
         ],
         "depth": {
-          "source_id": "depth_cincinnati-bengals",
-          "effective_date": null,
+          "source_id": "cin_week5_notes_depth",
+          "effective_date": "2026-10-06",
           "date_evidence": null,
           "classification": "club_unofficial",
           "confirmed_starters": false,
-          "current_week_date_verified": false,
+          "current_week_date_verified": true,
           "date_precision": "unknown",
           "matched_chart_rows": [
             [
@@ -3163,13 +3472,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": null
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_cincinnati-bengals",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "cin_week5_notes_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -3184,21 +3494,15 @@
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
-        "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
-        ],
+        "blockers": [],
         "resolved": {
-          "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "availability": "Questionable",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
-          "recommendation_allowed": false,
-          "restrictions": [
-            "roster eligibility unverified",
-            "verify availability"
-          ],
+          "recommendation_allowed": true,
+          "restrictions": [],
           "source_ids": [
+            "cin_week5_notes_roster",
             "injuries"
           ]
         }
@@ -3224,14 +3528,27 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "published",
+            "report_at": "2026-10-06T13:19:54-04:00",
+            "player_id": "00-0036971",
+            "team": "JAX",
+            "game_id": "aa6b5c2b-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "jax_week5_notes_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_jacksonville-jaguars",
-          "effective_date": null,
+          "source_id": "jax_week5_notes_depth",
+          "effective_date": "2026-10-06",
           "date_evidence": null,
           "classification": "club_unofficial",
           "confirmed_starters": false,
-          "current_week_date_verified": false,
+          "current_week_date_verified": true,
           "date_precision": "unknown",
           "matched_chart_rows": [
             [
@@ -3245,13 +3562,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": null
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_jacksonville-jaguars",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "jax_week5_notes_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -3267,22 +3585,21 @@
           "source_id": "inactives"
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "started",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "game started",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "jax_week5_notes_roster"
+          ]
         }
       },
       {
@@ -3630,7 +3947,7 @@
         "team": "CLE",
         "position": "QB",
         "identity_verified": true,
-        "classification": "UNKNOWN",
+        "classification": "PENDING OFFICIAL REPORT",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -3645,14 +3962,28 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "effective",
+            "effective_date": "2026-10-05",
+            "report_timezone": "America/New_York",
+            "player_id": "00-0033537",
+            "team": "CLE",
+            "game_id": "aa6b69bb-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "cle_week5_roster_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_cleveland-browns",
-          "effective_date": null,
+          "source_id": "cle_week5_roster_depth",
+          "effective_date": "2026-10-05",
           "date_evidence": null,
           "classification": "club_unofficial",
           "confirmed_starters": false,
-          "current_week_date_verified": false,
+          "current_week_date_verified": true,
           "date_precision": "unknown",
           "matched_chart_rows": [
             [
@@ -3663,13 +3994,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": null
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_cleveland-browns",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "cle_week5_roster_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -3685,21 +4017,20 @@
           "source_id": null
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "cle_week5_roster_roster"
+          ]
         }
       },
       {
@@ -4254,7 +4585,7 @@
         "team": "CIN",
         "position": "TE",
         "identity_verified": true,
-        "classification": "UNKNOWN",
+        "classification": "PENDING OFFICIAL REPORT",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -4269,14 +4600,28 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "effective",
+            "effective_date": "2026-10-06",
+            "report_timezone": "America/New_York",
+            "player_id": "00-0034829",
+            "team": "CIN",
+            "game_id": "aa6b5f66-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "cin_week5_notes_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_cincinnati-bengals",
-          "effective_date": null,
+          "source_id": "cin_week5_notes_depth",
+          "effective_date": "2026-10-06",
           "date_evidence": null,
           "classification": "club_unofficial",
           "confirmed_starters": false,
-          "current_week_date_verified": false,
+          "current_week_date_verified": true,
           "date_precision": "unknown",
           "matched_chart_rows": [
             [
@@ -4286,13 +4631,14 @@
               "Erick All Jr. Jack Endries Tanner Hudson"
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": null
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_cincinnati-bengals",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "cin_week5_notes_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -4308,21 +4654,20 @@
           "source_id": null
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "cin_week5_notes_roster"
+          ]
         }
       },
       {
@@ -4656,7 +5001,7 @@
         "team": "CIN",
         "position": "RB",
         "identity_verified": true,
-        "classification": "UNKNOWN",
+        "classification": "PENDING OFFICIAL REPORT",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -4671,14 +5016,28 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "effective",
+            "effective_date": "2026-10-06",
+            "report_timezone": "America/New_York",
+            "player_id": "00-0038597",
+            "team": "CIN",
+            "game_id": "aa6b5f66-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "cin_week5_notes_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_cincinnati-bengals",
-          "effective_date": null,
+          "source_id": "cin_week5_notes_depth",
+          "effective_date": "2026-10-06",
           "date_evidence": null,
           "classification": "club_unofficial",
           "confirmed_starters": false,
-          "current_week_date_verified": false,
+          "current_week_date_verified": true,
           "date_precision": "unknown",
           "matched_chart_rows": [
             [
@@ -4688,13 +5047,14 @@
               "Tahj Brooks"
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": null
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_cincinnati-bengals",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "cin_week5_notes_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -4710,21 +5070,20 @@
           "source_id": null
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "cin_week5_notes_roster"
+          ]
         }
       },
       {
@@ -4733,7 +5092,7 @@
         "team": "DEN",
         "position": "QB",
         "identity_verified": true,
-        "classification": "UNKNOWN",
+        "classification": "PENDING OFFICIAL REPORT",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -4748,14 +5107,27 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "published",
+            "report_at": "2026-10-06T12:59:18-07:00",
+            "player_id": "00-0039732",
+            "team": "DEN",
+            "game_id": "aa94bc51-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "lac_den_flipcard_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_denver-broncos",
+          "source_id": "lac_den_flipcard_depth",
           "effective_date": null,
           "date_evidence": null,
           "classification": "club_unofficial",
           "confirmed_starters": false,
-          "current_week_date_verified": false,
+          "current_week_date_verified": true,
           "date_precision": "unknown",
           "matched_chart_rows": [
             [
@@ -4766,13 +5138,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": "2026-10-06T12:59:18-07:00"
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_denver-broncos",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "lac_den_flipcard_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -4788,21 +5161,20 @@
           "source_id": null
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "lac_den_flipcard_roster"
+          ]
         }
       },
       {
@@ -5143,8 +5515,8 @@
         "team": "CIN",
         "position": "WR",
         "identity_verified": true,
-        "classification": "UNKNOWN",
-        "availability": "Unknown",
+        "classification": "VERIFIED",
+        "availability": "Questionable",
         "conflicts": [],
         "recommendation_allowed": false,
         "game": {
@@ -5161,6 +5533,19 @@
         "events": [
           {
             "authority": "official",
+            "timestamp_basis": "effective",
+            "effective_date": "2026-10-06",
+            "report_timezone": "America/New_York",
+            "player_id": "00-0036900",
+            "team": "CIN",
+            "game_id": "aa6b5f66-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "cin_week5_notes_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          },
+          {
+            "authority": "official",
             "timestamp_basis": "published",
             "report_at": "2026-10-10T21:23:47.29Z",
             "player_id": "00-0036900",
@@ -5173,12 +5558,12 @@
           }
         ],
         "depth": {
-          "source_id": "depth_cincinnati-bengals",
-          "effective_date": null,
+          "source_id": "cin_week5_notes_depth",
+          "effective_date": "2026-10-06",
           "date_evidence": null,
           "classification": "club_unofficial",
           "confirmed_starters": false,
-          "current_week_date_verified": false,
+          "current_week_date_verified": true,
           "date_precision": "unknown",
           "matched_chart_rows": [
             [
@@ -5188,13 +5573,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": null
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_cincinnati-bengals",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "cin_week5_notes_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -5209,21 +5595,15 @@
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
-        "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
-        ],
+        "blockers": [],
         "resolved": {
-          "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "availability": "Questionable",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
-          "recommendation_allowed": false,
-          "restrictions": [
-            "roster eligibility unverified",
-            "verify availability"
-          ],
+          "recommendation_allowed": true,
+          "restrictions": [],
           "source_ids": [
+            "cin_week5_notes_roster",
             "injuries"
           ]
         }
@@ -5894,7 +6274,7 @@
         "team": "CLE",
         "position": "WR",
         "identity_verified": true,
-        "classification": "UNKNOWN",
+        "classification": "PENDING OFFICIAL REPORT",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -5909,14 +6289,28 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "effective",
+            "effective_date": "2026-10-05",
+            "report_timezone": "America/New_York",
+            "player_id": "00-0041037",
+            "team": "CLE",
+            "game_id": "aa6b69bb-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "cle_week5_roster_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_cleveland-browns",
-          "effective_date": null,
+          "source_id": "cle_week5_roster_depth",
+          "effective_date": "2026-10-05",
           "date_evidence": null,
           "classification": "club_unofficial",
           "confirmed_starters": false,
-          "current_week_date_verified": false,
+          "current_week_date_verified": true,
           "date_precision": "unknown",
           "matched_chart_rows": [
             [
@@ -5934,13 +6328,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": null
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_cleveland-browns",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "cle_week5_roster_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -5956,21 +6351,20 @@
           "source_id": null
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "cle_week5_roster_roster"
+          ]
         }
       },
       {
@@ -6233,7 +6627,7 @@
         "team": "DEN",
         "position": "RB",
         "identity_verified": true,
-        "classification": "UNKNOWN",
+        "classification": "PENDING OFFICIAL REPORT",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -6248,14 +6642,27 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "published",
+            "report_at": "2026-10-06T12:59:18-07:00",
+            "player_id": "00-0040730",
+            "team": "DEN",
+            "game_id": "aa94bc51-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "lac_den_flipcard_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_denver-broncos",
+          "source_id": "lac_den_flipcard_depth",
           "effective_date": null,
           "date_evidence": null,
           "classification": "club_unofficial",
           "confirmed_starters": false,
-          "current_week_date_verified": false,
+          "current_week_date_verified": true,
           "date_precision": "unknown",
           "matched_chart_rows": [
             [
@@ -6273,13 +6680,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": "2026-10-06T12:59:18-07:00"
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_denver-broncos",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "lac_den_flipcard_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -6295,21 +6703,20 @@
           "source_id": null
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "lac_den_flipcard_roster"
+          ]
         }
       },
       {
@@ -6333,14 +6740,27 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "published",
+            "report_at": "2026-10-06T13:19:54-04:00",
+            "player_id": "00-0038606",
+            "team": "JAX",
+            "game_id": "aa6b5c2b-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "jax_week5_notes_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_jacksonville-jaguars",
-          "effective_date": null,
+          "source_id": "jax_week5_notes_depth",
+          "effective_date": "2026-10-06",
           "date_evidence": null,
           "classification": "club_unofficial",
           "confirmed_starters": false,
-          "current_week_date_verified": false,
+          "current_week_date_verified": true,
           "date_precision": "unknown",
           "matched_chart_rows": [
             [
@@ -6364,13 +6784,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": null
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_jacksonville-jaguars",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "jax_week5_notes_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -6386,22 +6807,21 @@
           "source_id": "inactives"
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "started",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "game started",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "jax_week5_notes_roster"
+          ]
         }
       },
       {
@@ -6425,14 +6845,27 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "published",
+            "report_at": "2026-10-06T13:19:54-04:00",
+            "player_id": "00-0040719",
+            "team": "JAX",
+            "game_id": "aa6b5c2b-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "jax_week5_notes_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_jacksonville-jaguars",
-          "effective_date": null,
+          "source_id": "jax_week5_notes_depth",
+          "effective_date": "2026-10-06",
           "date_evidence": null,
           "classification": "club_unofficial",
           "confirmed_starters": false,
-          "current_week_date_verified": false,
+          "current_week_date_verified": true,
           "date_precision": "unknown",
           "matched_chart_rows": [
             [
@@ -6456,13 +6889,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": null
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_jacksonville-jaguars",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "jax_week5_notes_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -6478,22 +6912,21 @@
           "source_id": "inactives"
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "started",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "game started",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "jax_week5_notes_roster"
+          ]
         }
       },
       {
@@ -6502,7 +6935,7 @@
         "team": "CLE",
         "position": "RB",
         "identity_verified": true,
-        "classification": "UNKNOWN",
+        "classification": "PENDING OFFICIAL REPORT",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -6517,14 +6950,28 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "effective",
+            "effective_date": "2026-10-05",
+            "report_timezone": "America/New_York",
+            "player_id": "00-0040784",
+            "team": "CLE",
+            "game_id": "aa6b69bb-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "cle_week5_roster_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_cleveland-browns",
-          "effective_date": null,
+          "source_id": "cle_week5_roster_depth",
+          "effective_date": "2026-10-05",
           "date_evidence": null,
           "classification": "club_unofficial",
           "confirmed_starters": false,
-          "current_week_date_verified": false,
+          "current_week_date_verified": true,
           "date_precision": "unknown",
           "matched_chart_rows": [
             [
@@ -6535,13 +6982,14 @@
               "Jaleel McLaughlin"
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": null
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_cleveland-browns",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "cle_week5_roster_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -6557,21 +7005,20 @@
           "source_id": null
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "cle_week5_roster_roster"
+          ]
         }
       },
       {
@@ -6925,7 +7372,7 @@
         "team": "CLE",
         "position": "TE",
         "identity_verified": true,
-        "classification": "UNKNOWN",
+        "classification": "PENDING OFFICIAL REPORT",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -6940,14 +7387,28 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "effective",
+            "effective_date": "2026-10-05",
+            "report_timezone": "America/New_York",
+            "player_id": "00-0040663",
+            "team": "CLE",
+            "game_id": "aa6b69bb-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "cle_week5_roster_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_cleveland-browns",
-          "effective_date": null,
+          "source_id": "cle_week5_roster_depth",
+          "effective_date": "2026-10-05",
           "date_evidence": null,
           "classification": "club_unofficial",
           "confirmed_starters": false,
-          "current_week_date_verified": false,
+          "current_week_date_verified": true,
           "date_precision": "unknown",
           "matched_chart_rows": [
             [
@@ -6958,13 +7419,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": null
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_cleveland-browns",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "cle_week5_roster_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -6980,21 +7442,20 @@
           "source_id": null
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "cle_week5_roster_roster"
+          ]
         }
       },
       {
@@ -7743,7 +8204,7 @@
         "team": "LAC",
         "position": "RB",
         "identity_verified": true,
-        "classification": "UNKNOWN",
+        "classification": "PENDING OFFICIAL REPORT",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -7758,14 +8219,27 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "published",
+            "report_at": "2026-10-06T13:53:30-07:00",
+            "player_id": "00-0040666",
+            "team": "LAC",
+            "game_id": "aa94bc51-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "lac_week5_notes_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_los-angeles-chargers",
+          "source_id": "lac_week5_notes_depth",
           "effective_date": null,
           "date_evidence": null,
           "classification": "club_unofficial",
           "confirmed_starters": false,
-          "current_week_date_verified": false,
+          "current_week_date_verified": true,
           "date_precision": "unknown",
           "matched_chart_rows": [
             [
@@ -7776,13 +8250,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": "2026-10-06T13:53:30-07:00"
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_los-angeles-chargers",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "lac_week5_notes_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -7798,21 +8273,20 @@
           "source_id": null
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "lac_week5_notes_roster"
+          ]
         }
       },
       {
@@ -7821,7 +8295,7 @@
         "team": "LV",
         "position": "WR",
         "identity_verified": true,
-        "classification": "UNKNOWN",
+        "classification": "PENDING OFFICIAL REPORT",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -7836,9 +8310,22 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "published",
+            "report_at": "2026-10-06T17:27:40-07:00",
+            "player_id": "00-0038563",
+            "team": "LV",
+            "game_id": "aa6b6286-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "lv_week5_notes_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_las-vegas-raiders",
+          "source_id": "lv_week5_notes_depth",
           "effective_date": "2026-10-06",
           "date_evidence": "as of October 6, 2026 | Week 5",
           "classification": "club_unofficial",
@@ -7854,13 +8341,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": null
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_las-vegas-raiders",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "lv_week5_notes_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -7876,20 +8364,20 @@
           "source_id": null
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "lv_week5_notes_roster"
+          ]
         }
       },
       {
@@ -7976,7 +8464,7 @@
         "team": "LAC",
         "position": "QB",
         "identity_verified": true,
-        "classification": "UNKNOWN",
+        "classification": "PENDING OFFICIAL REPORT",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -7991,14 +8479,27 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "published",
+            "report_at": "2026-10-06T13:53:30-07:00",
+            "player_id": "00-0036355",
+            "team": "LAC",
+            "game_id": "aa94bc51-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "lac_week5_notes_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_los-angeles-chargers",
+          "source_id": "lac_week5_notes_depth",
           "effective_date": null,
           "date_evidence": null,
           "classification": "club_unofficial",
           "confirmed_starters": false,
-          "current_week_date_verified": false,
+          "current_week_date_verified": true,
           "date_precision": "unknown",
           "matched_chart_rows": [
             [
@@ -8009,13 +8510,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": "2026-10-06T13:53:30-07:00"
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_los-angeles-chargers",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "lac_week5_notes_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -8031,21 +8533,20 @@
           "source_id": null
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "lac_week5_notes_roster"
+          ]
         }
       },
       {
@@ -8303,7 +8804,7 @@
         "team": "DEN",
         "position": "WR",
         "identity_verified": true,
-        "classification": "UNKNOWN",
+        "classification": "PENDING OFFICIAL REPORT",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -8318,14 +8819,27 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "published",
+            "report_at": "2026-10-06T12:59:18-07:00",
+            "player_id": "00-0036613",
+            "team": "DEN",
+            "game_id": "aa94bc51-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "lac_den_flipcard_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_denver-broncos",
+          "source_id": "lac_den_flipcard_depth",
           "effective_date": null,
           "date_evidence": null,
           "classification": "club_unofficial",
           "confirmed_starters": false,
-          "current_week_date_verified": false,
+          "current_week_date_verified": true,
           "date_precision": "unknown",
           "matched_chart_rows": [
             [
@@ -8336,13 +8850,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": "2026-10-06T12:59:18-07:00"
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_denver-broncos",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "lac_den_flipcard_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -8358,21 +8873,20 @@
           "source_id": null
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "lac_den_flipcard_roster"
+          ]
         }
       },
       {
@@ -8992,14 +9506,27 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "published",
+            "report_at": "2026-10-06T13:19:54-04:00",
+            "player_id": "00-0034960",
+            "team": "JAX",
+            "game_id": "aa6b5c2b-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "jax_week5_notes_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_jacksonville-jaguars",
-          "effective_date": null,
+          "source_id": "jax_week5_notes_depth",
+          "effective_date": "2026-10-06",
           "date_evidence": null,
           "classification": "club_unofficial",
           "confirmed_starters": false,
-          "current_week_date_verified": false,
+          "current_week_date_verified": true,
           "date_precision": "unknown",
           "matched_chart_rows": [
             [
@@ -9013,13 +9540,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": null
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_jacksonville-jaguars",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "jax_week5_notes_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -9035,22 +9563,21 @@
           "source_id": "inactives"
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "started",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "game started",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "jax_week5_notes_roster"
+          ]
         }
       },
       {
@@ -9449,7 +9976,7 @@
         "team": "LV",
         "position": "TE",
         "identity_verified": true,
-        "classification": "UNKNOWN",
+        "classification": "PENDING OFFICIAL REPORT",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -9464,9 +9991,22 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "published",
+            "report_at": "2026-10-06T17:27:40-07:00",
+            "player_id": "00-0039066",
+            "team": "LV",
+            "game_id": "aa6b6286-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "lv_week5_notes_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_las-vegas-raiders",
+          "source_id": "lv_week5_notes_depth",
           "effective_date": "2026-10-06",
           "date_evidence": "as of October 6, 2026 | Week 5",
           "classification": "club_unofficial",
@@ -9482,13 +10022,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": null
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_las-vegas-raiders",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "lv_week5_notes_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -9504,20 +10045,20 @@
           "source_id": null
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "lv_week5_notes_roster"
+          ]
         }
       },
       {
@@ -11268,14 +11809,27 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "published",
+            "report_at": "2026-10-06T13:19:54-04:00",
+            "player_id": "00-0038935",
+            "team": "JAX",
+            "game_id": "aa6b5c2b-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "jax_week5_notes_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_jacksonville-jaguars",
-          "effective_date": null,
+          "source_id": "jax_week5_notes_depth",
+          "effective_date": "2026-10-06",
           "date_evidence": null,
           "classification": "club_unofficial",
           "confirmed_starters": false,
-          "current_week_date_verified": false,
+          "current_week_date_verified": true,
           "date_precision": "unknown",
           "matched_chart_rows": [
             [
@@ -11289,13 +11843,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": null
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_jacksonville-jaguars",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "jax_week5_notes_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -11311,22 +11866,21 @@
           "source_id": "inactives"
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "started",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "game started",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "jax_week5_notes_roster"
+          ]
         }
       },
       {
@@ -11597,7 +12151,7 @@
         "team": "LAC",
         "position": "WR",
         "identity_verified": true,
-        "classification": "UNKNOWN",
+        "classification": "PENDING OFFICIAL REPORT",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -11612,14 +12166,27 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "published",
+            "report_at": "2026-10-06T13:53:30-07:00",
+            "player_id": "00-0040727",
+            "team": "LAC",
+            "game_id": "aa94bc51-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "lac_week5_notes_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_los-angeles-chargers",
+          "source_id": "lac_week5_notes_depth",
           "effective_date": null,
           "date_evidence": null,
           "classification": "club_unofficial",
           "confirmed_starters": false,
-          "current_week_date_verified": false,
+          "current_week_date_verified": true,
           "date_precision": "unknown",
           "matched_chart_rows": [
             [
@@ -11630,13 +12197,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": "2026-10-06T13:53:30-07:00"
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_los-angeles-chargers",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "lac_week5_notes_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -11652,21 +12220,20 @@
           "source_id": null
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "lac_week5_notes_roster"
+          ]
         }
       },
       {
@@ -11849,7 +12416,7 @@
         "team": "LAC",
         "position": "RB",
         "identity_verified": true,
-        "classification": "UNKNOWN",
+        "classification": "PENDING OFFICIAL REPORT",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -11864,14 +12431,27 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "published",
+            "report_at": "2026-10-06T13:53:30-07:00",
+            "player_id": "00-0038454",
+            "team": "LAC",
+            "game_id": "aa94bc51-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "lac_week5_notes_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_los-angeles-chargers",
+          "source_id": "lac_week5_notes_depth",
           "effective_date": null,
           "date_evidence": null,
           "classification": "club_unofficial",
           "confirmed_starters": false,
-          "current_week_date_verified": false,
+          "current_week_date_verified": true,
           "date_precision": "unknown",
           "matched_chart_rows": [
             [
@@ -11889,13 +12469,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": "2026-10-06T13:53:30-07:00"
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_los-angeles-chargers",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "lac_week5_notes_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -11911,21 +12492,20 @@
           "source_id": null
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "lac_week5_notes_roster"
+          ]
         }
       },
       {
@@ -12827,7 +13407,7 @@
         "team": "CLE",
         "position": "WR",
         "identity_verified": true,
-        "classification": "UNKNOWN",
+        "classification": "PENDING OFFICIAL REPORT",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -12842,14 +13422,28 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "effective",
+            "effective_date": "2026-10-05",
+            "report_timezone": "America/New_York",
+            "player_id": "00-0041547",
+            "team": "CLE",
+            "game_id": "aa6b69bb-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "cle_week5_roster_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_cleveland-browns",
-          "effective_date": null,
+          "source_id": "cle_week5_roster_depth",
+          "effective_date": "2026-10-05",
           "date_evidence": null,
           "classification": "club_unofficial",
           "confirmed_starters": false,
-          "current_week_date_verified": false,
+          "current_week_date_verified": true,
           "date_precision": "unknown",
           "matched_chart_rows": [
             [
@@ -12867,13 +13461,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": null
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_cleveland-browns",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "cle_week5_roster_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -12889,21 +13484,20 @@
           "source_id": null
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "cle_week5_roster_roster"
+          ]
         }
       },
       {
@@ -13666,14 +14260,27 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "published",
+            "report_at": "2026-10-06T13:19:54-04:00",
+            "player_id": "00-0039893",
+            "team": "JAX",
+            "game_id": "aa6b5c2b-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "jax_week5_notes_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_jacksonville-jaguars",
-          "effective_date": null,
+          "source_id": "jax_week5_notes_depth",
+          "effective_date": "2026-10-06",
           "date_evidence": null,
           "classification": "club_unofficial",
           "confirmed_starters": false,
-          "current_week_date_verified": false,
+          "current_week_date_verified": true,
           "date_precision": "unknown",
           "matched_chart_rows": [
             [
@@ -13687,13 +14294,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": null
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_jacksonville-jaguars",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "jax_week5_notes_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -13709,22 +14317,21 @@
           "source_id": "inactives"
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "started",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "game started",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "jax_week5_notes_roster"
+          ]
         }
       },
       {
@@ -13842,15 +14449,16 @@
           }
         ],
         "depth": {
-          "source_id": "depth_los-angeles-chargers",
+          "source_id": "lac_week5_notes_depth",
           "effective_date": null,
           "date_evidence": null,
           "classification": "club_unofficial",
           "confirmed_starters": false,
-          "current_week_date_verified": false,
+          "current_week_date_verified": true,
           "date_precision": "unknown",
           "matched_chart_rows": [],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": "2026-10-06T13:53:30-07:00"
         },
         "roster_claim": {
           "observed_status": "RES",
@@ -13871,9 +14479,7 @@
           "due_at": "2026-10-11T18:35:00+00:00",
           "source_id": null
         },
-        "blockers": [
-          "Projected role freshness unverified; role-dependent recommendations blocked"
-        ],
+        "blockers": [],
         "resolved": {
           "availability": "IR",
           "roster_eligibility": "ir",
@@ -14375,7 +14981,7 @@
         "team": "CIN",
         "position": "WR",
         "identity_verified": true,
-        "classification": "UNKNOWN",
+        "classification": "PENDING OFFICIAL REPORT",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -14390,14 +14996,28 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "effective",
+            "effective_date": "2026-10-06",
+            "report_timezone": "America/New_York",
+            "player_id": "00-0040785",
+            "team": "CIN",
+            "game_id": "aa6b5f66-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "cin_week5_notes_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_cincinnati-bengals",
-          "effective_date": null,
+          "source_id": "cin_week5_notes_depth",
+          "effective_date": "2026-10-06",
           "date_evidence": null,
           "classification": "club_unofficial",
           "confirmed_starters": false,
-          "current_week_date_verified": false,
+          "current_week_date_verified": true,
           "date_precision": "unknown",
           "matched_chart_rows": [
             [
@@ -14419,13 +15039,14 @@
               "Tahj Brooks"
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": null
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_cincinnati-bengals",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "cin_week5_notes_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -14441,21 +15062,20 @@
           "source_id": null
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "cin_week5_notes_roster"
+          ]
         }
       },
       {
@@ -14810,14 +15430,27 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "published",
+            "report_at": "2026-10-06T13:19:54-04:00",
+            "player_id": "00-0038611",
+            "team": "JAX",
+            "game_id": "aa6b5c2b-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "jax_week5_notes_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_jacksonville-jaguars",
-          "effective_date": null,
+          "source_id": "jax_week5_notes_depth",
+          "effective_date": "2026-10-06",
           "date_evidence": null,
           "classification": "club_unofficial",
           "confirmed_starters": false,
-          "current_week_date_verified": false,
+          "current_week_date_verified": true,
           "date_precision": "unknown",
           "matched_chart_rows": [
             [
@@ -14831,13 +15464,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": null
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_jacksonville-jaguars",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "jax_week5_notes_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -14853,22 +15487,21 @@
           "source_id": "inactives"
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "started",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "game started",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "jax_week5_notes_roster"
+          ]
         }
       },
       {
@@ -15060,7 +15693,7 @@
         "team": "DEN",
         "position": "RB",
         "identity_verified": true,
-        "classification": "UNKNOWN",
+        "classification": "PENDING OFFICIAL REPORT",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -15075,14 +15708,27 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "published",
+            "report_at": "2026-10-06T12:59:18-07:00",
+            "player_id": "00-0036158",
+            "team": "DEN",
+            "game_id": "aa94bc51-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "lac_den_flipcard_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_denver-broncos",
+          "source_id": "lac_den_flipcard_depth",
           "effective_date": null,
           "date_evidence": null,
           "classification": "club_unofficial",
           "confirmed_starters": false,
-          "current_week_date_verified": false,
+          "current_week_date_verified": true,
           "date_precision": "unknown",
           "matched_chart_rows": [
             [
@@ -15093,13 +15739,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": "2026-10-06T12:59:18-07:00"
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_denver-broncos",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "lac_den_flipcard_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -15115,21 +15762,20 @@
           "source_id": null
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "lac_den_flipcard_roster"
+          ]
         }
       },
       {
@@ -15859,7 +16505,7 @@
         "team": "LV",
         "position": "RB",
         "identity_verified": true,
-        "classification": "UNKNOWN",
+        "classification": "PENDING OFFICIAL REPORT",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -15874,9 +16520,22 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "published",
+            "report_at": "2026-10-06T17:27:40-07:00",
+            "player_id": "00-0040878",
+            "team": "LV",
+            "game_id": "aa6b6286-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "lv_week5_notes_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_las-vegas-raiders",
+          "source_id": "lv_week5_notes_depth",
           "effective_date": "2026-10-06",
           "date_evidence": "as of October 6, 2026 | Week 5",
           "classification": "club_unofficial",
@@ -15892,13 +16551,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": null
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_las-vegas-raiders",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "lv_week5_notes_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -15914,20 +16574,20 @@
           "source_id": null
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "lv_week5_notes_roster"
+          ]
         }
       },
       {
@@ -15955,6 +16615,18 @@
           {
             "authority": "official",
             "timestamp_basis": "published",
+            "report_at": "2026-10-06T13:53:30-07:00",
+            "player_id": "00-0038544",
+            "team": "LAC",
+            "game_id": "aa94bc51-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "lac_week5_notes_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          },
+          {
+            "authority": "official",
+            "timestamp_basis": "published",
             "report_at": "2026-10-10T21:23:47.29Z",
             "player_id": "00-0038544",
             "team": "LAC",
@@ -15966,12 +16638,12 @@
           }
         ],
         "depth": {
-          "source_id": "depth_los-angeles-chargers",
+          "source_id": "lac_week5_notes_depth",
           "effective_date": null,
           "date_evidence": null,
           "classification": "club_unofficial",
           "confirmed_starters": false,
-          "current_week_date_verified": false,
+          "current_week_date_verified": true,
           "date_precision": "unknown",
           "matched_chart_rows": [
             [
@@ -15982,13 +16654,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": "2026-10-06T13:53:30-07:00"
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_los-angeles-chargers",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "lac_week5_notes_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -16003,21 +16676,18 @@
           "due_at": "2026-10-11T18:35:00+00:00",
           "source_id": null
         },
-        "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked"
-        ],
+        "blockers": [],
         "resolved": {
           "availability": "Out",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "unavailable"
           ],
           "source_ids": [
-            "injuries"
+            "injuries",
+            "lac_week5_notes_roster"
           ]
         }
       },
@@ -16027,7 +16697,7 @@
         "team": "DEN",
         "position": "TE",
         "identity_verified": true,
-        "classification": "UNKNOWN",
+        "classification": "PENDING OFFICIAL REPORT",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -16042,14 +16712,27 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "published",
+            "report_at": "2026-10-06T12:59:18-07:00",
+            "player_id": "00-0033881",
+            "team": "DEN",
+            "game_id": "aa94bc51-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "lac_den_flipcard_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_denver-broncos",
+          "source_id": "lac_den_flipcard_depth",
           "effective_date": null,
           "date_evidence": null,
           "classification": "club_unofficial",
           "confirmed_starters": false,
-          "current_week_date_verified": false,
+          "current_week_date_verified": true,
           "date_precision": "unknown",
           "matched_chart_rows": [
             [
@@ -16060,13 +16743,14 @@
               "Dallen Bentley"
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": "2026-10-06T12:59:18-07:00"
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_denver-broncos",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "lac_den_flipcard_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -16082,21 +16766,20 @@
           "source_id": null
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "lac_den_flipcard_roster"
+          ]
         }
       },
       {
@@ -16105,7 +16788,7 @@
         "team": "DEN",
         "position": "WR",
         "identity_verified": true,
-        "classification": "UNKNOWN",
+        "classification": "PENDING OFFICIAL REPORT",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -16120,14 +16803,27 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "published",
+            "report_at": "2026-10-06T12:59:18-07:00",
+            "player_id": "00-0034348",
+            "team": "DEN",
+            "game_id": "aa94bc51-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "lac_den_flipcard_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_denver-broncos",
+          "source_id": "lac_den_flipcard_depth",
           "effective_date": null,
           "date_evidence": null,
           "classification": "club_unofficial",
           "confirmed_starters": false,
-          "current_week_date_verified": false,
+          "current_week_date_verified": true,
           "date_precision": "unknown",
           "matched_chart_rows": [
             [
@@ -16138,13 +16834,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": "2026-10-06T12:59:18-07:00"
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_denver-broncos",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "lac_den_flipcard_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -16160,21 +16857,20 @@
           "source_id": null
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "lac_den_flipcard_roster"
+          ]
         }
       },
       {
@@ -16537,6 +17233,18 @@
           {
             "authority": "official",
             "timestamp_basis": "published",
+            "report_at": "2026-10-06T17:27:40-07:00",
+            "player_id": "00-0037291",
+            "team": "LV",
+            "game_id": "aa6b6286-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "lv_week5_notes_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          },
+          {
+            "authority": "official",
+            "timestamp_basis": "published",
             "report_at": "2026-10-10T21:23:47.29Z",
             "player_id": "00-0037291",
             "team": "LV",
@@ -16548,7 +17256,7 @@
           }
         ],
         "depth": {
-          "source_id": "depth_las-vegas-raiders",
+          "source_id": "lv_week5_notes_depth",
           "effective_date": "2026-10-06",
           "date_evidence": "as of October 6, 2026 | Week 5",
           "classification": "club_unofficial",
@@ -16564,13 +17272,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": null
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_las-vegas-raiders",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "lv_week5_notes_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -16585,20 +17294,18 @@
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
-        "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately"
-        ],
+        "blockers": [],
         "resolved": {
           "availability": "Out",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "unavailable"
           ],
           "source_ids": [
-            "injuries"
+            "injuries",
+            "lv_week5_notes_roster"
           ]
         }
       },
