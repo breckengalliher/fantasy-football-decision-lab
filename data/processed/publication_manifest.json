@@ -1,19 +1,19 @@
 {
   "schema_version": 1,
-  "version": "1db221cb23f68bc3922f076ceddedfe90f2a47ff82438586334e869bd403beef",
-  "revision": "f381c84b3112675bb7ed272902676cb4435aa813",
+  "version": "3bd8ac0a1318dd6050bcc6b16701cab45adea4ac6eee2d7d1cda379ad9b26a70",
+  "revision": "13d4021b8c001b0d58c2c6267c5632f5c0044abd",
   "season": 2026,
   "week": 5,
   "validation_status": "passed",
-  "validated_at": "2026-10-11T14:26:54.461835+00:00",
-  "prepared_at": "2026-10-11T14:26:54.461835+00:00",
+  "validated_at": "2026-10-11T14:51:46.643364+00:00",
+  "prepared_at": "2026-10-11T14:51:46.643364+00:00",
   "files": {
     "live_start_sit_board_4pt_current.parquet": {
-      "sha256": "b76a9ab155d332e06deef09d16e024827043b525d9efba9233914549ddf67417",
+      "sha256": "899a6b2fef1216c43db16d2babce13d094bec8e53ab43fcfe2a911664531d32b",
       "record_count": 478
     },
     "live_start_sit_board_6pt_current.parquet": {
-      "sha256": "117567bb9a4c363f534ef4b1b41a259da0aaafbcfb56206d20f0f07249b83602",
+      "sha256": "191045c715615e90589c7b5eacc946c2f5264319017f1cd8993eb5b52264f9e5",
       "record_count": 478
     },
     "live_weekly_current.parquet": {
@@ -21,7 +21,7 @@
       "record_count": 4517
     },
     "live_refresh_metadata.json": {
-      "sha256": "ddc475e6187045f493335550f4d00095edcb6b7ae0a0a5cc973e7cb083640a0e",
+      "sha256": "ba64264ea91f1e0b1856cd126095780ddf3f1b224dba2379c27b4d80655364fa",
       "record_count": null
     }
   },
@@ -35,9 +35,9 @@
   },
   "availability_certification": {
     "status": "restricted",
-    "sha256": "b613e5ed6b03ea1478ab87ffd4f35c41505e1a9235fa5218df02b3d018aa5b2b",
+    "sha256": "4d8f79d029ad36c37d083621c0d9a64e5a6e2f7b9adaafcf81df5c4fa4865b5e",
     "player_count": 207,
     "all_availability_actions_blocked": true,
-    "unknown_count": 111
+    "unknown_count": 105
   }
 }
