@@ -30,7 +30,7 @@ def test_context_summaries_are_brief_and_explanatory():
         "wind_live": 3,
     }
     assert matchup_summary(row) == "20% tougher than baseline"
-    assert role_summary(row) == "86% snaps · role expanding"
+    assert role_summary(row) == "Recent games: 86% snaps · role expanding"
     assert weather_summary(row) == "Clear Sky · 88°F · calm wind"
 
 
@@ -108,3 +108,10 @@ def test_fantasy_game_log_is_position_aware_and_recent_first():
     log = fantasy_game_log(weekly, {"player": "Test WR", "position": "WR"})
     assert log["headers"] == ["Week", "Opp", "PPR", "Volume", "Yards", "TD"]
     assert log["rows"][0] == ["W2", "TB", "18.0", "7/10 rec/tgt", "90 rec", "1"]
+
+
+def test_kickoff_display_uses_same_instant_as_locks_and_labels_central_zone():
+    from dashboard.presentation import kickoff_summary
+    assert kickoff_summary({'gameday':'2026-10-11','gametime':'16:25'}) == 'Sun Oct 11 · 03:25 PM CDT'
+    assert kickoff_summary({'kickoff_at':'2026-12-06T18:00:00Z'}) == 'Sun Dec 06 · 12:00 PM CST'
+    assert kickoff_summary({'weekday':'Sunday','gametime':'13:00'}) == 'Kickoff unverified'

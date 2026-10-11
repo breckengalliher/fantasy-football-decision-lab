@@ -59,7 +59,7 @@ try:
     from dashboard.admin_refresh import authenticate as authenticate_refresh_admin, configured as admin_refresh_configured, refresh_status, trigger_refresh
     from dashboard.states import empty_player_pool_message, provider_issue_message
     from dashboard.methodology_copy import DISCLAIMER_LANGUAGE, METHODOLOGY_LANGUAGE, SOURCE_ATTRIBUTION
-    from dashboard.presentation import actionable_injury_alert, eligible_positions, fantasy_game_log, player_weekly_history, matchup_summary, opponent_position_rank, player_card_stat_summary, projected_team_total, role_summary, selection_availability_summary, team_logo_url, weather_summary
+    from dashboard.presentation import actionable_injury_alert, eligible_positions, fantasy_game_log, player_weekly_history, matchup_summary, opponent_position_rank, player_card_stat_summary, projected_team_total, role_summary, kickoff_summary, selection_availability_summary, team_logo_url, weather_summary
     from dashboard.decision_policy import CLOSE_CALL_THRESHOLD_PPR
     from dashboard.command_center_v2 import authenticate_command_center, render_command_center
     from dashboard.product_experience import mobile_navigation, render_home
@@ -72,7 +72,7 @@ except ModuleNotFoundError:
     from admin_refresh import authenticate as authenticate_refresh_admin, configured as admin_refresh_configured, refresh_status, trigger_refresh
     from states import empty_player_pool_message, provider_issue_message
     from methodology_copy import DISCLAIMER_LANGUAGE, METHODOLOGY_LANGUAGE, SOURCE_ATTRIBUTION
-    from presentation import actionable_injury_alert, eligible_positions, fantasy_game_log, player_weekly_history, matchup_summary, opponent_position_rank, player_card_stat_summary, projected_team_total, role_summary, selection_availability_summary, team_logo_url, weather_summary
+    from presentation import actionable_injury_alert, eligible_positions, fantasy_game_log, player_weekly_history, matchup_summary, opponent_position_rank, player_card_stat_summary, projected_team_total, role_summary, kickoff_summary, selection_availability_summary, team_logo_url, weather_summary
     from decision_policy import CLOSE_CALL_THRESHOLD_PPR
     from command_center_v2 import authenticate_command_center, render_command_center
     from product_experience import mobile_navigation, render_home
@@ -1530,7 +1530,7 @@ elif page == "Decision Room":
             BOARD["position"].eq("QB") & BOARD["base_roster_relevant"] & ~BOARD["verified_qb_starter"]
         ]
         if not excluded_qbs.empty:
-            st.caption(f"{len(excluded_qbs)} QB(s) hidden because the live depth chart does not verify them as QB1.")
+            st.caption(f"{len(excluded_qbs)} QB(s) excluded by the snapshot QB eligibility filter. This is not confirmation of current starting role.")
     if pool.empty:
         st.warning(empty_player_pool_message(position, len(excluded_qbs)))
         names = []
@@ -1603,11 +1603,11 @@ elif page == "Decision Room":
                                 "This player lacks enough personal workload history, so the projection leans on position, team environment, and verified depth-chart role priors with a wider range.",
                                 "limited-sample-pill",
                             ) if limited_sample else ""
-                            availability_class = "availability-alert" if any(term in availability.casefold() for term in ("questionable", "doubtful", "out", "inactive", "ir", "did not practice")) else "availability-ok"
+                            availability_class = "availability-alert" if any(term in availability.casefold() for term in ("questionable", "doubtful", "out", "inactive", "ir", "did not practice", "unknown", "unverified")) else "availability-ok"
                             photo = player_photo_html(selected_row.get("headshot_url"), selected_row["player"])
                             logo_url = team_logo_url(selected_row.get("team"))
                             logo = f'<img src="{html.escape(logo_url, quote=True)}" alt="{html.escape(str(selected_row["team"]), quote=True)} logo">' if logo_url else ""
-                            kickoff = " · ".join(str(value) for value in (selected_row.get("weekday"), selected_row.get("gametime")) if value is not None and pd.notna(value))
+                            kickoff = kickoff_summary(selected_row)
                             st.markdown(
                                 f'<div class="compare-slot-kicker">Player {slot_index + 1}</div>'
                                 f'<div class="compare-slot-top">{photo}<div class="compare-slot-main"><div class="compare-slot-name">{html.escape(str(selected_row["player"]))}</div>'
@@ -1900,7 +1900,7 @@ elif page == "Decision Room":
                 if team_record is not None and pd.notna(team_record) and str(team_record).strip():
                     game_detail_chips.append((f'{row.get("team")} {team_record}', "record"))
                 game_detail_chips.append((f'{row.get("venue")} vs {row.get("next_opponent")}', "matchup"))
-                kickoff = " · ".join(str(row.get(value)) for value in ("weekday", "gametime") if row.get(value) is not None and pd.notna(row.get(value)))
+                kickoff = kickoff_summary(row)
                 if kickoff:
                     game_detail_chips.append((kickoff, "kickoff"))
                 betting_total = row.get("betting_total_live")
@@ -1923,7 +1923,7 @@ elif page == "Decision Room":
                     for label, chip_class in game_detail_chips
                 )
                 practice = format_injury_context(row, "Connected" in INJURY_SOURCE_STATUS)
-                practice_alert = any(term in practice.casefold() for term in ("questionable", "doubtful", "out", "inactive", "ir", "did not practice"))
+                practice_alert = any(term in practice.casefold() for term in ("questionable", "doubtful", "out", "inactive", "ir", "did not practice", "unknown", "unverified"))
                 matchup_help = explained_term(
                     matchup_summary(row),
                     "Opponent difficulty after accounting for the strength of offenses already faced. The percentage is relative to this player’s baseline, and the projection adjustment is capped.",
@@ -2497,10 +2497,7 @@ elif page == "Decision Room":
                     personnel = " · ".join(changes) if changes else "No changes reported"
                 else:
                     personnel = "No changes reported" if PROVIDER_STATUS.startswith("Connected") else "Personnel status unavailable"
-                kickoff = " · ".join(
-                    str(row.get(value)) for value in ("weekday", "gametime")
-                    if row.get(value) is not None and pd.notna(row.get(value))
-                ) or "Kickoff TBD"
+                kickoff = kickoff_summary(row)
                 availability = selection_availability_summary(row)
                 team_record = row.get("team_record") if pd.notna(row.get("team_record")) else "—"
                 implied_team_total = projected_team_total(row)
@@ -2545,6 +2542,12 @@ elif page == "Decision Room":
             comparison_shell.markdown(DISCLAIMER_LANGUAGE)
 
 elif page == "Player Trends":
+    trends_unverified = not critical_data_fresh(header_metadata, datetime.now(timezone.utc))
+    if trends_unverified:
+        st.warning("VERIFY DATA — availability-based advice is paused. These baseline projections assume participation; they are not expected points for an unavailable player.")
+    else:
+        st.caption("Baseline projections assume participation. Check the separate availability status before using them.")
+    st.caption(f"Published data {str(header_metadata.get('_publication', {}).get('version', 'unavailable'))[:12]} · Context retrieved {context_checked.isoformat()} · Retrieval time is not an official report timestamp.")
     trends_controls = st.container(key="trends_controls")
     control_left, control_right = trends_controls.columns([1, 1.5])
     selected_position = control_left.segmented_control(
@@ -2583,19 +2586,16 @@ elif page == "Player Trends":
     photo = player_photo_html(player.get("headshot_url"), player_name)
     logo_url = team_logo_url(player.get("team"))
     logo = f'<img src="{html.escape(logo_url, quote=True)}" alt="{html.escape(str(player["team"]), quote=True)} logo">' if logo_url else ""
-    game_line = " · ".join(
-        str(player.get(value)) for value in ("weekday", "gametime")
-        if player.get(value) is not None and pd.notna(player.get(value))
-    ) or "Kickoff TBD"
+    game_line = kickoff_summary(player)
     availability_alert = any(
         term in availability.casefold()
-        for term in ("questionable", "doubtful", "out", "inactive", "ir", "did not practice")
+        for term in ("questionable", "doubtful", "out", "inactive", "ir", "did not practice", "unknown", "unverified")
     )
     st.markdown(
         f'<section class="trend-player-card"><div class="trend-player-identity">{photo}<div><div class="trend-player-name">{html.escape(player_name)}</div>'
         f'<div class="trend-player-team">{logo}<span>{html.escape(str(player["team"]))} · {selected_position} · {html.escape(str(player.get("venue", "")))} vs {html.escape(str(player["next_opponent"]))}</span></div>'
         f'<div class="trend-player-team"><span>{html.escape(game_line)}</span></div><span class="trend-status{" alert" if availability_alert else ""}">{html.escape(availability)}</span></div></div>'
-        f'<div class="trend-stat"><span>Week {NEXT_WEEK}</span><strong>{projection:.1f}</strong><small>Projected PPR</small></div>'
+        f'<div class="trend-stat"><span>Week {NEXT_WEEK}</span><strong>{projection:.1f}</strong><small>Baseline PPR · assumes participation</small></div>'
         f'<div class="trend-stat"><span>Recent form</span><strong>{recent_average:.1f}</strong><small>PPR per game</small></div>'
         f'<div class="trend-stat"><span>Season baseline</span><strong>{season_average:.1f}</strong><small>PPR per game</small></div>'
         f'<div class="trend-stat"><span>Projected range</span><strong>{float(player.get("floor_ppr", projection)):.1f}–{float(player.get("ceiling_ppr", projection)):.1f}</strong><small>Floor to ceiling</small></div></section>',
@@ -2611,7 +2611,7 @@ elif page == "Player Trends":
         direction = "up" if form_change > 2 else "down" if form_change < -2 else "steady"
         trend_sentence = (
             f"{player_name} is trending {direction} after scoring {latest_score:.1f} PPR last week. "
-            f"We project {projection:.1f} this week, {abs(projection - season_average):.1f} points "
+            f"The participation-assumed baseline is {projection:.1f} this week, {abs(projection - season_average):.1f} points "
             f"{'above' if projection >= season_average else 'below'} the season baseline."
         )
     elif games_played == 1:

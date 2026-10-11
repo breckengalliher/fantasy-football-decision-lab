@@ -10,8 +10,10 @@ import pandas as pd
 
 try:
     from dashboard.decision_policy import CLOSE_CALL_THRESHOLD_PPR
+    from dashboard.availability import kickoff_utc
 except ModuleNotFoundError:
     from decision_policy import CLOSE_CALL_THRESHOLD_PPR
+    from availability import kickoff_utc
 
 
 POSITION_GROUPS = {"FLEX": ("RB", "WR", "TE"), "SUPERFLEX": ("QB", "RB", "WR", "TE")}
@@ -353,10 +355,18 @@ def role_summary(row: Any) -> str:
     if latest is None or pd.isna(latest):
         return "Role data unavailable"
     if recent is None or pd.isna(recent):
-        return f"{float(latest):.0%} snap share"
+        return f"Recent games: {float(latest):.0%} snap share"
     change = round(float(latest) - float(recent), 3)
     direction = "role expanding" if change >= .05 else "role shrinking" if change <= -.05 else "stable role"
-    return f"{float(latest):.0%} snaps · {direction}"
+    return f"Recent games: {float(latest):.0%} snaps · {direction}"
+
+
+def kickoff_summary(row: Any) -> str:
+    """Display the same schedule instant as lineup locks, with an explicit zone."""
+    kickoff = kickoff_utc(row)
+    if kickoff is None:
+        return "Kickoff unverified"
+    return kickoff.astimezone(ZoneInfo('America/Chicago')).strftime('%a %b %d · %I:%M %p %Z')
 
 
 def weather_summary(row: Any) -> str:
