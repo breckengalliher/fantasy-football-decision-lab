@@ -1,19 +1,19 @@
 {
   "schema_version": 1,
-  "version": "52154db454842d5fe9e53c68eb160ae7741736657075e869ff762a96f9ca2707",
-  "revision": "20909811a5c31c869e7520f43a64f4e9b417212e",
+  "version": "8e7238f98dbd7c145971557e0090f4965a7cd13e31dfed0ebcef15710ec54c14",
+  "revision": "6edbbe15e192ddd73a393ed1b9d8aaa63db53a3f",
   "season": 2026,
   "week": 5,
   "validation_status": "passed",
-  "validated_at": "2026-10-11T15:59:23.606274+00:00",
-  "prepared_at": "2026-10-11T15:59:23.606274+00:00",
+  "validated_at": "2026-10-11T16:11:59.008950+00:00",
+  "prepared_at": "2026-10-11T16:11:59.008950+00:00",
   "files": {
     "live_start_sit_board_4pt_current.parquet": {
-      "sha256": "f5283d37af485cc731073dd3c38e5298b2a78eb4cd679edd5a8d06f73a52cca1",
+      "sha256": "9965f1ceed5b5211426c2021653d434a4822107701fab18ccc929d337923e640",
       "record_count": 478
     },
     "live_start_sit_board_6pt_current.parquet": {
-      "sha256": "ceb749b80fa9150a92aa85323e04397bc47653be2926a4d15763a143ad6230bd",
+      "sha256": "bd372174199f50b82e48ae5285a353c52693332856b241848b9dc7032953a98d",
       "record_count": 478
     },
     "live_weekly_current.parquet": {
@@ -21,12 +21,12 @@
       "record_count": 4517
     },
     "live_refresh_metadata.json": {
-      "sha256": "783a70cca4cd3d527fec9502f99009691d2766ff8f2e9c7b3e03a347609de3fc",
+      "sha256": "0dd6d4d94d6e9c8857b65e64739f1ab6605159c5caa8ff45c17dd5559fdbee4e",
       "record_count": null
     }
   },
   "projection_source_retrieved_at": "2026-10-11T03:50:15.657496+00:00",
-  "availability_source_retrieved_at": "2026-10-11T15:52:10.114064+00:00",
+  "availability_source_retrieved_at": "2026-10-11T16:07:43.394488+00:00",
   "availability_source_updated_at": null,
   "depth_source_updated_at": "2026-10-11T13:46:01+00:00",
   "source_freshness": {
@@ -35,9 +35,9 @@
   },
   "availability_certification": {
     "status": "restricted",
-    "sha256": "03973339e47799316c804c6f09ac7f3609c756f1d989da99bd4ac4287fb246ac",
+    "sha256": "27f39bf68a35dcdabba93d7bcc89a6fcca6df7fb52c10850a5058aad7d11d502",
     "player_count": 207,
     "all_availability_actions_blocked": true,
-    "unknown_count": 149
+    "unknown_count": 127
   }
 }
