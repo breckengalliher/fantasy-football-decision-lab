@@ -62,7 +62,8 @@ def retain_reviewed_availability(boards, originals, metadata, now=None):
                           recommendation_allowed=False)
             if resolved["game_state"] in {"bye", "started", "final", "postponed"}:
                 record["classification"] = "OUTSIDE ACTIONABLE SCOPE"
-            elif resolved["availability"] == "Unknown":
+            elif (record["classification"] == "VERIFIED" and resolved["availability"] == "Unknown") or (
+                    record["classification"] == "PENDING OFFICIAL REPORT" and inactive.get("state") == "due_missing"):
                 record["classification"] = "UNKNOWN"
             # Never upgrade a classification from this general-context fetch.
             for board in retained.values():

@@ -91,9 +91,13 @@ def test_context_refresh_cannot_overwrite_reviewed_unknown_or_source_timestamps(
 
 def test_context_refresh_downgrades_due_inactive_claim_without_new_evidence(case):
     cert, original, meta = case
+    cert["players"][0]["classification"] = "PENDING OFFICIAL REPORT"
     originals = {4: original[0], 6: original[1]}
+    _, still_pending = retain_reviewed_availability(originals, originals, meta, NOW)
+    assert still_pending["availability_certificate"]["players"][0]["classification"] == "PENDING OFFICIAL REPORT"
     boards, after = retain_reviewed_availability(originals, originals, meta, NOW+timedelta(hours=2))
     assert after["availability_certificate"]["players"][0]["inactives"]["state"] == "due_missing"
+    assert after["availability_certificate"]["players"][0]["classification"] == "UNKNOWN"
     assert after["availability_certificate"]["sources"] == cert["sources"]
     assert validate_certificate(after["availability_certificate"], list(boards.values()), after,
                                 NOW+timedelta(hours=2))["status"] == "restricted"
