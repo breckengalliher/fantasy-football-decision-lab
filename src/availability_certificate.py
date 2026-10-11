@@ -4,17 +4,11 @@ This validates claims and cross-file consistency. It cannot independently prove
 that a human/source extractor read a page correctly; raw receipts remain part
 of release review. A structural snapshot pass is not a football certification.
 """
-import hashlib
-import json
 import re
 from datetime import datetime, timezone
 from urllib.parse import urlsplit
 
-from dashboard.availability_evidence import resolve_availability, timestamp, report_time
-
-
-def certificate_digest(certificate):
-    return hashlib.sha256(json.dumps(certificate, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+from dashboard.availability_evidence import resolve_availability, timestamp, report_time, certificate_digest
 
 
 def validate_certificate(certificate, boards, metadata, now=None):

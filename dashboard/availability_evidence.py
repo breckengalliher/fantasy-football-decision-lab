@@ -4,6 +4,8 @@ Source extraction is a separate, reviewed step. Retrieval time is never an
 event's effective time. Unknown evidence is a blocking result, not Available.
 """
 from datetime import date, datetime, timedelta, timezone
+import hashlib
+import json
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 
@@ -13,6 +15,10 @@ VALUES = {
     "injury": {"out", "doubtful", "questionable", "available"},
     "gameday": {"inactive", "active"},
 }
+
+
+def certificate_digest(certificate):
+    return hashlib.sha256(json.dumps(certificate, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
 
 
 def timestamp(value):

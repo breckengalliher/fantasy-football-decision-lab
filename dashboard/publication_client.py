@@ -58,7 +58,7 @@ def read_metadata(session, base_url: str) -> dict:
     if metadata.get("season") != manifest.get("season") or metadata.get("next_week") != manifest.get("week"):
         raise ValueError("Metadata does not match publication")
     if metadata.get("injury_freshness_verified") is True or metadata.get("depth_freshness_verified") is True:
-        from src.availability_certificate import certificate_digest
+        from dashboard.availability_evidence import certificate_digest
         from dashboard.availability_evidence import timestamp
         from datetime import datetime, timezone
         certification = manifest.get("availability_certification") or {}
