@@ -1,6 +1,7 @@
 // Isolated QA only. Native event-to-paint measurements; no provider or controller calls.
 (() => {
- const w=parent,d=w.document,key='sdl_qa_visible_timings_v1';
+ const install=() => {
+ const w=window,d=w.document,key='sdl_qa_visible_timings_v1';
  if(w.__sdlQaTiming)return;
  const clock=()=>w.performance.timeOrigin+w.performance.now();
  let saved;try{saved=JSON.parse(w.sessionStorage.getItem(key)||'{}');}catch{saved={};}
@@ -43,4 +44,12 @@
  new w.MutationObserver(observe).observe(d.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['style','class','data-testid']});
  w.__sdlQaTiming={marker(value){if(active&&active.candidate!==value.candidate)finish('candidate_changed_incomplete');lastMarker=value;observe();}};
  display();deadline();
+ };
+ // Install in the app document's realm. Streamlit replaces the component iframe
+ // on rerun; listeners owned by that disposable realm otherwise disappear.
+ if(!parent.__sdlQaTiming){
+  const script=parent.document.createElement('script');
+  script.textContent='('+install.toString()+')();';
+  parent.document.head.appendChild(script);script.remove();
+ }
 })();
