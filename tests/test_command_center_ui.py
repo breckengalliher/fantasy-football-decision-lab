@@ -134,7 +134,7 @@ def test_committed_notice_survives_rerun_but_not_team_switch(monkeypatch, select
     from types import SimpleNamespace
     notices = []
     state = {'cc_save_notice': {'team_id': 'team'}}
-    monkeypatch.setattr(command_center_v2, 'st', SimpleNamespace(session_state=state, success=notices.append))
+    monkeypatch.setattr(command_center_v2, 'st', SimpleNamespace(session_state=state, toast=notices.append))
     command_center_v2._show_save_notice(selected_team)
     command_center_v2._show_save_notice(selected_team)
     assert notices == expected

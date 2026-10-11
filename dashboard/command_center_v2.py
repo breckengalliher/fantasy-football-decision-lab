@@ -712,7 +712,7 @@ def _show_save_notice(selected_team_id: str) -> None:
     """Render the committed-write receipt on the next authenticated rerun."""
     notice = st.session_state.pop("cc_save_notice", None)
     if isinstance(notice, dict) and notice.get("team_id") == str(selected_team_id):
-        st.success("Lineup saved")
+        st.toast("Lineup saved")
 
 
 def render_command_center(api: SupabaseAPI, app_url: str, season: int, player_pool: pd.DataFrame, weekly: pd.DataFrame, metadata: dict[str, Any], session=None) -> None:
