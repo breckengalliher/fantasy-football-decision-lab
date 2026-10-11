@@ -9,7 +9,7 @@ FRESH = {"refreshed_at": NOW.isoformat(), "context_refreshed_at": NOW.isoformat(
 
 
 def test_ready_requires_fresh_critical_data():
-    starter = {"player_id": "p1", "slot_type": "WR", "availability": "", "kickoff_at": (NOW + timedelta(hours=5)).isoformat()}
+    starter = {"player_id": "p1", "slot_type": "WR", "availability": "Available", "kickoff_at": (NOW + timedelta(hours=5)).isoformat()}
     assert lineup_status([starter], FRESH, NOW) == "READY"
     assert lineup_status([starter], {}, NOW) == "VERIFY DATA"
 
@@ -41,7 +41,7 @@ def test_ready_cannot_hide_missing_schedule_or_empty_setup():
 def test_out_overrides_started_game_and_injury_has_distinct_state():
     kickoff = (NOW + timedelta(hours=4)).isoformat()
     out = {"player_id": "p1", "slot_type": "WR", "availability": "Out", "kickoff_at": kickoff}
-    started = {"player_id": "p2", "slot_type": "RB", "game_started": True, "kickoff_at": kickoff}
+    started = {"player_id": "p2", "slot_type": "RB", "availability": "Available", "game_started": True, "kickoff_at": kickoff}
     assert lineup_status([out, started], FRESH, NOW) == "ACTION REQUIRED"
     assert lineup_status([{**out, "availability": "Questionable"}], FRESH, NOW) == "INJURY CONCERN"
 

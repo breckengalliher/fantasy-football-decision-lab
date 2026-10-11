@@ -134,12 +134,12 @@ def test_synthetic_personnel_scenarios_do_not_mutate_baseline(scenario, changes)
 
 @pytest.mark.parametrize("changes", [{"bye_week":True}, {"game_started":True}, {"data_unavailable":True}, {"availability":"Inactive"}])
 def test_ineligible_bench_never_actionable(changes):
-    assert not optimize_replacements([{"slot_id":"r", "slot_type":"FLEX"}], [{"player_id":"r1", "position":"RB", "median_ppr":20, **changes}])
+    assert not optimize_replacements([{"slot_id":"r", "slot_type":"FLEX"}], [{"player_id":"r1", "position":"RB", "availability":"Available", "median_ppr":20, **changes}])
 
 
 def test_flex_superflex_global_conflict_and_roster_validation():
     slots = [{"slot_id":"f", "slot_type":"FLEX"}, {"slot_id":"s", "slot_type":"SUPERFLEX"}]
-    bench = [{"player_id":"rb", "position":"RB", "median_ppr":20}, {"player_id":"qb", "position":"QB", "median_ppr":19}]
+    bench = [{"player_id":"rb", "position":"RB", "availability":"Available", "median_ppr":20}, {"player_id":"qb", "position":"QB", "availability":"Available", "median_ppr":19}]
     result = optimize_replacements(slots, bench)
     assert [(r.slot_id,r.player_id) for r in result] == [("f","rb"),("s","qb")]
     require_no_hard_errors(validate_assignments([{**slots[i], "player_id":r.player_id, "position":bench[i]["position"]} for i,r in enumerate(result)]))

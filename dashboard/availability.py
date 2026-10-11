@@ -4,11 +4,21 @@ from zoneinfo import ZoneInfo
 import pandas as pd
 
 UNAVAILABLE = {'out','inactive','ir','injured reserve','pup','suspended'}
+KNOWN_AVAILABLE = {'available', 'healthy'}
+KNOWN_UNCERTAIN = {'questionable', 'doubtful'}
 def status_key(value):
     if value is None or pd.isna(value):
         return ''
     key = str(value).strip().casefold()
     return {'reserve/injured':'ir', 'reserve/pup':'pup', 'physically unable to perform':'pup'}.get(key,key)
+
+def availability_is_known(value):
+    """Roster membership or an absent designation does not prove game eligibility.
+
+    This vocabulary check supplements source freshness; it does not certify a
+    source or authorize a publisher to manufacture an Available designation.
+    """
+    return status_key(value) in UNAVAILABLE | KNOWN_AVAILABLE | KNOWN_UNCERTAIN
 
 def kickoff_utc(row):
     value = row.get('kickoff_at')

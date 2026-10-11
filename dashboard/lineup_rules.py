@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Any, Iterable
-from dashboard.availability import UNAVAILABLE, status_key
+from dashboard.availability import UNAVAILABLE, status_key, availability_is_known
 
 
 UNCERTAIN = {"questionable", "doubtful"}
@@ -105,6 +105,8 @@ def lineup_status(starters: Iterable[dict[str, Any]], metadata: dict[str, Any], 
     if any(status_key(p.get('game_status_live')) in {'postponed','rescheduled','cancelled','canceled'} for p in starters):
         return "VERIFY DATA"
     if any(player.get("data_unavailable") or (not _utc(player.get("kickoff_at")) and not player.get("bye_week")) for player in starters):
+        return "VERIFY DATA"
+    if any(not availability_is_known(player.get("availability")) for player in starters):
         return "VERIFY DATA"
     actions = build_lineup_actions(starters, now)
     if any(action.mandatory for action in actions):

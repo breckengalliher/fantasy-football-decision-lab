@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from math import isfinite
 from typing import Any, Iterable
-from dashboard.availability import status_key, UNAVAILABLE
+from dashboard.availability import status_key, UNAVAILABLE, availability_is_known
 
 
 ELIGIBLE = {
@@ -35,6 +35,7 @@ def optimize_replacements(
         and not player.get("data_unavailable", False)
         and player.get("forecast_valid", True)
         and player.get("player_id")
+        and availability_is_known(player.get("availability"))
         and status_key(player.get("availability", "")) not in UNAVAILABLE
     ]
     if not slots or not candidates:
