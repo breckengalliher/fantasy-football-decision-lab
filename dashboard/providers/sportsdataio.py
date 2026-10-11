@@ -398,11 +398,35 @@ def normalize_depth_charts(
     return pd.DataFrame(rows)
 
 
+def repair_missing_game_schedule(board: pd.DataFrame) -> pd.DataFrame:
+    """Fill a missing kickoff only from agreeing current same-game teammates."""
+    result = board.copy()
+    columns = ["gameday", "gametime"]
+    if not {"team", "next_opponent", *columns} <= set(result):
+        return result
+    for _, group in result.groupby(["team", "next_opponent"], dropna=True):
+        complete = group[columns].dropna().drop_duplicates()
+        if len(complete) != 1:
+            continue
+        values = complete.iloc[0]
+        try:
+            datetime.fromisoformat(f'{values.gameday}T{values.gametime}')
+        except (ValueError, TypeError):
+            continue
+        for column in columns:
+            missing = group.index[group[column].isna()]
+            # Do not create a hybrid tuple from a conflicting partial record.
+            other = columns[1] if column == columns[0] else columns[0]
+            safe = missing[(result.loc[missing, other].isna() | result.loc[missing, other].eq(values[other])).to_numpy()]
+            result.loc[safe, column] = values[column]
+    return result
+
+
 def add_depth_chart_promotions(board: pd.DataFrame, context: SportsDataIOContext) -> pd.DataFrame:
     """Add verified offensive role players who have no current-season stat row yet."""
     if context.depth_charts.empty or context.games.empty:
-        return board.copy()
-    result = board.copy()
+        return repair_missing_game_schedule(board)
+    result = repair_missing_game_schedule(board)
     depth = canonical_depth(context.depth_charts)
     depth["team"] = depth["team"].map(canonical_team)
     depth["depth_order_live"] = pd.to_numeric(depth["depth_order_live"], errors="coerce")
@@ -472,6 +496,18 @@ def add_depth_chart_promotions(board: pd.DataFrame, context: SportsDataIOContext
             "is_roster_relevant": True,
             "limited_sample_role": True,
         })
+        # Promotions have no personal stat row, but kickoff belongs to the
+        # team's game. Reuse only one complete, agreeing game tuple from the
+        # current board; never infer a time from provider retrieval timestamps.
+        schedule_columns = ["gameday", "gametime"]
+        if all(column in result for column in schedule_columns):
+            same_game = result.loc[
+                result["team"].map(canonical_team).eq(str(promoted["team"]))
+                & result["next_opponent"].map(canonical_team).eq(str(promoted["provider_opponent"])),
+                schedule_columns,
+            ].dropna().drop_duplicates()
+            if len(same_game) == 1:
+                row.update(same_game.iloc[0].to_dict())
         for stat in (
             "ytd_attempts", "ytd_carries", "ytd_targets", "ytd_passing_yards", "ytd_rushing_yards",
             "ytd_receiving_yards", "ytd_receptions", "ytd_passing_tds", "ytd_rushing_tds", "ytd_receiving_tds",
