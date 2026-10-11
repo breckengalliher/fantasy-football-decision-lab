@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import sys
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -17,12 +19,17 @@ if str(ROOT) not in sys.path:
 from dashboard.headshots import enrich_with_headshots, load_headshot_context
 from dashboard.market_expectations import enrich_with_market
 from dashboard.providers.injuries import enrich_injuries, load_daily_injury_context
-from dashboard.providers.sportsdataio import SportsDataIOClient, add_depth_chart_promotions, enrich_board
+from dashboard.providers.sportsdataio import (
+    SportsDataIOClient, add_depth_chart_promotions, enrich_board,
+    GAME_CONTEXT_COLUMNS, DEPTH_CONTEXT_COLUMNS,
+)
 from dashboard.football_integrity import reconcile_board_identities, guard_forecasts
 from dashboard.reporting import enrich_with_reporting, load_reporting_context
 from dashboard.snapshots import build_personnel_context
 from src.refresh_weekly_snapshot import PROCESSED, api_key, atomic_parquet
 from src.context_ledger import append_context_snapshot, build_context_snapshot
+from src.context_availability import retain_reviewed_availability
+from src.publication import validate_snapshot
 
 
 INJURY_COLUMNS = [
@@ -30,12 +37,7 @@ INJURY_COLUMNS = [
     "injury_body_part_live", "injury_note_live", "injury_updated_live",
     "injury_source_live", "injury_conflict_live", "injury_checked_at",
 ]
-PROVIDER_COLUMNS = [
-    "depth_position_live", "depth_order_live", "provider_opponent",
-    "weather_summary_live", "temperature_live", "wind_live",
-    "betting_total_live", "game_status_live", "game_updated_live",
-    "provider_game_id", "sportsdataio_refreshed_at",
-]
+PROVIDER_COLUMNS = [*DEPTH_CONTEXT_COLUMNS, *GAME_CONTEXT_COLUMNS, "sportsdataio_refreshed_at"]
 MARKET_COLUMNS = [
     "market_receptions", "market_receiving_yards", "market_rushing_yards",
     "market_passing_yards", "market_passing_tds", "market_rushing_receiving_tds",
@@ -62,7 +64,8 @@ def refresh_board(
         if column in board.columns
     ]
     frozen = board.set_index("player_id")[projection_columns].copy()
-    result = board.drop(columns=INJURY_COLUMNS + PROVIDER_COLUMNS + MARKET_COLUMNS, errors="ignore")
+    retain_market = provider_context.market_status.startswith("Temporarily unavailable")
+    result = board.drop(columns=INJURY_COLUMNS + PROVIDER_COLUMNS + ([] if retain_market else MARKET_COLUMNS), errors="ignore")
     if reporting_context is not None:
         result = result.drop(columns=REPORTING_COLUMNS, errors="ignore")
     if headshot_context is not None:
@@ -70,7 +73,8 @@ def refresh_board(
     result = add_depth_chart_promotions(result, provider_context)
     result = enrich_injuries(result, injury_context)
     result = enrich_board(result, provider_context)
-    result = enrich_with_market(result, provider_context.market_lines, passing_td_points)
+    if not retain_market:
+        result = enrich_with_market(result, provider_context.market_lines, passing_td_points)
     if reporting_context is not None:
         result = enrich_with_reporting(result, reporting_context)
     if headshot_context is not None:
@@ -100,34 +104,35 @@ def main() -> None:
     seed = pd.read_parquet(PROCESSED / "live_start_sit_board_4pt_current.parquet")
     reporting_context = load_reporting_context(seed) if args.include_reporting else None
     headshot_context = load_headshot_context() if args.include_headshots else None
-    archived_board = None
+    originals, boards = {}, {}
     for points in (4, 6):
         path = PROCESSED / f"live_start_sit_board_{points}pt_current.parquet"
-        refreshed = refresh_board(
-            pd.read_parquet(path), provider_context, injury_context,
+        originals[points] = pd.read_parquet(path)
+        boards[points] = refresh_board(
+            originals[points], provider_context, injury_context,
             reporting_context, headshot_context,
             passing_td_points=points,
         )
-        atomic_parquet(refreshed, path)
-        if points == 4:
-            atomic_parquet(refreshed, PROCESSED / "live_start_sit_board_current.parquet")
-            archived_board = refreshed
 
     previous_path = PROCESSED / "sportsdataio_depth_current.parquet"
     previous = pd.read_parquet(previous_path) if previous_path.exists() else pd.DataFrame()
     players, teams = build_personnel_context(provider_context.depth_charts, previous)
-    atomic_parquet(provider_context.depth_charts, previous_path)
-    atomic_parquet(players, PROCESSED / "personnel_players_current.parquet")
-    atomic_parquet(teams, PROCESSED / "personnel_teams_current.parquet")
+    pending = {
+        "sportsdataio_depth_current.parquet": provider_context.depth_charts,
+        "sportsdataio_games_current.parquet": provider_context.games,
+        "general_injury_context_current.parquet": injury_context.records,
+        "personnel_players_current.parquet": players,
+        "personnel_teams_current.parquet": teams,
+    }
     if reporting_context is not None:
-        atomic_parquet(reporting_context.records, PROCESSED / "reporting_context_current.parquet")
+        pending["reporting_context_current.parquet"] = reporting_context.records
         metadata.update({
             "reporting_refreshed_at": reporting_context.checked_at,
             "journalism_status": reporting_context.journalism_status,
             "reporter_social_status": reporting_context.social_status,
         })
     if headshot_context is not None:
-        atomic_parquet(headshot_context.records, PROCESSED / "headshot_context_current.parquet")
+        pending["headshot_context_current.parquet"] = headshot_context.records
         metadata.update({
             "headshot_refreshed_at": headshot_context.checked_at,
             "headshot_status": headshot_context.status,
@@ -153,18 +158,38 @@ def main() -> None:
         "sportsdataio_refreshed_at": provider_context.refreshed_at,
         "sportsdataio_status": f"Connected · {provider_context.refreshed_at[:16].replace('T', ' ')} UTC",
         "market_status": provider_context.market_status,
-        "market_refreshed_at": provider_context.refreshed_at,
         "refresh_scope": "Live context only; projections preserved",
     })
-    temporary = metadata_path.with_suffix(".json.tmp")
-    temporary.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
-    temporary.replace(metadata_path)
+    if provider_context.market_status.startswith("Temporarily unavailable"):
+        metadata["market_last_attempted_at"] = provider_context.refreshed_at
+    else:
+        metadata["market_refreshed_at"] = provider_context.refreshed_at
+    boards, metadata = retain_reviewed_availability(boards, originals, metadata)
+    for points, board in boards.items():
+        pending[f"live_start_sit_board_{points}pt_current.parquet"] = board
+    pending["live_start_sit_board_current.parquet"] = boards[4]
+    # Validate the complete staged snapshot before changing working outputs.
+    # Publication itself is one Git ref update after the immutable data commit
+    # and validated manifest commit; this command never moves that pointer.
+    with tempfile.TemporaryDirectory(prefix=".context-stage-", dir=PROCESSED) as temporary_dir:
+        stage = Path(temporary_dir)
+        for name, frame in pending.items():
+            atomic_parquet(frame, stage / name)
+        shutil.copy2(PROCESSED / "live_weekly_current.parquet", stage / "live_weekly_current.parquet")
+        staged_metadata = stage / metadata_path.name
+        staged_metadata.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
+        validation = validate_snapshot(stage)
+        for name in pending:
+            (stage / name).replace(PROCESSED / name)
+        staged_metadata.replace(metadata_path)
     captured_at = metadata["context_refreshed_at"]
     context_snapshot = build_context_snapshot(
-        archived_board, season=season, week=week, captured_at=captured_at
+        boards[4], season=season, week=week, captured_at=captured_at
     )
     append_context_snapshot(context_snapshot, CONTEXT_LEDGER)
-    print(json.dumps({"season": season, "week": week, "scope": metadata["refresh_scope"]}))
+    print(json.dumps({"season": season, "week": week, "scope": metadata["refresh_scope"],
+        "validation": "passed", "record_counts": validation["record_counts"],
+        "context_refreshed_at": metadata["context_refreshed_at"]}))
 
 
 if __name__ == "__main__":

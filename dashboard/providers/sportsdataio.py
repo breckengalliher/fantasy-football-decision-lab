@@ -519,29 +519,58 @@ def add_depth_chart_promotions(board: pd.DataFrame, context: SportsDataIOContext
     return pd.concat([result, pd.DataFrame(additions)], ignore_index=True)
 
 
+# These fields belong to a complete provider context snapshot, not the model or
+# player-prop market feed. Missing current values mean unknown, never a carry of
+# an older game's line under a new retrieval timestamp. The immutable previous
+# publication retains the old observations and their original provenance.
+GAME_CONTEXT_COLUMNS = (
+    "provider_opponent", "weather_summary_live", "temperature_live", "wind_live",
+    "betting_total_live", "spread_line_live", "game_status_live",
+    "game_updated_live", "provider_game_id",
+)
+DEPTH_CONTEXT_COLUMNS = ("depth_position_live", "depth_order_live")
+
+
+def _replace_context(result, incoming, keys, owned):
+    """Replace only explicit owned fields and their legacy pandas artifacts."""
+    obsolete = [column for column in result.columns if any(
+        column == name or (column.startswith(name + "_")
+            and set(column[len(name):].split("_")) <= {"", "x", "y"})
+        for name in owned)]
+    result = result.drop(columns=obsolete)
+    if incoming.empty:
+        for column in owned:
+            result[column] = pd.NA
+        return result
+    if not incoming.columns.is_unique or incoming.duplicated(keys).any():
+        raise ValueError("Provider returned duplicate context keys or columns")
+    # Missing fields in the response explicitly become unknown. Never let a
+    # provider-added column acquire ownership of a forecast or market input.
+    incoming = incoming.reindex(columns=[*keys, *owned])
+    return result.merge(incoming, on=keys, how="left", validate="many_to_one", sort=False)
+
+
 def enrich_board(board: pd.DataFrame, context: SportsDataIOContext) -> pd.DataFrame:
-    """Join provider context without modifying any projection columns."""
-    result = board.copy()
+    """Idempotently replace provider context; preserve model and market fields."""
+    if not board.columns.is_unique:
+        raise ValueError("Player board has duplicate columns")
+    result = board.drop(columns="sportsdataio_refreshed_at", errors="ignore").copy()
     result["player_key"] = result["player"].map(_key)
+    result["team"] = result["team"].map(canonical_team)
+    depth = pd.DataFrame()
     if not context.depth_charts.empty:
-        depth_columns = ["player_key", "team", "depth_position_live", "depth_order_live"]
+        depth_columns = ["player_key", "team", *DEPTH_CONTEXT_COLUMNS]
         depth = canonical_depth(context.depth_charts)[depth_columns].copy()
         depth["team"] = depth["team"].map(canonical_team)
-        result = result.merge(depth, on=["player_key", "team"], how="left")
+    result = _replace_context(result, depth, ["player_key", "team"], DEPTH_CONTEXT_COLUMNS)
+    games = context.games.copy()
     if not context.games.empty:
-        games = context.games.copy()
+        unexpected = set(games.columns) - {"team", *GAME_CONTEXT_COLUMNS}
+        if unexpected:
+            raise ValueError("Unexpected provider game fields: " + ", ".join(sorted(unexpected)))
         games["team"] = games["team"].map(canonical_team)
-        games["provider_opponent"] = games["provider_opponent"].map(canonical_team)
-        # Provider-owned fields are replaced, not repeatedly suffixed. Old
-        # snapshots may already contain _x/_y artifacts from earlier refreshes.
-        owned = set(games.columns) - {"team"}
-        obsolete = [column for column in result.columns
-                    if column in owned or any(column.startswith(name + "_")
-                    and set(column[len(name):].split("_")) <= {"", "x", "y"}
-                    for name in owned)]
-        result = result.drop(columns=obsolete)
-        if games.team.duplicated().any():
-            raise ValueError("Provider returned duplicate team game context")
-        result = result.merge(games, on="team", how="left")
+        if "provider_opponent" in games:
+            games["provider_opponent"] = games["provider_opponent"].map(canonical_team)
+    result = _replace_context(result, games, ["team"], GAME_CONTEXT_COLUMNS)
     result["sportsdataio_refreshed_at"] = context.refreshed_at
     return result.drop(columns="player_key")

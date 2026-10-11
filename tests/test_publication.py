@@ -68,6 +68,17 @@ def test_unchanged_data_has_stable_version(snapshot):
     assert first["revision"] != later["revision"]
 
 
+@pytest.mark.parametrize("artifact", ["spread_line_live_x", "spread_line_live_y_x", "depth_order_live_y"])
+def test_legacy_merge_artifacts_never_advance_last_good_pointer(snapshot, artifact):
+    before = write_manifest(snapshot, "a" * 40)
+    board = pd.read_parquet(snapshot / FILES[0])
+    board[artifact] = -3
+    board.to_parquet(snapshot / FILES[0], index=False)
+    with pytest.raises(ValueError, match="merge artifacts"):
+        write_manifest(snapshot, "b" * 40)
+    assert json.loads((snapshot / "publication_manifest.json").read_text()) == before
+
+
 def test_client_downloads_pinned_revision_and_rejects_hash_mismatch(snapshot):
     manifest = build_manifest(snapshot, "a" * 40)
     urls = []

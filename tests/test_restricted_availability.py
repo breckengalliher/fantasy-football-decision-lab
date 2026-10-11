@@ -10,6 +10,7 @@ from dashboard.pilot_scope import invited_accounts
 from dashboard.publication_client import read_metadata
 from dashboard.availability_evidence import certificate_digest
 from src.availability_certificate import validate_certificate
+from src.context_availability import retain_reviewed_availability
 
 NOW = datetime(2026, 10, 11, 14, tzinfo=timezone.utc)
 
@@ -68,6 +69,42 @@ def test_pending_inactives_do_not_remain_future_after_due(case):
         validate_certificate(cert, boards, meta, NOW+timedelta(hours=2))
     cert["players"][0]["inactives"]["state"] = "due_missing"
     assert validate_certificate(cert, boards, meta, NOW+timedelta(hours=2))["status"] == "restricted"
+
+
+def test_context_refresh_cannot_overwrite_reviewed_unknown_or_source_timestamps(case):
+    cert, original, meta = case
+    originals = {4: original[0], 6: original[1]}
+    incoming = {p: frame.assign(injury_status_live="Available", depth_order_live=1,
+                  game_status_live="InProgress", spread_line_live=-3.) for p, frame in originals.items()}
+    before = deepcopy(meta)
+    boards, after = retain_reviewed_availability(incoming, originals, meta, NOW)
+    assert meta == before
+    assert after["availability_certificate"]["sources"] == before["availability_certificate"]["sources"]
+    assert after["context_refreshed_at"] == before["context_refreshed_at"]
+    for board in boards.values():
+        assert board.iloc[0].injury_status_live == "Unknown"
+        assert pd.isna(board.iloc[0].depth_order_live)
+        assert board.iloc[0].game_status_live == "scheduled"
+        assert board.iloc[0].spread_line_live == -3.
+    assert not after["injury_freshness_verified"] and not after["depth_freshness_verified"]
+
+
+def test_context_refresh_downgrades_due_inactive_claim_without_new_evidence(case):
+    cert, original, meta = case
+    originals = {4: original[0], 6: original[1]}
+    boards, after = retain_reviewed_availability(originals, originals, meta, NOW+timedelta(hours=2))
+    assert after["availability_certificate"]["players"][0]["inactives"]["state"] == "due_missing"
+    assert after["availability_certificate"]["sources"] == cert["sources"]
+    assert validate_certificate(after["availability_certificate"], list(boards.values()), after,
+                                NOW+timedelta(hours=2))["status"] == "restricted"
+
+
+def test_context_refresh_rejects_changed_identity_before_publication(case):
+    cert, original, meta = case
+    originals = {4: original[0], 6: original[1]}
+    incoming = {4: original[0].assign(team="ARI"), 6: original[1]}
+    with pytest.raises(ValueError, match="identity or scope changed"):
+        retain_reviewed_availability(incoming, originals, meta, NOW)
 
 
 @pytest.mark.parametrize("database,allowed", [("https://deburhwrnuqeyexpezzo.supabase.co", True),

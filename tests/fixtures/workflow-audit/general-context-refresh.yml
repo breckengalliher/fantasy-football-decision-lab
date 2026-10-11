@@ -29,14 +29,18 @@ jobs:
           python-version: "3.12"
           cache: pip
           cache-dependency-path: dashboard/requirements.txt
-      - run: pip install -r dashboard/requirements.txt pytest
+      - run: pip install -r dashboard/requirements.txt -c dashboard/requirements.lock pytest
       - name: Require protected provider secret
         shell: bash
         run: test -n "$SPORTSDATAIO_API_KEY"
+      - name: Verify merge and publication safety before retrieval
+        run: python -m pytest tests/test_context_merge_ownership.py tests/test_context_refresh_staging.py tests/test_live_context_refresh.py tests/test_publication.py tests/test_restricted_availability.py tests/test_refresh_reliability.py -q
       - name: Refresh decision context, reporting and roster photos
         run: python src/refresh_live_context.py --include-reporting --include-headshots
       - name: Validate context publication
-        run: python -m pytest tests/test_injury_sources.py tests/test_sportsdataio.py tests/test_reporting.py tests/test_headshots.py tests/test_weekly_refresh.py tests/test_player_pool.py -q
+        run: |
+          python -m pytest tests/test_injury_sources.py tests/test_sportsdataio.py tests/test_reporting.py tests/test_headshots.py tests/test_weekly_refresh.py tests/test_player_pool.py -q
+          python scripts/prepare_publication.py --validate-only
       - name: Publish validated context snapshot
         run: |
           git config user.name "github-actions[bot]"

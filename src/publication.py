@@ -14,6 +14,7 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 from dashboard.football_integrity import guard_forecasts
+from dashboard.providers.sportsdataio import GAME_CONTEXT_COLUMNS, DEPTH_CONTEXT_COLUMNS
 
 FILES = (
     "live_start_sit_board_4pt_current.parquet",
@@ -40,6 +41,10 @@ def validate_snapshot(directory: Path, now: datetime | None = None) -> dict:
         board = pd.read_parquet(directory / filename)
         if board.empty or not board.columns.is_unique:
             raise ValueError("Empty or duplicate-column player board")
+        if any(re.fullmatch(re.escape(name) + r"(?:_[xy])+", column)
+               for name in (*GAME_CONTEXT_COLUMNS, *DEPTH_CONTEXT_COLUMNS)
+               for column in board.columns):
+            raise ValueError("Unresolved provider merge artifacts; publication blocked")
         required = {"player_id", "player", "team", "position", "floor_ppr", "median_ppr", "ceiling_ppr"}
         if not required <= set(board):
             raise ValueError("Incomplete player schema")
