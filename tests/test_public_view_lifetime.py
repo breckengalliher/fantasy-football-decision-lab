@@ -149,7 +149,8 @@ from dashboard.command_center_v2 import _add_player_slot
 st.session_state['cc_add_panel_team_slot'] = True
 pool = pd.DataFrame(dict(player_id=['saved','new','wrong'], player=['Saved','New','Wrong'],
                          team=['A','B','C'],position=['QB','QB','WR'],median_ppr=[25.,20.,30.]))
-_add_player_slot(dict(id='team'), [dict(roster_assignments=[dict(player_id='saved')])],
+_add_player_slot(dict(id='team'), [dict(id='occupied',slot_type='QB',slot_order=0,is_starter=True,
+                 roster_assignments=[dict(id='assignment',player_id='saved',updated_at='v1')])],
                  dict(id='slot',slot_type='QB',slot_order=0), None, pool)
 ''').run()
     assert not app.exception
