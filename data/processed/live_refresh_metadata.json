@@ -3,8 +3,8 @@
   "completed_week": 4,
   "next_week": 5,
   "refreshed_at": "2026-10-11T03:50:15.657496+00:00",
-  "context_refreshed_at": "2026-10-11T03:50:15.657496+00:00",
-  "refresh_scope": "Full weekly projection and context rebuild",
+  "context_refreshed_at": "2026-10-11T15:52:21.692787+00:00",
+  "refresh_scope": "Live context only; projections preserved",
   "eligible_players": 207,
   "player_pool_audit": {
     "eligible_players": 207,
@@ -71,31 +71,31 @@
       ]
     }
   },
-  "injury_records": 493,
+  "injury_records": 502,
   "injury_source_status": {
-    "nflverse": "Connected \u00b7 357 Week 5 records",
-    "sleeper": "Connected \u00b7 292 designated players"
+    "nflverse": "Connected \u00b7 361 Week 5 records",
+    "sleeper": "Connected \u00b7 293 designated players"
   },
-  "injury_refreshed_at": "2026-10-11T03:50:02.131196+00:00",
+  "injury_refreshed_at": "2026-10-11T15:52:10.114064+00:00",
   "injury_source_updated_at": null,
   "injury_official_report_at": null,
   "injury_freshness_verified": false,
-  "depth_source_updated_at": "2026-10-11T02:33:24+00:00",
-  "depth_source_version": "bf1a7e0372b39be60474798b0e39c292063d54aaea9a0427765fbdfe23b761f2",
+  "depth_source_updated_at": "2026-10-11T13:46:01+00:00",
+  "depth_source_version": "4126c345e84059641fcd29753f9aec8895c287ae3b2df0921abca34ca0609b3c",
   "depth_source_version_kind": "sha256-provider-payload",
   "depth_oldest_source_updated_at": "2026-10-05T17:32:24+00:00",
   "depth_timestamp_records": 1904,
   "depth_records": 1904,
   "depth_freshness_verified": false,
-  "sportsdataio_status": "Connected \u00b7 2026-10-11 03:50 UTC",
-  "sportsdataio_refreshed_at": "2026-10-11T03:50:01.224439+00:00",
+  "sportsdataio_status": "Connected \u00b7 2026-10-11 15:52 UTC",
+  "sportsdataio_refreshed_at": "2026-10-11T15:52:09.249520+00:00",
   "market_status": "No player props currently published",
-  "market_refreshed_at": "2026-10-11T03:50:01.224439+00:00",
-  "reporting_refreshed_at": "2026-10-11T03:50:02.202812+00:00",
-  "journalism_status": "Connected \u00b7 5 matched items",
-  "reporter_social_status": "Connected \u00b7 11 reporter posts",
+  "market_refreshed_at": "2026-10-11T15:52:09.249520+00:00",
+  "reporting_refreshed_at": "2026-10-11T15:52:10.152076+00:00",
+  "journalism_status": "Connected \u00b7 4 matched items",
+  "reporter_social_status": "Connected \u00b7 9 reporter posts",
   "reporting_records": 16,
-  "headshot_refreshed_at": "2026-10-11T03:50:12.148845+00:00",
+  "headshot_refreshed_at": "2026-10-11T15:52:20.497776+00:00",
   "headshot_status": "Connected \u00b7 829 active roster photos",
   "headshot_coverage": 0.9420289855072463,
   "depth_chart_players": 1904,
@@ -119,17 +119,16 @@
   },
   "availability_evidence_retrieved_at": "2026-10-11T14:47:01.078500+00:00",
   "availability_coverage": {
-    "evaluated_at": "2026-10-11T14:47:01.078500+00:00",
+    "evaluated_at": "2026-10-11T15:52:21.692787+00:00",
     "eligible_forecast_players": 207,
     "actionable_time_scope_players": 177,
     "classifications": {
-      "PENDING OFFICIAL REPORT": 44,
-      "UNKNOWN": 105,
+      "UNKNOWN": 149,
       "OUTSIDE ACTIONABLE SCOPE": 30,
       "VERIFIED": 28
     },
     "verified_unavailable_statuses": 26,
-    "pending_official_reports": 44,
+    "pending_official_reports": 0,
     "unresolved_identity": 0,
     "missing_dated_roster_evidence": 133,
     "missing_current_game_injury_coverage": 0,
@@ -1266,7 +1265,7 @@
         "team": "SEA",
         "position": "WR",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -1728,13 +1727,14 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -1755,7 +1755,7 @@
         "team": "SF",
         "position": "QB",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -2096,7 +2096,7 @@
         "team": "LV",
         "position": "TE",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -2160,12 +2160,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -2315,14 +2316,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -2393,14 +2395,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -2562,13 +2565,14 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -2718,14 +2722,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -2995,7 +3000,7 @@
         "team": "LV",
         "position": "QB",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -3059,12 +3064,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -3214,13 +3220,14 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -3241,7 +3248,7 @@
         "team": "CIN",
         "position": "QB",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -3305,12 +3312,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -3332,7 +3340,7 @@
         "team": "SF",
         "position": "RB",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -3577,11 +3585,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
-        "blockers": [],
+        "blockers": [
+          "Due game-day inactive report missing"
+        ],
         "resolved": {
           "availability": "Questionable",
           "roster_eligibility": "active",
@@ -3676,11 +3686,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
-        "blockers": [],
+        "blockers": [
+          "Due game-day inactive report missing"
+        ],
         "resolved": {
           "availability": "Questionable",
           "roster_eligibility": "active",
@@ -3948,13 +3960,14 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -4026,13 +4039,14 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -4105,14 +4119,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -4133,7 +4148,7 @@
         "team": "CLE",
         "position": "QB",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -4198,12 +4213,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -4353,14 +4369,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -4588,14 +4605,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -4666,13 +4684,14 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -4693,7 +4712,7 @@
         "team": "SF",
         "position": "TE",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -4785,7 +4804,7 @@
         "team": "CIN",
         "position": "TE",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -4849,12 +4868,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -4939,12 +4959,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately"
+          "No dated roster-as-of evidence; current official observation retained separately",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Out",
@@ -5093,14 +5114,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -5201,7 +5223,7 @@
         "team": "CIN",
         "position": "RB",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -5265,12 +5287,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -5292,7 +5315,7 @@
         "team": "DEN",
         "position": "QB",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -5466,7 +5489,7 @@
         "team": "TEN",
         "position": "QB",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -5529,12 +5552,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -5700,14 +5724,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -5805,11 +5830,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
-        "blockers": [],
+        "blockers": [
+          "Due game-day inactive report missing"
+        ],
         "resolved": {
           "availability": "Questionable",
           "roster_eligibility": "active",
@@ -5878,14 +5905,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -5965,14 +5993,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -6049,13 +6078,14 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -6076,7 +6106,7 @@
         "team": "SF",
         "position": "WR",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -6305,14 +6335,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -6396,13 +6427,14 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked"
+          "Projected role freshness unverified; role-dependent recommendations blocked",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Out",
@@ -6474,14 +6506,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -6502,7 +6535,7 @@
         "team": "CLE",
         "position": "WR",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -6574,12 +6607,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -6653,14 +6687,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -6681,7 +6716,7 @@
         "team": "SEA",
         "position": "QB",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -6841,13 +6876,14 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked"
+          "Projected role freshness unverified; role-dependent recommendations blocked",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Out",
@@ -6869,7 +6905,7 @@
         "team": "DEN",
         "position": "RB",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -7177,7 +7213,7 @@
         "team": "CLE",
         "position": "RB",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -7242,12 +7278,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -7333,13 +7370,14 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -7495,14 +7533,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -7523,7 +7562,7 @@
         "team": "NE",
         "position": "QB",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -7587,12 +7626,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -7614,7 +7654,7 @@
         "team": "CLE",
         "position": "TE",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -7679,12 +7719,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -7874,11 +7915,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
-        "blockers": [],
+        "blockers": [
+          "Due game-day inactive report missing"
+        ],
         "resolved": {
           "availability": "Questionable",
           "roster_eligibility": "active",
@@ -7897,7 +7940,7 @@
         "team": "SF",
         "position": "WR",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -8117,13 +8160,14 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -8362,14 +8406,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -8440,14 +8485,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -8468,7 +8514,7 @@
         "team": "LAC",
         "position": "RB",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -8559,7 +8605,7 @@
         "team": "LV",
         "position": "WR",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -8623,12 +8669,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -8701,13 +8748,14 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -8728,7 +8776,7 @@
         "team": "LAC",
         "position": "QB",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -8882,14 +8930,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -8962,14 +9011,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -9068,7 +9118,7 @@
         "team": "DEN",
         "position": "WR",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -9222,13 +9272,14 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked"
+          "Projected role freshness unverified; role-dependent recommendations blocked",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Out",
@@ -9301,14 +9352,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -9405,11 +9457,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
-        "blockers": [],
+        "blockers": [
+          "Due game-day inactive report missing"
+        ],
         "resolved": {
           "availability": "Questionable",
           "roster_eligibility": "active",
@@ -9428,7 +9482,7 @@
         "team": "NE",
         "position": "WR",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -9492,12 +9546,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -9570,14 +9625,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -9649,14 +9705,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -9727,14 +9784,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -9928,7 +9986,7 @@
         "team": "TEN",
         "position": "WR",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -9991,12 +10049,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -10068,14 +10127,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -10226,14 +10286,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -10254,7 +10315,7 @@
         "team": "LV",
         "position": "TE",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -10318,12 +10379,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -10396,13 +10458,14 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -10567,14 +10630,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -10646,14 +10710,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -10725,14 +10790,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -10809,12 +10875,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
-          "Projected role freshness unverified; role-dependent recommendations blocked"
+          "Projected role freshness unverified; role-dependent recommendations blocked",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "IR",
@@ -10913,7 +10980,7 @@
         "team": "SEA",
         "position": "RB",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -11215,13 +11282,14 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -11242,7 +11310,7 @@
         "team": "TEN",
         "position": "RB",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -11305,12 +11373,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -11473,14 +11542,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -11649,14 +11719,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -11727,14 +11798,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -11902,14 +11974,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -11994,13 +12067,14 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked"
+          "Projected role freshness unverified; role-dependent recommendations blocked",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Out",
@@ -12244,14 +12318,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -12355,11 +12430,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
-        "blockers": [],
+        "blockers": [
+          "Due game-day inactive report missing"
+        ],
         "resolved": {
           "availability": "IR",
           "roster_eligibility": "ir",
@@ -12430,13 +12507,14 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -12457,7 +12535,7 @@
         "team": "LAC",
         "position": "WR",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -12693,14 +12771,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -12722,7 +12801,7 @@
         "team": "LAC",
         "position": "RB",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -12872,14 +12951,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -12964,14 +13044,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -13048,12 +13129,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
-          "Projected role freshness unverified; role-dependent recommendations blocked"
+          "Projected role freshness unverified; role-dependent recommendations blocked",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "IR",
@@ -13202,13 +13284,14 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -13520,14 +13603,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -13685,14 +13769,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -13713,7 +13798,7 @@
         "team": "CLE",
         "position": "WR",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -13785,12 +13870,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -13812,7 +13898,7 @@
         "team": "NE",
         "position": "RB",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -13876,12 +13962,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -14033,13 +14120,14 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -14111,13 +14199,14 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -14195,14 +14284,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -14274,14 +14364,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -14432,14 +14523,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -14460,7 +14552,7 @@
         "team": "NE",
         "position": "TE",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -14524,12 +14616,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -14696,14 +14789,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -14855,13 +14949,14 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -14932,14 +15027,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -15011,14 +15107,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -15121,7 +15218,7 @@
         "team": "SEA",
         "position": "TE",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -15301,7 +15398,7 @@
         "team": "CIN",
         "position": "WR",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -15377,12 +15474,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -15460,12 +15558,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
-          "Projected role freshness unverified; role-dependent recommendations blocked"
+          "Projected role freshness unverified; role-dependent recommendations blocked",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "IR",
@@ -15486,7 +15585,7 @@
         "team": "LAC",
         "position": "TE",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -15569,7 +15668,7 @@
         "team": "SEA",
         "position": "WR",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -16040,7 +16139,7 @@
         "team": "DEN",
         "position": "RB",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -16211,14 +16310,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -16317,12 +16417,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
-          "Projected role freshness unverified; role-dependent recommendations blocked"
+          "Projected role freshness unverified; role-dependent recommendations blocked",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "IR",
@@ -16482,13 +16583,14 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -16662,13 +16764,14 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -16832,14 +16935,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -16860,7 +16964,7 @@
         "team": "LV",
         "position": "RB",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -16924,12 +17028,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -17052,7 +17157,7 @@
         "team": "DEN",
         "position": "TE",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -17143,7 +17248,7 @@
         "team": "DEN",
         "position": "WR",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -17285,14 +17390,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -17493,7 +17599,7 @@
         "team": "TEN",
         "position": "RB",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -17556,12 +17662,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -17659,11 +17766,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
-        "blockers": [],
+        "blockers": [
+          "Due game-day inactive report missing"
+        ],
         "resolved": {
           "availability": "Out",
           "roster_eligibility": "active",
@@ -17735,14 +17844,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -17814,13 +17924,14 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -17902,14 +18013,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -17930,7 +18042,7 @@
         "team": "SF",
         "position": "RB",
         "identity_verified": true,
-        "classification": "PENDING OFFICIAL REPORT",
+        "classification": "UNKNOWN",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -18079,11 +18191,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
-        "blockers": [],
+        "blockers": [
+          "Due game-day inactive report missing"
+        ],
         "resolved": {
           "availability": "IR",
           "roster_eligibility": "ir",
@@ -18155,14 +18269,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -18233,14 +18348,15 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
           "Projected role freshness unverified; role-dependent recommendations blocked",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -18478,13 +18594,14 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -18555,13 +18672,14 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
         "blockers": [
           "No dated roster-as-of evidence; current official observation retained separately",
-          "No verified game availability; not converted from absence of injury designation"
+          "No verified game availability; not converted from absence of injury designation",
+          "Due game-day inactive report missing"
         ],
         "resolved": {
           "availability": "Unknown",
@@ -18806,11 +18924,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
-        "blockers": [],
+        "blockers": [
+          "Due game-day inactive report missing"
+        ],
         "resolved": {
           "availability": "Exempt",
           "roster_eligibility": "exempt",
@@ -18887,11 +19007,13 @@
           "not_listed_does_not_mean_game_active": true
         },
         "inactives": {
-          "state": "not_yet_due",
+          "state": "due_missing",
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
-        "blockers": [],
+        "blockers": [
+          "Due game-day inactive report missing"
+        ],
         "resolved": {
           "availability": "PUP",
           "roster_eligibility": "pup",
@@ -19000,6 +19122,14 @@
           ]
         }
       }
-    ]
+    ],
+    "reevaluated_at": "2026-10-11T15:52:21.692787+00:00"
+  },
+  "general_context_availability_policy": {
+    "reviewed_sources_retained": true,
+    "source_timestamps_advanced": false,
+    "reevaluated_at": "2026-10-11T15:52:21.692787+00:00",
+    "status": "restricted",
+    "provider_context_is_supplemental": true
   }
 }
