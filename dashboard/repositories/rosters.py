@@ -221,9 +221,13 @@ class RosterRepository:
 
     def swap_players(self, first: dict[str, Any], second: dict[str, Any], team_id: str) -> None:
         """One authorized transaction; stale displayed assignments are rejected."""
+        if not first.get("updated_at") or not second.get("updated_at"):
+            raise ValueError("Reload the roster before editing these assignments")
         self.api.rpc(self.access_token, "swap_roster_players", {
             "p_team_id": team_id,
             "p_first_id": str(first["id"]), "p_first_slot": str(first["slot_id"]), "p_first_player": str(first["player_id"]),
             "p_second_id": str(second["id"]), "p_second_slot": str(second["slot_id"]), "p_second_player": str(second["player_id"]),
+            "p_first_updated_at": str(first["updated_at"]),
+            "p_second_updated_at": str(second["updated_at"]),
         })
 

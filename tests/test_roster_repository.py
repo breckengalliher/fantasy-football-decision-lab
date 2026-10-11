@@ -72,10 +72,24 @@ def test_applying_sleeper_lineup_requires_explicit_resolution_rpc():
 def test_swap_is_one_atomic_rpc_and_never_deletes_in_python():
     api = API()
     repo = RosterRepository(api, "access", "user-1")
-    repo.swap_players({"id": "a", "slot_id": "qb", "player_id": "p1"}, {"id": "b", "slot_id": "bench", "player_id": "p2"}, "team-1")
+    repo.swap_players({"id": "a", "slot_id": "qb", "player_id": "p1", "updated_at": "2026-10-10T18:00:00+00:00"}, {"id": "b", "slot_id": "bench", "player_id": "p2", "updated_at": "2026-10-10T18:00:01+00:00"}, "team-1")
     assert len(api.calls) == 1
     assert api.calls[0][1] == "swap_roster_players"
     assert api.calls[0][2]["payload"]["p_first_player"] == "p1"
+    assert api.calls[0][2]["payload"]["p_first_updated_at"] == "2026-10-10T18:00:00+00:00"
+    assert api.calls[0][2]["payload"]["p_second_updated_at"] == "2026-10-10T18:00:01+00:00"
+
+
+@pytest.mark.parametrize("missing_version", [0, 1])
+def test_swap_requires_both_displayed_versions_before_sending(missing_version):
+    api = API()
+    repo = RosterRepository(api, "access", "user-1")
+    rows = [{"id": "a", "slot_id": "qb", "player_id": "p1", "updated_at": "2026-10-10T18:00:00+00:00"},
+            {"id": "b", "slot_id": "bench", "player_id": "p2", "updated_at": "2026-10-10T18:00:01+00:00"}]
+    rows[missing_version].pop("updated_at")
+    with pytest.raises(ValueError, match="Reload"):
+        repo.swap_players(*rows, "team-1")
+    assert not api.calls
 
 
 @pytest.mark.parametrize("operation", ["move", "remove"])

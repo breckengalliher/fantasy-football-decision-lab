@@ -15,20 +15,21 @@ begin
   select r.* into w from public.roster_assignments r join public.roster_slots s on s.id=r.slot_id
     where r.team_id=team and s.slot_type='WR' limit 1;
   if a.id is null or b.id is null or w.id is null then raise exception 'QA roster incomplete'; end if;
-  perform public.swap_roster_players(team,a.id,a.slot_id,a.player_id,b.id,b.slot_id,b.player_id);
+  perform public.swap_roster_players(team,a.id,a.slot_id,a.player_id,b.id,b.slot_id,b.player_id,a.updated_at,b.updated_at);
   if not exists(select 1 from public.roster_assignments where id=a.id and slot_id=b.slot_id and player_id=a.player_id)
      or not exists(select 1 from public.roster_assignments where id=b.id and slot_id=a.slot_id and player_id=b.player_id)
      then raise exception 'Valid swap lost assignments'; end if;
   begin
-    perform public.swap_roster_players(team,a.id,a.slot_id,a.player_id,b.id,b.slot_id,b.player_id);
+    perform public.swap_roster_players(team,a.id,a.slot_id,a.player_id,b.id,b.slot_id,b.player_id,a.updated_at,b.updated_at);
     raise exception 'Stale swap accepted';
   exception when others then
     if sqlerrm = 'Stale swap accepted' then raise; end if;
     if sqlerrm <> 'Roster changed; reload before saving' then raise; end if;
   end;
   select jsonb_agg(to_jsonb(r) order by id) into snapshot from public.roster_assignments r where team_id=team;
+  select * into b from public.roster_assignments where id=b.id;
   begin
-    perform public.swap_roster_players(team,b.id,a.slot_id,b.player_id,w.id,w.slot_id,w.player_id);
+    perform public.swap_roster_players(team,b.id,a.slot_id,b.player_id,w.id,w.slot_id,w.player_id,b.updated_at,w.updated_at);
     raise exception 'Invalid position accepted';
   exception when others then
     if sqlerrm = 'Invalid position accepted' then raise; end if;
