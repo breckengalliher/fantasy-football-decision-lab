@@ -213,6 +213,15 @@ button:focus-visible, summary:focus-visible, a:focus-visible, [tabindex="0"]:foc
 .trust-strip { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:.45rem; margin:.75rem 0; }.trust-strip span { padding:.55rem .65rem; background:#fff; border:1px solid #d7dde0; border-radius:10px; color:#52606a; font-size:.68rem; }.trust-strip b { display:block; color:#285b16; font-size:.65rem; text-transform:uppercase; letter-spacing:.05em; }
 .landing-section { margin:1.35rem 0 .5rem; }.landing-section h2 { color:#002244; margin:.12rem 0; }.landing-player { min-height:155px; padding:1rem; background:#fff; border:1px solid #d7dde0; border-top:4px solid #69be28; border-radius:15px; }.landing-player span { color:#315f20; font-size:.65rem; font-weight:900; }.landing-player h3 { color:#002244; margin:.18rem 0; }.landing-player>strong { display:block; margin-top:.55rem; color:#285b16; font-size:2rem; }.landing-player small,.landing-player p { font-size:.7rem; color:#56636b; }.landing-steps { display:grid; grid-template-columns:repeat(3,1fr); gap:.65rem; margin:1rem 0; }.landing-steps>div { display:grid; grid-template-columns:34px 1fr; gap:.1rem .55rem; padding:.85rem; background:#eaf0f2; border-radius:12px; }.landing-steps b { grid-row:1/3; display:grid; place-items:center; width:34px; height:34px; border-radius:50%; background:#002244; color:#9ee468; }.landing-steps strong { color:#002244; }.landing-steps span { color:#53616b; font-size:.7rem; }
 .mobile-nav { display:none; }
+.st-key-mobile_navigation { display:none; }
+@media(max-width:1024px) {
+  .st-key-mobile_navigation { box-sizing:border-box; position:fixed; z-index:999990; display:block; left:8px; width:calc(100vw - 16px); bottom:8px; padding:.35rem; background:#002244; border:1px solid #69be28; border-radius:16px; box-shadow:0 8px 26px rgba(0,34,68,.28); }
+  .st-key-mobile_navigation [data-testid="stHorizontalBlock"] { flex-flow:row nowrap !important; gap:.35rem !important; }
+  .st-key-mobile_navigation [data-testid="stColumn"] { min-width:0 !important; width:0 !important; flex:1 1 0 !important; }
+  .st-key-mobile_navigation button { width:100%; min-height:44px; padding:.3rem !important; color:#fff !important; background:#002244 !important; border-color:transparent !important; }
+  .st-key-mobile_navigation button p { font-size:.72rem; white-space:nowrap; }
+  .stMainBlockContainer { padding-bottom:5.3rem !important; }
+}
 @media(max-width:1050px) {
   [class*="st-key-comparison_slot_actions_"] [data-testid="stHorizontalBlock"] { flex-direction:column !important; gap:.35rem !important; }
   [class*="st-key-comparison_slot_actions_"] [data-testid="stColumn"] { width:100% !important; min-width:100% !important; flex:1 1 100% !important; }

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import html
 import os
-from urllib.parse import urlencode
 from typing import Any
 
 import pandas as pd
@@ -22,22 +21,21 @@ def _route(view: str, **params: str) -> None:
     st.rerun()
 
 
+def _mobile_route(view: str) -> None:
+    # Native widget callbacks retain the authenticated app session. An anchor
+    # reloads the whole document and repeats provider verification on every tap.
+    st.query_params["view"] = view
+
+
 def mobile_navigation() -> None:
-    context = {key: str(st.query_params[key]) for key in ("team", "qb") if key in st.query_params}
-    def link(view):
-        return html.escape("?" + urlencode({"view": view, **context}), quote=True)
-    extra_links = f'<a href="{link("player-trends")}" target="_self"><b>↗</b><span>Trends</span></a>'
+    routes = [("⌂ Command", "command-center"), ("⇄ Compare", "decision-room"),
+              ("↗ Trends", "player-trends")]
     if os.environ.get('SDL_RESTRICTED_PILOT') != '1':
-        extra_links += (
-        f'<a href="{link("how-it-works")}" target="_self"><b>ⓘ</b><span>Method</span></a>'
-        )
-    st.markdown(
-        '<nav class="mobile-nav" aria-label="Primary">'
-        f'<a href="{link("command-center")}" target="_self"><b>⌂</b><span>Command</span></a>'
-        f'<a href="{link("decision-room")}" target="_self"><b>⇄</b><span>Compare</span></a>'
-        f'{extra_links}'
-        '</nav>', unsafe_allow_html=True,
-    )
+        routes.append(("ⓘ Method", "how-it-works"))
+    with st.container(key="mobile_navigation"):
+        for column, (label, route) in zip(st.columns(len(routes)), routes):
+            column.button(label, key=f"mobile_route_{route}", width="stretch",
+                          on_click=_mobile_route, args=(route,))
 
 
 def render_home(board: pd.DataFrame, metadata: dict[str, Any], season: int) -> None:

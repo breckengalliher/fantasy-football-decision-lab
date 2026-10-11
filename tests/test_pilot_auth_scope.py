@@ -212,15 +212,28 @@ def test_uninvited_remembered_session_dispatches_clear_before_restore(monkeypatc
 
 
 def test_mobile_pilot_navigation_does_not_offer_excluded_routes(monkeypatch):
-    from dashboard import product_experience
+    from streamlit.testing.v1 import AppTest
     monkeypatch.setenv('SDL_RESTRICTED_PILOT', '1')
-    output = []
-    monkeypatch.setattr(product_experience, 'st', SimpleNamespace(
-        query_params={}, markdown=lambda value, **kwargs: output.append(value)))
-    product_experience.mobile_navigation()
-    assert 'command-center' in output[0] and 'decision-room' in output[0]
-    assert 'player-trends' in output[0] and 'how-it-works' not in output[0]
-    assert output[0].count('target="_self"') == 3
+    app = AppTest.from_string('''
+import streamlit as st
+from dashboard.product_experience import mobile_navigation
+if 'visit_marker' not in st.session_state:
+    st.session_state.visit_marker = 'same-visit'
+    st.query_params.update(team='saved-team', qb='6', position='TE', players='Saved selection')
+mobile_navigation()
+st.text(str(st.query_params.get('view', 'command-center')))
+''').run()
+    assert not app.exception
+    assert [b.label for b in app.button] == ['⌂ Command', '⇄ Compare', '↗ Trends']
+    for label, expected in [('⇄ Compare', 'decision-room'), ('↗ Trends', 'player-trends'), ('⌂ Command', 'command-center')]:
+        next(b for b in app.button if b.label == label).click().run()
+        assert not app.exception
+        assert app.text[0].value == expected
+        assert app.session_state['visit_marker'] == 'same-visit'
+        assert app.query_params['team'] == 'saved-team'
+        assert app.query_params['qb'] == '6'
+        assert app.query_params['position'] == 'TE'
+        assert app.query_params['players'] == 'Saved selection'
 
 
 def test_uninvited_successful_login_is_not_persisted(monkeypatch):
