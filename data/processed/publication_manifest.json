@@ -1,19 +1,19 @@
 {
   "schema_version": 1,
-  "version": "3bd8ac0a1318dd6050bcc6b16701cab45adea4ac6eee2d7d1cda379ad9b26a70",
-  "revision": "13d4021b8c001b0d58c2c6267c5632f5c0044abd",
+  "version": "52154db454842d5fe9e53c68eb160ae7741736657075e869ff762a96f9ca2707",
+  "revision": "20909811a5c31c869e7520f43a64f4e9b417212e",
   "season": 2026,
   "week": 5,
   "validation_status": "passed",
-  "validated_at": "2026-10-11T14:51:46.643364+00:00",
-  "prepared_at": "2026-10-11T14:51:46.643364+00:00",
+  "validated_at": "2026-10-11T15:59:23.606274+00:00",
+  "prepared_at": "2026-10-11T15:59:23.606274+00:00",
   "files": {
     "live_start_sit_board_4pt_current.parquet": {
-      "sha256": "899a6b2fef1216c43db16d2babce13d094bec8e53ab43fcfe2a911664531d32b",
+      "sha256": "f5283d37af485cc731073dd3c38e5298b2a78eb4cd679edd5a8d06f73a52cca1",
       "record_count": 478
     },
     "live_start_sit_board_6pt_current.parquet": {
-      "sha256": "191045c715615e90589c7b5eacc946c2f5264319017f1cd8993eb5b52264f9e5",
+      "sha256": "ceb749b80fa9150a92aa85323e04397bc47653be2926a4d15763a143ad6230bd",
       "record_count": 478
     },
     "live_weekly_current.parquet": {
@@ -21,23 +21,23 @@
       "record_count": 4517
     },
     "live_refresh_metadata.json": {
-      "sha256": "ba64264ea91f1e0b1856cd126095780ddf3f1b224dba2379c27b4d80655364fa",
+      "sha256": "783a70cca4cd3d527fec9502f99009691d2766ff8f2e9c7b3e03a347609de3fc",
       "record_count": null
     }
   },
   "projection_source_retrieved_at": "2026-10-11T03:50:15.657496+00:00",
-  "availability_source_retrieved_at": "2026-10-11T03:50:02.131196+00:00",
+  "availability_source_retrieved_at": "2026-10-11T15:52:10.114064+00:00",
   "availability_source_updated_at": null,
-  "depth_source_updated_at": "2026-10-11T02:33:24+00:00",
+  "depth_source_updated_at": "2026-10-11T13:46:01+00:00",
   "source_freshness": {
     "injury": "unverified",
     "depth": "unverified"
   },
   "availability_certification": {
     "status": "restricted",
-    "sha256": "4d8f79d029ad36c37d083621c0d9a64e5a6e2f7b9adaafcf81df5c4fa4865b5e",
+    "sha256": "03973339e47799316c804c6f09ac7f3609c756f1d989da99bd4ac4287fb246ac",
     "player_count": 207,
     "all_availability_actions_blocked": true,
-    "unknown_count": 105
+    "unknown_count": 149
   }
 }
