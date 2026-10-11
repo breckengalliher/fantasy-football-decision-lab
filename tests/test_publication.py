@@ -132,3 +132,31 @@ def test_invalid_baseline_can_only_publish_as_explicit_nonactionable_quarantine(
     board.to_parquet(snapshot / FILES[0], index=False)
     with pytest.raises(ValueError, match="validation failed"):
         write_manifest(snapshot, "b" * 40)
+
+
+@pytest.mark.parametrize("flag", ["injury_freshness_verified", "depth_freshness_verified"])
+def test_unproven_freshness_never_advances_last_good_pointer(snapshot, flag):
+    before = write_manifest(snapshot, "a" * 40)
+    metadata = json.loads((snapshot / FILES[-1]).read_text())
+    metadata[flag] = True
+    (snapshot / FILES[-1]).write_text(json.dumps(metadata))
+    with pytest.raises(ValueError, match="Availability certificate"):
+        write_manifest(snapshot, "b" * 40)
+    assert json.loads((snapshot / "publication_manifest.json").read_text()) == before
+
+
+def test_interruption_before_atomic_replace_retains_last_good_pointer(snapshot, monkeypatch):
+    before = write_manifest(snapshot, "a" * 40)
+    original = Path.replace
+    def interrupted(path, target):
+        if path.name == "publication_manifest.json.tmp":
+            raise OSError("simulated interrupted publication")
+        return original(path, target)
+    monkeypatch.setattr(Path, "replace", interrupted)
+    with pytest.raises(OSError, match="interrupted"):
+        write_manifest(snapshot, "b" * 40)
+    assert json.loads((snapshot / "publication_manifest.json").read_text()) == before
+    monkeypatch.setattr(Path, "replace", original)
+    retry = write_manifest(snapshot, "b" * 40)
+    assert retry["version"] == before["version"]
+    assert retry["availability_source_updated_at"] == before["availability_source_updated_at"]

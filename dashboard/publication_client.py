@@ -57,6 +57,19 @@ def read_metadata(session, base_url: str) -> dict:
     metadata = json.loads(verified_payload(session, base_url, manifest, "live_refresh_metadata.json"))
     if metadata.get("season") != manifest.get("season") or metadata.get("next_week") != manifest.get("week"):
         raise ValueError("Metadata does not match publication")
+    if metadata.get("injury_freshness_verified") is True or metadata.get("depth_freshness_verified") is True:
+        from src.availability_certificate import certificate_digest
+        from dashboard.availability_evidence import timestamp
+        from datetime import datetime, timezone
+        certification = manifest.get("availability_certification") or {}
+        if (certification.get("status") != "verified"
+                or certification.get("sha256") != certificate_digest(metadata.get("availability_certificate"))):
+            raise ValueError("Availability freshness lacks a bound certificate")
+        until = timestamp(certification.get("valid_until"))
+        if not until or until <= datetime.now(timezone.utc):
+            metadata["injury_freshness_verified"] = False
+            metadata["depth_freshness_verified"] = False
+            metadata["availability_certification_status"] = "expired"
     metadata["_publication"] = manifest
     metadata["publication_status"] = "validated"
     return metadata

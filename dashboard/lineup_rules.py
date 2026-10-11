@@ -41,6 +41,11 @@ def _utc(value: Any) -> datetime | None:
 def critical_data_fresh(metadata: dict[str, Any], now: datetime, *, projection_hours: int = 24, context_hours: int = 4) -> bool:
     projection = _utc(metadata.get("refreshed_at"))
     context = _utc(metadata.get("context_refreshed_at") or metadata.get("injury_refreshed_at"))
+    certificate = (metadata.get("_publication") or {}).get("availability_certification") or {}
+    if metadata.get("availability_certificate") is not None:
+        until = _utc(certificate.get("valid_until"))
+        if certificate.get("status") != "verified" or not until or now.astimezone(timezone.utc) >= until:
+            return False  # Expire cached metadata at the next report's due time too.
     return bool(
         projection and context
         # Retrieval timestamps alone cannot establish report freshness.

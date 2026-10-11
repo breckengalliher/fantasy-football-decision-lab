@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 import pandas as pd
 
-UNAVAILABLE = {'out','inactive','ir','injured reserve','pup','suspended'}
+UNAVAILABLE = {'out','inactive','ir','injured reserve','pup','nfi','reserve','suspended','exempt'}
 KNOWN_AVAILABLE = {'available', 'healthy'}
 KNOWN_UNCERTAIN = {'questionable', 'doubtful'}
 def status_key(value):

@@ -27,7 +27,7 @@ def digest(payload: bytes) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
-def validate_snapshot(directory: Path) -> dict:
+def validate_snapshot(directory: Path, now: datetime | None = None) -> dict:
     metadata = json.loads((directory / FILES[-1]).read_text(encoding="utf-8"))
     if not metadata.get("season") or not metadata.get("next_week"):
         raise ValueError("Missing season/week")
@@ -71,13 +71,19 @@ def validate_snapshot(directory: Path) -> dict:
     if weekly.empty:
         raise ValueError("Empty historical statistics")
     counts[FILES[2]] = len(weekly)
-    return {"metadata": metadata, "record_counts": counts}
+    certification = None
+    if (metadata.get("injury_freshness_verified") is True
+            or metadata.get("depth_freshness_verified") is True
+            or metadata.get("availability_certificate") is not None):
+        from src.availability_certificate import validate_certificate
+        certification = validate_certificate(metadata.get("availability_certificate"), boards, metadata, now)
+    return {"metadata": metadata, "record_counts": counts, "availability_certification": certification}
 
 
 def build_manifest(directory: Path, revision: str, now: datetime | None = None) -> dict:
     if not re.fullmatch(r"[0-9a-f]{40}", revision):
         raise ValueError("Publication must reference a full immutable Git commit")
-    validation = validate_snapshot(directory)
+    validation = validate_snapshot(directory, now)
     metadata = validation["metadata"]
     timestamp = (now or datetime.now(timezone.utc)).isoformat()
     files = {filename: {"sha256": digest((directory / filename).read_bytes()),
@@ -98,6 +104,7 @@ def build_manifest(directory: Path, revision: str, now: datetime | None = None) 
             "injury": "verified" if metadata.get("injury_freshness_verified") is True else "unverified",
             "depth": "verified" if metadata.get("depth_freshness_verified") is True else "unverified",
         },
+        "availability_certification": validation["availability_certification"],
     }
 
 
