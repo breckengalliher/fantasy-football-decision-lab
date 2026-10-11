@@ -19,7 +19,7 @@ from dashboard.presentation import fantasy_game_log, opponent_position_rank, opp
 from dashboard.public_display_cache import public_display_version, display_ranks, display_game_log, roster_pool
 from dashboard.replacement_optimizer import optimize_replacements
 from dashboard.repositories.rosters import RosterRepository
-from dashboard.roster_edit_guard import edit_is_current, clear_team_edit_state, reject_changed_editors
+from dashboard.roster_edit_guard import edit_is_current, clear_team_edit_state, reject_changed_editors, roster_revision
 from dashboard.sleeper_client import SleeperClient, SleeperError, map_player_records, map_players, passing_td_points, roster_shape
 from dashboard.sleeper_sync import build_snapshot, detect_changes, external_name, local_starter_ids
 from dashboard.supabase_api import SupabaseAPI, SupabaseAPIError
@@ -407,13 +407,25 @@ def _compact_roster_editor(team: dict[str, Any], all_roster: list[dict[str, Any]
         candidates = pool[pool["position"].astype(str).isin(ELIGIBLE[slot_type]) & ~pool["player_id"].astype(str).isin(used)].sort_values("median_ppr", ascending=False)
         options = candidates["player_id"].astype(str).tolist()
         rows = {str(row["player_id"]): row.to_dict() for _, row in candidates.iterrows()}
-        chosen = left.selectbox(label, options, index=None, placeholder=f"Search and add an eligible {slot_type}…", format_func=lambda pid: f"{rows[pid]['player']} · {rows[pid]['team']} {rows[pid]['position']} · {float(rows[pid]['median_ppr']):.1f} PPR", key=f"cc_compact_pick_{team['id']}_{slot_id}")
+        pick_key = f"cc_compact_pick_{team['id']}_{slot_id}"
+        revision_key = f"cc_add_revision_{team['id']}_{slot_id}"
+        chosen = left.selectbox(label, options, index=None, placeholder=f"Search and add an eligible {slot_type}…", format_func=lambda pid: f"{rows[pid]['player']} · {rows[pid]['team']} {rows[pid]['position']} · {float(rows[pid]['median_ppr']):.1f} PPR", key=pick_key,
+            on_change=_remember_add_selection, args=(pick_key, revision_key, roster_revision(all_roster)))
         if right.button("Add", key=f"cc_compact_add_{team['id']}_{slot_id}", disabled=chosen is None, width="stretch"):
             try:
                 repo.assign_player(str(team["id"]), slot_id, str(chosen))
                 st.session_state["cc_save_notice"] = {"team_id": str(team["id"])}
                 st.rerun()
             except SupabaseAPIError as error: st.error(str(error))
+
+
+def _remember_add_selection(pick_key: str, revision_key: str, displayed_revision: tuple) -> None:
+    # The callback runs before the next database read. Bind the selection to
+    # the roster actually displayed, not the newer roster fetched on submit.
+    if st.session_state.get(pick_key) is None:
+        st.session_state.pop(revision_key, None)
+    else:
+        st.session_state[revision_key] = displayed_revision
 
 
 def _manage_player(team: dict[str, Any], roster: list[dict[str, Any]], source_slot: dict[str, Any], current: dict[str, Any], repo: RosterRepository, pool: pd.DataFrame, lookup: dict[str, dict[str, Any]] | None = None) -> None:

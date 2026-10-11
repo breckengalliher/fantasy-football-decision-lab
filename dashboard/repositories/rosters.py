@@ -187,8 +187,10 @@ class RosterRepository:
             self.api.table(self.access_token, "roster_slots", method="POST", prefer="return=minimal", payload=additions)
 
     def assign_player(self, team_id: str, slot_id: str, player_id: str) -> dict[str, Any]:
+        # Insert only. The unique slot constraint rejects a concurrent occupant;
+        # a retried Add must never replace an acknowledged assignment.
         rows = self.api.table(
-            self.access_token, "roster_assignments", method="POST", prefer="return=representation,resolution=merge-duplicates",
+            self.access_token, "roster_assignments", method="POST", prefer="return=representation",
             payload={"owner_id": self.user_id, "team_id": team_id, "slot_id": slot_id, "player_id": player_id},
         )
         return rows[0]

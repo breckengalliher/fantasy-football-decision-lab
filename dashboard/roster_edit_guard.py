@@ -39,6 +39,7 @@ def clear_team_edit_state(state: MutableMapping[str, Any], team_id: str) -> None
             slot = key[len(add_prefix):]
             state[f"cc_add_panel_{team_id}_{slot}"] = False
             state.pop(f"cc_slot_pick_{team_id}_{slot}", None)
+            state.pop(f"cc_compact_pick_{team_id}_{slot}", None)
             state.pop(key, None)
         elif key.startswith("cc_confirm_swap_"):
             state.pop(key, None)
