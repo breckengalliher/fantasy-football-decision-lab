@@ -111,6 +111,9 @@ st.markdown(
 [data-testid="stHeader"] { height:0 !important; min-height:0 !important; background:transparent !important; }
 [data-testid="stToolbar"], [data-testid="stAppToolbar"], [data-testid="stAppDeployButton"], [data-testid="stDecoration"], #MainMenu { display:none !important; visibility:hidden !important; }
 [data-testid="stSidebarCollapsedControl"] { position:fixed !important; top:.45rem !important; left:.45rem !important; z-index:1000001 !important; pointer-events:auto !important; }
+/* Current Streamlit places the collapsed-sidebar control inside its toolbar. */
+[data-testid="stToolbar"]:has([data-testid="stExpandSidebarButton"]) { display:flex !important; visibility:visible !important; }
+[data-testid="stExpandSidebarButton"] { position:fixed !important; top:.45rem !important; left:.45rem !important; z-index:1000001 !important; visibility:visible !important; pointer-events:auto !important; }
 .sr-only { position:absolute !important; width:1px !important; height:1px !important; padding:0 !important; margin:-1px !important; overflow:hidden !important; clip:rect(0,0,0,0) !important; white-space:nowrap !important; border:0 !important; }
 button:focus-visible, summary:focus-visible, a:focus-visible, [tabindex="0"]:focus-visible { outline:3px solid #4b9fea !important; outline-offset:3px !important; border-radius:6px; }
 [data-testid="stMain"] [data-testid="stCaptionContainer"] { color:var(--ink); }
