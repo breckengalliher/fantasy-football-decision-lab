@@ -117,27 +117,27 @@
     "4": "live_start_sit_board_4pt_current.parquet",
     "6": "live_start_sit_board_6pt_current.parquet"
   },
-  "availability_evidence_retrieved_at": "2026-10-11T14:26:12.342301+00:00",
+  "availability_evidence_retrieved_at": "2026-10-11T14:47:01.078500+00:00",
   "availability_coverage": {
-    "evaluated_at": "2026-10-11T14:26:12.342301+00:00",
+    "evaluated_at": "2026-10-11T14:47:01.078500+00:00",
     "eligible_forecast_players": 207,
     "actionable_time_scope_players": 177,
     "classifications": {
-      "PENDING OFFICIAL REPORT": 39,
-      "UNKNOWN": 111,
+      "PENDING OFFICIAL REPORT": 44,
+      "UNKNOWN": 105,
       "OUTSIDE ACTIONABLE SCOPE": 30,
-      "VERIFIED": 27
+      "VERIFIED": 28
     },
     "verified_unavailable_statuses": 26,
-    "pending_official_reports": 39,
+    "pending_official_reports": 44,
     "unresolved_identity": 0,
-    "missing_dated_roster_evidence": 139,
+    "missing_dated_roster_evidence": 133,
     "missing_current_game_injury_coverage": 0,
-    "missing_current_depth_date": 121,
+    "missing_current_depth_date": 120,
     "blocked_from_actionable_recommendations": 207,
     "publication_policy": "all_availability_actions_blocked",
     "fully_verified_availability": false,
-    "unknown_status_rows": 176
+    "unknown_status_rows": 175
   },
   "availability_certificate": {
     "schema_version": 2,
@@ -279,6 +279,13 @@
         "sha256": "49e91f94d6c94d96175523bd847380996e74bdd56c1bf8f1d2e8cc35b551adfc",
         "authority": "official",
         "retrieved_at": "2026-10-11T14:25:06.975609+00:00",
+        "timestamp_basis": "undated_observation"
+      },
+      "ten_hou_week5_notes": {
+        "url": "https://static.clubs.nfl.com/image/upload/titans/cj6tq4o1dl1mu1nryrma",
+        "sha256": "c3b606b7477f4dd23d4d6c8c3926120cad6169bdc99298a8e26c94626419e87d",
+        "authority": "official",
+        "retrieved_at": "2026-10-11T14:39:17.318932+00:00",
         "timestamp_basis": "undated_observation"
       },
       "ne_dated_roster": {
@@ -944,6 +951,40 @@
         "effective_date": "2026-08-30",
         "report_timezone": "America/New_York",
         "claim": "Dated reserve designation; current NFL roster corroborates"
+      },
+      "ten_hou_week5_notes_roster": {
+        "url": "https://static.clubs.nfl.com/image/upload/titans/cj6tq4o1dl1mu1nryrma",
+        "sha256": "c3b606b7477f4dd23d4d6c8c3926120cad6169bdc99298a8e26c94626419e87d",
+        "authority": "official",
+        "retrieved_at": "2026-10-11T14:39:17.318932+00:00",
+        "season": 2026,
+        "week": 5,
+        "publisher": "TEN official club media",
+        "pdf_modified_at": "2026-10-06T13:41:37-05:00",
+        "http_last_modified": "Tue, 06 Oct 2026 19:54:51 GMT",
+        "limitation": "Roster membership as of weekly document; not health, current activation, or an individual transaction effective date.",
+        "page": 106,
+        "claim": "Active roster membership",
+        "timestamp_basis": "published",
+        "report_at": "2026-10-06T13:41:37-05:00",
+        "report_time_description": "Official current-game PDF modification timestamp; corroborated by same/next-day origin Last-Modified. Document publication basis, not player transaction time."
+      },
+      "ten_hou_week5_notes_depth": {
+        "url": "https://static.clubs.nfl.com/image/upload/titans/cj6tq4o1dl1mu1nryrma",
+        "sha256": "c3b606b7477f4dd23d4d6c8c3926120cad6169bdc99298a8e26c94626419e87d",
+        "authority": "official",
+        "retrieved_at": "2026-10-11T14:39:17.318932+00:00",
+        "season": 2026,
+        "week": 5,
+        "publisher": "TEN official club media",
+        "pdf_modified_at": "2026-10-06T13:41:37-05:00",
+        "http_last_modified": "Tue, 06 Oct 2026 19:54:51 GMT",
+        "limitation": "Roster membership as of weekly document; not health, current activation, or an individual transaction effective date.",
+        "page": 97,
+        "claim": "Club unofficial projected role; no confirmed starter claim",
+        "timestamp_basis": "effective",
+        "effective_date": "2026-10-05",
+        "report_timezone": "America/Chicago"
       },
       "sea_week5_notes_roster": {
         "url": "https://media.49ers.1rmg.com/wp-content/uploads/2026/04/06134506/Seattle-Seahawks-vs.-San-Francisco-49ers-Weekly-Release.pdf",
@@ -5425,7 +5466,7 @@
         "team": "TEN",
         "position": "QB",
         "identity_verified": true,
-        "classification": "UNKNOWN",
+        "classification": "PENDING OFFICIAL REPORT",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -5440,9 +5481,22 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "published",
+            "report_at": "2026-10-06T13:41:37-05:00",
+            "player_id": "00-0040676",
+            "team": "TEN",
+            "game_id": "aa94b527-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "ten_hou_week5_notes_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_tennessee-titans",
+          "source_id": "ten_hou_week5_notes_depth",
           "effective_date": "2026-10-05",
           "date_evidence": "as of 10/5/26",
           "classification": "club_unofficial",
@@ -5457,13 +5511,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": null
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_tennessee-titans",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "ten_hou_week5_notes_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -5479,20 +5534,20 @@
           "source_id": null
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "ten_hou_week5_notes_roster"
+          ]
         }
       },
       {
@@ -7744,8 +7799,8 @@
         "team": "TEN",
         "position": "WR",
         "identity_verified": true,
-        "classification": "UNKNOWN",
-        "availability": "Unknown",
+        "classification": "VERIFIED",
+        "availability": "Questionable",
         "conflicts": [],
         "recommendation_allowed": false,
         "game": {
@@ -7763,6 +7818,18 @@
           {
             "authority": "official",
             "timestamp_basis": "published",
+            "report_at": "2026-10-06T13:41:37-05:00",
+            "player_id": "00-0041438",
+            "team": "TEN",
+            "game_id": "aa94b527-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "ten_hou_week5_notes_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          },
+          {
+            "authority": "official",
+            "timestamp_basis": "published",
             "report_at": "2026-10-10T21:23:47.29Z",
             "player_id": "00-0041438",
             "team": "TEN",
@@ -7774,7 +7841,7 @@
           }
         ],
         "depth": {
-          "source_id": "depth_tennessee-titans",
+          "source_id": "ten_hou_week5_notes_depth",
           "effective_date": "2026-10-05",
           "date_evidence": "as of 10/5/26",
           "classification": "club_unofficial",
@@ -7789,13 +7856,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": null
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_tennessee-titans",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "ten_hou_week5_notes_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -7810,21 +7878,16 @@
           "due_at": "2026-10-11T15:30:00+00:00",
           "source_id": null
         },
-        "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
-          "No verified game availability; not converted from absence of injury designation"
-        ],
+        "blockers": [],
         "resolved": {
-          "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "availability": "Questionable",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
-          "recommendation_allowed": false,
-          "restrictions": [
-            "roster eligibility unverified",
-            "verify availability"
-          ],
+          "recommendation_allowed": true,
+          "restrictions": [],
           "source_ids": [
-            "injuries"
+            "injuries",
+            "ten_hou_week5_notes_roster"
           ]
         }
       },
@@ -9865,7 +9928,7 @@
         "team": "TEN",
         "position": "WR",
         "identity_verified": true,
-        "classification": "UNKNOWN",
+        "classification": "PENDING OFFICIAL REPORT",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -9880,9 +9943,22 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "published",
+            "report_at": "2026-10-06T13:41:37-05:00",
+            "player_id": "00-0038117",
+            "team": "TEN",
+            "game_id": "aa94b527-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "ten_hou_week5_notes_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_tennessee-titans",
+          "source_id": "ten_hou_week5_notes_depth",
           "effective_date": "2026-10-05",
           "date_evidence": "as of 10/5/26",
           "classification": "club_unofficial",
@@ -9897,13 +9973,14 @@
               ""
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": null
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_tennessee-titans",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "ten_hou_week5_notes_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -9919,20 +9996,20 @@
           "source_id": null
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "ten_hou_week5_notes_roster"
+          ]
         }
       },
       {
@@ -11165,7 +11242,7 @@
         "team": "TEN",
         "position": "RB",
         "identity_verified": true,
-        "classification": "UNKNOWN",
+        "classification": "PENDING OFFICIAL REPORT",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -11180,9 +11257,22 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "published",
+            "report_at": "2026-10-06T13:41:37-05:00",
+            "player_id": "00-0035261",
+            "team": "TEN",
+            "game_id": "aa94b527-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "ten_hou_week5_notes_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_tennessee-titans",
+          "source_id": "ten_hou_week5_notes_depth",
           "effective_date": "2026-10-05",
           "date_evidence": "as of 10/5/26",
           "classification": "club_unofficial",
@@ -11197,13 +11287,14 @@
               "Julius Chestnut Michael Carter"
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": null
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_tennessee-titans",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "ten_hou_week5_notes_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -11219,20 +11310,20 @@
           "source_id": null
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "ten_hou_week5_notes_roster"
+          ]
         }
       },
       {
@@ -15395,7 +15486,7 @@
         "team": "LAC",
         "position": "TE",
         "identity_verified": true,
-        "classification": "UNKNOWN",
+        "classification": "PENDING OFFICIAL REPORT",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -15410,23 +15501,37 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "published",
+            "report_at": "2026-10-06T13:53:30-07:00",
+            "player_id": "00-0040189",
+            "team": "LAC",
+            "game_id": "aa94bc51-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "lac_week5_notes_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_los-angeles-chargers",
+          "source_id": "lac_week5_notes_depth",
           "effective_date": null,
           "date_evidence": null,
           "classification": "club_unofficial",
           "confirmed_starters": false,
-          "current_week_date_verified": false,
+          "current_week_date_verified": true,
           "date_precision": "unknown",
           "matched_chart_rows": [],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": "2026-10-06T13:53:30-07:00"
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_los-angeles-chargers",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "lac_week5_notes_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -15442,21 +15547,20 @@
           "source_id": null
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
-          "Projected role freshness unverified; role-dependent recommendations blocked",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "lac_week5_notes_roster"
+          ]
         }
       },
       {
@@ -17389,7 +17493,7 @@
         "team": "TEN",
         "position": "RB",
         "identity_verified": true,
-        "classification": "UNKNOWN",
+        "classification": "PENDING OFFICIAL REPORT",
         "availability": "Unknown",
         "conflicts": [],
         "recommendation_allowed": false,
@@ -17404,9 +17508,22 @@
           "state_source_id": "schedule",
           "state_limitation": "Schedule payload is not live; kickoff clock locks started games"
         },
-        "events": [],
+        "events": [
+          {
+            "authority": "official",
+            "timestamp_basis": "published",
+            "report_at": "2026-10-06T13:41:37-05:00",
+            "player_id": "00-0039032",
+            "team": "TEN",
+            "game_id": "aa94b527-4feb-11f1-abca-2c54536568a9",
+            "domain": "roster",
+            "status": "active",
+            "source_id": "ten_hou_week5_notes_roster",
+            "valid_until": "2026-10-14T04:00:00+00:00"
+          }
+        ],
         "depth": {
-          "source_id": "depth_tennessee-titans",
+          "source_id": "ten_hou_week5_notes_depth",
           "effective_date": "2026-10-05",
           "date_evidence": "as of 10/5/26",
           "classification": "club_unofficial",
@@ -17421,13 +17538,14 @@
               "Julius Chestnut Michael Carter"
             ]
           ],
-          "confirmed_starter": false
+          "confirmed_starter": false,
+          "report_at": null
         },
         "roster_claim": {
           "observed_status": "ACT",
           "observation_source_id": "roster_tennessee-titans",
-          "as_of_verified": false,
-          "dated_source_id": null,
+          "as_of_verified": true,
+          "dated_source_id": "ten_hou_week5_notes_roster",
           "individual_transaction_date_required": false
         },
         "injury_coverage": {
@@ -17443,20 +17561,20 @@
           "source_id": null
         },
         "blockers": [
-          "No dated roster-as-of evidence; current official observation retained separately",
           "No verified game availability; not converted from absence of injury designation"
         ],
         "resolved": {
           "availability": "Unknown",
-          "roster_eligibility": "unknown",
+          "roster_eligibility": "active",
           "game_state": "scheduled",
           "recommendation_allowed": false,
           "restrictions": [
-            "roster eligibility unverified",
             "injury/game availability unverified",
             "verify availability"
           ],
-          "source_ids": []
+          "source_ids": [
+            "ten_hou_week5_notes_roster"
+          ]
         }
       },
       {
