@@ -14,6 +14,7 @@ work
 data/raw
 data/processed/*
 !data/processed/live_refresh_metadata.json
+!data/processed/publication_manifest.json
 !data/processed/live_start_sit_board_4pt_current.parquet
 !data/processed/live_start_sit_board_6pt_current.parquet
 !data/processed/live_start_sit_board_current.parquet

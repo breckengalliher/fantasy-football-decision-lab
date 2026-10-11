@@ -1,34 +1,34 @@
 {
   "schema_version": 1,
-  "version": "95b7ff59f89ff5945069eb8a41185d4b6c2034a17d8de42d0c087f4e4e1a0c6d",
-  "revision": "2fa081f069a0a57adb69b2cf75b826330ca1d5f6",
+  "version": "bcb8479e873f18ff82f3f8d599aeb0f5c737e8c04e9818ce19d3389d9c4293fa",
+  "revision": "d1534ddbcfe6c60f5daeb039231106e26df4f68f",
   "season": 2026,
   "week": 5,
   "validation_status": "passed",
-  "validated_at": "2026-10-09T20:39:05.566862+00:00",
-  "prepared_at": "2026-10-09T20:39:05.566862+00:00",
+  "validated_at": "2026-10-11T03:56:20.985143+00:00",
+  "prepared_at": "2026-10-11T03:56:20.985143+00:00",
   "files": {
     "live_start_sit_board_4pt_current.parquet": {
-      "sha256": "12a55490d20c311d836d3dfa3fa7660c3745b4b49b03b2ca7f4982a5623d81ae",
+      "sha256": "e1f9cf3fffe1236438de3f2a30f8aaa542fed4394d6fac28040864d7278a36b3",
       "record_count": 478
     },
     "live_start_sit_board_6pt_current.parquet": {
-      "sha256": "1333b05dc94f03c77441ed545cdc1550cb0fb5c4378962bd6b45a67359f6192e",
+      "sha256": "72956f8b8f1a3cf9eb931be4f0af6918ba1c733c6196a1e6b5587d8f8861b270",
       "record_count": 478
     },
     "live_weekly_current.parquet": {
-      "sha256": "982a152c7e2fc9d831f56645232521711ac747792915b65a3db05def9e5240c6",
-      "record_count": 4449
+      "sha256": "2c7067da61d4f8cd8157e2edf14809bba88b90bf074f4b76dd1017d5235d1f6b",
+      "record_count": 4517
     },
     "live_refresh_metadata.json": {
-      "sha256": "0d525a69212d585a3a986568d9691c17556a991f0f723c2961cb9c465a1c0fef",
+      "sha256": "ff386eac589c2390a9601d2cbb7ac039d00fd6c368b896946e5c72a6b9bc2695",
       "record_count": null
     }
   },
-  "projection_source_retrieved_at": "2026-10-08T23:31:43.711159+00:00",
-  "availability_source_retrieved_at": "2026-10-09T20:27:59.066479+00:00",
+  "projection_source_retrieved_at": "2026-10-11T03:50:15.657496+00:00",
+  "availability_source_retrieved_at": "2026-10-11T03:50:02.131196+00:00",
   "availability_source_updated_at": null,
-  "depth_source_updated_at": null,
+  "depth_source_updated_at": "2026-10-11T02:33:24+00:00",
   "source_freshness": {
     "injury": "unverified",
     "depth": "unverified"
