@@ -16,8 +16,8 @@ CALIBRATED_INTERVAL_OFFSETS = {
     "WR": (-6.07, 4.95),
     "TE": (-4.15, 4.31),
 }
-QB_RANGE_CALIBRATION_PATH = Path(__file__).resolve().parents[1] / "reports" / "qb-model-calibration.json"
-POSITION_RANGE_CALIBRATION_PATH = Path(__file__).resolve().parents[1] / "reports" / "projection-range-calibration.json"
+QB_RANGE_CALIBRATION_PATH = Path(__file__).resolve().parent / "assets" / "calibration" / "qb-model-calibration.json"
+POSITION_RANGE_CALIBRATION_PATH = Path(__file__).resolve().parent / "assets" / "calibration" / "projection-range-calibration.json"
 PLAYER_POOL_CAPS = {"QB": 32, "RB": 64, "WR": 80, "TE": 36}
 
 # Policy lock: observed touchdown scoring always receives the approved strong
@@ -603,6 +603,8 @@ def apply_qb_scoring_mode(
     qbs = weekly.loc[weekly["position"].eq("QB")].copy()
     if qbs.empty:
         return result
+    if not QB_RANGE_CALIBRATION_PATH.is_file():
+        raise RuntimeError("Approved calibration missing: qb-model-calibration.json; refresh blocked")
     id_column = "player_id" if "player_id" in qbs else "player_display_name"
     qbs["passing_tds"] = pd.to_numeric(qbs.get("passing_tds", 0), errors="coerce").fillna(0)
     qbs["qb_points"] = _position_fantasy_points(qbs) + (passing_td_points - 4) * qbs["passing_tds"]
@@ -672,6 +674,9 @@ def apply_approved_projection_model(
     passing_td_points: int = 4,
 ) -> pd.DataFrame:
     """Apply the approved round-three median and calibrated outcome ranges live."""
+    for required in (QB_RANGE_CALIBRATION_PATH, POSITION_RANGE_CALIBRATION_PATH):
+        if not required.is_file():
+            raise RuntimeError(f"Approved calibration missing: {required.name}; refresh blocked")
     if SCORING_ROLE_TD_EXCEPTION_ENABLED:
         raise RuntimeError(
             "Scoring-role touchdown exception is policy-locked until reliable "

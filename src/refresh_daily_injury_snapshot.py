@@ -15,7 +15,7 @@ if str(ROOT) not in sys.path:
 from dashboard.data import build_start_sit_board, current_nfl_season, load_live_weekly_data
 from dashboard.providers.injuries import enrich_injuries, load_daily_injury_context
 from src.refresh_weekly_snapshot import atomic_parquet
-from src.football_qa import require_no_hard_errors, validate_board
+from src.football_qa import require_publishable_board
 
 
 def main() -> None:
@@ -59,7 +59,7 @@ def main() -> None:
             raise FileNotFoundError(f"Published weekly snapshot is missing: {filename}")
         board = pd.read_parquet(path).drop(columns=injury_columns, errors="ignore")
         refreshed_board = enrich_injuries(board, context)
-        require_no_hard_errors(validate_board(refreshed_board))
+        require_publishable_board(refreshed_board)
         refreshed_boards[path] = refreshed_board
     for path, refreshed_board in refreshed_boards.items():
         atomic_parquet(refreshed_board, path)

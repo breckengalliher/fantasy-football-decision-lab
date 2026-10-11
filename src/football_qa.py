@@ -143,3 +143,28 @@ def require_no_hard_errors(flags: list[FootballFlag]) -> None:
     hard = [f for f in flags if f.severity == "hard_error"]
     if hard:
         raise AssertionError(f"{len(hard)} hard football errors: " + "; ".join(f.code for f in hard[:10]))
+
+
+def require_publishable_board(board: pd.DataFrame) -> dict:
+    """Allow diagnostic baselines only under the existing explicit quarantine.
+
+    The general audit still reports every numerical failure as a hard error.
+    Publication can retain those rows only when both selection flags are actual
+    false booleans and the unavailable label is explicit. Identity errors and
+    every unquarantined numerical error remain fatal. No numbers are changed.
+    """
+    flags = validate_board(board)
+    quarantined = set()
+    columns = {"player_id", "forecast_valid", "forecast_status", "is_roster_relevant"}
+    if columns <= set(board):
+        false = lambda v: isinstance(v, (bool, np.bool_)) and not v
+        mask = (board.forecast_valid.map(false)
+                & board.is_roster_relevant.map(false)
+                & board.forecast_status.eq("Unavailable: invalid forecast; verification needed"))
+        quarantined = set(board.loc[mask, "player_id"].astype(str))
+    retained = [f for f in flags if f.code in {"invalid_interval", "projection_disagreement"}
+                and f.entity in quarantined]
+    require_no_hard_errors([f for f in flags if f not in retained])
+    return {"quarantined_error_count": len(retained),
+            "quarantined_player_count": len({f.entity for f in retained}),
+            "quarantined_errors": [f.to_dict() for f in retained]}

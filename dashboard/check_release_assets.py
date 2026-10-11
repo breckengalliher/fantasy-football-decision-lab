@@ -13,6 +13,8 @@ REQUIRED = (
     "dashboard/assets/sunday-decision-lab-logo-clean.png",
     "dashboard/assets/sunday-decision-lab-icon-clean.png",
     ".streamlit/config.toml",
+    "dashboard/assets/calibration/qb-model-calibration.json",
+    "dashboard/assets/calibration/projection-range-calibration.json",
 )
 
 
@@ -33,6 +35,12 @@ def check_assets(root):
     metadata = json.loads((root / "data/processed/live_refresh_metadata.json").read_text())
     if set(metadata.get("refreshed_qb_passing_td_formats", [])) != {4, 6}:
         raise ValueError("Release does not include both supported scoring formats")
+    qb = json.loads((root / REQUIRED[-2]).read_text(encoding="utf-8"))
+    position = json.loads((root / REQUIRED[-1]).read_text(encoding="utf-8"))
+    if set(qb.get("formats", {})) != {"4_point_passing_td", "6_point_passing_td"}:
+        raise ValueError("Release QB calibrations do not cover both scoring formats")
+    if not position.get("offsets") or not all(qb["formats"][f"{points}_point_passing_td"].get("range_offsets") for points in (4, 6)):
+        raise ValueError("Release calibration offsets are missing")
     return {"required_assets": len(REQUIRED), "identity_aliases": len(records)}
 
 

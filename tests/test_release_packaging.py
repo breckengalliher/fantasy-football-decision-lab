@@ -25,7 +25,7 @@ def test_missing_identity_asset_blocks_build(tmp_path):
         check_assets(tmp_path)
 
 
-@pytest.mark.parametrize("missing", REQUIRED[:5])
+@pytest.mark.parametrize("missing", (*REQUIRED[:5], *REQUIRED[-2:]))
 def test_each_required_identity_or_publication_asset_blocks_build(tmp_path, missing):
     root = Path(__file__).resolve().parents[1]
     for name in REQUIRED:

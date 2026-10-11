@@ -13,8 +13,8 @@ from dashboard.repositories.rosters import RosterRepository
 from dashboard.supabase_api import SupabaseAPIError
 now = datetime(2026,10,10,tzinfo=timezone.utc)
 lookup = {
- 'p1': {'position':'QB','player':'Starter','median_ppr':15,'injury_status_live':'Out'},
- 'p2': {'position':'QB','player':'Bench','median_ppr':20},
+ 'p1': {'position':'QB','player':'Starter','median_ppr':15,'projected_ppr':15,'floor_ppr':5,'ceiling_ppr':25,'injury_status_live':'Out'},
+ 'p2': {'position':'QB','player':'Bench','median_ppr':20,'projected_ppr':20,'floor_ppr':10,'ceiling_ppr':30},
 }
 slots = [
  {'id':'qb','slot_type':'QB','slot_order':0,'is_starter':True,'roster_assignments':[{'id':'a','player_id':'p1','updated_at':'2026-10-10T18:00:00+00:00'}]},

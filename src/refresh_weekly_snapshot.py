@@ -34,7 +34,8 @@ from dashboard.reporting import enrich_with_reporting, load_reporting_context
 from dashboard.headshots import enrich_with_headshots, load_headshot_context
 from dashboard.market_expectations import enrich_with_market
 from src.projection_ledger import append_forecast_snapshot, build_forecast_snapshot, write_manifest
-from src.football_qa import require_no_hard_errors, validate_board, validate_weekly
+from src.football_qa import require_no_hard_errors, require_publishable_board, validate_board, validate_weekly
+from dashboard.football_integrity import guard_forecasts
 
 
 PROCESSED = ROOT / "data" / "processed"
@@ -84,7 +85,7 @@ def api_key() -> str:
 
 def atomic_parquet(frame: pd.DataFrame, path: Path) -> None:
     if path.name.startswith('live_start_sit_board'):
-        require_no_hard_errors(validate_board(frame))
+        require_publishable_board(frame)
     temporary = path.with_suffix(path.suffix + ".tmp")
     frame.to_parquet(temporary, index=False)
     temporary.replace(path)
@@ -111,7 +112,7 @@ def main() -> None:
     prior_weekly = load_prior_weekly_data(season)
     scoring_boards = build_scoring_format_boards(board, weekly, prior_weekly, next_week)
     scoring_boards = {
-        points: enrich_with_market(scoring_board, context.market_lines, points)
+        points: guard_forecasts(enrich_with_market(scoring_board, context.market_lines, points))
         for points, scoring_board in scoring_boards.items()
     }
     board = scoring_boards[4]
@@ -119,8 +120,8 @@ def main() -> None:
     # Validate before *any* snapshot is replaced. Workflow-only checks after
     # publication are too late; failure here leaves the previous files intact.
     require_no_hard_errors(validate_weekly(weekly, complete_team_feed=True))
-    for scoring_board in scoring_boards.values():
-        require_no_hard_errors(validate_board(scoring_board))
+    forecast_audit = {points: require_publishable_board(scoring_board)
+                      for points, scoring_board in scoring_boards.items()}
 
     previous_path = PROCESSED / "sportsdataio_depth_current.parquet"
     previous = pd.read_parquet(previous_path) if previous_path.exists() else pd.DataFrame()
@@ -158,6 +159,7 @@ def main() -> None:
         "refresh_scope": "Full weekly projection and context rebuild",
         "eligible_players": int(len(eligible)),
         "player_pool_audit": pool_audit,
+        "forecast_quarantine_audit": forecast_audit,
         "injury_records": int(len(injury_context.records)),
         "injury_source_status": {
             "nflverse": injury_context.nflverse_status,

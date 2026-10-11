@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import html
+import math
 import os
 from datetime import datetime, timedelta, timezone
 from typing import Any
@@ -83,7 +84,18 @@ def _entry(slot: dict[str, Any], lookup: dict[str, dict[str, Any]], now: datetim
     player = lookup.get(player_id or "", {})
     kickoff = _kickoff(player)
     game_status = _text(player.get("game_status_live"), "").casefold()
-    return {**player, "slot_id": str(slot["id"]), "assignment_id": str(assignment["id"]) if assignment else None, "assignment_updated_at": assignment.get("updated_at") if assignment else None, "slot_type": str(slot["slot_type"]), "slot_order": int(slot.get("slot_order", 0)), "is_starter": bool(slot.get("is_starter")), "player_id": player_id, "availability": _availability(player) if player_id else "Empty", "kickoff_at": kickoff, "game_started": _player_locked(player, now), "bye_week": bool(player.get("bye_week", False)) or _text(player.get("next_opponent"), "").casefold() == "bye", "data_unavailable": bool(player_id and (not player or pd.isna(player.get("median_ppr"))))}
+    return {**player, "slot_id": str(slot["id"]), "assignment_id": str(assignment["id"]) if assignment else None, "assignment_updated_at": assignment.get("updated_at") if assignment else None, "slot_type": str(slot["slot_type"]), "slot_order": int(slot.get("slot_order", 0)), "is_starter": bool(slot.get("is_starter")), "player_id": player_id, "availability": _availability(player) if player_id else "Empty", "kickoff_at": kickoff, "game_started": _player_locked(player, now), "bye_week": bool(player.get("bye_week", False)) or _text(player.get("next_opponent"), "").casefold() == "bye", "data_unavailable": bool(player_id and not _forecast_available(player))}
+
+
+def _forecast_available(player: dict[str, Any]) -> bool:
+    try:
+        lower, expected, upper, projected = (float(player.get(key)) for key in
+            ('floor_ppr', 'median_ppr', 'ceiling_ppr', 'projected_ppr'))
+        return (all(math.isfinite(n) for n in (lower, expected, upper, projected))
+                and lower <= expected <= upper and math.isclose(expected, projected, rel_tol=1e-5, abs_tol=1e-8)
+                and bool(player.get('forecast_valid', True)))
+    except (TypeError, ValueError):
+        return False
 
 
 def _assign_imported_roster(repo: RosterRepository, team_id: str, slots: list[dict[str, Any]], starters: list[str], players: list[str], pool: pd.DataFrame) -> None:
@@ -351,7 +363,9 @@ def _compact_roster_editor(team: dict[str, Any], all_roster: list[dict[str, Any]
         left, right = st.columns([5, 1], vertical_alignment="center")
         if current:
             player = lookup.get(str(current["player_id"]), {})
-            projection = float(player.get("median_ppr", 0) or 0)
+            forecast_available = _forecast_available(player)
+            projection_text = f'{float(player["median_ppr"]):.1f} PPR' if forecast_available else 'Unavailable · verify data'
+            range_text = f'{float(player["floor_ppr"]):.1f}–{float(player["ceiling_ppr"]):.1f}' if forecast_available else 'Unavailable'
             photo = player_photo_html(player.get("headshot_url"), player.get("player"))
             summary = player_card_stat_summary(player)
             game_total = player.get("betting_total_live")
@@ -367,17 +381,19 @@ def _compact_roster_editor(team: dict[str, Any], all_roster: list[dict[str, Any]
             if team_total is not None:
                 context_parts.append(f"Team {team_total:.1f}")
             stats = (
-                f'<div class="cc-roster-stats"><span class="cc-stat-chip projection"><b>Week projection</b><em>{projection:.1f} PPR</em></span>'
+                f'<div class="cc-roster-stats"><span class="cc-stat-chip projection"><b>Week projection</b><em>{projection_text}</em></span>'
                 f'<span class="cc-stat-chip"><b>{html.escape(summary["season_label"])}</b><em>{html.escape(summary["season_value"])} PPR</em></span>'
                 f'<span class="cc-stat-chip"><b>{html.escape(summary["form_label"])}</b><em>{html.escape(summary["form_value"])} PPR</em></span>'
                 f'<span class="cc-stat-chip"><b>{html.escape(summary["workload_label"])}</b><em>{html.escape(summary["workload_value"])}</em></span>'
                 f'{_matchup_chip(pool, player, ranks)}</div>'
             )
+            if not player:
+                stats = '<div class="cc-roster-stats"><span class="cc-stat-chip"><b>Saved player data unavailable</b><em>Your saved assignment is retained. Verify the player data.</em></span></div>'
             left.markdown(
                 f'<article class="cc-roster-row"><span class="cc-roster-slot">{html.escape(label)}</span>'
                 f'<div class="cc-roster-identity">{photo}<div><strong>{html.escape(_text(player.get("player"), str(current["player_id"])))}</strong>'
                 f'<small>{html.escape(" · ".join(context_parts))}</small></div></div>'
-                f'<b>{float(player.get("floor_ppr", 0) or 0):.1f}–{float(player.get("ceiling_ppr", 0) or 0):.1f}<small>RANGE</small></b>{stats}</article>',
+                f'<b>{range_text}<small>RANGE</small></b>{stats}</article>',
                 unsafe_allow_html=True,
             )
             if right.button("Manage", key=f"cc_compact_manage_{current['id']}", width="stretch", help="Compare, move, swap, or remove this player."):
@@ -674,7 +690,7 @@ def _sleeper_sync_panel(team: dict[str, Any], repo: RosterRepository, roster: li
     _render_sync_review(team, repo, connection, roster, pool)
 
 
-def _dashboard(team: dict[str, Any], repo: RosterRepository, pool: pd.DataFrame, weekly: pd.DataFrame, metadata: dict[str, Any], now: datetime) -> None:
+def _dashboard(team: dict[str, Any], repo: RosterRepository, pool: pd.DataFrame, weekly: pd.DataFrame, metadata: dict[str, Any], now: datetime, roster_catalog: pd.DataFrame | None = None) -> None:
     league, roster = team.get("fantasy_leagues") or {}, _ordered_slots(repo.team_roster(str(team["id"])))
     if reject_changed_editors(st.session_state, str(team["id"]), roster):
         st.session_state["cc_conflict_notice"] = str(team["id"])
@@ -684,7 +700,9 @@ def _dashboard(team: dict[str, Any], repo: RosterRepository, pool: pd.DataFrame,
     # Entries, replacements, and management only need saved roster identities.
     # Add/search controls still receive the complete eligible player pool.
     roster_ids = {str(item["player_id"]) for slot in roster if (item := _assignment(slot))}
-    lookup = _player_lookup(pool, roster_ids)
+    # Keep saved identity/history visible even when its forecast is quarantined.
+    # Only the filtered pool can feed add/search/replacement controls.
+    lookup = _player_lookup(roster_catalog if roster_catalog is not None else pool, roster_ids)
     version = public_display_version(metadata, int((team.get('fantasy_leagues') or {}).get('passing_td_points', 4)))
     ranks = display_ranks(pool, version, scope='valid-roster')
     entries = [_entry(slot, lookup, now) for slot in roster]
@@ -695,14 +713,16 @@ def _dashboard(team: dict[str, Any], repo: RosterRepository, pool: pd.DataFrame,
     status = lineup_status(starters, metadata, now)
     next_kickoff = min((e["kickoff_at"] for e in starters if e.get("kickoff_at") and e["kickoff_at"] > now), default=None)
     occupied_starters = [entry for entry in starters if entry.get("player_id")]
-    starter_projection = sum(float(entry.get("median_ppr", 0) or 0) for entry in occupied_starters)
+    starter_projection = sum(float(entry.get("median_ppr", 0) or 0) for entry in occupied_starters if not entry['data_unavailable'])
+    starter_projection_text = ('Projection incomplete · verify data' if any(e['data_unavailable'] for e in occupied_starters)
+                               else f'{starter_projection:.1f} projected starter PPR')
     bench_count = sum(1 for entry in entries if not entry["is_starter"] and entry.get("player_id"))
     copy = {"INCOMPLETE SETUP": "Add players to your open starting positions. Empty setup slots are not treated as injury warnings.", "READY": "No actionable lineup issues detected based on the latest available information. This is not a performance guarantee.", "INJURY CONCERN": "One or more starters have uncertain availability. Check official inactives before kickoff.", "ACTION REQUIRED": "A starter is unavailable or on bye. Review an eligible replacement; games already started may be locked.", "VERIFY DATA": "Essential information is missing or stale. Verify before making a decision.", "GAME IN PROGRESS": "At least one starter's game has begun. Started players cannot be moved."}[status]
     refreshed = _text(metadata.get("context_refreshed_at") or metadata.get("refreshed_at"), "Unavailable")
     if refreshed != "Unavailable":
         try: refreshed = datetime.fromisoformat(refreshed.replace("Z", "+00:00")).astimezone(CENTRAL).strftime("%b %d · %I:%M %p CT").replace(" 0", " ")
         except ValueError: pass
-    st.markdown(f'<section class="cc-status status-{status.lower().replace(" ", "-")}"><div><span>LINEUP STATUS</span><h1>{html.escape(status)}</h1><p>{html.escape(copy)}</p></div><div class="cc-status-meta"><b>{html.escape(str(team["name"]))}</b><span>{html.escape(_text(league.get("name"), "Saved league"))} · Week {_text(metadata.get("next_week"))} · Full PPR · {int(league.get("passing_td_points", 4))}-pt pass TD</span><span>{len(occupied_starters)}/{len(starters)} starters filled · {bench_count} bench · {starter_projection:.1f} projected starter PPR</span><span>{len(actions)} requiring attention · {_countdown(next_kickoff, now)}</span><span>Updated {html.escape(refreshed)}</span></div></section>', unsafe_allow_html=True)
+    st.markdown(f'<section class="cc-status status-{status.lower().replace(" ", "-")}"><div><span>LINEUP STATUS</span><h1>{html.escape(status)}</h1><p>{html.escape(copy)}</p></div><div class="cc-status-meta"><b>{html.escape(str(team["name"]))}</b><span>{html.escape(_text(league.get("name"), "Saved league"))} · Week {_text(metadata.get("next_week"))} · Full PPR · {int(league.get("passing_td_points", 4))}-pt pass TD</span><span>{len(occupied_starters)}/{len(starters)} starters filled · {bench_count} bench · {html.escape(starter_projection_text)}</span><span>{len(actions)} requiring attention · {_countdown(next_kickoff, now)}</span><span>Updated {html.escape(refreshed)}</span></div></section>', unsafe_allow_html=True)
     render_trust_strip(metadata)
     _sleeper_sync_panel(team, repo, roster, pool)
     if actions:
@@ -744,6 +764,7 @@ def _show_save_notice(selected_team_id: str) -> None:
 def render_command_center(api: SupabaseAPI, app_url: str, season: int, player_pool: pd.DataFrame, weekly: pd.DataFrame, metadata: dict[str, Any], session=None) -> None:
     # Invalid saved forecasts remain in audit files, never in add/compare/swap pools.
     version = public_display_version(metadata, int(st.query_params.get('qb', '4')) if str(st.query_params.get('qb', '4')) in ('4', '6') else 4)
+    roster_catalog = player_pool
     player_pool = roster_pool(player_pool, version)
     session = session or render_auth(api, app_url)
     if not session: return
@@ -767,7 +788,7 @@ def render_command_center(api: SupabaseAPI, app_url: str, season: int, player_po
         st.query_params["qb"] = scoring
         st.rerun()
     _show_save_notice(selected_id)
-    _dashboard(selected_team, repo, player_pool, weekly, metadata, datetime.now(timezone.utc))
+    _dashboard(selected_team, repo, player_pool, weekly, metadata, datetime.now(timezone.utc), roster_catalog)
     if os.environ.get('SDL_RESTRICTED_PILOT') == '1':
         st.session_state.pop("cc_team_settings_open", None)
         st.caption("League settings are fixed for this pilot. Use Manage to edit your lineup.")

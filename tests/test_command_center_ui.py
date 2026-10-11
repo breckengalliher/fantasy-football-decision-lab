@@ -5,6 +5,35 @@ import pytest
 from dashboard.command_center_v2 import _entry, _kickoff, _ordered_slots
 
 
+@pytest.mark.parametrize('catalogued', [True, False])
+def test_unavailable_saved_forecast_never_invents_zero_points(monkeypatch, catalogued):
+    import pandas as pd
+    from dashboard import command_center_v2 as cc
+    player = dict(player_id='saved', player='Saved quarterback', position='QB', team='SEA',
+                  floor_ppr=0., median_ppr=-.1, projected_ppr=-.1, ceiling_ppr=4., forecast_valid=False)
+    slot = dict(id='slot',slot_type='BENCH',slot_order=0,is_starter=False,
+                roster_assignments=[dict(id='assignment',player_id='saved',updated_at='version')])
+    captured=[]
+    class Column:
+        def markdown(self, value, **kwargs): captured.append(value)
+        def button(self, *args, **kwargs): return False
+    class Screen:
+        session_state={}
+        def columns(self, *args, **kwargs): return Column(),Column()
+    monkeypatch.setattr(cc,'st',Screen())
+    monkeypatch.setattr(cc,'_fantasy_details',lambda *args,**kwargs:None)
+    monkeypatch.setattr(cc,'_matchup_chip',lambda *args,**kwargs:'')
+    lookup={'saved':player} if catalogued else {}
+    cc._compact_roster_editor({'id':'team'},[slot],[slot],None,pd.DataFrame([player]),pd.DataFrame(),4,lookup)
+    text=''.join(captured)
+    assert 'Unavailable' in text or 'unavailable' in text
+    assert '0.0–0.0' not in text and '-0.1 PPR' not in text
+    assert ('Saved quarterback' in text) == catalogued
+    entry=cc._entry(slot,lookup,datetime.now(timezone.utc))
+    assert entry['data_unavailable']
+    assert entry['player_id']=='saved' and entry['assignment_updated_at']=='version'
+
+
 def test_pilot_rejects_previously_open_settings_before_any_repository_call(monkeypatch):
     from dashboard import command_center_v2
 
