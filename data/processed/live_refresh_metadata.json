@@ -1,18 +1,18 @@
 {
   "season": 2026,
-  "completed_week": 4,
-  "next_week": 5,
-  "refreshed_at": "2026-10-08T23:31:43.711159+00:00",
-  "context_refreshed_at": "2026-10-09T01:41:08.709230+00:00",
-  "refresh_scope": "Live context only; projections preserved",
-  "eligible_players": 210,
+  "completed_week": 5,
+  "next_week": 6,
+  "refreshed_at": "2026-10-13T17:54:59.948324+00:00",
+  "context_refreshed_at": "2026-10-13T17:54:59.948336+00:00",
+  "refresh_scope": "Full weekly projection and context rebuild",
+  "eligible_players": 208,
   "player_pool_audit": {
-    "eligible_players": 210,
+    "eligible_players": 208,
     "eligible_by_position": {
       "WR": 80,
       "RB": 64,
       "TE": 36,
-      "QB": 30
+      "QB": 28
     },
     "duplicate_player_ids": 0,
     "duplicate_player_names_by_position": 0,
@@ -21,30 +21,30 @@
     "missing_opponents": 0,
     "invalid_positions": 0
   },
-  "injury_records": 421,
+  "injury_records": 328,
   "injury_source_status": {
-    "nflverse": "Connected \u00b7 222 Week 5 records",
-    "sleeper": "Connected \u00b7 327 designated players"
+    "nflverse": "Connected \u00b7 0 Week 6 records",
+    "sleeper": "Connected \u00b7 328 designated players"
   },
-  "injury_refreshed_at": "2026-10-09T01:40:54.084822+00:00",
-  "sportsdataio_status": "Connected \u00b7 2026-10-09 01:40 UTC",
-  "sportsdataio_refreshed_at": "2026-10-09T01:40:53.405079+00:00",
+  "injury_refreshed_at": "2026-10-13T17:54:45.785382+00:00",
+  "sportsdataio_status": "Connected \u00b7 2026-10-13 17:54 UTC",
+  "sportsdataio_refreshed_at": "2026-10-13T17:54:45.146332+00:00",
   "market_status": "No player props currently published",
-  "market_refreshed_at": "2026-10-13T16:19:43.079489+00:00",
-  "reporting_refreshed_at": "2026-10-09T01:40:54.092862+00:00",
+  "market_refreshed_at": "2026-10-13T17:54:45.146332+00:00",
+  "reporting_refreshed_at": "2026-10-13T17:54:45.793874+00:00",
   "journalism_status": "Connected \u00b7 0 matched items",
   "reporter_social_status": "Connected \u00b7 12 reporter posts",
-  "reporting_records": 11,
-  "headshot_refreshed_at": "2026-10-09T01:41:08.235379+00:00",
-  "headshot_status": "Connected \u00b7 832 active roster photos",
-  "headshot_coverage": 0.9095238095238095,
-  "depth_chart_players": 1866,
-  "snap_coverage": 0.8761904761904762,
-  "weather_coverage": 0.9714285714285714,
-  "betting_total_coverage": 0.9714285714285714,
-  "depth_chart_coverage": 0.919047619047619,
+  "reporting_records": 12,
+  "headshot_refreshed_at": "2026-10-13T17:54:59.061176+00:00",
+  "headshot_status": "Connected \u00b7 828 active roster photos",
+  "headshot_coverage": 0.9086538461538461,
+  "depth_chart_players": 1868,
+  "snap_coverage": 0.8894230769230769,
+  "weather_coverage": 0.07211538461538461,
+  "betting_total_coverage": 0.9711538461538461,
+  "depth_chart_coverage": 0.9182692307692307,
   "verified_qb_starters": 32,
-  "unverified_relevant_qbs": 8,
+  "unverified_relevant_qbs": 10,
   "projection_model": "Approved round-three live model",
   "scoring_role_td_exception_enabled": false,
   "scoring_role_td_exception_requirement": "verified red-zone or goal-line opportunity data",
@@ -56,6 +56,5 @@
   "scoring_format_snapshots": {
     "4": "live_start_sit_board_4pt_current.parquet",
     "6": "live_start_sit_board_6pt_current.parquet"
-  },
-  "market_refresh_interval_minutes": 360
+  }
 }

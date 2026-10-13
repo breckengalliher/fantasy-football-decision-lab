@@ -1,0 +1,12 @@
+{
+  "publication_id": "2026-W6-2026-10-13T175459",
+  "forecast_timestamp": "2026-10-13T17:54:59.948324+00:00",
+  "information_cutoff": "2026-10-13T17:54:59.948324+00:00",
+  "season": 2026,
+  "week": 6,
+  "model_version": "Approved round-three live model",
+  "forecast_files": [
+    "/home/runner/work/fantasy-football-decision-lab/fantasy-football-decision-lab/data/projection_ledger/projections/season=2026/week=6/2026-10-13T17-54-59.948324_00-00_PPR-4PT-PASS-TD_2026-W6-4pt-2026-10-13T175459.parquet",
+    "/home/runner/work/fantasy-football-decision-lab/fantasy-football-decision-lab/data/projection_ledger/projections/season=2026/week=6/2026-10-13T17-54-59.948324_00-00_PPR-6PT-PASS-TD_2026-W6-6pt-2026-10-13T175459.parquet"
+  ]
+}
