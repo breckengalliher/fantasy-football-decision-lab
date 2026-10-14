@@ -52,9 +52,12 @@ def test_curated_reporter_rss_requires_full_player_name():
     <description></description><link>https://bsky.app/profile/reporter/post/abc</link>
     <pubDate>Wed, 07 Oct 2026 12:00:00 GMT</pubDate></item></channel></rss>"""
     players = pd.DataFrame([{"player": "CeeDee Lamb", "team": "DAL"}, {"player": "Nico Collins", "team": "HOU"}])
-    result = parse_bluesky_rss(xml, players, "reporter.bsky.social", "Local Reporter")
+    result = parse_bluesky_rss(xml, players, "reporter.bsky.social", "Local Reporter",
+                               now=datetime(2026, 10, 7, 13, tzinfo=timezone.utc))
     assert result["player"].tolist() == ["CeeDee Lamb"]
     assert result.loc[0, "source_type"] == "Reporter social"
+    assert parse_bluesky_rss(xml, players, "reporter.bsky.social", "Local Reporter",
+                             now=datetime(2026, 10, 15, 13, tzinfo=timezone.utc)).empty
 
 
 def test_reporting_summary_is_natural_and_explicitly_non_model():

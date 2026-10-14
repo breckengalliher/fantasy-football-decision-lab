@@ -3,6 +3,43 @@ import hashlib
 import json
 import re
 import time
+import os
+from urllib.parse import urlsplit, quote
+
+QA_REPOSITORY = 'breckengalliher/sdl-release-qa-scheduler'
+
+
+def publication_get(session, url, timeout):
+    """Private QA assets use a pinned API destination and per-request credential.
+
+    Never attach this header to the shared HTTP session or follow redirects.
+    Public production reads retain their existing behavior.
+    """
+    parsed = urlsplit(url)
+    prefix = '/' + QA_REPOSITORY + '/'
+    if parsed.hostname != 'raw.githubusercontent.com' or not parsed.path.startswith(prefix):
+        return session.get(url, timeout=timeout)
+    if (parsed.scheme != 'https' or parsed.netloc != 'raw.githubusercontent.com'
+            or os.getenv('RENDER_SERVICE_ID') != 'srv-db4ir249v7es7389sshg'
+            or os.getenv('SUPABASE_URL', '').rstrip('/') != 'https://deburhwrnuqeyexpezzo.supabase.co'):
+        raise ValueError('Private snapshot access requires isolated QA service')
+    suffix = parsed.path[len(prefix):]
+    match = re.fullmatch(r'(qa-app-data|[0-9a-f]{40})/data/processed/([A-Za-z0-9_.-]+)', suffix)
+    allowed = {'publication_manifest.json', 'live_refresh_metadata.json', 'live_weekly_current.parquet',
+               'live_start_sit_board_4pt_current.parquet', 'live_start_sit_board_6pt_current.parquet'}
+    if not match or match[2] not in allowed:
+        raise ValueError('Private snapshot path not allowed')
+    token = os.getenv('QA_SNAPSHOT_READER_TOKEN', '').strip()
+    if not token:
+        raise ValueError('Private QA snapshot credential missing')
+    endpoint = f'https://api.github.com/repos/{QA_REPOSITORY}/contents/data/processed/{match[2]}?ref={quote(match[1])}'
+    response = session.get(endpoint, timeout=timeout, allow_redirects=False,
+                           headers={'Authorization': 'Bearer ' + token,
+                                    'Accept': 'application/vnd.github.raw+json',
+                                    'X-GitHub-Api-Version': '2022-11-28'})
+    if 300 <= response.status_code < 400 or response.status_code == 404:
+        raise ValueError('Private QA snapshot unavailable; retaining prior snapshot')
+    return response
 
 
 def publication_pointer_url(base_url: str, now: float | None = None) -> str:
@@ -34,7 +71,7 @@ def immutable_base(base_url: str, revision: str) -> str:
 def verified_payload(session, base_url: str, manifest: dict, filename: str) -> bytes:
     if manifest.get("validation_status") != "passed":
         raise ValueError("Unvalidated publication")
-    response = session.get(f"{immutable_base(base_url, manifest['revision'])}/{filename}", timeout=(3.05, 12))
+    response = publication_get(session, f"{immutable_base(base_url, manifest['revision'])}/{filename}", timeout=(3.05, 12))
     response.raise_for_status()
     if hashlib.sha256(response.content).hexdigest() != manifest["files"][filename]["sha256"]:
         raise ValueError("Publication hash mismatch")
@@ -42,7 +79,7 @@ def verified_payload(session, base_url: str, manifest: dict, filename: str) -> b
 
 
 def read_metadata(session, base_url: str) -> dict:
-    response = session.get(publication_pointer_url(base_url), timeout=(3.05, 8))
+    response = publication_get(session, publication_pointer_url(base_url), timeout=(3.05, 8))
     if response.status_code == 404:
         # Legacy snapshots remain usable but cannot be release-certified.
         legacy = session.get(f"{base_url}/live_refresh_metadata.json", timeout=(3.05, 8))
