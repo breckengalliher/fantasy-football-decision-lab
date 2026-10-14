@@ -1,0 +1,86 @@
+name: Game-day live context refresh
+
+on:
+  schedule:
+    # Practice-report windows, Wednesday through Friday.
+    - cron: "0 12,16,19 * * 3-5"
+      timezone: "America/Chicago"
+    # Thursday night: 4:30–7:30 PM.
+    - cron: "0,30 16-19 * * 4"
+      timezone: "America/Chicago"
+    # Sunday early inactives: every 15 minutes from 10:00 AM through noon.
+    - cron: "*/15 10-11 * * 0"
+      timezone: "America/Chicago"
+    - cron: "0 12 * * 0"
+      timezone: "America/Chicago"
+    # Sunday late window and Sunday Night Football.
+    - cron: "30 13 * * 0"
+      timezone: "America/Chicago"
+    - cron: "0,30 14-15 * * 0"
+      timezone: "America/Chicago"
+    - cron: "30 17,18 * * 0"
+      timezone: "America/Chicago"
+    # Monday night: 4:30–7:00 PM.
+    - cron: "30 16 * * 1"
+      timezone: "America/Chicago"
+    - cron: "0,30 17-18 * * 1"
+      timezone: "America/Chicago"
+    - cron: "0 19 * * 1"
+      timezone: "America/Chicago"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: production-data-refresh
+  cancel-in-progress: false
+  queue: max
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SPORTSDATAIO_API_KEY: ${{ secrets.SPORTSDATAIO_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: dashboard/requirements.txt
+      - run: pip install -r dashboard/requirements.txt pytest
+      - name: Require protected provider secret
+        shell: bash
+        run: test -n "$SPORTSDATAIO_API_KEY"
+      - name: Refresh volatile context without recalculating projections
+        run: python src/refresh_live_context.py
+      - name: Run source and refresh tests
+        run: python -m pytest tests/test_injury_sources.py tests/test_sportsdataio.py tests/test_reporting.py tests/test_headshots.py tests/test_weekly_refresh.py tests/test_player_pool.py -q
+      - name: Publish refreshed snapshot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f data/processed/live_refresh_metadata.json data/processed/live_weekly_current.parquet data/processed/live_start_sit_board_current.parquet data/processed/live_start_sit_board_4pt_current.parquet data/processed/live_start_sit_board_6pt_current.parquet data/processed/personnel_players_current.parquet data/processed/personnel_teams_current.parquet data/processed/sportsdataio_depth_current.parquet data/processed/reporting_context_current.parquet data/processed/headshot_context_current.parquet data/context_ledger
+          git diff --cached --quiet || git commit -m "Refresh daily production context [skip ci]"
+          python scripts/prepare_publication.py
+          git add -f data/processed/publication_manifest.json
+          git diff --cached --quiet || git commit -m "Publish immutable snapshot pointer [skip ci]"
+          git push
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: game-day-live-context
+          path: |
+            data/processed/live_refresh_metadata.json
+            data/processed/live_weekly_current.parquet
+            data/processed/live_start_sit_board_4pt_current.parquet
+            data/processed/live_start_sit_board_6pt_current.parquet
+            data/processed/reporting_context_current.parquet
+            data/processed/headshot_context_current.parquet
+            data/context_ledger
+          if-no-files-found: warn
+          retention-days: 14

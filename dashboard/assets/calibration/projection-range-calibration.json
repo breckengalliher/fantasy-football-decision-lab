@@ -1,0 +1,241 @@
+{
+  "definition": "P10/P50/P90 conditional outcome range; approximately 80% of games should land from P10 through P90.",
+  "training_seasons": [
+    2021,
+    2022,
+    2023
+  ],
+  "scale_tuning_season": 2024,
+  "untouched_validation_season": 2025,
+  "selected_scale": 1.0300000000000002,
+  "check_2024": {
+    "samples": 3198,
+    "coverage": 0.8014383989993746,
+    "below_p10": 0.08567854909318325,
+    "above_p90": 0.11288305190744215,
+    "mean_width": 16.76326752643757
+  },
+  "validation_2025": {
+    "samples": 3170,
+    "coverage": 0.7965299684542587,
+    "below_p10": 0.0974763406940063,
+    "above_p90": 0.10599369085173502,
+    "mean_width": 16.772121190649617
+  },
+  "validation_2025_by_position_and_sample": [
+    {
+      "position": "QB",
+      "sample_bucket": "2-4",
+      "samples": 145,
+      "coverage": 0.7586206896551724,
+      "below_p10": 0.1103448275862069,
+      "above_p90": 0.1310344827586207,
+      "mean_width": 20.268227505556922
+    },
+    {
+      "position": "QB",
+      "sample_bucket": "5-8",
+      "samples": 154,
+      "coverage": 0.6883116883116883,
+      "below_p10": 0.13636363636363635,
+      "above_p90": 0.17532467532467533,
+      "mean_width": 19.621438220502824
+    },
+    {
+      "position": "QB",
+      "sample_bucket": "9+",
+      "samples": 172,
+      "coverage": 0.813953488372093,
+      "below_p10": 0.12209302325581395,
+      "above_p90": 0.06395348837209303,
+      "mean_width": 20.31313903386293
+    },
+    {
+      "position": "RB",
+      "sample_bucket": "2-4",
+      "samples": 197,
+      "coverage": 0.8121827411167513,
+      "below_p10": 0.07614213197969544,
+      "above_p90": 0.1116751269035533,
+      "mean_width": 17.242936749478183
+    },
+    {
+      "position": "RB",
+      "sample_bucket": "5-8",
+      "samples": 247,
+      "coverage": 0.7813765182186235,
+      "below_p10": 0.10931174089068826,
+      "above_p90": 0.10931174089068826,
+      "mean_width": 15.903872066277671
+    },
+    {
+      "position": "RB",
+      "sample_bucket": "9+",
+      "samples": 381,
+      "coverage": 0.8031496062992126,
+      "below_p10": 0.08923884514435695,
+      "above_p90": 0.10761154855643044,
+      "mean_width": 18.575780187761925
+    },
+    {
+      "position": "TE",
+      "sample_bucket": "2-4",
+      "samples": 179,
+      "coverage": 0.7597765363128491,
+      "below_p10": 0.09497206703910614,
+      "above_p90": 0.1452513966480447,
+      "mean_width": 12.76982076620479
+    },
+    {
+      "position": "TE",
+      "sample_bucket": "5-8",
+      "samples": 233,
+      "coverage": 0.8025751072961373,
+      "below_p10": 0.11158798283261803,
+      "above_p90": 0.08583690987124463,
+      "mean_width": 12.911525106970231
+    },
+    {
+      "position": "TE",
+      "sample_bucket": "9+",
+      "samples": 269,
+      "coverage": 0.79182156133829,
+      "below_p10": 0.10408921933085502,
+      "above_p90": 0.10408921933085502,
+      "mean_width": 13.615855143471542
+    },
+    {
+      "position": "WR",
+      "sample_bucket": "2-4",
+      "samples": 310,
+      "coverage": 0.8290322580645161,
+      "below_p10": 0.06129032258064516,
+      "above_p90": 0.10967741935483871,
+      "mean_width": 16.15845251333035
+    },
+    {
+      "position": "WR",
+      "sample_bucket": "5-8",
+      "samples": 390,
+      "coverage": 0.8205128205128205,
+      "below_p10": 0.07948717948717948,
+      "above_p90": 0.1,
+      "mean_width": 16.892553873800377
+    },
+    {
+      "position": "WR",
+      "sample_bucket": "9+",
+      "samples": 493,
+      "coverage": 0.8052738336713996,
+      "below_p10": 0.10953346855983773,
+      "above_p90": 0.08519269776876268,
+      "mean_width": 17.761902645301163
+    }
+  ],
+  "offsets": [
+    {
+      "position": "QB",
+      "sample_bucket": "2-4",
+      "p10_offset": -9.933137866653135,
+      "p90_offset": 10.793515965182948,
+      "samples": 428
+    },
+    {
+      "position": "QB",
+      "sample_bucket": "5-8",
+      "p10_offset": -10.517649709497354,
+      "p90_offset": 9.201076564639187,
+      "samples": 435
+    },
+    {
+      "position": "QB",
+      "sample_bucket": "9+",
+      "p10_offset": -9.97843916706384,
+      "p90_offset": 10.355152910419026,
+      "samples": 521
+    },
+    {
+      "position": "RB",
+      "sample_bucket": "2-4",
+      "p10_offset": -7.982001310682618,
+      "p90_offset": 10.106833058837069,
+      "samples": 687
+    },
+    {
+      "position": "RB",
+      "sample_bucket": "5-8",
+      "p10_offset": -8.133322629208388,
+      "p90_offset": 8.531282222650399,
+      "samples": 849
+    },
+    {
+      "position": "RB",
+      "sample_bucket": "9+",
+      "p10_offset": -8.696530108729837,
+      "p90_offset": 10.68338559167133,
+      "samples": 1053
+    },
+    {
+      "position": "TE",
+      "sample_bucket": "2-4",
+      "p10_offset": -5.684859139517771,
+      "p90_offset": 7.816003062398042,
+      "samples": 493
+    },
+    {
+      "position": "TE",
+      "sample_bucket": "5-8",
+      "p10_offset": -5.882988058728616,
+      "p90_offset": 7.625171143628508,
+      "samples": 649
+    },
+    {
+      "position": "TE",
+      "sample_bucket": "9+",
+      "p10_offset": -6.7481891073499956,
+      "p90_offset": 7.559433049883715,
+      "samples": 772
+    },
+    {
+      "position": "WR",
+      "sample_bucket": "2-4",
+      "p10_offset": -8.701456406685587,
+      "p90_offset": 8.449770649864067,
+      "samples": 1009
+    },
+    {
+      "position": "WR",
+      "sample_bucket": "5-8",
+      "p10_offset": -8.317543918726795,
+      "p90_offset": 9.373001526157237,
+      "samples": 1242
+    },
+    {
+      "position": "WR",
+      "sample_bucket": "9+",
+      "p10_offset": -8.385812015422916,
+      "p90_offset": 10.021163083424575,
+      "samples": 1669
+    }
+  ],
+  "live_week_5": [
+    {
+      "player": "Jaxon Smith-Njigba",
+      "p10": 12.887417593314414,
+      "p50": 21.588874,
+      "p90": 30.038644649864068
+    },
+    {
+      "player": "CeeDee Lamb",
+      "p10": 12.646265593314414,
+      "p50": 21.347722,
+      "p90": 29.79749264986407
+    },
+    {
+      "player": "Nico Collins",
+      "p10": 7.778243593314414,
+      "p50": 16.4797,
+      "p90": 24.92947064986407
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "league_name": "Portfolio Default",
+  "season": 2026,
+  "teams": 12,
+  "draft": {
+    "type": "auction",
+    "budget_per_team": 200,
+    "league_budget": 2400,
+    "minimum_bid": 1
+  },
+  "starters": {
+    "QB": 1,
+    "RB": 2,
+    "WR": 2,
+    "TE": 1,
+    "FLEX": 2,
+    "DST": 1
+  },
+  "bench_slots_per_team": 6,
+  "roster_slots_per_team": 15,
+  "league_drafted_slots": 180,
+  "flex_eligible_positions": [
+    "RB",
+    "WR",
+    "TE"
+  ],
+  "scoring": {
+    "reception": 1.0,
+    "passing_yard": 0.04,
+    "passing_touchdown": 6.0,
+    "interception_thrown": -2.0,
+    "rushing_yard": 0.1,
+    "rushing_touchdown": 6.0,
+    "receiving_yard": 0.1,
+    "receiving_touchdown": 6.0,
+    "two_point_conversion": 2.0,
+    "fumble_lost": -2.0
+  },
+  "team_defense_scoring": {
+    "sack": 1.0,
+    "interception": 2.0,
+    "fumble_recovery": 2.0,
+    "blocked_punt_pat_or_field_goal": 2.0,
+    "safety": 2.0,
+    "kickoff_return_touchdown": 6.0,
+    "punt_return_touchdown": 6.0,
+    "interception_return_touchdown": 6.0,
+    "fumble_return_touchdown": 6.0,
+    "blocked_kick_return_touchdown": 6.0,
+    "points_allowed": [
+      {
+        "minimum": 0,
+        "maximum": 0,
+        "points": 5.0
+      },
+      {
+        "minimum": 1,
+        "maximum": 6,
+        "points": 4.0
+      },
+      {
+        "minimum": 7,
+        "maximum": 13,
+        "points": 3.0
+      },
+      {
+        "minimum": 14,
+        "maximum": 17,
+        "points": 1.0
+      },
+      {
+        "minimum": 18,
+        "maximum": 27,
+        "points": 0.0
+      },
+      {
+        "minimum": 28,
+        "maximum": 34,
+        "points": -1.0
+      },
+      {
+        "minimum": 35,
+        "maximum": 45,
+        "points": -3.0
+      },
+      {
+        "minimum": 46,
+        "maximum": null,
+        "points": -5.0
+      }
+    ],
+    "yards_allowed_scoring": false,
+    "offensive_return_touchdowns_count_against_points_allowed": false
+  },
+  "special_positions": {
+    "include_kicker": false,
+    "include_team_defense": true
+  },
+  "auction_pool": {
+    "minimum_bid_reserve": 180,
+    "discretionary_dollars": 2220,
+    "projected_draft_counts": {
+      "QB": 24,
+      "RB": 54,
+      "WR": 66,
+      "TE": 24,
+      "DST": 12
+    }
+  }
+}

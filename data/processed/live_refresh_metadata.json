@@ -1,0 +1,120 @@
+{
+  "season": 2026,
+  "completed_week": 4,
+  "next_week": 5,
+  "refreshed_at": "2026-10-11T03:50:15.657496+00:00",
+  "context_refreshed_at": "2026-10-11T03:50:15.657496+00:00",
+  "refresh_scope": "Full weekly projection and context rebuild",
+  "eligible_players": 207,
+  "player_pool_audit": {
+    "eligible_players": 207,
+    "eligible_by_position": {
+      "WR": 80,
+      "RB": 61,
+      "TE": 36,
+      "QB": 30
+    },
+    "duplicate_player_ids": 0,
+    "duplicate_player_names_by_position": 0,
+    "missing_player_names": 0,
+    "missing_teams": 0,
+    "missing_opponents": 0,
+    "invalid_positions": 0
+  },
+  "forecast_quarantine_audit": {
+    "4": {
+      "quarantined_error_count": 2,
+      "quarantined_player_count": 2,
+      "quarantined_errors": [
+        {
+          "code": "invalid_interval",
+          "severity": "hard_error",
+          "entity": "00-0033319",
+          "week": null,
+          "calculation": "projection range",
+          "expected": "Finite floor <= median <= ceiling",
+          "observed": "[0.0, -0.13200000000000003, 9.560807498879726]",
+          "evidence": "Nick Mullens",
+          "code_location": "dashboard/data.py:apply_approved_projection_model",
+          "recommendation": "Reject invalid interval; do not silently reorder"
+        },
+        {
+          "code": "invalid_interval",
+          "severity": "hard_error",
+          "entity": "00-0027973",
+          "week": null,
+          "calculation": "projection range",
+          "expected": "Finite floor <= median <= ceiling",
+          "observed": "[0.0, -0.06334255167498219, 9.629464947204744]",
+          "evidence": "Andy Dalton",
+          "code_location": "dashboard/data.py:apply_approved_projection_model",
+          "recommendation": "Reject invalid interval; do not silently reorder"
+        }
+      ]
+    },
+    "6": {
+      "quarantined_error_count": 1,
+      "quarantined_player_count": 1,
+      "quarantined_errors": [
+        {
+          "code": "invalid_interval",
+          "severity": "hard_error",
+          "entity": "00-0033319",
+          "week": null,
+          "calculation": "projection range",
+          "expected": "Finite floor <= median <= ceiling",
+          "observed": "[0.0, -0.13200000000000003, 11.874351754018155]",
+          "evidence": "Nick Mullens",
+          "code_location": "dashboard/data.py:apply_approved_projection_model",
+          "recommendation": "Reject invalid interval; do not silently reorder"
+        }
+      ]
+    }
+  },
+  "injury_records": 493,
+  "injury_source_status": {
+    "nflverse": "Connected \u00b7 357 Week 5 records",
+    "sleeper": "Connected \u00b7 292 designated players"
+  },
+  "injury_refreshed_at": "2026-10-11T03:50:02.131196+00:00",
+  "injury_source_updated_at": null,
+  "injury_official_report_at": null,
+  "injury_freshness_verified": false,
+  "depth_source_updated_at": "2026-10-11T02:33:24+00:00",
+  "depth_source_version": "bf1a7e0372b39be60474798b0e39c292063d54aaea9a0427765fbdfe23b761f2",
+  "depth_source_version_kind": "sha256-provider-payload",
+  "depth_oldest_source_updated_at": "2026-10-05T17:32:24+00:00",
+  "depth_timestamp_records": 1904,
+  "depth_records": 1904,
+  "depth_freshness_verified": false,
+  "sportsdataio_status": "Connected \u00b7 2026-10-11 03:50 UTC",
+  "sportsdataio_refreshed_at": "2026-10-11T03:50:01.224439+00:00",
+  "market_status": "No player props currently published",
+  "market_refreshed_at": "2026-10-11T03:50:01.224439+00:00",
+  "reporting_refreshed_at": "2026-10-11T03:50:02.202812+00:00",
+  "journalism_status": "Connected \u00b7 5 matched items",
+  "reporter_social_status": "Connected \u00b7 11 reporter posts",
+  "reporting_records": 16,
+  "headshot_refreshed_at": "2026-10-11T03:50:12.148845+00:00",
+  "headshot_status": "Connected \u00b7 829 active roster photos",
+  "headshot_coverage": 0.9420289855072463,
+  "depth_chart_players": 1904,
+  "snap_coverage": 0.9082125603864735,
+  "weather_coverage": 1.0,
+  "betting_total_coverage": 1.0,
+  "depth_chart_coverage": 0.966183574879227,
+  "verified_qb_starters": 32,
+  "unverified_relevant_qbs": 7,
+  "projection_model": "Approved round-three live model",
+  "scoring_role_td_exception_enabled": false,
+  "scoring_role_td_exception_requirement": "verified red-zone or goal-line opportunity data",
+  "default_qb_passing_td_points": 4,
+  "refreshed_qb_passing_td_formats": [
+    4,
+    6
+  ],
+  "scoring_format_snapshots": {
+    "4": "live_start_sit_board_4pt_current.parquet",
+    "6": "live_start_sit_board_6pt_current.parquet"
+  }
+}
