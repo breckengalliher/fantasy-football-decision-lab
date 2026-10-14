@@ -20,9 +20,13 @@ def invited_accounts(environ=None):
     base = env.get('SNAPSHOT_BASE_URL', '').rstrip('/')
     qa_pointer = (base == 'https://raw.githubusercontent.com/breckengalliher/fantasy-football-decision-lab/codex/qa-availability-data/data/processed'
                   and env.get('SUPABASE_URL', '').rstrip('/') == 'https://deburhwrnuqeyexpezzo.supabase.co')
+    private_qa_pointer = (
+        base == 'https://raw.githubusercontent.com/breckengalliher/sdl-release-qa-scheduler/qa-app-data/data/processed'
+        and env.get('SUPABASE_URL', '').rstrip('/') == 'https://deburhwrnuqeyexpezzo.supabase.co'
+        and env.get('RENDER_SERVICE_ID') == 'srv-db4ir249v7es7389sshg')
     # QA alone may follow this controlled pointer. Every asset still uses a
     # full immutable revision and a validated hash; production remains pinned.
-    if not qa_pointer and not re.fullmatch(r'https://raw\.githubusercontent\.com/breckengalliher/fantasy-football-decision-lab/[0-9a-f]{40}/data/processed', base):
+    if not (qa_pointer or private_qa_pointer) and not re.fullmatch(r'https://raw\.githubusercontent\.com/breckengalliher/fantasy-football-decision-lab/[0-9a-f]{40}/data/processed', base):
         raise ValueError('pilot-requires-immutable-publication')
     return accounts
 
