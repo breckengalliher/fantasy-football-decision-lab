@@ -344,7 +344,7 @@ def _position_fantasy_points(frame: pd.DataFrame) -> pd.Series:
 
 
 def build_start_sit_board(
-    weekly: pd.DataFrame, schedules: pd.DataFrame, season: int
+    weekly: pd.DataFrame, schedules: pd.DataFrame, season: int, *, current_teams: dict | None = None
 ) -> tuple[pd.DataFrame, int]:
     """Create transparent current-form, matchup, and projection signals."""
     data = weekly.copy()
@@ -457,6 +457,14 @@ def build_start_sit_board(
             team_records = team_records[[team_col, "team_record"]]
 
     latest = data.groupby(id_col, as_index=False).tail(1).copy()
+    # Current-team assignments affect upcoming context, never historical totals
+    # or the team/opponent attached to a played game. Callers own provenance.
+    if current_teams:
+        unknown = set(current_teams) - set(latest[id_col])
+        valid_teams = set(schedules.home_team) | set(schedules.away_team)
+        if unknown or not set(current_teams.values()) <= valid_teams:
+            raise ValueError('Invalid current-team assignment')
+        latest[team_col] = latest[id_col].map(current_teams).fillna(latest[team_col])
     latest = latest.merge(opponents, on=team_col, how="left")
     latest = latest.merge(team_records, on=team_col, how="left")
     latest = latest.merge(

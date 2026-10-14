@@ -22,6 +22,7 @@ from dashboard.availability_evidence import resolve_availability
 from src.refresh_weekly_snapshot import build_scoring_format_boards
 from src.football_qa import require_no_hard_errors, validate_weekly
 from src.publication import validate_snapshot, FILES
+from src.qa_current_teams import reviewed_current_teams, TRANSACTIONS
 
 
 def official_games(raw, season, week):
@@ -75,7 +76,8 @@ def build(destination, season, week):
     if {(g['home'],g['away']) for g in games} != set(zip(current.home_team,current.away_team)):
         raise ValueError('Schedule providers disagree on current-week games')
     by_team = {team:game for game in games for team in (game['home'],game['away'])}
-    board, next_week = build_start_sit_board(weekly,schedules,season)
+    current_teams = reviewed_current_teams(weekly,season,week,fetch)
+    board, next_week = build_start_sit_board(weekly,schedules,season,current_teams=current_teams)
     if next_week != week:
         raise ValueError('Model week disagrees with requested publication')
     snaps = pd.read_parquet(BytesIO(fetch('snaps',SNAP_COUNTS_URL.format(season=season))))
@@ -126,7 +128,8 @@ def build(destination, season, week):
         'injury_freshness_verified':False,'depth_freshness_verified':False,
         'availability_certificate':{'schema_version':2,'season':season,'week':week,'synthetic':False,
             'policy':'all_availability_actions_blocked','sources':{'official_schedule':source},'players':records},
-        'qa_input_receipts':receipts}
+        'qa_input_receipts':receipts,
+        'qa_reviewed_transactions':list(TRANSACTIONS)}
     destination.mkdir(parents=True)
     for points, frame in scoring.items():
         frame.to_parquet(destination/f'live_start_sit_board_{points}pt_current.parquet',index=False)
