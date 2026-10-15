@@ -5,6 +5,13 @@ window.authInitStage = function(stage) {
   if (location.hostname === 'sdl-release-qa-8306.onrender.com') {
     document.documentElement.dataset.authStage = stage;
     console.info('[SDL auth init r7] ' + stage);
+    // Mirror only the fixed stage label so parent-only browser consoles can see it.
+    if (parent !== window) {
+      try {
+        parent.document.documentElement.setAttribute('data-sdl-auth-stage', stage);
+        parent.console.info('[SDL auth init r7] embedded ' + stage);
+      } catch {}
+    }
   }
 };
 authInitStage('html');
