@@ -16,7 +16,7 @@ def setup(monkeypatch, state=None, clicked=False, result=None):
     def rerun():
         raise Rerun()
     monkeypatch.setenv('RENDER_SERVICE_ID', 'srv-db4ir249v7es7389sshg')
-    monkeypatch.setattr(bridge, 'st', SimpleNamespace(session_state=state, button=button,
+    monkeypatch.setattr(bridge, 'st', SimpleNamespace(session_state=state, button=button, query_params={},
         caption=lambda text: events.append(('caption', text)),
         warning=lambda text: events.append(('warning', text)), rerun=rerun))
     calls = []

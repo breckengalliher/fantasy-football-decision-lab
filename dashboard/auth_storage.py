@@ -14,6 +14,24 @@ MAX_INITIALIZATION_RETRIES = 3
 _bridge = components.declare_component('sdl_auth_storage_v2', path=str(Path(__file__).parent / 'components' / 'auth_storage'))
 
 
+@st.cache_resource
+def _native_component():
+    folder = Path(__file__).parent / 'components' / 'auth_storage'
+    adapter = (folder / 'native.js').read_text(encoding='utf-8')
+    assert adapter.count('/* AUTH_CORE */') == 1
+    # The same reviewed operations, expiry handling, locks and acknowledgments.
+    javascript = adapter.replace('/* AUTH_CORE */', (folder / 'auth.js').read_text(encoding='utf-8'))
+    return st.components.v2.component('sdl_auth_native', js=javascript)
+
+
+def _native_bridge(**kwargs):
+    key = kwargs.pop('key')
+    kwargs.pop('default', None)
+    result = _native_component()(key=key, data=kwargs, default={'ack': None},
+                                 on_ack_change=lambda: None, height=1)
+    return result.ack
+
+
 def _offer_initialization_retry(api, pending):
     """Remount only an idle QA bridge, never replay an unacknowledged mutation.
 
@@ -82,7 +100,11 @@ def browser_auth_storage(api=None):
     pending = st.session_state.get(PENDING_KEY, {})
     attempt = st.session_state.get(RETRY_KEY, 0)
     bridge_key = 'cc_acknowledged_auth_storage_v2' + (f'_retry_{attempt}' if attempt else '')
-    result = _bridge(changes=pending.get('changes', {}), operation_id=pending.get('operation_id', ''),
+    use_native = (os.getenv('RENDER_SERVICE_ID') == 'srv-db4ir249v7es7389sshg'
+                  and getattr(api, 'url', '').rstrip('/') == 'https://deburhwrnuqeyexpezzo.supabase.co'
+                  and st.query_params.get('qa_auth_transport') == 'native')
+    transport = _native_bridge if use_native else _bridge
+    result = transport(changes=pending.get('changes', {}), operation_id=pending.get('operation_id', ''),
                      refresh=bool(pending.get('refresh')), clear=bool(pending.get('clear')),
                      clear_revision=pending.get('clear_revision'), clear_token=pending.get('clear_token'),
                      clear_session_id=pending.get('clear_session_id'),
