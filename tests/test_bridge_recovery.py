@@ -16,7 +16,8 @@ def setup(monkeypatch, state=None, clicked=False, result=None):
     def rerun():
         raise Rerun()
     monkeypatch.setenv('RENDER_SERVICE_ID', 'srv-db4ir249v7es7389sshg')
-    monkeypatch.setattr(bridge, 'st', SimpleNamespace(session_state=state, button=button,
+    monkeypatch.setattr(bridge, 'st', SimpleNamespace(session_state=state, button=button, query_params={},
+        html=lambda text: events.append(('html', text)),
         caption=lambda text: events.append(('caption', text)),
         warning=lambda text: events.append(('warning', text)), rerun=rerun))
     calls = []
@@ -80,3 +81,12 @@ def test_acknowledgment_after_retry_returns_storage(monkeypatch):
     storage = bridge.browser_auth_storage(QA)
     assert storage.getItem('sdl_auth_persistence') == 'always'
     assert not events
+
+
+def test_eager_layout_diagnostic_does_not_mutate_or_refresh(monkeypatch):
+    state, events, calls = setup(monkeypatch, {'draft': 'retain'})
+    bridge.st.query_params['qa_auth_layout'] = 'eager'
+    assert bridge.browser_auth_storage(QA) is None
+    assert state == {'draft': 'retain'}
+    assert any(kind == 'html' and 'display:block' in value for kind, value in events)
+    assert not calls[0]['refresh'] and not calls[0]['clear'] and not calls[0]['changes']

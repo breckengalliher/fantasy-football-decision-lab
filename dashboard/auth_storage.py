@@ -79,6 +79,12 @@ class AuthStorage:
 
 
 def browser_auth_storage(api=None):
+    # QA A/B diagnostic: test the framework's display:none-before-ready iframe.
+    # Both paths use identical credentials, component code and acknowledgment rules.
+    if (os.getenv('RENDER_SERVICE_ID') == 'srv-db4ir249v7es7389sshg'
+            and getattr(api, 'url', '').rstrip('/') == 'https://deburhwrnuqeyexpezzo.supabase.co'
+            and st.query_params.get('qa_auth_layout') == 'eager'):
+        st.html('<style>iframe[title="dashboard.auth_storage.sdl_auth_storage_v2"] { display:block !important; }</style>')
     pending = st.session_state.get(PENDING_KEY, {})
     attempt = st.session_state.get(RETRY_KEY, 0)
     bridge_key = 'cc_acknowledged_auth_storage_v2' + (f'_retry_{attempt}' if attempt else '')
