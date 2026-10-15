@@ -100,11 +100,10 @@ def browser_auth_storage(api=None):
     pending = st.session_state.get(PENDING_KEY, {})
     attempt = st.session_state.get(RETRY_KEY, 0)
     bridge_key = 'cc_acknowledged_auth_storage_v2' + (f'_retry_{attempt}' if attempt else '')
-    # QA rollout only: the legacy iframe can remain about:blank in Chrome before
-    # auth.js starts. Native transport runs the same session protocol without
-    # that iframe handshake. Production keeps its existing transport unchanged.
-    use_native = (os.getenv('RENDER_SERVICE_ID') == 'srv-db4ir249v7es7389sshg'
-                  and getattr(api, 'url', '').rstrip('/') == 'https://deburhwrnuqeyexpezzo.supabase.co')
+    # Recovery artifact: pin the already-tested native transport for the
+    # configured API. Credentials, session protocol and database stay unchanged.
+    # This artifact is deployed only after explicit release/recovery approval.
+    use_native = bool(api and getattr(api, 'url', ''))
     transport = _native_bridge if use_native else _bridge
     result = transport(changes=pending.get('changes', {}), operation_id=pending.get('operation_id', ''),
                      refresh=bool(pending.get('refresh')), clear=bool(pending.get('clear')),

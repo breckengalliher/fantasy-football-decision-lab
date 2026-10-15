@@ -16,13 +16,15 @@ def test_native_transport_reuses_exact_pending_operation(monkeypatch):
     assert state['draft'] == 'keep' and state[bridge.PENDING_KEY] == pending
 
 
-def test_native_experiment_cannot_enable_on_production(monkeypatch):
+def test_recovery_native_path_preserves_configured_api(monkeypatch):
     state, events, calls = setup(monkeypatch)
     bridge.st.query_params['qa_auth_transport'] = 'native'
     monkeypatch.setenv('RENDER_SERVICE_ID', 'production')
-    monkeypatch.setattr(bridge, '_native_bridge', lambda **kwargs: (_ for _ in ()).throw(AssertionError('native on production')))
+    native = []
+    monkeypatch.setattr(bridge, '_native_bridge', lambda **kwargs: native.append(kwargs))
     bridge.browser_auth_storage(QA)
-    assert len(calls) == 1
+    assert not calls and len(native) == 1
+    assert native[0]['auth_url'] == QA.url
 
 
 @pytest.mark.parametrize('service,url', [
@@ -30,12 +32,16 @@ def test_native_experiment_cannot_enable_on_production(monkeypatch):
     ('another-service', QA.url),
     ('', QA.url),
 ])
-def test_native_requires_both_exact_qa_bindings(monkeypatch, service, url):
+def test_recovery_transport_does_not_change_credentials_or_database(monkeypatch, service, url):
     state, events, calls = setup(monkeypatch)
     monkeypatch.setenv('RENDER_SERVICE_ID', service)
-    monkeypatch.setattr(bridge, '_native_bridge', lambda **kw: pytest.fail('wrong isolation'))
+    native = []
+    monkeypatch.setattr(bridge, '_native_bridge', lambda **kw: native.append(kw))
     bridge.browser_auth_storage(SimpleNamespace(url=url, publishable_key='sb_publishable_test'))
-    assert len(calls) == 1
+    assert not calls and len(native) == 1
+    assert native[0]['auth_url'] == url
+    assert native[0]['publishable_key'] == 'sb_publishable_test'
+    assert not native[0]['refresh'] and not native[0]['clear']
 
 
 def test_native_stale_ack_preserves_pending_write_and_draft(monkeypatch):

@@ -3,13 +3,14 @@ import pytest
 from dashboard import onboarding_storage as module
 
 
-def test_exact_qa_bindings_required(monkeypatch):
+def test_recovery_native_guide_follows_configured_api(monkeypatch):
     api = SimpleNamespace(url='https://deburhwrnuqeyexpezzo.supabase.co')
     monkeypatch.setenv('RENDER_SERVICE_ID', 'production')
-    assert not module.enabled(api)
+    assert module.enabled(api)
     monkeypatch.setenv('RENDER_SERVICE_ID', 'srv-db4ir249v7es7389sshg')
     assert module.enabled(api)
-    assert not module.enabled(SimpleNamespace(url='https://other.supabase.co'))
+    assert module.enabled(SimpleNamespace(url='https://other.supabase.co'))
+    assert not module.enabled(None)
 
 
 @pytest.mark.parametrize('value,dismiss', [(None,False), ({'ok':True,'dismissed':False,'write_ack':False},True)])
