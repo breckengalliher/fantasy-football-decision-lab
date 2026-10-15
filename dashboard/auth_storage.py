@@ -83,8 +83,11 @@ def browser_auth_storage(api=None):
     # Both paths use identical credentials, component code and acknowledgment rules.
     if (os.getenv('RENDER_SERVICE_ID') == 'srv-db4ir249v7es7389sshg'
             and getattr(api, 'url', '').rstrip('/') == 'https://deburhwrnuqeyexpezzo.supabase.co'
-            and st.query_params.get('qa_auth_layout') == 'eager'):
-        st.html('<style>iframe[title="dashboard.auth_storage.sdl_auth_storage_v2"] { display:block !important; }</style>')
+            and st.query_params.get('qa_auth_layout') in ('eager', 'probe', 'onepixel')):
+        st.html(Path(__file__).parent / 'components' / 'auth_storage' / 'qa_frame_diagnostic.html', unsafe_allow_javascript=True)
+        if st.query_params.get('qa_auth_layout') in ('eager', 'onepixel'):
+            minimum = 'min-height:1px !important;' if st.query_params.get('qa_auth_layout') == 'onepixel' else ''
+            st.html('<style>iframe[title="dashboard.auth_storage.sdl_auth_storage_v2"] { display:block !important;' + minimum + ' }</style>')
     pending = st.session_state.get(PENDING_KEY, {})
     attempt = st.session_state.get(RETRY_KEY, 0)
     bridge_key = 'cc_acknowledged_auth_storage_v2' + (f'_retry_{attempt}' if attempt else '')

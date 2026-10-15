@@ -1,0 +1,31 @@
+<script>
+(() => {
+  if (location.hostname !== 'sdl-release-qa-8306.onrender.com' || window.sdlAuthFrameDiagnostic) return;
+  window.sdlAuthFrameDiagnostic = true;
+  let count = 0, last = '';
+  const inspect = () => {
+    const frame = document.querySelector('iframe[title="dashboard.auth_storage.sdl_auth_storage_v2"]');
+    const result = {event:'frame_probe', present:!!frame};
+    if (frame) {
+      result.width = frame.getBoundingClientRect().width;
+      result.height = frame.getBoundingClientRect().height;
+      try {
+        const doc = frame.contentDocument;
+        result.readable = !!doc;
+        if (doc) {
+          result.ready = doc.readyState;
+          result.path = new URL(doc.URL).pathname;
+          result.stage = doc.documentElement?.getAttribute('data-auth-stage');
+          result.scriptCount = doc.scripts.length;
+        }
+      } catch (error) { result.errorType = error.name; }
+    }
+    const text = JSON.stringify(result);
+    document.documentElement.setAttribute('data-sdl-auth-frame', text);
+    if (text !== last) { console.info('[SDL auth frame] '+text); last=text; }
+    count++;
+    if (count < 45 && document.documentElement.getAttribute('data-sdl-auth-stage') !== 'ack_sent') setTimeout(inspect,1000);
+  };
+  inspect();
+})();
+</script>
