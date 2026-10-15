@@ -1,0 +1,5129 @@
+{
+  "season": 2026,
+  "completed_week": 5,
+  "next_week": 6,
+  "refreshed_at": "2026-10-15T14:25:57.646632+00:00",
+  "context_refreshed_at": "2026-10-15T14:25:58.254450+00:00",
+  "refreshed_qb_passing_td_formats": [
+    4,
+    6
+  ],
+  "projection_model": "Approved round-three live model",
+  "refresh_scope": "Restricted QA weekly rebuild; missing depth and availability remain blocked",
+  "injury_freshness_verified": false,
+  "depth_freshness_verified": false,
+  "availability_certificate": {
+    "schema_version": 2,
+    "season": 2026,
+    "week": 6,
+    "synthetic": false,
+    "policy": "all_availability_actions_blocked",
+    "sources": {
+      "official_schedule": {
+        "url": "https://www.nfl.com/schedules/2026/by-week/week-6",
+        "retrieved_at": "2026-10-15T14:25:58.254450+00:00",
+        "sha256": "4dfc69df457aa257f7dc278e61b88f9492f2ae24d1657080090381a3aa79c710",
+        "source_last_modified": null,
+        "authority": "official",
+        "timestamp_basis": "undated_observation"
+      }
+    },
+    "players": [
+      {
+        "player_id": "00-0038134",
+        "player": "Kenneth Walker III",
+        "team": "KC",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab59281-4feb-11f1-abca-2c54536568a9",
+          "opponent": "LAC",
+          "kickoff_at": "2026-10-18T20:25:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:55:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0038543",
+        "player": "Jaxon Smith-Njigba",
+        "team": "SEA",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aa94cffe-4feb-11f1-abca-2c54536568a9",
+          "opponent": "DEN",
+          "kickoff_at": "2026-10-16T00:15:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-15T22:45:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0039075",
+        "player": "Puka Nacua",
+        "team": "LA",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58f7e-4feb-11f1-abca-2c54536568a9",
+          "opponent": "ARI",
+          "kickoff_at": "2026-10-18T20:05:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:35:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0038542",
+        "player": "Bijan Robinson",
+        "team": "ATL",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab577eb-4feb-11f1-abca-2c54536568a9",
+          "opponent": "CHI",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0036358",
+        "player": "CeeDee Lamb",
+        "team": "DAL",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad58264-4feb-11f1-abca-2c54536568a9",
+          "opponent": "GB",
+          "kickoff_at": "2026-10-19T00:20:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T22:50:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0039338",
+        "player": "Brock Bowers",
+        "team": "LV",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad57852-4feb-11f1-abca-2c54536568a9",
+          "opponent": "BUF",
+          "kickoff_at": "2026-10-18T20:25:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:55:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0038124",
+        "player": "Christian Watson",
+        "team": "GB",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad58264-4feb-11f1-abca-2c54536568a9",
+          "opponent": "DAL",
+          "kickoff_at": "2026-10-19T00:20:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T22:50:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0037840",
+        "player": "Kyren Williams",
+        "team": "LA",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58f7e-4feb-11f1-abca-2c54536568a9",
+          "opponent": "ARI",
+          "kickoff_at": "2026-10-18T20:05:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:35:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0036554",
+        "player": "Nico Collins",
+        "team": "HOU",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab56e82-4feb-11f1-abca-2c54536568a9",
+          "opponent": "JAX",
+          "kickoff_at": "2026-10-18T13:30:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T12:00:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0032764",
+        "player": "Derrick Henry",
+        "team": "BAL",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab57bb8-4feb-11f1-abca-2c54536568a9",
+          "opponent": "CLE",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0039064",
+        "player": "Zay Flowers",
+        "team": "BAL",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab57bb8-4feb-11f1-abca-2c54536568a9",
+          "opponent": "CLE",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0031381",
+        "player": "Davante Adams",
+        "team": "LA",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58f7e-4feb-11f1-abca-2c54536568a9",
+          "opponent": "ARI",
+          "kickoff_at": "2026-10-18T20:05:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:35:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0036997",
+        "player": "Javonte Williams",
+        "team": "DAL",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad58264-4feb-11f1-abca-2c54536568a9",
+          "opponent": "GB",
+          "kickoff_at": "2026-10-19T00:20:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T22:50:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0036223",
+        "player": "Jonathan Taylor",
+        "team": "IND",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab57f15-4feb-11f1-abca-2c54536568a9",
+          "opponent": "TEN",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0040124",
+        "player": "Tetairoa McMillan",
+        "team": "CAR",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab588fe-4feb-11f1-abca-2c54536568a9",
+          "opponent": "PHI",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0037239",
+        "player": "Chris Olave",
+        "team": "NO",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab5857e-4feb-11f1-abca-2c54536568a9",
+          "opponent": "NYG",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0036555",
+        "player": "Chuba Hubbard",
+        "team": "CAR",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab588fe-4feb-11f1-abca-2c54536568a9",
+          "opponent": "PHI",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0037248",
+        "player": "James Cook",
+        "team": "BUF",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad57852-4feb-11f1-abca-2c54536568a9",
+          "opponent": "LV",
+          "kickoff_at": "2026-10-18T20:25:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:55:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0037228",
+        "player": "Jaylen Warren",
+        "team": "PIT",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58c4b-4feb-11f1-abca-2c54536568a9",
+          "opponent": "TB",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0039491",
+        "player": "Jalen Coker",
+        "team": "CAR",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab588fe-4feb-11f1-abca-2c54536568a9",
+          "opponent": "PHI",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0033280",
+        "player": "Christian McCaffrey",
+        "team": "SF",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad58635-4feb-11f1-abca-2c54536568a9",
+          "opponent": "WAS",
+          "kickoff_at": "2026-10-20T00:15:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-19T22:45:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0037740",
+        "player": "Garrett Wilson",
+        "team": "NYJ",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58261-4feb-11f1-abca-2c54536568a9",
+          "opponent": "NE",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0037838",
+        "player": "Isaiah Likely",
+        "team": "NYG",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab5857e-4feb-11f1-abca-2c54536568a9",
+          "opponent": "NO",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0037744",
+        "player": "Trey McBride",
+        "team": "ARI",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58f7e-4feb-11f1-abca-2c54536568a9",
+          "opponent": "LA",
+          "kickoff_at": "2026-10-18T20:05:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:35:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0040122",
+        "player": "Ashton Jeanty",
+        "team": "LV",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad57852-4feb-11f1-abca-2c54536568a9",
+          "opponent": "BUF",
+          "kickoff_at": "2026-10-18T20:25:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:55:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0038606",
+        "player": "Parker Washington",
+        "team": "JAX",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab56e82-4feb-11f1-abca-2c54536568a9",
+          "opponent": "HOU",
+          "kickoff_at": "2026-10-18T13:30:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T12:00:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0040667",
+        "player": "Matthew Golden",
+        "team": "GB",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad58264-4feb-11f1-abca-2c54536568a9",
+          "opponent": "DAL",
+          "kickoff_at": "2026-10-19T00:20:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T22:50:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0037238",
+        "player": "Drake London",
+        "team": "ATL",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab577eb-4feb-11f1-abca-2c54536568a9",
+          "opponent": "CHI",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0039361",
+        "player": "Bucky Irving",
+        "team": "TB",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58c4b-4feb-11f1-abca-2c54536568a9",
+          "opponent": "PIT",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0031408",
+        "player": "Mike Evans",
+        "team": "SF",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad58635-4feb-11f1-abca-2c54536568a9",
+          "opponent": "WAS",
+          "kickoff_at": "2026-10-20T00:15:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-19T22:45:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0036912",
+        "player": "DeVonta Smith",
+        "team": "PHI",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab588fe-4feb-11f1-abca-2c54536568a9",
+          "opponent": "CAR",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0036275",
+        "player": "D'Andre Swift",
+        "team": "CHI",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab577eb-4feb-11f1-abca-2c54536568a9",
+          "opponent": "ATL",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0033288",
+        "player": "George Kittle",
+        "team": "SF",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad58635-4feb-11f1-abca-2c54536568a9",
+          "opponent": "WAS",
+          "kickoff_at": "2026-10-20T00:15:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-19T22:45:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0039337",
+        "player": "Malik Nabers",
+        "team": "NYG",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab5857e-4feb-11f1-abca-2c54536568a9",
+          "opponent": "NO",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0040236",
+        "player": "Kyle Monangai",
+        "team": "CHI",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab577eb-4feb-11f1-abca-2c54536568a9",
+          "opponent": "ATL",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0041037",
+        "player": "Denzel Boston",
+        "team": "CLE",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab57bb8-4feb-11f1-abca-2c54536568a9",
+          "opponent": "BAL",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0037247",
+        "player": "George Pickens",
+        "team": "DAL",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad58264-4feb-11f1-abca-2c54536568a9",
+          "opponent": "GB",
+          "kickoff_at": "2026-10-19T00:20:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T22:50:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0038120",
+        "player": "Breece Hall",
+        "team": "NYJ",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58261-4feb-11f1-abca-2c54536568a9",
+          "opponent": "NE",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0040128",
+        "player": "Tyler Warren",
+        "team": "IND",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab57f15-4feb-11f1-abca-2c54536568a9",
+          "opponent": "TEN",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0031588",
+        "player": "Stefon Diggs",
+        "team": "WAS",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad58635-4feb-11f1-abca-2c54536568a9",
+          "opponent": "SF",
+          "kickoff_at": "2026-10-20T00:15:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-19T22:45:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0030506",
+        "player": "Travis Kelce",
+        "team": "KC",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab59281-4feb-11f1-abca-2c54536568a9",
+          "opponent": "LAC",
+          "kickoff_at": "2026-10-18T20:25:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:55:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0036040",
+        "player": "Juwan Johnson",
+        "team": "NO",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab5857e-4feb-11f1-abca-2c54536568a9",
+          "opponent": "NYG",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0039067",
+        "player": "Rashee Rice",
+        "team": "KC",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab59281-4feb-11f1-abca-2c54536568a9",
+          "opponent": "LAC",
+          "kickoff_at": "2026-10-18T20:25:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:55:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0036875",
+        "player": "Rhamondre Stevenson",
+        "team": "NE",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58261-4feb-11f1-abca-2c54536568a9",
+          "opponent": "NYJ",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0038559",
+        "player": "Michael Wilson",
+        "team": "ARI",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58f7e-4feb-11f1-abca-2c54536568a9",
+          "opponent": "LA",
+          "kickoff_at": "2026-10-18T20:05:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:35:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0035719",
+        "player": "Deebo Samuel Sr.",
+        "team": "SF",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad58635-4feb-11f1-abca-2c54536568a9",
+          "opponent": "WAS",
+          "kickoff_at": "2026-10-20T00:15:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-19T22:45:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0040719",
+        "player": "Bhayshul Tuten",
+        "team": "JAX",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab56e82-4feb-11f1-abca-2c54536568a9",
+          "opponent": "HOU",
+          "kickoff_at": "2026-10-18T13:30:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T12:00:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0036894",
+        "player": "Pat Freiermuth",
+        "team": "PIT",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58c4b-4feb-11f1-abca-2c54536568a9",
+          "opponent": "TB",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0039424",
+        "player": "Devaughn Vele",
+        "team": "NO",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab5857e-4feb-11f1-abca-2c54536568a9",
+          "opponent": "NYG",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0034351",
+        "player": "Dallas Goedert",
+        "team": "PHI",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab588fe-4feb-11f1-abca-2c54536568a9",
+          "opponent": "CAR",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0033110",
+        "player": "Tyler Higbee",
+        "team": "LA",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58f7e-4feb-11f1-abca-2c54536568a9",
+          "opponent": "ARI",
+          "kickoff_at": "2026-10-18T20:05:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:35:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0040735",
+        "player": "Luther Burden III",
+        "team": "CHI",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab577eb-4feb-11f1-abca-2c54536568a9",
+          "opponent": "ATL",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0040784",
+        "player": "Quinshon Judkins",
+        "team": "CLE",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab57bb8-4feb-11f1-abca-2c54536568a9",
+          "opponent": "BAL",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0038104",
+        "player": "Tyquan Thornton",
+        "team": "KC",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab59281-4feb-11f1-abca-2c54536568a9",
+          "opponent": "LAC",
+          "kickoff_at": "2026-10-18T20:25:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:55:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0038563",
+        "player": "Tre Tucker",
+        "team": "LV",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad57852-4feb-11f1-abca-2c54536568a9",
+          "opponent": "BUF",
+          "kickoff_at": "2026-10-18T20:25:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:55:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0038797",
+        "player": "Emanuel Wilson",
+        "team": "SEA",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aa94cffe-4feb-11f1-abca-2c54536568a9",
+          "opponent": "DEN",
+          "kickoff_at": "2026-10-16T00:15:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-15T22:45:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0039890",
+        "player": "Adonai Mitchell",
+        "team": "NYJ",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58261-4feb-11f1-abca-2c54536568a9",
+          "opponent": "NE",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0032464",
+        "player": "Kalif Raymond",
+        "team": "CHI",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab577eb-4feb-11f1-abca-2c54536568a9",
+          "opponent": "ATL",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0040715",
+        "player": "Cam Skattebo",
+        "team": "NYG",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab5857e-4feb-11f1-abca-2c54536568a9",
+          "opponent": "NO",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0036973",
+        "player": "Travis Etienne",
+        "team": "NO",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab5857e-4feb-11f1-abca-2c54536568a9",
+          "opponent": "NYG",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0035659",
+        "player": "Terry McLaurin",
+        "team": "WAS",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad58635-4feb-11f1-abca-2c54536568a9",
+          "opponent": "SF",
+          "kickoff_at": "2026-10-20T00:15:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-19T22:45:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0038117",
+        "player": "Wan'Dale Robinson",
+        "team": "TEN",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab57f15-4feb-11f1-abca-2c54536568a9",
+          "opponent": "IND",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0039901",
+        "player": "Keon Coleman",
+        "team": "BUF",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad57852-4feb-11f1-abca-2c54536568a9",
+          "opponent": "LV",
+          "kickoff_at": "2026-10-18T20:25:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:55:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0040129",
+        "player": "Emeka Egbuka",
+        "team": "TB",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58c4b-4feb-11f1-abca-2c54536568a9",
+          "opponent": "PIT",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0040663",
+        "player": "Harold Fannin Jr.",
+        "team": "CLE",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab57bb8-4feb-11f1-abca-2c54536568a9",
+          "opponent": "BAL",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0041027",
+        "player": "Jeremiyah Love",
+        "team": "ARI",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58f7e-4feb-11f1-abca-2c54536568a9",
+          "opponent": "LA",
+          "kickoff_at": "2026-10-18T20:05:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:35:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0040666",
+        "player": "Omarion Hampton",
+        "team": "LAC",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab59281-4feb-11f1-abca-2c54536568a9",
+          "opponent": "KC",
+          "kickoff_at": "2026-10-18T20:25:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:55:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0037746",
+        "player": "Brian Robinson",
+        "team": "ATL",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab577eb-4feb-11f1-abca-2c54536568a9",
+          "opponent": "CHI",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0034960",
+        "player": "Jakobi Meyers",
+        "team": "JAX",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab56e82-4feb-11f1-abca-2c54536568a9",
+          "opponent": "HOU",
+          "kickoff_at": "2026-10-18T13:30:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T12:00:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0038935",
+        "player": "Brenton Strange",
+        "team": "JAX",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab56e82-4feb-11f1-abca-2c54536568a9",
+          "opponent": "HOU",
+          "kickoff_at": "2026-10-18T13:30:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T12:00:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0040730",
+        "player": "RJ Harvey",
+        "team": "DEN",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aa94cffe-4feb-11f1-abca-2c54536568a9",
+          "opponent": "SEA",
+          "kickoff_at": "2026-10-16T00:15:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-15T22:45:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0041438",
+        "player": "Carnell Tate",
+        "team": "TEN",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab57f15-4feb-11f1-abca-2c54536568a9",
+          "opponent": "IND",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0030279",
+        "player": "Keenan Allen",
+        "team": "IND",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab57f15-4feb-11f1-abca-2c54536568a9",
+          "opponent": "TEN",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0035640",
+        "player": "DK Metcalf",
+        "team": "PIT",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58c4b-4feb-11f1-abca-2c54536568a9",
+          "opponent": "TB",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0033906",
+        "player": "Alvin Kamara",
+        "team": "NO",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab5857e-4feb-11f1-abca-2c54536568a9",
+          "opponent": "NYG",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0036613",
+        "player": "Jaylen Waddle",
+        "team": "DEN",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aa94cffe-4feb-11f1-abca-2c54536568a9",
+          "opponent": "SEA",
+          "kickoff_at": "2026-10-16T00:15:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-15T22:45:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0031610",
+        "player": "Darren Waller",
+        "team": "CAR",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab588fe-4feb-11f1-abca-2c54536568a9",
+          "opponent": "PHI",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0036550",
+        "player": "Rashod Bateman",
+        "team": "BAL",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab57bb8-4feb-11f1-abca-2c54536568a9",
+          "opponent": "CLE",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0034383",
+        "player": "Dalton Schultz",
+        "team": "HOU",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab56e82-4feb-11f1-abca-2c54536568a9",
+          "opponent": "JAX",
+          "kickoff_at": "2026-10-18T13:30:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T12:00:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0038393",
+        "player": "Dontayvion Wicks",
+        "team": "PHI",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab588fe-4feb-11f1-abca-2c54536568a9",
+          "opponent": "CAR",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0037816",
+        "player": "Romeo Doubs",
+        "team": "NE",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58261-4feb-11f1-abca-2c54536568a9",
+          "opponent": "NYJ",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0038996",
+        "player": "Tucker Kraft",
+        "team": "GB",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad58264-4feb-11f1-abca-2c54536568a9",
+          "opponent": "DAL",
+          "kickoff_at": "2026-10-19T00:20:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T22:50:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0040138",
+        "player": "Jaylin Noel",
+        "team": "HOU",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab56e82-4feb-11f1-abca-2c54536568a9",
+          "opponent": "JAX",
+          "kickoff_at": "2026-10-18T13:30:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T12:00:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0034827",
+        "player": "DJ Moore",
+        "team": "BUF",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad57852-4feb-11f1-abca-2c54536568a9",
+          "opponent": "LV",
+          "kickoff_at": "2026-10-18T20:25:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:55:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0035261",
+        "player": "Tony Pollard",
+        "team": "TEN",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab57f15-4feb-11f1-abca-2c54536568a9",
+          "opponent": "IND",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0038997",
+        "player": "Josh Downs",
+        "team": "IND",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab57f15-4feb-11f1-abca-2c54536568a9",
+          "opponent": "TEN",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0039811",
+        "player": "MarShawn Lloyd",
+        "team": "GB",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad58264-4feb-11f1-abca-2c54536568a9",
+          "opponent": "DAL",
+          "kickoff_at": "2026-10-19T00:20:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T22:50:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0040242",
+        "player": "Jacory Croskey-Merritt",
+        "team": "WAS",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad58635-4feb-11f1-abca-2c54536568a9",
+          "opponent": "SF",
+          "kickoff_at": "2026-10-20T00:15:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-19T22:45:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0039739",
+        "player": "Roman Wilson",
+        "team": "PIT",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58c4b-4feb-11f1-abca-2c54536568a9",
+          "opponent": "TB",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0034753",
+        "player": "Mark Andrews",
+        "team": "BAL",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab57bb8-4feb-11f1-abca-2c54536568a9",
+          "opponent": "CLE",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0039919",
+        "player": "Rome Odunze",
+        "team": "CHI",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab577eb-4feb-11f1-abca-2c54536568a9",
+          "opponent": "ATL",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0040024",
+        "player": "Darius Cooper",
+        "team": "PHI",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab588fe-4feb-11f1-abca-2c54536568a9",
+          "opponent": "CAR",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0039915",
+        "player": "Ladd McConkey",
+        "team": "LAC",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab59281-4feb-11f1-abca-2c54536568a9",
+          "opponent": "KC",
+          "kickoff_at": "2026-10-18T20:25:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:55:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0033555",
+        "player": "Mack Hollins",
+        "team": "NE",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58261-4feb-11f1-abca-2c54536568a9",
+          "opponent": "NYJ",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0039794",
+        "player": "Braelon Allen",
+        "team": "NYJ",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58261-4feb-11f1-abca-2c54536568a9",
+          "opponent": "NE",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0039066",
+        "player": "Michael Mayer",
+        "team": "LV",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad57852-4feb-11f1-abca-2c54536568a9",
+          "opponent": "BUF",
+          "kickoff_at": "2026-10-18T20:25:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:55:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0033307",
+        "player": "Kendrick Bourne",
+        "team": "ARI",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58f7e-4feb-11f1-abca-2c54536568a9",
+          "opponent": "LA",
+          "kickoff_at": "2026-10-18T20:05:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:35:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0037261",
+        "player": "Khalil Shakir",
+        "team": "BUF",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad57852-4feb-11f1-abca-2c54536568a9",
+          "opponent": "LV",
+          "kickoff_at": "2026-10-18T20:25:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:55:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0040583",
+        "player": "Woody Marks",
+        "team": "HOU",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab56e82-4feb-11f1-abca-2c54536568a9",
+          "opponent": "JAX",
+          "kickoff_at": "2026-10-18T13:30:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T12:00:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0035685",
+        "player": "David Montgomery",
+        "team": "HOU",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab56e82-4feb-11f1-abca-2c54536568a9",
+          "opponent": "JAX",
+          "kickoff_at": "2026-10-18T13:30:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T12:00:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0037256",
+        "player": "Rachaad White",
+        "team": "WAS",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad58635-4feb-11f1-abca-2c54536568a9",
+          "opponent": "SF",
+          "kickoff_at": "2026-10-20T00:15:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-19T22:45:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0038618",
+        "player": "Xavier Hutchinson",
+        "team": "HOU",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab56e82-4feb-11f1-abca-2c54536568a9",
+          "opponent": "JAX",
+          "kickoff_at": "2026-10-18T13:30:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T12:00:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0039894",
+        "player": "Xavier Worthy",
+        "team": "KC",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab59281-4feb-11f1-abca-2c54536568a9",
+          "opponent": "LAC",
+          "kickoff_at": "2026-10-18T20:25:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:55:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0038041",
+        "player": "Jake Ferguson",
+        "team": "DAL",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad58264-4feb-11f1-abca-2c54536568a9",
+          "opponent": "GB",
+          "kickoff_at": "2026-10-19T00:20:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T22:50:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0035891",
+        "player": "Cody White",
+        "team": "LV",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad57852-4feb-11f1-abca-2c54536568a9",
+          "opponent": "BUF",
+          "kickoff_at": "2026-10-18T20:25:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:55:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0038621",
+        "player": "DeMario Douglas",
+        "team": "NE",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58261-4feb-11f1-abca-2c54536568a9",
+          "opponent": "NYJ",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0039738",
+        "player": "Blake Corum",
+        "team": "LA",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58f7e-4feb-11f1-abca-2c54536568a9",
+          "opponent": "ARI",
+          "kickoff_at": "2026-10-18T20:05:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:35:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0035250",
+        "player": "Devin Singletary",
+        "team": "NYG",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab5857e-4feb-11f1-abca-2c54536568a9",
+          "opponent": "NO",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0033090",
+        "player": "Hunter Henry",
+        "team": "NE",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58261-4feb-11f1-abca-2c54536568a9",
+          "opponent": "NYJ",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0033921",
+        "player": "Chris Godwin Jr.",
+        "team": "TB",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58c4b-4feb-11f1-abca-2c54536568a9",
+          "opponent": "PIT",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0041032",
+        "player": "Kenyon Sadiq",
+        "team": "NYJ",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58261-4feb-11f1-abca-2c54536568a9",
+          "opponent": "NE",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0038454",
+        "player": "Keaton Mitchell",
+        "team": "LAC",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab59281-4feb-11f1-abca-2c54536568a9",
+          "opponent": "KC",
+          "kickoff_at": "2026-10-18T20:25:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:55:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0041496",
+        "player": "Jonah Coleman",
+        "team": "DEN",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aa94cffe-4feb-11f1-abca-2c54536568a9",
+          "opponent": "SEA",
+          "kickoff_at": "2026-10-16T00:15:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-15T22:45:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0036158",
+        "player": "J.K. Dobbins",
+        "team": "DEN",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aa94cffe-4feb-11f1-abca-2c54536568a9",
+          "opponent": "SEA",
+          "kickoff_at": "2026-10-16T00:15:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-15T22:45:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0040727",
+        "player": "Tre Harris",
+        "team": "LAC",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab59281-4feb-11f1-abca-2c54536568a9",
+          "opponent": "KC",
+          "kickoff_at": "2026-10-18T20:25:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:55:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0038129",
+        "player": "Cade Otton",
+        "team": "TB",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58c4b-4feb-11f1-abca-2c54536568a9",
+          "opponent": "PIT",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0039410",
+        "player": "Ryan Flournoy",
+        "team": "DAL",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad58264-4feb-11f1-abca-2c54536568a9",
+          "opponent": "GB",
+          "kickoff_at": "2026-10-19T00:20:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T22:50:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0041040",
+        "player": "Antonio Williams",
+        "team": "WAS",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad58635-4feb-11f1-abca-2c54536568a9",
+          "opponent": "SF",
+          "kickoff_at": "2026-10-20T00:15:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-19T22:45:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0040734",
+        "player": "TreVeyon Henderson",
+        "team": "NE",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58261-4feb-11f1-abca-2c54536568a9",
+          "opponent": "NYJ",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0041489",
+        "player": "Germie Bernard",
+        "team": "PIT",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58c4b-4feb-11f1-abca-2c54536568a9",
+          "opponent": "TB",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0039391",
+        "player": "Kimani Vidal",
+        "team": "LAC",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab59281-4feb-11f1-abca-2c54536568a9",
+          "opponent": "KC",
+          "kickoff_at": "2026-10-18T20:25:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:55:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0040737",
+        "player": "Terrance Ferguson",
+        "team": "LA",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58f7e-4feb-11f1-abca-2c54536568a9",
+          "opponent": "ARI",
+          "kickoff_at": "2026-10-18T20:05:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:35:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0037263",
+        "player": "Tyler Allgeier",
+        "team": "ARI",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58f7e-4feb-11f1-abca-2c54536568a9",
+          "opponent": "LA",
+          "kickoff_at": "2026-10-18T20:05:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:35:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0033885",
+        "player": "David Njoku",
+        "team": "LAC",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab59281-4feb-11f1-abca-2c54536568a9",
+          "opponent": "KC",
+          "kickoff_at": "2026-10-18T20:25:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:55:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0041547",
+        "player": "KC Concepcion",
+        "team": "CLE",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab57bb8-4feb-11f1-abca-2c54536568a9",
+          "opponent": "BAL",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0041100",
+        "player": "Josh Cameron",
+        "team": "JAX",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab56e82-4feb-11f1-abca-2c54536568a9",
+          "opponent": "HOU",
+          "kickoff_at": "2026-10-18T13:30:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T12:00:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0041048",
+        "player": "Ted Hurst III",
+        "team": "TB",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58c4b-4feb-11f1-abca-2c54536568a9",
+          "opponent": "PIT",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0037742",
+        "player": "Treylon Burks",
+        "team": "WAS",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad58635-4feb-11f1-abca-2c54536568a9",
+          "opponent": "SF",
+          "kickoff_at": "2026-10-20T00:15:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-19T22:45:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0038558",
+        "player": "Darnell Washington",
+        "team": "PIT",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58c4b-4feb-11f1-abca-2c54536568a9",
+          "opponent": "TB",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0040563",
+        "player": "Efton Chism III",
+        "team": "NE",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58261-4feb-11f1-abca-2c54536568a9",
+          "opponent": "NYJ",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0037664",
+        "player": "Alec Pierce",
+        "team": "IND",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab57f15-4feb-11f1-abca-2c54536568a9",
+          "opponent": "TEN",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0038551",
+        "player": "Kendre Miller",
+        "team": "NO",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab5857e-4feb-11f1-abca-2c54536568a9",
+          "opponent": "NYG",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0037805",
+        "player": "Jeremy Ruckert",
+        "team": "NYJ",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58261-4feb-11f1-abca-2c54536568a9",
+          "opponent": "NE",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0040590",
+        "player": "Konata Mumpfield",
+        "team": "LA",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58f7e-4feb-11f1-abca-2c54536568a9",
+          "opponent": "ARI",
+          "kickoff_at": "2026-10-18T20:05:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:35:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0039793",
+        "player": "AJ Barner",
+        "team": "SEA",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aa94cffe-4feb-11f1-abca-2c54536568a9",
+          "opponent": "DEN",
+          "kickoff_at": "2026-10-16T00:15:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-15T22:45:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0034844",
+        "player": "Saquon Barkley",
+        "team": "PHI",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab588fe-4feb-11f1-abca-2c54536568a9",
+          "opponent": "CAR",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0041395",
+        "player": "Eli Raridon",
+        "team": "NE",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58261-4feb-11f1-abca-2c54536568a9",
+          "opponent": "NYJ",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0038608",
+        "player": "Kayshon Boutte",
+        "team": "HOU",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab56e82-4feb-11f1-abca-2c54536568a9",
+          "opponent": "JAX",
+          "kickoff_at": "2026-10-18T13:30:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T12:00:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0039041",
+        "player": "Elijah Higgins",
+        "team": "ARI",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58f7e-4feb-11f1-abca-2c54536568a9",
+          "opponent": "LA",
+          "kickoff_at": "2026-10-18T20:05:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:35:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0037545",
+        "player": "Rashid Shaheed",
+        "team": "SEA",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aa94cffe-4feb-11f1-abca-2c54536568a9",
+          "opponent": "DEN",
+          "kickoff_at": "2026-10-16T00:15:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-15T22:45:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0036919",
+        "player": "Kenny Gainwell",
+        "team": "TB",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58c4b-4feb-11f1-abca-2c54536568a9",
+          "opponent": "PIT",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0032951",
+        "player": "Laquon Treadwell",
+        "team": "IND",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab57f15-4feb-11f1-abca-2c54536568a9",
+          "opponent": "TEN",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0034348",
+        "player": "Courtland Sutton",
+        "team": "DEN",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aa94cffe-4feb-11f1-abca-2c54536568a9",
+          "opponent": "SEA",
+          "kickoff_at": "2026-10-16T00:15:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-15T22:45:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0036970",
+        "player": "Kyle Pitts",
+        "team": "ATL",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab577eb-4feb-11f1-abca-2c54536568a9",
+          "opponent": "CHI",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0039032",
+        "player": "Tyjae Spears",
+        "team": "TEN",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab57f15-4feb-11f1-abca-2c54536568a9",
+          "opponent": "IND",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0036252",
+        "player": "Michael Pittman",
+        "team": "PIT",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58c4b-4feb-11f1-abca-2c54536568a9",
+          "opponent": "TB",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0033881",
+        "player": "Evan Engram",
+        "team": "DEN",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aa94cffe-4feb-11f1-abca-2c54536568a9",
+          "opponent": "SEA",
+          "kickoff_at": "2026-10-16T00:15:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-15T22:45:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0037809",
+        "player": "Chig Okonkwo",
+        "team": "WAS",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad58635-4feb-11f1-abca-2c54536568a9",
+          "opponent": "SF",
+          "kickoff_at": "2026-10-20T00:15:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-19T22:45:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0039299",
+        "player": "George Holani",
+        "team": "SEA",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aa94cffe-4feb-11f1-abca-2c54536568a9",
+          "opponent": "DEN",
+          "kickoff_at": "2026-10-16T00:15:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-15T22:45:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0036139",
+        "player": "Rico Dowdle",
+        "team": "PIT",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58c4b-4feb-11f1-abca-2c54536568a9",
+          "opponent": "TB",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0040126",
+        "player": "Colston Loveland",
+        "team": "CHI",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab577eb-4feb-11f1-abca-2c54536568a9",
+          "opponent": "ATL",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0040867",
+        "player": "Makai Lemon",
+        "team": "PHI",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab588fe-4feb-11f1-abca-2c54536568a9",
+          "opponent": "CAR",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0040189",
+        "player": "Oronde Gadsden II",
+        "team": "LAC",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab59281-4feb-11f1-abca-2c54536568a9",
+          "opponent": "KC",
+          "kickoff_at": "2026-10-18T20:25:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:55:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0034975",
+        "player": "Justice Hill",
+        "team": "BAL",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab57bb8-4feb-11f1-abca-2c54536568a9",
+          "opponent": "CLE",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0038611",
+        "player": "Chris Rodriguez Jr.",
+        "team": "JAX",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab56e82-4feb-11f1-abca-2c54536568a9",
+          "opponent": "HOU",
+          "kickoff_at": "2026-10-18T13:30:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T12:00:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0041512",
+        "player": "Jadarian Price",
+        "team": "SEA",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aa94cffe-4feb-11f1-abca-2c54536568a9",
+          "opponent": "DEN",
+          "kickoff_at": "2026-10-16T00:15:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-15T22:45:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0037005",
+        "player": "Tommy Tremble",
+        "team": "CAR",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab588fe-4feb-11f1-abca-2c54536568a9",
+          "opponent": "PHI",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0039344",
+        "player": "Jonathon Brooks",
+        "team": "CAR",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab588fe-4feb-11f1-abca-2c54536568a9",
+          "opponent": "PHI",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0038555",
+        "player": "Tank Bigsby",
+        "team": "PHI",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab588fe-4feb-11f1-abca-2c54536568a9",
+          "opponent": "CAR",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0038544",
+        "player": "Quentin Johnston",
+        "team": "LAC",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab59281-4feb-11f1-abca-2c54536568a9",
+          "opponent": "KC",
+          "kickoff_at": "2026-10-18T20:25:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:55:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0040878",
+        "player": "Mike Washington Jr.",
+        "team": "LV",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad57852-4feb-11f1-abca-2c54536568a9",
+          "opponent": "BUF",
+          "kickoff_at": "2026-10-18T20:25:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:55:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0036407",
+        "player": "Jerry Jeudy",
+        "team": "CLE",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab57bb8-4feb-11f1-abca-2c54536568a9",
+          "opponent": "BAL",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0034981",
+        "player": "Foster Moreau",
+        "team": "HOU",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab56e82-4feb-11f1-abca-2c54536568a9",
+          "opponent": "JAX",
+          "kickoff_at": "2026-10-18T13:30:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T12:00:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0039746",
+        "player": "Will Shipley",
+        "team": "PHI",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab588fe-4feb-11f1-abca-2c54536568a9",
+          "opponent": "CAR",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0039021",
+        "player": "Roschon Johnson",
+        "team": "CHI",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab577eb-4feb-11f1-abca-2c54536568a9",
+          "opponent": "ATL",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0036309",
+        "player": "Darnell Mooney",
+        "team": "NYG",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab5857e-4feb-11f1-abca-2c54536568a9",
+          "opponent": "NO",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0033699",
+        "player": "Austin Ekeler",
+        "team": "WAS",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad58635-4feb-11f1-abca-2c54536568a9",
+          "opponent": "SF",
+          "kickoff_at": "2026-10-20T00:15:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-19T22:45:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0037291",
+        "player": "Jalen Nailor",
+        "team": "LV",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad57852-4feb-11f1-abca-2c54536568a9",
+          "opponent": "BUF",
+          "kickoff_at": "2026-10-18T20:25:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T18:55:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0040736",
+        "player": "Mason Taylor",
+        "team": "NYJ",
+        "position": "TE",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab58261-4feb-11f1-abca-2c54536568a9",
+          "opponent": "NE",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0039146",
+        "player": "Jayden Reed",
+        "team": "GB",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad58264-4feb-11f1-abca-2c54536568a9",
+          "opponent": "DAL",
+          "kickoff_at": "2026-10-19T00:20:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T22:50:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0035021",
+        "player": "Ashton Dulin",
+        "team": "IND",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab57f15-4feb-11f1-abca-2c54536568a9",
+          "opponent": "TEN",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0036893",
+        "player": "Najee Harris",
+        "team": "NYG",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab5857e-4feb-11f1-abca-2c54536568a9",
+          "opponent": "NO",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0041052",
+        "player": "Kaelon Black",
+        "team": "SF",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad58635-4feb-11f1-abca-2c54536568a9",
+          "opponent": "WAS",
+          "kickoff_at": "2026-10-20T00:15:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-19T22:45:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0040142",
+        "player": "Kaleb Johnson",
+        "team": "GB",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad58264-4feb-11f1-abca-2c54536568a9",
+          "opponent": "DAL",
+          "kickoff_at": "2026-10-19T00:20:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T22:50:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0041125",
+        "player": "Seth McGowan",
+        "team": "IND",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab57f15-4feb-11f1-abca-2c54536568a9",
+          "opponent": "TEN",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0037120",
+        "player": "Tyler Goodson",
+        "team": "DAL",
+        "position": "RB",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aad58264-4feb-11f1-abca-2c54536568a9",
+          "opponent": "GB",
+          "kickoff_at": "2026-10-19T00:20:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T22:50:00+00:00",
+          "state": "not_yet_due"
+        }
+      },
+      {
+        "player_id": "00-0041067",
+        "player": "Bryce Lance",
+        "team": "NO",
+        "position": "WR",
+        "identity_verified": true,
+        "classification": "UNKNOWN",
+        "recommendation_allowed": false,
+        "events": [],
+        "conflicts": [],
+        "depth": {
+          "classification": "unknown",
+          "confirmed_starter": false
+        },
+        "game": {
+          "game_id": "aab5857e-4feb-11f1-abca-2c54536568a9",
+          "opponent": "NYG",
+          "kickoff_at": "2026-10-18T17:00:00+00:00",
+          "bye": false,
+          "mapping_verified": true,
+          "source_id": "official_schedule",
+          "status": "scheduled"
+        },
+        "inactives": {
+          "due_at": "2026-10-18T15:30:00+00:00",
+          "state": "not_yet_due"
+        }
+      }
+    ]
+  },
+  "qa_input_receipts": {
+    "weekly": {
+      "url": "https://github.com/nflverse/nflverse-data/releases/download/stats_player/stats_player_week_2026.parquet",
+      "retrieved_at": "2026-10-15T14:25:57.646632+00:00",
+      "sha256": "8da79a965941a62ea3244a262fffd39b8ee2af172fedf9758a079d8e81ae6a26",
+      "source_last_modified": "Thu, 15 Oct 2026 14:12:02 GMT"
+    },
+    "nflverse_schedule": {
+      "url": "https://github.com/nflverse/nflverse-data/releases/download/schedules/games.csv",
+      "retrieved_at": "2026-10-15T14:25:58.075789+00:00",
+      "sha256": "63ba80cd881972901dde0b3c0f42a16791a948e75d179c4d1adaefb40236a601",
+      "source_last_modified": "Thu, 15 Oct 2026 14:16:31 GMT"
+    },
+    "official_schedule": {
+      "url": "https://www.nfl.com/schedules/2026/by-week/week-6",
+      "retrieved_at": "2026-10-15T14:25:58.254450+00:00",
+      "sha256": "4dfc69df457aa257f7dc278e61b88f9492f2ae24d1657080090381a3aa79c710",
+      "source_last_modified": null
+    },
+    "transaction_00-0039849": {
+      "url": "https://www.houstontexans.com/news/houston-texans-transactions-10-12-2026",
+      "retrieved_at": "2026-10-15T14:25:58.602823+00:00",
+      "sha256": "984f2b8d20a4cf77e5ee5f2011343aaacc5f3ed2b6a5a72c218f8058a5e2d487",
+      "source_last_modified": null
+    },
+    "transaction_00-0038728": {
+      "url": "https://www.miamidolphins.com/news/dolphins-make-roster-moves-x9196",
+      "retrieved_at": "2026-10-15T14:25:58.748544+00:00",
+      "sha256": "51ea8d1a74588debd75536cdf209a764c3e75269fa394e3fc63064b8c8434256",
+      "source_last_modified": null
+    },
+    "transaction_00-0041096": {
+      "url": "https://www.miamidolphins.com/team/transactions/",
+      "retrieved_at": "2026-10-15T14:25:59.030662+00:00",
+      "sha256": "bf27bcd232838b621e9cae0c491f8e45c91b554e9742cf95677812fadc6ebf38",
+      "source_last_modified": null
+    },
+    "snaps": {
+      "url": "https://github.com/nflverse/nflverse-data/releases/download/snap_counts/snap_counts_2026.parquet",
+      "retrieved_at": "2026-10-15T14:26:00.145004+00:00",
+      "sha256": "e61c4343f9224e5ba4fc993cbfdea315bba2ea9f80d530387ee2c8a56024e12f",
+      "source_last_modified": "Tue, 13 Oct 2026 11:01:32 GMT"
+    },
+    "teams": {
+      "url": "https://github.com/nflverse/nflverse-data/releases/download/stats_team/stats_team_week_2026.parquet",
+      "retrieved_at": "2026-10-15T14:26:00.470865+00:00",
+      "sha256": "86ae1a398e76226b8d89d137f0fc327b2a0d10ed7f3f74de02f02c24e2edea82",
+      "source_last_modified": "Thu, 15 Oct 2026 14:12:05 GMT"
+    }
+  },
+  "qa_reviewed_transactions": [
+    {
+      "player_id": "00-0039849",
+      "player": "Marvin Harrison Jr.",
+      "position": "WR",
+      "old": "ARI",
+      "new": "HOU",
+      "date": "2026-10-12",
+      "url": "https://www.houstontexans.com/news/houston-texans-transactions-10-12-2026",
+      "anchors": [
+        "Marvin Harrison Jr.",
+        "via trade with the Arizona Cardinals"
+      ]
+    },
+    {
+      "player_id": "00-0038728",
+      "player": "Jared Wayne",
+      "position": "WR",
+      "old": "HOU",
+      "new": "MIA",
+      "date": "2026-10-13",
+      "url": "https://www.miamidolphins.com/news/dolphins-make-roster-moves-x9196",
+      "anchors": [
+        "Jared Wayne",
+        "off waivers from Houston"
+      ]
+    },
+    {
+      "player_id": "00-0041096",
+      "player": "Kaytron Allen",
+      "position": "RB",
+      "old": "WAS",
+      "new": "MIA",
+      "date": "2026-10-09",
+      "url": "https://www.miamidolphins.com/team/transactions/",
+      "anchors": [
+        "10/09",
+        "Kaytron Allen",
+        "off waivers from Washington"
+      ]
+    }
+  ],
+  "qa_provider_observation": {
+    "source_retrieved_at": "2026-10-15T14:27:28.023855+00:00",
+    "validated_at": "2026-10-15T14:27:28.043604+00:00",
+    "official_freshness_verified": false,
+    "scope": "QA supplemental observation; projections and official evidence unchanged",
+    "counts": {
+      "designations": 2254,
+      "games": 14,
+      "identity_search_Charles": 48,
+      "identity_search_Ertz": 4,
+      "identity_search_Wayne": 41,
+      "injuries": 553,
+      "roster_ARI": 73,
+      "roster_ATL": 74,
+      "roster_BAL": 70,
+      "roster_BUF": 65,
+      "roster_CAR": 79,
+      "roster_CHI": 72,
+      "roster_CIN": 64,
+      "roster_CLE": 72,
+      "roster_DAL": 70,
+      "roster_DEN": 72,
+      "roster_DET": 70,
+      "roster_GB": 77,
+      "roster_HOU": 79,
+      "roster_IND": 69,
+      "roster_JAX": 74,
+      "roster_KC": 72,
+      "roster_LAC": 74,
+      "roster_LAR": 69,
+      "roster_LV": 70,
+      "roster_MIA": 69,
+      "roster_MIN": 66,
+      "roster_NE": 78,
+      "roster_NO": 74,
+      "roster_NYG": 77,
+      "roster_NYJ": 71,
+      "roster_PHI": 73,
+      "roster_PIT": 73,
+      "roster_SEA": 68,
+      "roster_SF": 78,
+      "roster_TB": 64,
+      "roster_TEN": 68,
+      "roster_WSH": 74,
+      "teams": 32
+    }
+  }
+}
