@@ -24,6 +24,7 @@ def setup(monkeypatch, state=None, clicked=False, result=None):
         calls.append(kwargs)
         return result
     monkeypatch.setattr(bridge, '_bridge', component)
+    monkeypatch.setattr(bridge, '_native_bridge', component)
     return state, events, calls
 
 def test_no_automatic_retry_or_state_loss(monkeypatch):
