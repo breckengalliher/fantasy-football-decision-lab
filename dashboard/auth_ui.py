@@ -414,7 +414,7 @@ def render_auth(api: SupabaseAPI, app_url: str) -> AuthSession | None:
         if pilot_only and os.environ.get('SDL_PILOT_PREPROVISIONED_ONLY') != '1':
             st.info(
                 "**First time here?** Open your newest invitation email and choose "
-                "**Set your account password**. Create a unique password with "
+                "**Accept invitation**. On the **Set your account password** screen, create a unique password with "
                 "**at least 12 characters**, then sign in here.\n\n"
                 "Already set a password, or set one with the pilot organizer? Use that password below."
             )

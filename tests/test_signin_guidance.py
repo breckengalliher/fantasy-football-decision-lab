@@ -70,6 +70,8 @@ def test_pilot_setup_login_and_recovery_help_match_available_controls(screen):
     app = screen()
     text = all_text(app)
     assert "newest invitation email" in text and "at least 12 characters" in text
+    assert "choose **Accept invitation**" in text
+    assert "On the **Set your account password** screen" in text
     assert "set one with the pilot organizer" in text
     assert "does not create a new password" in text
     assert "Forgot your password" in text and "spam folder" in text

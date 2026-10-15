@@ -1,0 +1,14 @@
+{
+  "previous_candidate": "059dba3d3823a583cfacf13b070d616bedb64e31",
+  "scope": "Local correction to PR #2; no remote PR update or hosted change",
+  "change": "Invitation email instruction now says Accept invitation, followed by Set your account password on the destination screen",
+  "validation": "53 focused local form and pilot-access tests passed; all provider operations mocked",
+  "receipt": "review/evidence/onboarding-wording-reconcile.xml",
+  "preserved": "Previous 89-Python and 24-JavaScript receipts remain untouched and candidate-specific. Shared parser, auth operations, allowlist and password validation are unchanged by this correction.",
+  "policy_discrepancy": "Read-only QA inspection found provider minimum 6 and application minimum 12. Neither changed. Provider-policy alignment remains a separate decision.",
+  "pending": ["Hosted exact-candidate checks", "Authorized QA email/setup/recovery exercise", "Human-completed real password actions"],
+  "production_changes": 0,
+  "emails_sent": 0,
+  "password_changes": 0,
+  "remote_updates": 0
+}
