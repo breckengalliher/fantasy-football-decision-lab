@@ -55,6 +55,7 @@ except ModuleNotFoundError:
     from public_display_cache import public_display_version, display_opponent_rank, display_game_log, clear_public_display_cache, comparison_pool
 from urllib.parse import urlencode
 from streamlit_local_storage import LocalStorage
+from dashboard import onboarding_storage
 
 try:
     from dashboard.providers.sportsdataio import context_freshness, format_injury_context
@@ -1329,7 +1330,14 @@ if page == "Sunday Command Center" or pilot_accounts is not None:
 
 browser_storage = None
 persisted_onboarding_seen = True
-if page == "Decision Room":
+if page == "Decision Room" and onboarding_storage.enabled(command_center_api_client):
+    if "onboarding_seen" not in st.session_state or st.session_state.get("onboarding_pending_persist", False):
+        persisted_onboarding_seen = onboarding_storage.load(
+            dismiss=st.session_state.get("onboarding_pending_persist", False))
+        st.session_state["onboarding_pending_persist"] = False
+    else:
+        persisted_onboarding_seen = bool(st.session_state["onboarding_seen"])
+elif page == "Decision Room":
     if "onboarding_seen" not in st.session_state:
         # Browser storage is relevant only to the Decision Room guide. Mounting
         # this custom component on every public page caused an avoidable second
