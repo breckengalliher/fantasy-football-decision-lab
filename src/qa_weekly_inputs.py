@@ -22,6 +22,7 @@ from dashboard.availability_evidence import resolve_availability
 from src.refresh_weekly_snapshot import build_scoring_format_boards
 from src.football_qa import require_no_hard_errors, validate_weekly
 from src.publication import validate_snapshot, FILES
+from src.qa_current_teams import reviewed_current_teams, reviewed_transactions
 
 
 def official_games(raw, season, week):
@@ -47,12 +48,13 @@ def official_games(raw, season, week):
     return list(games.values())
 
 
-def build(destination, season, week):
+def build(destination, season, week, *, team_review=None):
     from src.rollover import Target, validate_target
     target = Target(season, week)
     if (os.getenv('SDL_QA_PROVIDER_PUBLICATION') != '1'
             or os.getenv('GITHUB_REPOSITORY') != 'breckengalliher/sdl-release-qa-scheduler'):
         raise ValueError('QA-only producer')
+    transactions = reviewed_transactions(season, week, team_review)
     destination = Path(destination)
     if destination.exists():
         raise ValueError('Use a new staging destination')
@@ -77,7 +79,8 @@ def build(destination, season, week):
     if {(g['home'],g['away']) for g in games} != set(zip(current.home_team,current.away_team)):
         raise ValueError('Schedule providers disagree on current-week games')
     by_team = {team:game for game in games for team in (game['home'],game['away'])}
-    board, next_week = build_start_sit_board(weekly,schedules,season)
+    current_teams = reviewed_current_teams(weekly, season, week, fetch, review=team_review)
+    board, next_week = build_start_sit_board(weekly,schedules,season,current_teams=current_teams)
     if next_week != week:
         raise ValueError('Model week disagrees with requested publication')
     snaps = pd.read_parquet(BytesIO(fetch('snaps',SNAP_COUNTS_URL.format(season=season))))
@@ -130,7 +133,11 @@ def build(destination, season, week):
         'injury_freshness_verified':False,'depth_freshness_verified':False,
         'availability_certificate':{'schema_version':2,'season':season,'week':week,'synthetic':False,
             'policy':'all_availability_actions_blocked','sources':{'official_schedule':source},'players':records},
-        'qa_input_receipts':receipts}
+        'qa_input_receipts':receipts,
+        'qa_reviewed_transactions':transactions}
+    if team_review is not None:
+        metadata['qa_transaction_review'] = {key: team_review[key] for key in
+            ('schema_version', 'season', 'week', 'status', 'reviewed_at')}
     destination.mkdir(parents=True)
     for points, frame in scoring.items():
         frame.to_parquet(destination/f'live_start_sit_board_{points}pt_current.parquet',index=False)
@@ -145,5 +152,7 @@ if __name__ == '__main__':
     parser.add_argument('--destination',required=True)
     parser.add_argument('--season',type=int,required=True)
     parser.add_argument('--week',type=int,required=True)
+    parser.add_argument('--team-review', default='', help='Reviewed transaction JSON for this exact period; required beyond 2026 Week 6')
     args=parser.parse_args()
-    print(json.dumps(build(args.destination,args.season,args.week),indent=2))
+    review = json.loads(Path(args.team_review).read_text()) if args.team_review else None
+    print(json.dumps(build(args.destination,args.season,args.week,team_review=review),indent=2))

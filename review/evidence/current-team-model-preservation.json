@@ -1,0 +1,26 @@
+{
+  "reference": "71040d6dc38fea291cf7b8cc65260ebf01e36fc3",
+  "source_files": {
+    "dashboard/data.py": {
+      "LF_normalized_sha256": "4305703a42f9f8dd98e73eb57313352bc6805c4a32f88cd965d1aa0df840afc5",
+      "unchanged": true
+    },
+    "src/scoring.py": {
+      "LF_normalized_sha256": "fd6934eb711740645adc03c4f449a568aba663793e31233ae33611324dbbec6d",
+      "unchanged": true
+    },
+    "src/features.py": {
+      "LF_normalized_sha256": "635069f5dee77babbdb48b93b45fec654469d4c3249509bcff1b51967c21cd5a",
+      "unchanged": true
+    },
+    "src/refresh_weekly_snapshot.py": {
+      "LF_normalized_sha256": "628bbcf21067a503ddb7ee6c1aa519bf5fad423c774a54ad4fec7da8950f60ed",
+      "unchanged": true
+    },
+    "tests/test_qa_current_teams.py": {
+      "LF_normalized_sha256": "c8af932b143a7471871dd80ea5e487ba9804b0b3901a566a62955659d6d2f2a0",
+      "unchanged": true
+    }
+  },
+  "TRANSACTIONS_AST_unchanged": true
+}

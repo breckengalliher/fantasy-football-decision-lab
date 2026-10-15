@@ -1,0 +1,32 @@
+{
+  "previous_candidate": "97c1bea6c3fd5f383ef2a325898d406f1054012a",
+  "actual_producer_reference": "71040d6dc38fea291cf7b8cc65260ebf01e36fc3",
+  "scope": "Local producer reconciliation for PR #3; no remote PR update or hosted change",
+  "preservation": [
+    "dashboard/data.py is copied exactly from the actual producer, retaining its current_teams argument and upcoming-team mapping block; scoring formulas are not edited",
+    "The three reviewed Week 6 TRANSACTIONS entries and source-anchor/identity checks are retained",
+    "Original tests/test_qa_current_teams.py is byte-identical to the producer reference",
+    "Historical game rows, original PASS receipts, prior candidate commits and source timestamps remain intact",
+    "No League Settings, schema, numerical scoring, source vendor or production changes"
+  ],
+  "new_contract": [
+    "Producer accepts --team-review JSON for an explicit season/week",
+    "Built-in reviewed 2026 Week 6 remains supported without a new document",
+    "Any later period requires schema version, matching period, reviewed status/time and transaction entries with stable identity/source anchors",
+    "A review cannot silently omit a prior correction while the statistical input still assigns the player to its old team",
+    "Source pages are rechecked by the existing fetch boundary; absent/changed evidence fails closed",
+    "Transactions and review period/time remain in exported metadata; restricted availability is unchanged"
+  ],
+  "local_tests": "127 passed, zero failures/errors/skips; synthetic data and blocked external operations",
+  "receipt": "review/evidence/rollover-reconcile-final.xml",
+  "scheduler_companion": "Local private scheduler checkout based on 4e473de7e7bcee9e0f30786243720e9c3fce708d; separately committed and packaged",
+  "remaining_gates": [
+    "Review and approve an actual next-period current-team document; no real Week 7 review was fabricated here",
+    "Publish/activate exact producer and scheduler only under separately authorized QA work",
+    "Locked-runtime, real source completeness and hosted adoption/recovery checks remain pending",
+    "Automatic timing, postponed games, corrections and season-transition policy remain unapproved proposals"
+  ],
+  "production_changes": 0,
+  "live_refreshes": 0,
+  "remote_updates": 0
+}

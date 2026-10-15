@@ -19,6 +19,13 @@ import pytest
 POINTS = ["floor_ppr", "median_ppr", "ceiling_ppr", "projected_ppr"]
 
 
+def review_for(week):
+    # Explicit review of fabricated identities only; not real NFL evidence.
+    return {'schema_version':1, 'season':2026, 'week':week, 'status':'reviewed',
+            'reviewed_at':'2026-10-14T12:00:00Z', 'transactions':[]}
+
+
+
 def fingerprint(directory):
     return {str(path.relative_to(directory)): hashlib.sha256(path.read_bytes()).hexdigest()
             for path in directory.rglob("*") if path.is_file()}
@@ -57,8 +64,9 @@ def feed(api, spec, monkeypatch):
                 "kickoff_at": spec["kickoff_at"] if opponent != "BYE" else None})
         return pd.DataFrame(rows)
 
-    def base_model(weekly, schedule, season):
+    def base_model(weekly, schedule, season, *, current_teams=None):
         state["model_calls"].append(("base", season))
+        state["current_teams"] = current_teams
         return frame(4), state["model_week"]
 
     def scoring_model(board, weekly, prior, week):
@@ -128,7 +136,7 @@ BASE = f"https://raw.githubusercontent.com/fixture/offline/{'b' * 40}/data/proce
 @pytest.fixture
 def built(tmp_path, api, feed):
     destination = tmp_path / "week7"
-    api.weekly.build(destination, 2026, 7)
+    api.weekly.build(destination, 2026, 7, team_review=review_for(7))
     return destination
 
 
@@ -137,7 +145,7 @@ def last_good(tmp_path, api, feed):
     previous = dict(feed)
     feed.update(completed_week=5, official_week=6, schedule_week=6, model_week=6)
     directory = tmp_path / "last-good-week6"
-    api.weekly.build(directory, 2026, 6)
+    api.weekly.build(directory, 2026, 6, team_review=review_for(6))
     api.publication.write_manifest(directory, "a" * 40)
     feed.update(previous)
     return directory, fingerprint(directory)
@@ -147,6 +155,9 @@ def test_next_week_build_and_immutable_reader_agree_on_both_formats(built, api, 
     meta = metadata(built, api)
     assert (meta["season"], meta["completed_week"], meta["next_week"]) == (2026, 6, 7)
     assert feed["model_calls"] == [("base", 2026), ("scoring", 7)]
+    assert feed['current_teams'] == {}
+    assert meta['qa_reviewed_transactions'] == []
+    assert meta['qa_transaction_review']['week'] == 7
     manifest = api.publication.build_manifest(built, "c" * 40)
     transport = LocalTransport(built, manifest)
     loaded = api.reader.read_metadata(transport, BASE)
@@ -194,7 +205,7 @@ def test_wrong_period_rejected_without_touching_last_good(tmp_path, api, feed, l
     feed[field] = value
     output = tmp_path / "rejected"
     with pytest.raises(ValueError, match=error):
-        api.weekly.build(output, 2026, 7)
+        api.weekly.build(output, 2026, 7, team_review=review_for(7))
     assert not output.exists()
     assert fingerprint(directory) == before
 
@@ -205,7 +216,7 @@ def test_partial_next_week_producer_output_never_becomes_a_pointer(tmp_path, api
     feed["formats"] = formats
     output = tmp_path / "partial"
     with pytest.raises(FileNotFoundError):
-        api.weekly.build(output, 2026, 7)
+        api.weekly.build(output, 2026, 7, team_review=review_for(7))
     assert not (output / "publication_manifest.json").exists()
     assert fingerprint(directory) == before
 
