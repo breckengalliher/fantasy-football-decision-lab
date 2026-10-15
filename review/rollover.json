@@ -1,0 +1,58 @@
+{
+  "base": "57ccd3051d7147783d5f6b81fdb5964d22833f95",
+  "scope": "Local/QA producer, publisher and export guards. No live jobs or activation.",
+  "changes": [
+    "QA producer and publisher CLI require explicit season/week instead of Week 6 defaults",
+    "Nonnumerical board period columns bind both scoring outputs to the explicit target",
+    "New python -m src.rollover export validates period, schema, identities, finite ordered forecasts, certificates, hashes and actual reader code before atomic local directory installation",
+    "QA publisher supports target and reader gates before its existing single non-force ref update",
+    "Retained snapshot notice identifies prior week and failed requested week without advancing source timestamps"
+  ],
+  "acceptance": {
+    "preserved_rollover_contracts": "PASS_LOCAL_CURRENT_CANDIDATE via separate adapted tests; archived tests and receipts unchanged",
+    "week6_to_week7_coherent_pair": "PASS_LOCAL synthetic model/input/git boundaries; not real NFL forecasts",
+    "missing_data_last_good_bytes_and_time": "PASS_LOCAL; exporter emits no successful-publication timestamp",
+    "wrong_period_mixed_pair_schema_validation": "PASS_LOCAL",
+    "failed_download_access_denial": "PASS_LOCAL failure/recovery boundaries; real provider not called",
+    "boundary_delayed_duplicate_overlap": "PASS_LOCAL policy, duplicate-export, competing-writer and publisher tests",
+    "source_times_availability_restrictions": "PASS_LOCAL unchanged payload bytes and certificate",
+    "both_QA_readers_period_version_hashes": "PASS_LOCAL actual reader over local immutable transport; HOSTED_QA_PENDING",
+    "adoption_saved_state": "PASS_LOCAL unchanged idle-update/draft regressions; hosted adoption/reopening pending",
+    "previous_snapshot_recovery": "PASS_LOCAL data-only preparation and both readers; hosted rehearsal pending",
+    "no_production_model_change": "PASS: numerical model/scoring and packaged-data source has no diff"
+  },
+  "automatic_target_proposal": {
+    "status": "ADVISORY_ONLY; no scheduler or activation wired",
+    "rule": "All authoritative current-week games final, statistics cover both teams of every game through exactly that week, next-week schedule exists: propose week+1. Then enforce independent schedule agreement, existing completeness rules and complete publication validation.",
+    "waiting": "Delayed statistics, non-final/postponed game or absent schedule retains last-good. Never use weekday/midnight alone or infer healthy status.",
+    "product_decisions": [
+      "Approve authoritative final-state source and postponed/rescheduled-game handling",
+      "Approve statistics correction/completeness delay and behavior after next week's first kickoff",
+      "Define Week 1, postseason and season-transition policy; current Target permits regular-season weeks 2–18",
+      "Review actual scheduler patch separately: its repository/configuration is absent from frozen candidate"
+    ]
+  },
+  "evidence": {
+    "python": "109 passed, zero failures/errors/skips; review/evidence/rollover.xml",
+    "contracts": "tests/test_rollover_candidate.py; copied/adapted from preserved original tests/rollover",
+    "historical": "Original reports/rollover-tests-20261015 and Week-6-only historical export guard remain untouched; not relabeled as updated",
+    "transport": "Actual local readers, synthetic model/input and in-memory git; no live publication receipt",
+    "runtime": "Windows Python 3.14; locked runtime and exact active producer parity pending"
+  },
+  "remaining_gates": [
+    "Reconcile exact active producer/scheduler; patch explicit target arguments in actual scheduler repository",
+    "Validate real next-week inputs and exact candidate under locked runtime in isolated QA",
+    "Authorized hosted QA publication, reader/adoption/unsaved-draft and data-only recovery rehearsal",
+    "Verify declared export asset revision really contains exported bytes before remote publication; local preparation cannot prove remote contents"
+  ],
+  "proposed_release": {
+    "status": "NOT_READY_FOR_PRODUCTION_APPROVAL",
+    "scope": "Separate app notice, producer/export validation and reviewed scheduler configuration; no numerical scoring or private-data changes",
+    "reconnects": "App notice requires runtime deployment and may reconnect sessions; separately approved data-only pin adoption uses existing edit guards",
+    "rollback": "Restore immediately preceding validated data pointer after both reader/hash checks, preserving timestamps; no source/schema change for data rollback. Restore prior app artifact separately if runtime fails."
+  },
+  "production_changes": 0,
+  "live_refreshes": 0,
+  "real_publications": 0,
+  "database_changes": 0
+}

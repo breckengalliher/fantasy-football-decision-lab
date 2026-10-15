@@ -1,0 +1,13 @@
+{
+  "fixture_kind": "synthetic offline contract data; not actual NFL schedule or forecasts",
+  "season": 2026,
+  "previous_week": 6,
+  "next_week": 7,
+  "kickoff_at": "2026-10-25T17:00:00Z",
+  "game": {"id": "fixture-week-7", "home": "SEA", "away": "DEN"},
+  "players": [
+    {"player_id": "fixture-qb", "player": "Fixture Quarterback", "team": "SEA", "position": "QB", "four": 16.0, "six": 20.0},
+    {"player_id": "fixture-wr", "player": "Fixture Receiver", "team": "DEN", "position": "WR", "four": 12.0, "six": 12.0},
+    {"player_id": "fixture-bye", "player": "Fixture Bye Runner", "team": "CHI", "position": "RB", "four": 10.0, "six": 10.0}
+  ]
+}

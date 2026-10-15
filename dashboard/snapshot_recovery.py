@@ -8,6 +8,14 @@ from copy import deepcopy
 from threading import Lock
 
 
+def retained_notice(metadata):
+    week = metadata.get('next_week', 'unknown')
+    target = metadata.get('failed_target_week')
+    period = f'Retaining prior-week data: Week {week}; Week {target} could not be validated.' if isinstance(target, int) and isinstance(week, int) and target > week else f'Showing the last fully validated Week {week} snapshot.'
+    return ('Update unavailable. ' + period + ' Original source timestamps are unchanged. '
+            'Verify current injuries and availability before changing your lineup.')
+
+
 class SnapshotRecovery:
     def __init__(self, max_entries=2):
         self._entries = OrderedDict()
@@ -28,6 +36,7 @@ class SnapshotRecovery:
             snapshot, retained_metadata = previous
             recovered = deepcopy(retained_metadata)
             recovered["publication_status"] = "retained-validated-offline"
+            recovered['failed_target_week'] = metadata.get('next_week')
             # A valid file is not proof of current availability during outage.
             recovered["injury_freshness_verified"] = False
             recovered["depth_freshness_verified"] = False

@@ -48,6 +48,8 @@ def official_games(raw, season, week):
 
 
 def build(destination, season, week):
+    from src.rollover import Target, validate_target
+    target = Target(season, week)
     if (os.getenv('SDL_QA_PROVIDER_PUBLICATION') != '1'
             or os.getenv('GITHUB_REPOSITORY') != 'breckengalliher/sdl-release-qa-scheduler'):
         raise ValueError('QA-only producer')
@@ -90,6 +92,8 @@ def build(destination, season, week):
     records = []
     for points, frame in scoring.items():
         frame = guard_forecasts(reconcile_board_identities(frame))
+        frame['publication_season'] = season
+        frame['publication_week'] = week
         frame['injury_status_live'] = 'Unknown'
         frame['injury_note_live'] = 'Official availability unverified; QA recommendations blocked.'
         frame['game_status_live'] = 'scheduled'
@@ -132,14 +136,14 @@ def build(destination, season, week):
         frame.to_parquet(destination/f'live_start_sit_board_{points}pt_current.parquet',index=False)
     weekly.to_parquet(destination/FILES[2],index=False)
     (destination/FILES[-1]).write_text(json.dumps(metadata,indent=2))
-    result = validate_snapshot(destination)
+    result = validate_target(destination, target)
     return {'record_counts':result['record_counts'],'certification':result['availability_certification']}
 
 
 if __name__ == '__main__':
     parser=argparse.ArgumentParser()
     parser.add_argument('--destination',required=True)
-    parser.add_argument('--season',type=int,default=2026)
-    parser.add_argument('--week',type=int,default=6)
+    parser.add_argument('--season',type=int,required=True)
+    parser.add_argument('--week',type=int,required=True)
     args=parser.parse_args()
     print(json.dumps(build(args.destination,args.season,args.week),indent=2))
