@@ -17,7 +17,7 @@ class RosterRepository:
         self.user_id = user_id
 
     def list_teams(self) -> list[dict[str, Any]]:
-        query = "select=id,name,league_id,updated_at,fantasy_leagues(name,season,scoring_type,passing_td_points)&order=updated_at.desc"
+        query = "select=id,name,league_id,updated_at,fantasy_leagues(name,season,scoring_type,passing_td_points,updated_at)&order=updated_at.desc"
         return self.api.table(self.access_token, "fantasy_teams", query=query) or []
 
     def sleeper_connection(self, team_id: str) -> dict[str, Any] | None:
@@ -140,6 +140,43 @@ class RosterRepository:
             method="DELETE",
             query=f"id=eq.{quote(league_id, safe='')}",
         )
+
+    def save_team_settings(self, team: dict[str, Any], roster: list[dict[str, Any]], *,
+                           name: str, team_name: str, passing_td_points: int,
+                           slot_counts: dict[str, int]) -> None:
+        """Commit one displayed settings revision without changing assignments."""
+        allowed = {"QB", "RB", "WR", "TE", "FLEX", "SUPERFLEX", "BENCH"}
+        if not 1 <= len(name.strip()) <= 80 or not 1 <= len(team_name.strip()) <= 80:
+            raise ValueError("League and team names must contain 1–80 characters.")
+        if type(passing_td_points) is not int or passing_td_points not in {4, 6}:
+            raise ValueError("Passing touchdowns must be worth 4 or 6 points.")
+        if set(slot_counts) != allowed or any(type(n) is not int or not 0 <= n <= 20 for n in slot_counts.values()):
+            raise ValueError("Each roster slot count must be a whole number between 0 and 20.")
+        if not sum(slot_counts.values()):
+            raise ValueError("Keep at least one roster slot.")
+        for kind, count in slot_counts.items():
+            occupied = sum(bool(row.get("roster_assignments")) for row in roster if str(row["slot_type"]) == kind)
+            if count < occupied:
+                raise ValueError(f"Remove players from {kind} slots before reducing that slot count.")
+        league = team.get("fantasy_leagues") or {}
+        if not team.get("updated_at") or not league.get("updated_at"):
+            raise ValueError("Close League Settings and reopen it before saving.")
+        expected = {
+            "league_id": str(team["league_id"]), "team_name": team["name"],
+            "league_name": league["name"], "passing_td_points": league["passing_td_points"],
+            "team_updated_at": team["updated_at"], "league_updated_at": league["updated_at"],
+            "slots": sorted(
+                [{"id": str(row["id"]), "slot_type": str(row["slot_type"]),
+                  "slot_order": int(row["slot_order"]), "is_starter": bool(row["is_starter"])} for row in roster],
+                key=lambda row: row["id"]),
+        }
+        result = self.api.rpc(self.access_token, "save_team_settings", {
+            "p_team_id": str(team["id"]), "p_team_name": team_name.strip(),
+            "p_league_name": name.strip(), "p_passing_td_points": passing_td_points,
+            "p_slot_counts": slot_counts, "p_expected": expected,
+        })
+        if result != {"saved": True}:
+            raise SupabaseAPIError("Settings save was not confirmed. Close League Settings and reopen it to check before trying again.")
 
     def update_league(self, league_id: str, *, name: str, passing_td_points: int) -> None:
         if not name.strip():

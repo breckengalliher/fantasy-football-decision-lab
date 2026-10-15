@@ -34,18 +34,18 @@ def test_unavailable_saved_forecast_never_invents_zero_points(monkeypatch, catal
     assert entry['player_id']=='saved' and entry['assignment_updated_at']=='version'
 
 
-def test_pilot_rejects_previously_open_settings_before_any_repository_call(monkeypatch):
+def test_pilot_exposes_existing_settings_without_team_creation(monkeypatch):
     from dashboard import command_center_v2
-
+    from types import SimpleNamespace
     class NoRepositoryAccess:
         def __getattr__(self, name):
-            raise AssertionError(f"Pilot settings attempted repository access: {name}")
-
-    notices = []
+            raise AssertionError(f"Closed settings attempted repository access: {name}")
+    buttons = []
     monkeypatch.setenv('SDL_RESTRICTED_PILOT', '1')
-    monkeypatch.setattr(command_center_v2.st, 'info', notices.append)
-    command_center_v2._edit_team_settings({}, NoRepositoryAccess())
-    assert notices == ["League settings are fixed for this pilot. Use Manage to edit your lineup."]
+    monkeypatch.setattr(command_center_v2, 'st', SimpleNamespace(session_state={},
+        button=lambda label, **kwargs: buttons.append(label)))
+    command_center_v2._league_settings_panel({"id": "test-team"}, NoRepositoryAccess())
+    assert buttons == ["League Settings"]
 
 
 @pytest.mark.parametrize('write_succeeds', [True, False])

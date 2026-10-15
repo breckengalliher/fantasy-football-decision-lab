@@ -4,6 +4,7 @@ from __future__ import annotations
 import html
 import math
 import os
+from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -227,19 +228,22 @@ def _manual_team_setup(repo: RosterRepository, season: int) -> None:
 
 
 def _edit_team_settings(team: dict[str, Any], repo: RosterRepository) -> None:
-    # Reject even an editor left open before the pilot restriction was enabled.
-    if os.environ.get('SDL_RESTRICTED_PILOT') == '1':
-        st.info("League settings are fixed for this pilot. Use Manage to edit your lineup.")
-        return
+    # Keep the original revision across reruns/snapshot updates, not a fresh
+    # pre-read that could silently bless stale form values.
+    draft_key = f"cc_settings_draft_{team['id']}"
+    if draft_key not in st.session_state:
+        st.session_state[draft_key] = {"team": deepcopy(team), "roster": repo.team_roster(str(team["id"]))}
+    draft = st.session_state[draft_key]
+    team, roster = draft["team"], draft["roster"]
     league = team.get("fantasy_leagues") or {}
-    roster = repo.team_roster(str(team["id"]))
     current_counts = {slot: sum(1 for row in roster if str(row["slot_type"]) == slot) for slot in DEFAULT_SLOTS}
-    st.markdown("#### Edit league settings")
+    st.markdown("#### League Settings")
+    st.caption("Applies only to this fantasy team. Full PPR scoring stays unchanged. Saved players are preserved.")
     with st.form(f"cc_edit_team_{team['id']}"):
         left, right = st.columns(2)
-        league_name = left.text_input("League name", value=str(league.get("name", "")))
-        team_name = right.text_input("Fantasy team name", value=str(team.get("name", "")))
-        passing_td = st.radio("QB passing touchdowns", [4, 6], index=1 if int(league.get("passing_td_points", 4)) == 6 else 0, horizontal=True, format_func=lambda value: f"{value} points")
+        league_name = left.text_input("League name", value=str(league.get("name", "")), max_chars=80, key=f"cc_edit_{team['id']}_league")
+        team_name = right.text_input("Fantasy team name", value=str(team.get("name", "")), max_chars=80, key=f"cc_edit_{team['id']}_name")
+        passing_td = st.radio("QB passing touchdowns", [4, 6], index=1 if int(league.get("passing_td_points", 4)) == 6 else 0, horizontal=True, format_func=lambda value: f"{value} points", key=f"cc_edit_{team['id']}_td")
         st.caption("Roster format · reductions remove empty slots only")
         columns, desired = st.columns(4), {}
         for index, slot_type in enumerate(DEFAULT_SLOTS):
@@ -248,13 +252,34 @@ def _edit_team_settings(team: dict[str, Any], repo: RosterRepository) -> None:
     if not submitted:
         return
     try:
-        repo.reconcile_roster_slots(str(team["id"]), roster, desired)
-        repo.update_league(str(team["league_id"]), name=league_name, passing_td_points=int(passing_td))
-        repo.update_team_name(str(team["id"]), team_name)
-        st.success("League settings saved.")
+        repo.save_team_settings(team, roster, name=league_name, team_name=team_name,
+                                passing_td_points=int(passing_td), slot_counts=desired)
+        st.session_state.pop(draft_key, None)
+        st.session_state[f"cc_settings_open_{team['id']}"] = False
+        st.session_state["cc_settings_saved"] = str(team["id"])
         st.rerun()
     except (SupabaseAPIError, ValueError) as error:
         st.error(str(error))
+
+
+def _toggle_league_settings(team_id: str) -> None:
+    key = f"cc_settings_open_{team_id}"
+    st.session_state[key] = not st.session_state.get(key, False)
+    st.session_state.pop(f"cc_settings_draft_{team_id}", None)
+    for widget_key in list(st.session_state):
+        if widget_key.startswith(f"cc_edit_{team_id}_"):
+            st.session_state.pop(widget_key, None)
+
+
+def _league_settings_panel(team: dict[str, Any], repo: RosterRepository) -> None:
+    team_id = str(team["id"])
+    if st.session_state.pop("cc_settings_saved", None) == team_id:
+        st.success("League settings saved. Your saved players are unchanged.")
+    st.button("Cancel settings" if st.session_state.get(f"cc_settings_open_{team_id}", False) else "League Settings",
+              key=f"cc_settings_toggle_{team_id}", width="stretch",
+              on_click=_toggle_league_settings, args=(team_id,))
+    if st.session_state.get(f"cc_settings_open_{team_id}", False):
+        _edit_team_settings(team, repo)
 
 
 def _roster_editor(team: dict[str, Any], roster: list[dict[str, Any]], repo: RosterRepository, pool: pd.DataFrame) -> None:
@@ -800,14 +825,13 @@ def render_command_center(api: SupabaseAPI, app_url: str, season: int, player_po
         st.query_params["qb"] = scoring
         st.rerun()
     _show_save_notice(selected_id)
+    _league_settings_panel(selected_team, repo)
     _dashboard(selected_team, repo, player_pool, weekly, metadata, datetime.now(timezone.utc), roster_catalog)
     if os.environ.get('SDL_RESTRICTED_PILOT') == '1':
-        st.session_state.pop("cc_team_settings_open", None)
-        st.caption("League settings are fixed for this pilot. Use Manage to edit your lineup.")
         return
     settings_key = "cc_team_settings_open"
     st.button(
-        "Close team settings" if st.session_state.get(settings_key, False) else ('Team settings' if os.environ.get('SDL_RESTRICTED_PILOT') == '1' else 'Team settings and additional teams'),
+        "Close additional teams" if st.session_state.get(settings_key, False) else "Additional teams",
         key="cc_team_settings_toggle",
         width="stretch",
         on_click=_toggle_panel,
@@ -816,7 +840,6 @@ def render_command_center(api: SupabaseAPI, app_url: str, season: int, player_po
     if st.session_state.get(settings_key, False):
         selected_team = next(t for t in teams if str(t["id"]) == selected_id)
         st.caption(f"Signed in as {session.email}")
-        _edit_team_settings(selected_team, repo)
         if os.environ.get('SDL_RESTRICTED_PILOT') != '1':
             st.divider()
             _team_setup(repo, season, player_pool)

@@ -69,6 +69,22 @@ class SupabaseAPI:
             if status in {400, 401} and path.startswith("/auth/"):
                 raise SupabaseAPIError("The email or password was not accepted.") from None
             if status in {400, 403, 409} and path.startswith("/rest/"):
+                if path == "/rest/v1/rpc/save_team_settings":
+                    try:
+                        payload = error.response.json()
+                    except ValueError:
+                        payload = {}
+                    message = payload.get("message") if isinstance(payload, dict) else None
+                    # Never expose arbitrary provider/SQL errors or private identifiers.
+                    safe = {
+                        "Settings changed. Close League Settings and reopen it before saving.",
+                        "Occupied roster slots cannot be removed. Move or remove those players first.",
+                        "This league is shared by multiple teams. No settings were changed.",
+                        "League settings are unavailable for this account.",
+                        "Invalid league settings. Check names, scoring and roster counts.",
+                    }
+                    raise SupabaseAPIError(message if message in safe else
+                        "League settings were not saved. Close League Settings and reopen it before trying again.") from None
                 raise SupabaseAPIError("The roster could not be saved. Reload it and verify position eligibility; another visit may have changed it.") from None
             if status == 429:
                 raise SupabaseAPIError("Too many attempts. Please wait before trying again.", retryable=True) from None
@@ -125,7 +141,7 @@ class SupabaseAPI:
         return self._request(method, f"/rest/v1/{table}{suffix}", access_token=access_token, json=payload, prefer=prefer)
 
     def rpc(self, access_token: str, function: str, payload: dict[str, Any]) -> Any:
-        allowed = {"begin_sleeper_sync", "record_sleeper_sync_result", "resolve_sleeper_sync", "swap_roster_players"}
+        allowed = {"begin_sleeper_sync", "record_sleeper_sync_result", "resolve_sleeper_sync", "swap_roster_players", "save_team_settings"}
         if function not in allowed:
             raise ValueError("Unknown Command Center function")
         return self._request("POST", f"/rest/v1/rpc/{function}", access_token=access_token, json=payload)
