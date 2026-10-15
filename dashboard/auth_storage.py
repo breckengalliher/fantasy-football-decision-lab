@@ -3,12 +3,37 @@ from pathlib import Path
 from uuid import uuid4
 import base64
 import json
+import os
 import streamlit as st
 import streamlit.components.v1 as components
 
 PENDING_KEY = '_cc_auth_storage_pending'
 RECORD_KEY = 'sdl_auth_session_v2'
+RETRY_KEY = '_cc_auth_bridge_mount_attempt'
+MAX_INITIALIZATION_RETRIES = 3
 _bridge = components.declare_component('sdl_auth_storage_v2', path=str(Path(__file__).parent / 'components' / 'auth_storage'))
+
+
+def _offer_initialization_retry(api, pending):
+    """Remount only an idle QA bridge, never replay an unacknowledged mutation.
+
+    This is a recovery control, not evidence that the component transport issue
+    is fixed. It does not inspect or remove localStorage, tokens or roster state.
+    """
+    if (os.getenv('RENDER_SERVICE_ID') != 'srv-db4ir249v7es7389sshg'
+            or getattr(api, 'url', '').rstrip('/') != 'https://deburhwrnuqeyexpezzo.supabase.co'):
+        return
+    if pending:
+        st.caption('Waiting for the existing session operation to be acknowledged. No retry or sign-out has been sent.')
+        return
+    attempt = st.session_state.get(RETRY_KEY, 0)
+    if attempt >= MAX_INITIALIZATION_RETRIES:
+        st.warning('The browser session connection is still unavailable. Your saved session and lineup have not been cleared. Keep any working tab open and report this connection problem.')
+        return
+    if st.button('Retry session connection', key='cc_retry_auth_bridge',
+                 help='Use this only if session restoration stays on screen. Reconnects this tab without clearing remembered sign-in or lineup edits.'):
+        st.session_state[RETRY_KEY] = attempt + 1
+        st.rerun()
 
 
 class AuthStorage:
@@ -55,6 +80,8 @@ class AuthStorage:
 
 def browser_auth_storage(api=None):
     pending = st.session_state.get(PENDING_KEY, {})
+    attempt = st.session_state.get(RETRY_KEY, 0)
+    bridge_key = 'cc_acknowledged_auth_storage_v2' + (f'_retry_{attempt}' if attempt else '')
     result = _bridge(changes=pending.get('changes', {}), operation_id=pending.get('operation_id', ''),
                      refresh=bool(pending.get('refresh')), clear=bool(pending.get('clear')),
                      clear_revision=pending.get('clear_revision'), clear_token=pending.get('clear_token'),
@@ -62,8 +89,9 @@ def browser_auth_storage(api=None):
                      force_revision=pending.get('force_revision'),
                      auth_url=api.url if api else '', publishable_key=api.publishable_key if api else '',
                      clear_recovery=bool(st.session_state.get('cc_recovery_link_seen')),
-                     key='cc_acknowledged_auth_storage_v2', default=None)
+                     key=bridge_key, default=None)
     if not result or (pending and result.get('operation_id') != pending['operation_id']):
+        _offer_initialization_retry(api, pending)
         return None
     if not result.get('ok'):
         st.warning('Browser storage is unavailable. Sign-in will last for this visit only.')
