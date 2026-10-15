@@ -1,6 +1,8 @@
 import json
 import pytest
 from src import qa_application_publisher as publisher
+from src.rollover import Target
+TARGET = Target(2026, 6)
 
 
 @pytest.fixture
@@ -8,6 +10,9 @@ def harness(tmp_path, monkeypatch):
     source = tmp_path / 'source'; source.mkdir()
     checkout = tmp_path / 'checkout'; checkout.mkdir()
     (source / publisher.FILES[-1]).write_text(json.dumps({'availability_certificate': {'schema_version': 2}}))
+    import src.rollover as rollover
+    monkeypatch.setattr(rollover, "validate_target", lambda *args: None)
+    monkeypatch.setattr(rollover, "verify_readers", lambda *args: {})
     calls = []
     def git(path, *args):
         calls.append(args)
@@ -32,14 +37,14 @@ def harness(tmp_path, monkeypatch):
 
 def test_dry_run_never_mutates_checkout(harness):
     source, checkout, calls, _ = harness
-    assert publisher.publish(source, checkout, {})['status'] == 'validated-not-published'
+    assert publisher.publish(source, checkout, {}, target=TARGET)['status'] == 'validated-not-published'
     assert list(checkout.iterdir()) == []
     assert not any(c[0] in {'add','commit','push'} for c in calls)
 
 
 def test_two_assets_then_pointer_one_nonforce_push(harness):
     source, checkout, calls, _ = harness
-    assert publisher.publish(source, checkout, {}, push=True)['status'] == 'published'
+    assert publisher.publish(source, checkout, {}, push=True, target=TARGET)['status'] == 'published'
     assert len([c for c in calls if c[0]=='commit']) == 2
     assert [c for c in calls if c[0]=='push'] == [('push','origin','HEAD:refs/heads/qa-app-data')]
     assert all((checkout/'data/processed'/f).exists() for f in publisher.FILES)
@@ -60,7 +65,7 @@ def test_failure_before_push_keeps_remote_last_good(harness, monkeypatch, failur
             return 'b'*40+'\trefs/heads/qa-app-data' if args[0]=='ls-remote' else result
         monkeypatch.setattr(publisher, 'git', git)
     with pytest.raises(ValueError):
-        publisher.publish(source, checkout, {}, push=True)
+        publisher.publish(source, checkout, {}, push=True, target=TARGET)
     assert not any(c[0]=='push' for c in calls)
 
 
@@ -69,7 +74,7 @@ def test_incomplete_baseline_cannot_publish(harness, metadata):
     source, checkout, calls, _ = harness
     (source/publisher.FILES[-1]).write_text(json.dumps(metadata))
     with pytest.raises(ValueError):
-        publisher.publish(source, checkout, {}, push=True)
+        publisher.publish(source, checkout, {}, push=True, target=TARGET)
     assert not any(c[0]=='commit' for c in calls)
 
 
@@ -80,5 +85,5 @@ def test_production_remote_rejected(harness, monkeypatch):
         return 'https://github.com/breckengalliher/fantasy-football-decision-lab.git' if args[0]=='remote' else result
     monkeypatch.setattr(publisher, 'git', git)
     with pytest.raises(ValueError, match='isolated'):
-        publisher.publish(source, checkout, {}, push=True)
+        publisher.publish(source, checkout, {}, push=True, target=TARGET)
     assert not (checkout/'data').exists()

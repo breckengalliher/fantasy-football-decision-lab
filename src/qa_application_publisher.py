@@ -23,7 +23,7 @@ def git(checkout, *args):
                                    stderr=subprocess.PIPE, timeout=120).decode().strip()
 
 
-def publish(source, checkout, observation, matches=(), push=False):
+def publish(source, checkout, observation, matches=(), push=False, *, target):
     checkout = Path(checkout).resolve()
     if (git(checkout, 'remote', 'get-url', 'origin') != REMOTE
             or git(checkout, 'branch', '--show-current') != BRANCH):
@@ -41,6 +41,8 @@ def publish(source, checkout, observation, matches=(), push=False):
     with tempfile.TemporaryDirectory(prefix='sdl-qa-publish-') as temporary:
         staged = Path(temporary) / 'snapshot'
         validation = stage_context(source, staged, observation, matches)
+        from src.rollover import validate_target
+        validate_target(staged, target)
         receipt = {'status': 'validated-not-published', 'previous_revision': previous,
                    'record_counts': validation['record_counts'], 'production_modified': False}
         if not push:
@@ -58,6 +60,8 @@ def publish(source, checkout, observation, matches=(), push=False):
         git(checkout, 'commit', '-m', 'QA validated scoring assets [skip ci]')
         revision = git(checkout, 'rev-parse', 'HEAD')
         manifest = write_manifest(destination, revision)
+        from src.rollover import verify_readers
+        verify_readers(destination, manifest, target)
         git(checkout, 'add', '-f', 'data/processed/publication_manifest.json')
         git(checkout, 'commit', '-m', 'QA atomic scoring publication pointer [skip ci]')
         git(checkout, 'push', 'origin', 'HEAD:refs/heads/' + BRANCH)
@@ -73,11 +77,15 @@ def main():
     parser.add_argument('--matches', required=True)
     parser.add_argument('--receipt', required=True)
     parser.add_argument('--publish', action='store_true')
+    parser.add_argument('--season', type=int, required=True)
+    parser.add_argument('--week', type=int, required=True)
     args = parser.parse_args()
     try:
+        from src.rollover import Target
         result = publish(args.source, args.checkout,
                          json.loads(Path(args.observation).read_text()),
-                         json.loads(Path(args.matches).read_text()), args.publish)
+                         json.loads(Path(args.matches).read_text()), args.publish,
+                         target=Target(args.season, args.week))
     except Exception as error:
         # No request URLs, tokens, subprocess stderr, or credential material.
         Path(args.receipt).write_text(json.dumps({'status': 'failed',

@@ -34,11 +34,11 @@ except ModuleNotFoundError:
 try:
     from dashboard.publication_client import read_metadata, verified_payload
     from dashboard.live_updates import watch_publication
-    from dashboard.snapshot_recovery import SnapshotRecovery
+    from dashboard.snapshot_recovery import SnapshotRecovery, retained_notice
 except ModuleNotFoundError:
     from publication_client import read_metadata, verified_payload
     from live_updates import watch_publication
-    from snapshot_recovery import SnapshotRecovery
+    from snapshot_recovery import SnapshotRecovery, retained_notice
 
 try:
     from dashboard.football_integrity import guard_forecasts, reconcile_board_identities
@@ -1426,7 +1426,7 @@ try:
         header_checked = datetime.fromisoformat(str(header_metadata.get("refreshed_at", datetime.now(timezone.utc).isoformat())).replace("Z", "+00:00"))
         context_checked = datetime.fromisoformat(str(header_metadata.get("context_refreshed_at", header_metadata.get("sportsdataio_refreshed_at", header_checked.isoformat()))).replace("Z", "+00:00"))
     if snapshot_restored:
-        st.warning("Update unavailable. Showing the last fully validated snapshot with its original timestamp. Verify current injuries and availability before changing your lineup.")
+        st.warning(retained_notice(header_metadata))
 except Exception as error:
     st.error("The weekly player dataset could not be loaded, so projections are temporarily unavailable.")
     st.info("Check your connection, then use **Refresh now**. The app will not show cached estimates as if they were current.")
