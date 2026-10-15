@@ -1,4 +1,6 @@
 // No third-party scripts. Provider credentials are publishable only; never passwords.
+const stage = typeof window !== 'undefined' && window.authInitStage ? window.authInitStage : () => {};
+stage('script_boot');
 const RECORD = 'sdl_auth_session_v2';
 const keys = [RECORD,'sdl_auth_refresh_token','sdl_auth_persistence','sdl_auth_persistence_expires_at'];
 const send = (type,extra={}) => parent.postMessage({isStreamlitMessage:true,type,...extra},location.origin);
@@ -51,14 +53,16 @@ function emit(args,auth_result) {
   let value;try{value={values:values(),recovery,auth_result,operation_id:args.operation_id||'',ok:true};}
   catch{value={values:{},recovery,operation_id:args.operation_id||'',ok:false};}
   const serialized=JSON.stringify(value);
-  if(serialized!==lastSent){lastSent=serialized;send('streamlit:setComponentValue',{value});}
+  if(serialized!==lastSent){lastSent=serialized;stage('ack_sent');send('streamlit:setComponentValue',{value});}
 }
 async function process(args) {
+  stage('process');
   if(args.clear_recovery)recovery=undefined;
   const id=args.operation_id||'';
   if(id&&completed.has(id)){emit(args,completed.get(id));return;}
   let result;
   const work=async()=>{
+    stage('lock_acquired');
     if(args.clear){const current=read(RECORD);if(current ? (current.revision===args.clear_revision||(args.clear_session_id&&sessionId(current.session)===args.clear_session_id)) : read('sdl_auth_refresh_token')===args.clear_token)clear();}
     for(const [key,value] of Object.entries(args.changes||{})){
       if(!keys.includes(key))continue;
@@ -86,8 +90,9 @@ try {
 }catch{}
 addEventListener('message',event=>{
   if(event.source!==parent||event.origin!==location.origin||event.data.type!=='streamlit:render')return;
+  stage('render_received');
   latestArgs=event.data.args||{};
   const args=latestArgs;running=running.then(()=>process(args));
 });
 addEventListener('storage',event=>{if(keys.includes(event.key)&&latestArgs)running=running.then(()=>emit(latestArgs,undefined));});
-send('streamlit:componentReady',{apiVersion:1});send('streamlit:setFrameHeight',{height:0});
+stage('ready_sent');send('streamlit:componentReady',{apiVersion:1});send('streamlit:setFrameHeight',{height:0});
