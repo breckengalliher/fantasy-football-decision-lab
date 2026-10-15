@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "version": "68063f79ccfb9719cb3c31f6f73f5f05566b59bec3437f5407ee690908a663dc",
+  "revision": "e610ee1a0e1709070deae9f1c12f28e7d0b46b5c",
+  "season": 2026,
+  "week": 6,
+  "validation_status": "passed",
+  "validated_at": "2026-10-15T14:27:31.700191+00:00",
+  "prepared_at": "2026-10-15T14:27:31.700191+00:00",
+  "files": {
+    "live_start_sit_board_4pt_current.parquet": {
+      "sha256": "a40fe337d059d5cedd2a1676a79b411e0ab83b352fbfaebdcd0c1940e3167590",
+      "record_count": 496
+    },
+    "live_start_sit_board_6pt_current.parquet": {
+      "sha256": "e5073e03ad2d995352ed1b0df0370ccd02b07b66e9f5c5a4646487ae40def55a",
+      "record_count": 496
+    },
+    "live_weekly_current.parquet": {
+      "sha256": "146b276f11b185fad425a08d0585dcf7ff09b8a155a52c6298e871cf58ef4364",
+      "record_count": 5506
+    },
+    "live_refresh_metadata.json": {
+      "sha256": "81d43e647d947f4f48e990a459831fb8d31f09121f37d8bc8585e9282c0ddf01",
+      "record_count": null
+    }
+  },
+  "projection_source_retrieved_at": "2026-10-15T14:25:57.646632+00:00",
+  "availability_source_retrieved_at": null,
+  "availability_source_updated_at": null,
+  "depth_source_updated_at": null,
+  "source_freshness": {
+    "injury": "unverified",
+    "depth": "unverified"
+  },
+  "availability_certification": {
+    "status": "restricted",
+    "sha256": "0671de9fd818313ad204c7ab6b0d5dd44613f6cf6c4d14a87be6db827592bb44",
+    "player_count": 177,
+    "all_availability_actions_blocked": true,
+    "unknown_count": 177
+  }
+}
