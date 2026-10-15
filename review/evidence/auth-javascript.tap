@@ -1,0 +1,32 @@
+✔ malformed setup fragment is removed and actionable: #type (6.9507ms)
+✔ malformed setup fragment is removed and actionable: #type (1.849ms)
+✔ malformed setup fragment is removed and actionable: #refresh_token (1.3947ms)
+✔ malformed setup fragment is removed and actionable: #access_token (1.2963ms)
+✔ reused or expired recovery error is visible without depending on a query flag:  (4.6531ms)
+✔ reused or expired recovery error is visible without depending on a query flag: ?view=command-center (1.356ms)
+✔ reused or expired recovery error is visible without depending on a query flag: ?view=command-center&recovery=1 (1.1622ms)
+✔ two tabs expire together: one provider rotation, both acknowledge newest record (15.4724ms)
+✔ reload/new iframe uses fresh shared access without rotating (2.5861ms)
+✔ replayed acknowledgement never rotates twice (1.6549ms)
+✔ legacy token migration is serialized and retains remember deadline (14.4078ms)
+✔ expired remember deadline clears without provider request (1.3639ms)
+✔ no Web Locks: do not issue unsafe refresh (1.8356ms)
+✔ timeout/provider outage preserves last credential and revision (1.9568ms)
+✔ rejected refresh clears remembered credentials (1.3747ms)
+✔ stale logout cannot delete a newer login or different account (1.4444ms)
+✔ logout clears same auth family even after refresh changes revision (0.9523ms)
+✔ server secret cannot be transmitted to browser provider request (1.2358ms)
+✔ storage change informs another tab without timer or provider request (1.3629ms)
+✔ native first load acknowledges without iframe messages or provider requests (16.2668ms)
+✔ identical native rerender does not cause an acknowledgment loop (2.2774ms)
+✔ native operation dedup survives cleanup and rerender (2.5977ms)
+✔ pending write completes once while unmounted and is acknowledged after remount (2.2359ms)
+✔ storage listener cleans up without clearing persisted state (1.8117ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 215.443
