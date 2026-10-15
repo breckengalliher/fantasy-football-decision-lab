@@ -306,7 +306,7 @@ def render_auth(api: SupabaseAPI, app_url: str) -> AuthSession | None:
     recovery = getattr(storage, "recovery", None)
     if os.environ.get('SDL_PILOT_PREPROVISIONED_ONLY') == '1' and (
             isinstance(recovery, dict) or st.session_state.get('cc_recovery_session')):
-        st.warning('Account setup is managed for this pilot. Use your provided sign-in account.')
+        st.warning('Account setup is managed for this pilot. Use your provided sign-in account. Contact the pilot organizer if you need help setting or resetting your password.')
         return None
     if isinstance(recovery, dict) and recovery.get("error"):
         st.session_state["cc_recovery_link_error"] = True
@@ -325,10 +325,13 @@ def render_auth(api: SupabaseAPI, app_url: str) -> AuthSession | None:
                     st.warning('This pilot is available to invited accounts only.')
                     return None
                 st.session_state["cc_recovery_session"] = asdict(verified)
+                st.session_state.pop("cc_recovery_link_error", None)
             except SupabaseAPIError:
                 st.session_state["cc_recovery_link_error"] = True
     if st.session_state.get("cc_recovery_link_error"):
-        st.warning("This account-access link could not be verified. Request a new recovery email.")
+        next_step = "Use the Recover access tab to request a new recovery email. Contact the organizer if you still cannot complete setup."
+        st.warning("This setup or recovery link could not be verified. It may have expired or already been used. "
+                   + next_step + " Open the newest email and keep the link private.")
     if st.session_state.get("cc_recovery_session"):
         if not account_allowed(st.session_state['cc_recovery_session'].get('user_id'), pilot_accounts):
             st.session_state.pop('cc_recovery_session', None)
@@ -338,12 +341,14 @@ def render_auth(api: SupabaseAPI, app_url: str) -> AuthSession | None:
             st.warning('This pilot is available to invited accounts only.')
             return None
         st.markdown("### Set your account password")
-        st.caption("Use a unique password with at least 12 characters. Your saved rosters will not change.")
+        st.caption("Create a unique password or passphrase with at least 12 characters. Enter it twice, then choose Save new password. This updates your password without changing your saved teams or lineups.")
         with st.form("cc_set_recovery_password"):
-            password = st.text_input("New password", type="password", key="cc_new_password")
-            confirmation = st.text_input("Confirm new password", type="password", key="cc_confirm_password")
+            password = st.text_input("New password", type="password", key="cc_new_password",
+                                     help="Use at least 12 characters and a password you do not reuse elsewhere.")
+            confirmation = st.text_input("Confirm new password", type="password", key="cc_confirm_password",
+                                         help="Enter the same new password again.")
             persistence = st.selectbox("After updating password", list(PERSISTENCE_OPTIONS), index=0)
-            submitted = st.form_submit_button("Save new password", type="primary")
+            submitted = st.form_submit_button("Save new password", type="primary", width="stretch")
         if submitted:
             if len(password) < 12:
                 st.error("Use at least 12 characters.")
@@ -357,6 +362,7 @@ def render_auth(api: SupabaseAPI, app_url: str) -> AuthSession | None:
                     st.session_state.pop("cc_recovery_session", None)
                     st.session_state.pop("cc_recovery_link_error", None)
                     st.session_state["cc_clear_recovery_inputs"] = True
+                    st.session_state["cc_password_updated"] = True
                     st.rerun()
                 except SupabaseAPIError as error:
                     st.error(str(error))
@@ -376,6 +382,8 @@ def render_auth(api: SupabaseAPI, app_url: str) -> AuthSession | None:
         st.warning('This pilot is available to invited accounts only.')
     if session:
         # Non-privileged refresh rehearsal, only on the named isolated QA service.
+        if st.session_state.pop("cc_password_updated", False):
+            st.success("Your password was saved. Your Sunday Command Center is ready below.")
         # No auth bypass, token changes, provider-setting changes or production UI.
         from dashboard.qa_telemetry import enabled as qa_enabled
         if qa_enabled() and api.url == 'https://deburhwrnuqeyexpezzo.supabase.co':
@@ -387,6 +395,8 @@ def render_auth(api: SupabaseAPI, app_url: str) -> AuthSession | None:
                     st.rerun()
         return session
 
+    if st.session_state.pop("cc_password_updated", False):
+        st.success("Your password was saved. Sign in below to open your Sunday Command Center.")
     st.markdown(
         '<section class="cc-auth-intro"><span>PRIVATE FANTASY DASHBOARD</span>'
         '<h2>Sign in to your Sunday Command Center</h2>'
@@ -394,10 +404,22 @@ def render_auth(api: SupabaseAPI, app_url: str) -> AuthSession | None:
         unsafe_allow_html=True,
     )
     if pilot_only:
-        sign_in_tab = st.tabs(['Sign in'])[0]
+        if os.environ.get('SDL_PILOT_PREPROVISIONED_ONLY') == '1':
+            sign_in_tab = st.tabs(['Sign in'])[0]
+        else:
+            sign_in_tab, recover_tab = st.tabs(['Sign in', 'Recover access'])
     else:
         sign_in_tab, register_tab, recover_tab = st.tabs(["Sign in", "Create account", "Recover access"])
     with sign_in_tab:
+        if pilot_only and os.environ.get('SDL_PILOT_PREPROVISIONED_ONLY') != '1':
+            st.info(
+                "**First time here?** Open your newest invitation email and choose "
+                "**Set your account password**. Create a unique password with "
+                "**at least 12 characters**, then sign in here.\n\n"
+                "Already set a password, or set one with the pilot organizer? Use that password below."
+            )
+        elif not pilot_only:
+            st.caption('Use your existing account password. To reset it, choose Recover access. Signing in does not create a password.')
         with st.form("command_center_sign_in"):
             email = st.text_input("Email", key="cc_login_email")
             password = st.text_input("Password", type="password", key="cc_login_password")
@@ -425,36 +447,42 @@ def render_auth(api: SupabaseAPI, app_url: str) -> AuthSession | None:
             except SupabaseAPIError as error:
                 st.error(str(error))
     if pilot_only:
-        st.caption('Account setup is managed for this pilot. Use your provided sign-in account.')
-        return None
-    with register_tab:
-        with st.form("command_center_register"):
-            email = st.text_input("Email", key="cc_register_email")
-            password = st.text_input("Create password", type="password", key="cc_register_password", help="Use at least 12 characters and a password you do not reuse elsewhere.")
-            persistence_label = st.selectbox(
-                "After account confirmation",
-                list(PERSISTENCE_OPTIONS),
-                index=2,
-                help="Use session only on a shared device.",
-                key="cc_register_persistence",
-            )
-            accepted = st.checkbox("I agree to store my account and fantasy roster data for this service.")
-            submitted = st.form_submit_button("Create account", type="primary", width="stretch")
-        if submitted:
-            if len(password) < 12:
-                st.error("Use a password with at least 12 characters.")
-            elif not accepted:
-                st.error("Confirm the data-storage notice before creating an account.")
-            else:
-                try:
-                    payload = api.sign_up(email.strip(), password)
-                    if payload.get("access_token"):
-                        _save(api.session_from_payload(payload), storage, PERSISTENCE_OPTIONS[persistence_label])
-                        st.rerun()
-                    st.success("Check your email to confirm the account, then return here to sign in.")
-                except SupabaseAPIError as error:
-                    st.error(str(error))
+        if os.environ.get('SDL_PILOT_PREPROVISIONED_ONLY') == '1':
+            st.caption('Account setup is managed for this pilot. Use your provided sign-in account. Contact the pilot organizer if you forgot your password. This form does not create a new password.')
+        else:
+            st.caption('Sign in with the password you already created. This form does not create a new password. Forgot your password, missing the email, or using an expired link? Choose Recover access, check your spam folder and use the newest email. Contact the pilot organizer if the invitation opens ordinary sign-in or you still need help. Keep passwords and links private.')
+        if os.environ.get('SDL_PILOT_PREPROVISIONED_ONLY') == '1':
+            return None
+    if not pilot_only:
+        with register_tab:
+            with st.form("command_center_register"):
+                email = st.text_input("Email", key="cc_register_email")
+                password = st.text_input("Create password", type="password", key="cc_register_password", help="Use at least 12 characters and a password you do not reuse elsewhere.")
+                persistence_label = st.selectbox(
+                    "After account confirmation",
+                    list(PERSISTENCE_OPTIONS),
+                    index=2,
+                    help="Use session only on a shared device.",
+                    key="cc_register_persistence",
+                )
+                accepted = st.checkbox("I agree to store my account and fantasy roster data for this service.")
+                submitted = st.form_submit_button("Create account", type="primary", width="stretch")
+            if submitted:
+                if len(password) < 12:
+                    st.error("Use a password with at least 12 characters.")
+                elif not accepted:
+                    st.error("Confirm the data-storage notice before creating an account.")
+                else:
+                    try:
+                        payload = api.sign_up(email.strip(), password)
+                        if payload.get("access_token"):
+                            _save(api.session_from_payload(payload), storage, PERSISTENCE_OPTIONS[persistence_label])
+                            st.rerun()
+                        st.success("Check your email to confirm the account, then return here to sign in.")
+                    except SupabaseAPIError as error:
+                        st.error(str(error))
     with recover_tab:
+        st.caption('Enter your account email below. Open the newest recovery email, choose a unique password with at least 12 characters, and save it on the password setup page. Check your spam folder if the email is missing. Keep your password and recovery link private.')
         with st.form("command_center_recovery"):
             email = st.text_input("Account email", key="cc_recovery_email")
             submitted = st.form_submit_button("Send recovery email", width="stretch")
@@ -462,7 +490,8 @@ def render_auth(api: SupabaseAPI, app_url: str) -> AuthSession | None:
             try:
                 api.recover(email.strip(), f"{app_url}?view=command-center&recovery=1")
             except SupabaseAPIError:
+                # Provider outcomes must not reveal account existence or pilot membership.
                 pass
-            st.success("If an account exists for that address, a recovery email will arrive shortly.")
+            st.info("If an account exists for that address, a recovery email may arrive. Check its inbox and spam folder and use the newest link to set a password with at least 12 characters. Delivery is not confirmed here. If nothing arrives, wait before retrying or contact the organizer. Recovery does not grant pilot access.")
     return None
 

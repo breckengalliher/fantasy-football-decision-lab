@@ -20,6 +20,18 @@ function env(initial=record(),fetchImpl){
 }
 const args=id=>({operation_id:id,auth_url:'https://qa.supabase.co',publishable_key:'sb_publishable_unit_test',refresh:true});
 
+for (const hash of ['#type=invite', '#type=recovery', '#refresh_token=fixture-only', '#access_token=fixture-only']) {
+ test('malformed setup fragment is removed and actionable: '+hash.split('=')[0], async()=>{
+  const e=env(null),tab=e.create(true,hash);
+  await tab.process({});
+  const value=tab.messages.findLast(x=>x.value).value;
+  assert.equal(value.recovery.error,true);
+  assert.equal(value.recovery.refresh_token,undefined);
+  assert.equal(tab.context.parent.replaced,'/');
+  assert.equal(e.requests(),0);
+ });
+}
+
 for(const search of ['', '?view=command-center', '?view=command-center&recovery=1']) {
  test('reused or expired recovery error is visible without depending on a query flag: '+search,async()=>{
   const e=env(null),tab=e.create(true,'#error=access_denied&error_code=otp_expired',search);

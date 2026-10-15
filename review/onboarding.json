@@ -1,0 +1,46 @@
+{
+  "base": "57ccd3051d7147783d5f6b81fdb5964d22833f95",
+  "scope": "Local self-service recovery candidate. No production changes, email or real password operations.",
+  "changes": [
+    "Invitation-mode restricted pilot offers Sign in and Recover access; signup remains hidden",
+    "All recovery outcomes receive the same neutral, delivery-unconfirmed public response",
+    "Verified provider identity and pilot allowlist still gate password setup and private access",
+    "Malformed auth fragments are removed and route to actionable recovery guidance",
+    "First-use help, existing 12-character creation validation, confirmation and save-success guidance"
+  ],
+  "acceptance": {
+    "valid_invite_and_recovery_to_authenticated_app": "PASS_LOCAL_MOCKS; HOSTED_QA_PENDING",
+    "expired_reused_malformed_links": "PASS_LOCAL forms and JS; hosted provider cases pending",
+    "11_rejected_12_accepted": "PASS_LOCAL_MOCKS; actual configured provider policy UNKNOWN, not changed",
+    "confirmation_mismatch": "PASS_LOCAL",
+    "known_unknown_outside_pilot_recovery_equivalence": "PASS_LOCAL including retryable provider outage",
+    "existing_signin_and_preserved_private_state": "PASS_LOCAL; real teams/lineups not accessed or changed",
+    "phone_keyboard": "PASS_BOUNDED_LOCAL_PREVIEW: 320/390 px, no horizontal overflow, recovery submit and show-password focus reachable; not hosted/physical-device certification",
+    "no_real_credentials_in_tests": "PASS: fabricated identities only",
+    "historical_PASS_preservation": "PASS: original receipts untouched"
+  },
+  "evidence": {
+    "python": "89 passed, zero failures/errors/skips; review/evidence/onboarding.xml",
+    "javascript": "24 passed; node --test tests/auth_bridge.test.cjs tests/auth_native.test.cjs",
+    "browser": "Local fabricated Streamlit preview inspected through browser; stopped after inspection",
+    "prior_evidence": "Original reports/signin-guidance-task2-20261015/completion.json belongs to its older source hash. Preserve its 95 functional and 21 browser results; reuse only observations for unchanged controls/layout, not a whole-candidate PASS.",
+    "runtime": "Windows Python 3.14; no renewed locked Linux qualification"
+  },
+  "remaining_gates": [
+    "Verify non-secret configured password minimum and redirect/link format in QA; report discrepancies without changing policy",
+    "Explicit permission and designated disposable QA identities required for email/setup/recovery; user completes real password changes",
+    "Hosted QA invitation/recovery, existing signin, saved-team preservation and changed-screen phone/keyboard checks",
+    "Collect actual tester success separately; no tester success inferred or messages sent"
+  ],
+  "proposed_release": {
+    "status": "NOT_READY_FOR_PRODUCTION_APPROVAL",
+    "scope": "auth_ui.py and auth fragment parser only; no League Settings, model or schema changes",
+    "configuration": "Review SDL_PILOT_PREPROVISIONED_ONLY=0 for invitation mode; retain SDL_RESTRICTED_PILOT=1, exact existing four-account allowlist and closed signup. Managed-only mode deliberately remains closed.",
+    "reconnects": "App/environment deployment may reconnect Streamlit sessions. Preserve/finish edits first; no credential rotation or intentional logout.",
+    "rollback": "Restore exact prior production artifact/configuration. No database restore or password reversal; user-changed passwords persist."
+  },
+  "production_changes": 0,
+  "emails_sent": 0,
+  "real_password_changes": 0,
+  "remote_pushes": 0
+}

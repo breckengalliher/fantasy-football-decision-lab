@@ -43,7 +43,7 @@ class Screen:
     def markdown(self, *args, **kwargs):
         pass
 
-    caption = warning = markdown
+    caption = warning = info = markdown
 
 
 def setup(monkeypatch, *, recovery=None, state=None, session=None):
@@ -123,8 +123,64 @@ def test_restricted_invitation_mode_still_hides_registration_and_public_recovery
     monkeypatch.setenv('SDL_PILOT_ACCOUNT_IDS', INVITES)
     monkeypatch.setenv('SNAPSHOT_BASE_URL', PIN)
     assert auth_ui.render_auth(api, 'https://qa.example/') is None
-    assert screen.offered_tabs == ['Sign in']
-    assert screen.forms == ['command_center_sign_in']
+    assert screen.offered_tabs == ['Sign in', 'Recover access']
+    assert screen.forms == ['command_center_sign_in', 'command_center_recovery']
+
+
+@pytest.mark.parametrize('preprovisioned', ['0', '1'])
+def test_first_time_setup_guidance_matches_pilot_mode(monkeypatch, preprovisioned):
+    screen, api = setup(monkeypatch)
+    monkeypatch.setenv('SDL_PILOT_PREPROVISIONED_ONLY', preprovisioned)
+    monkeypatch.setenv('SDL_RESTRICTED_PILOT', '1')
+    monkeypatch.setenv('SDL_PILOT_ACCOUNT_IDS', INVITES)
+    monkeypatch.setenv('SNAPSHOT_BASE_URL', PIN)
+    notices, captions = [], []
+    screen.info = notices.append
+    screen.caption = captions.append
+    assert auth_ui.render_auth(api, 'https://qa.example/') is None
+    assert screen.offered_tabs == (['Sign in'] if preprovisioned == '1' else ['Sign in', 'Recover access'])
+    assert screen.forms == (['command_center_sign_in'] if preprovisioned == '1' else ['command_center_sign_in', 'command_center_recovery'])
+    if preprovisioned == '0':
+        assert len(notices) == 1
+        assert 'newest invitation email' in notices[0]
+        assert 'at least 12 characters' in notices[0]
+        assert 'expired' in captions[0] and 'pilot organizer' in captions[0]
+        assert 'does not create a new password' in captions[0]
+    else:
+        assert notices == []
+        assert 'Use your provided sign-in account' in captions[0]
+
+
+def test_first_time_guidance_renders_above_signin_without_changing_password_validation(monkeypatch):
+    from streamlit.testing.v1 import AppTest
+    monkeypatch.setenv('SDL_PILOT_PREPROVISIONED_ONLY', '0')
+    monkeypatch.setenv('SDL_RESTRICTED_PILOT', '1')
+    monkeypatch.setenv('SDL_PILOT_ACCOUNT_IDS', INVITES)
+    monkeypatch.setenv('SNAPSHOT_BASE_URL', PIN)
+    monkeypatch.setattr(auth_ui, 'browser_auth_storage', lambda api: SimpleNamespace(recovery=None))
+    monkeypatch.setattr(auth_ui, 'restore_session', lambda api, storage: None)
+    monkeypatch.setattr(auth_ui, '_save', lambda *args: None)
+    app = AppTest.from_string('''
+import streamlit as st
+from dashboard.auth_ui import render_auth
+from dashboard.supabase_api import SupabaseAPIError
+class FakeAPI:
+    def sign_in(self, email, password):
+        st.session_state['submitted_length'] = len(password)
+        raise SupabaseAPIError('fixture sign-in reached')
+render_auth(FakeAPI(), 'https://qa.example/')
+''').run()
+    assert not app.exception
+    assert len(app.info) == 1 and 'at least 12 characters' in app.info[0].value
+    assert [field.label for field in app.text_input] == ['Email', 'Password', 'Account email']
+    assert [button.label for button in app.button] == ['Sign in', 'Send recovery email']
+    # A creation rule must not become a new login gate for existing passwords.
+    app.text_input[0].set_value('fixture@example.invalid')
+    app.text_input[1].set_value('short')
+    app.button[0].click().run()
+    assert app.session_state['submitted_length'] == 5
+    assert not app.exception
+    assert any('fixture sign-in reached' in error.value for error in app.error)
 
 
 def test_restricted_rejected_link_cannot_reach_password_form(monkeypatch):
@@ -137,7 +193,7 @@ def test_restricted_rejected_link_cannot_reach_password_form(monkeypatch):
         raise auth_ui.SupabaseAPIError('Account link could not be verified')
     api.refresh = rejected
     assert auth_ui.render_auth(api, 'https://qa.example/') is None
-    assert screen.forms == ['command_center_sign_in']
+    assert screen.forms == ['command_center_sign_in', 'command_center_recovery']
     assert 'cc_recovery_session' not in screen.session_state
     assert screen.session_state['cc_recovery_link_error'] is True
 
