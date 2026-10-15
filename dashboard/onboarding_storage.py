@@ -1,12 +1,11 @@
-"""QA-only, allowlisted guide preference without a blocking legacy iframe."""
-import os
+"""Allowlisted guide preference without a blocking legacy iframe."""
 from pathlib import Path
 import streamlit as st
+from dashboard.browser_components import native_enabled
 
 
 def enabled(api):
-    return (os.getenv('RENDER_SERVICE_ID') == 'srv-db4ir249v7es7389sshg'
-            and getattr(api, 'url', '').rstrip('/') == 'https://deburhwrnuqeyexpezzo.supabase.co')
+    return native_enabled(api)
 
 
 @st.cache_resource

@@ -6,6 +6,7 @@ import json
 import os
 import streamlit as st
 import streamlit.components.v1 as components
+from dashboard.browser_components import native_enabled
 
 PENDING_KEY = '_cc_auth_storage_pending'
 RECORD_KEY = 'sdl_auth_session_v2'
@@ -100,12 +101,8 @@ def browser_auth_storage(api=None):
     pending = st.session_state.get(PENDING_KEY, {})
     attempt = st.session_state.get(RETRY_KEY, 0)
     bridge_key = 'cc_acknowledged_auth_storage_v2' + (f'_retry_{attempt}' if attempt else '')
-    # QA rollout only: the legacy iframe can remain about:blank in Chrome before
-    # auth.js starts. Native transport runs the same session protocol without
-    # that iframe handshake. Production keeps its existing transport unchanged.
-    use_native = (os.getenv('RENDER_SERVICE_ID') == 'srv-db4ir249v7es7389sshg'
-                  and getattr(api, 'url', '').rstrip('/') == 'https://deburhwrnuqeyexpezzo.supabase.co')
-    transport = _native_bridge if use_native else _bridge
+    # Same session protocol; only the server-selected rendering transport differs.
+    transport = _native_bridge if native_enabled(api) else _bridge
     result = transport(changes=pending.get('changes', {}), operation_id=pending.get('operation_id', ''),
                      refresh=bool(pending.get('refresh')), clear=bool(pending.get('clear')),
                      clear_revision=pending.get('clear_revision'), clear_token=pending.get('clear_token'),
