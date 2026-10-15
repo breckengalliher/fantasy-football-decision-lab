@@ -83,7 +83,7 @@ def browser_auth_storage(api=None):
     # Both paths use identical credentials, component code and acknowledgment rules.
     if (os.getenv('RENDER_SERVICE_ID') == 'srv-db4ir249v7es7389sshg'
             and getattr(api, 'url', '').rstrip('/') == 'https://deburhwrnuqeyexpezzo.supabase.co'
-            and st.query_params.get('qa_auth_layout') in ('eager', 'probe', 'onepixel')):
+            and st.query_params.get('qa_auth_layout') in ('eager', 'probe', 'onepixel', 'navigate')):
         st.html(Path(__file__).parent / 'components' / 'auth_storage' / 'qa_frame_diagnostic.html', unsafe_allow_javascript=True)
         if st.query_params.get('qa_auth_layout') in ('eager', 'onepixel'):
             minimum = 'min-height:1px !important;' if st.query_params.get('qa_auth_layout') == 'onepixel' else ''

@@ -3,6 +3,7 @@
   if (location.hostname !== 'sdl-release-qa-8306.onrender.com' || window.sdlAuthFrameDiagnostic) return;
   window.sdlAuthFrameDiagnostic = true;
   let count = 0, last = '';
+  let navigated = false;
   const inspect = () => {
     const frame = document.querySelector('iframe[title="dashboard.auth_storage.sdl_auth_storage_v2"]');
     const result = {event:'frame_probe', present:!!frame};
@@ -17,6 +18,15 @@
           result.path = new URL(doc.URL).pathname;
           result.stage = doc.documentElement?.getAttribute('data-auth-stage');
           result.scriptCount = doc.scripts.length;
+          if (new URLSearchParams(location.search).get('qa_auth_layout') === 'navigate'
+              && count >= 3 && !navigated && doc.URL === 'about:blank' && doc.scripts.length === 0) {
+            const target = new URL(frame.src);
+            if (target.origin === location.origin && target.pathname === '/component/dashboard.auth_storage.sdl_auth_storage_v2/index.html') {
+              navigated = true;
+              result.recovery = 'blank_document_navigation_once';
+              frame.contentWindow.location.replace(target.href);
+            }
+          }
         }
       } catch (error) { result.errorType = error.name; }
     }
