@@ -131,12 +131,24 @@ class SportsDataIOClient:
         self.timeout = timeout
 
     def _get(self, path: str) -> Any:
-        response = requests.get(
-            f"{BASE_URL}/{path.lstrip('/')}",
-            params={"key": self.api_key},
-            timeout=self.timeout,
-        )
-        response.raise_for_status()
+        try:
+            response = requests.get(
+                f"{BASE_URL}/{path.lstrip('/')}",
+                headers={"Ocp-Apim-Subscription-Key": self.api_key},
+                timeout=self.timeout,
+            )
+            response.raise_for_status()
+        except requests.RequestException as error:
+            # Never expose the raw request, response body or credential header.
+            status = getattr(error.response, "status_code", None)
+            safe_response = requests.Response()
+            safe_response.status_code = status if status is not None else 0
+            raise requests.HTTPError(
+                f"SportsDataIO request failed (HTTP {status or 'unavailable'}); "
+                "refresh aborted; retain last-good snapshot. "
+                "Access-denial cause requires provider verification.",
+                response=safe_response,
+            ) from None
         return response.json()
 
     def weekly_context(self, season: int, week: int) -> SportsDataIOContext:
@@ -179,7 +191,9 @@ class SportsDataIOClient:
                 props = self._get(f"odds/json/BettingPlayerPropsByScoreID/{score_id}")
             except requests.RequestException as exc:
                 if getattr(exc.response, "status_code", None) in {401, 403}:
-                    market_status = "Player-prop feed is not included in the connected subscription"
+                    # Denied access is not an empty successful feed. Abort before
+                    # either scoring board or its timestamps can be overwritten.
+                    raise
                 elif getattr(exc.response, "status_code", None) != 404:
                     temporary_errors += 1
                 continue
