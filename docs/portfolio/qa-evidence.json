@@ -1,0 +1,76 @@
+{
+  "qualification_date": "2026-10-15",
+  "publication_date": "2026-10-26",
+  "candidate": "57ccd3051d7147783d5f6b81fdb5964d22833f95",
+  "status": "Historical restricted-pilot QA PASS",
+  "source_archive_sha256": "588a7d812112d8be5e54fb09686c3fe66f8d5f0c332b419182c95be846717848",
+  "closeout_sha256": "919981b42fa531d74874f6075e6e893d46f5730f402b076c74e67cd2a44acf12",
+  "regression_receipts": {
+    "linux-final.xml": {
+      "tests": 671,
+      "passed": 669,
+      "skipped": 2,
+      "failures": 0,
+      "errors": 0,
+      "sha256": "8052b890ad40ad4f35652b41b53c2bfa3f1d5c6c98dd14b25e90242ca1708fd3"
+    },
+    "windows-final.xml": {
+      "tests": 671,
+      "passed": 669,
+      "skipped": 2,
+      "failures": 0,
+      "errors": 0,
+      "sha256": "7ad00264aca81691079dc76da4b62cbb3950d6dbb6d986c21ee026efe9773a2f"
+    }
+  },
+  "qualification_gates": [
+    {
+      "gate": "Chrome authentication restoration",
+      "status": "PASS",
+      "scope": "Three fresh Chrome tabs and three reloads restored sign-in without clearing storage or changing browser protections. Native transport avoids the observed blank legacy component iframe; the underlying Chrome navigation trigger remains unknown and is not represented as a diagnosed extension problem."
+    },
+    {
+      "gate": "Browser account isolation and persistence",
+      "status": "PASS",
+      "scope": "Logout cleared private content in both agent test tabs; account B could not display account A's team via its URL; B reload restored B; switching back to A restored all 12 articles exactly. Existing negative-write evidence is reused only for unchanged API/repository/schema code."
+    },
+    {
+      "gate": "Actual browser response",
+      "status": "PASS",
+      "scope": "20 Command Center and 20 full WR comparison actions measured by browser event-to-double-animation-frame completion during four-account protocol load. P95 1109.175 and 806.385 ms; target 5000 ms. Not ten independent browsers, mobile paint timing, or a matched causal speedup claim."
+    },
+    {
+      "gate": "Final-runtime bounded load/recovery",
+      "status": "PASS_WITH_FINITE_OBSERVATION_SCOPE",
+      "scope": "Three 180-second cycles, four distinct QA accounts, 2306 successful roster/comparison operations, zero operation errors. Final quiet window 263.86 seconds; after session TTL RSS 294.45\u2013295.10 MiB, expired disconnected sessions zero, data cache fell to 22160 bytes, Arrow live allocation returned to 11618816 bytes, zero OOM/cleanup failures. No forced collection or cache clearing; not a proof of indefinite leak freedom."
+    },
+    {
+      "gate": "Unsaved edits and both-scoring snapshot adoption",
+      "status": "PASS",
+      "scope": "RB swap draft retained and old version held until editor closed. Both four-point roster and six-point comparison adopted rollback/restored versions without manual reload. Saved articles and source timestamps preserved. Only the agent's disposable draft was closed; no move was confirmed."
+    },
+    {
+      "gate": "Native unattended QA publication",
+      "status": "PASS",
+      "scope": "Run 38668614770 event=schedule, scheduler 4e473de7e7bcee9e0f30786243720e9c3fce708d, producer 71040d6dc38fea291cf7b8cc65260ebf01e36fc3. Actual application publication and authenticated private-reader receipts passed for both 496-row datasets. Producer and runtime identities are deliberately distinct. No production scheduling claim; bounded QA expiry remains October 15 16:00 UTC."
+    },
+    {
+      "gate": "Compatible runtime recovery and restoration",
+      "status": "PASS_IN_QA",
+      "scope": "Recovery b2b4a6e9cf71586bfdd1fa9b4da15d736418d9af deployed as dep-db83giom7kps73ctedqg; native sign-in, exact roster, both scoring formats and comparisons worked. Final retained artifact restored with no configuration changes as dep-db83hpqvcj2c7382k3fg. No database restore or down-migration."
+    },
+    {
+      "gate": "Full regressions and required assets",
+      "status": "PASS",
+      "scope": "Final: 669 passed and two documented absent-PDF-fixture skips on Linux and Windows. Recovery: 663 passed, same two skips on Linux. Existing JS tests: 25 passed. Containers verified ten required assets, thirteen identity aliases, Python 3.12.15 and matching locked runtime dependencies. Initial sandbox-constrained Windows attempt was interrupted; the normal-permission complete rerun passed."
+    }
+  ],
+  "limitations": [
+    "Forced refresh-token rotation was expressly skipped by the user; it is NOT marked passed.",
+    "Official availability remains unverified/restricted in this QA publication. The app correctly shows research baselines, unknown status and paused actionable recommendations. Normal not-yet-due reports are not application failures.",
+    "The full final load test ran on Render 2c-4g. Current production remains 1c-2g; this run does not certify that smaller plan.",
+    "The recovery artifact is newly qualified and production-configurable, not the historically deployed production version. Compatibility was executed against the current QA schema; target production schema/configuration still requires read-only preflight before activation.",
+    "The restricted production pilot requires an approved immutable publication. QA's private rolling reader and QA credentials cannot simply be copied into production. Live production publication/scheduling has not been changed or certified by this QA work."
+  ],
+  "note": "Sanitized summary of unchanged local receipts. Historical candidate and configuration scope remain unchanged; no new tests or production certification are claimed."
+}

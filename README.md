@@ -1,162 +1,75 @@
 # The Sunday Decision Lab
 
-A live fantasy-football evidence app for comparing weekly lineup options.
-It updates current-season player results and schedules from nflverse, then combines
-recent production, season production, and opponent performance against the position
-into a transparent PPR projection.
+![The Sunday Decision Lab](dashboard/assets/sunday-decision-lab-social-preview.png)
 
-## What the app answers
+**A fantasy football decision-support application built by Brecken Galliher.**
 
-> How do my players compare this week, and what evidence should inform my choice?
+SDL brought player research, weekly projections, lineup comparisons, and private roster management into a Python and Streamlit application. The project reached a restricted research pilot with authenticated users, validated data publication, and a tested recovery process.
 
-The decision room compares up to three players at the same position and shows:
+**Project status: retired from active operation on October 26, 2026.** The source and engineering history are preserved as a portfolio project. Hosting has been suspended and refresh workflows disabled; stored snapshots are historical and must not be used for current lineup decisions.
 
-- season PPR points per game;
-- YTD box-score production and recent workload;
-- average PPR output over the last four appearances;
-- recent-form change versus the season baseline;
-- the upcoming opponent's PPR allowed to the position;
-- an explainable projected outcome and confidence label.
-- neutral written outlooks for every selected player.
-- narrative-only player reporting from ESPN's NFL feed and recent public Bluesky reporter posts, with source links and no effect on projections.
+## Explore the project
 
-The system issues a Start or Sit verdict using only the documented core model.
-Injuries, participation, weather, game environment, betting totals, personnel
-changes, schedule-adjusted opponent strength, and uncertainty ranges are shown
-as independent Decision Context and do not change that verdict.
+- [Tested pilot release source](https://github.com/breckengalliher/fantasy-football-decision-lab/tree/57ccd3051d7147783d5f6b81fdb5964d22833f95)
+- [Streamlit application](https://github.com/breckengalliher/fantasy-football-decision-lab/blob/57ccd3051d7147783d5f6b81fdb5964d22833f95/dashboard/app.py) and [projection implementation](https://github.com/breckengalliher/fantasy-football-decision-lab/blob/57ccd3051d7147783d5f6b81fdb5964d22833f95/dashboard/data.py)
+- [Release test suite](https://github.com/breckengalliher/fantasy-football-decision-lab/tree/57ccd3051d7147783d5f6b81fdb5964d22833f95/tests)
+- [QA evidence summary](docs/portfolio/qa-evidence.json)
+- [Original README preserved at retirement](docs/portfolio/original-README.md), including historical setup instructions
 
-Only verified nflverse player IDs with an upcoming game, at least two appearances,
-and position-specific recent workload are included in the chooser. This prevents
-demo names, inactive roster entries, and fringe players without meaningful usage
-from crowding the comparison.
+The default branch contains earlier development history. The pinned release above identifies the tested pilot runtime; later review branches retain work that was not part of that runtime.
 
-## Projection model
+## Product and engineering work
 
-The current model deliberately favors clarity and stability:
+SDL addressed a practical question: **How do my players compare this week, and what evidence should inform my choice?** The application combined scoring-aware player comparisons, recent production and workload, matchup context, written outlooks, and saved team selections. Four-point and six-point passing-touchdown formats were handled separately.
 
-```text
-form estimate = 65% × last-four PPR/G + 35% × season PPR/G
-projection = (90% season PPR/G + 10% last-four PPR/G) × conservative matchup adjustment
+The engineering work extended beyond the comparison screen:
+
+- **Private account and roster handling:** Supabase authentication, row-level access controls, session restoration, and account-isolation checks.
+- **Safe editing:** unsaved-draft protection, guarded saves, and snapshot adoption that waits for the user to finish editing.
+- **Reliable publication:** provider retrieval and validation separated from the public application; versioned snapshots and last-good recovery prevent partial or failed refreshes from silently replacing trusted data.
+- **Honest availability:** incomplete or unverified source information remains restricted or unknown instead of producing a confident actionable recommendation.
+- **Release discipline:** candidate-linked regression receipts, separate QA infrastructure, bounded multi-account performance checks, and recovery rehearsals.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    A[Football data sources] --> B[Python retrieval and validation]
+    B --> C[Projection and context pipeline]
+    C --> D[Versioned snapshot publication]
+    D --> E[Streamlit application]
+    F[Supabase authentication and private rosters] <--> E
+    G[Python and JavaScript tests] --> B
+    G --> E
 ```
 
-The weights were selected with a leakage-safe 2021–2023 backtest and checked on
-the untouched 2024 season. The raw matchup index is capped between 0.85 and 1.15, and only 25% of that
-adjustment reaches the projection. The effective matchup effect is therefore
-limited to ±3.75%. A noisy defense ranking cannot overwhelm player production.
+The deployed application consumed validated snapshots rather than fetching paid provider data for each visitor. Public analytical data and private account state had separate storage paths. Docker and Render supplied the hosted runtime; GitHub Actions and an isolated scheduler supported refresh and QA publication workflows.
 
-Confidence is based on player-game and opponent-position sample sizes. It does
-not represent injury certainty.
+The projection engine used historical and recent production, workload, touchdown regression, bounded matchup adjustments, and separate quarterback scoring formats. Supplemental reporting and availability context had explicit ownership and validation rules. The pinned implementation is the authority for the release; older methodology notes describe earlier iterations.
 
-## Live data
+## Verified QA results
 
-The app reads the current `player_stats` and `schedules` releases from
-[nflverse](https://github.com/nflverse/nflverse-data) and caches them for one
-hour. The UI includes a manual refresh action.
+The retained October 15 release qualification for commit `57ccd3051d7147783d5f6b81fdb5964d22833f95` recorded:
 
-The core nflverse layer includes player results, schedules, snaps, pace,
-schedule-adjusted opponent context, and daily injury/practice reports. Sleeper
-provides a once-daily fallback designation when nflverse has no designation and
-is also used to flag source disagreements. Pregame weather, available game
-totals, and depth charts become available when SportsDataIO is connected.
-Breaking news remains an explicit limitation rather than being silently treated
-as neutral.
+| Check | Recorded result | Scope |
+| --- | --- | --- |
+| Python regression suite | 669 passed, 2 documented fixture skips on both Linux and Windows | The pinned final candidate |
+| JavaScript suite | 25 passed | Existing release component tests |
+| Multi-account operations | 2,306 successful operations; zero operation errors | Four QA accounts, three 180-second cycles |
+| Command Center response | P95 1,109 ms | 20 browser actions during bounded QA load |
+| Player comparison response | P95 806 ms | 20 browser actions during bounded QA load |
+| Recovery | Compatible runtime restored and checked in QA | No database restore or down-migration |
 
-### Optional SportsDataIO context
+These are historical engineering measurements, not a claim of indefinite uptime, broad public-launch readiness, or superiority to commercial projections. Model evaluation and operational validation were kept separate. The restricted pilot retained availability limitations.
 
-The app includes an optional SportsDataIO adapter for pregame weather, game
-totals, and depth-chart context. Copy
-`.streamlit/secrets.toml.example` to `.streamlit/secrets.toml`, then store your
-private NFL API key there:
+## Preserved development history
 
-```toml
-SPORTSDATAIO_API_KEY = "your-private-key"
-```
+The [onboarding work](https://github.com/breckengalliher/fantasy-football-decision-lab/pull/2) and [safe rollover work](https://github.com/breckengalliher/fantasy-football-decision-lab/pull/3) remain inspectable with their review history. Their final preserved commits are `2c286db` and `421f17b`, respectively. They are not represented as deployed features. Draft, trade, and waiver roadmap ideas are not represented as completed functionality.
 
-You may alternatively define the `SPORTSDATAIO_API_KEY` environment variable.
-Never commit the real key. Provider data is displayed as Decision Context and
-is deliberately excluded from the Start/Sit model.
+The original release evidence remains unchanged in the local project archive. This public case study publishes a narrow summary without private rosters, invitation links, passwords, provider keys, or database backups.
 
-## Run locally
+## Running or studying the code
 
-```bash
-pip install -r dashboard/requirements.txt
-streamlit run dashboard/app.py
-```
+Use the pinned release when investigating the qualified runtime. Its Dockerfile, dependency files, tests, and configuration examples describe that revision. Historical instructions may depend on credentials or snapshots that are no longer active. Review provider terms before obtaining or redistributing data. Existing deployment files are retained as history; do not enable them just to browse the project.
 
-On Windows, `run_dashboard.ps1` launches the app after the dependencies are
-installed.
-
-## Production refreshes
-
-GitHub Actions owns the production schedule. `general-context-refresh.yml`
-updates injuries, depth charts, weather, game context, reporting and roster
-photos at 6:00 AM and 5:00 PM Central. `daily-injury-refresh.yml` performs
-lightweight injury, availability, weather and depth-chart checks during
-practice-report and game-day windows without recalculating projections.
-`weekly-production-refresh.yml` performs the full post-week projection rebuild
-and complete test suite every Tuesday at 6:00 AM America/Chicago. The workflows can be
-run manually, serialize through one production-refresh concurrency group, retain
-downloadable artifacts, and publish validated snapshots to the repository's
-raw cloud endpoint. The app checks that endpoint every five minutes, so a
-data-only update does not need to restart the Render service.
-The SportsDataIO key is read only from the protected GitHub Actions repository
-secret named `SPORTSDATAIO_API_KEY`. The public Streamlit process reads only
-these committed snapshots and never calls an upstream provider on behalf of a
-visitor.
-
-`market-data-refresh.yml` checks every 30 minutes but uses an adaptive gate
-before calling the provider: every 6 hours Tuesday–Wednesday, every 2 hours
-Thursday–Friday, hourly Saturday, and every 30 minutes from 8:00 AM–11:00 PM
-Central on Sunday and Monday (six hours overnight). It updates only the
-supplemental player-prop fields and never recalculates the core projection.
-
-The same cloud refresh collects a limited set of recent journalism and public
-reporter posts for roster-relevant players. It stores short theme-based
-summaries and source links inside the published snapshot. This reporting layer
-is appended only after projections and verdicts are finalized; it cannot change
-any projection, range, ranking, or Start/Sit label.
-
-## Always-on hosting
-
-Community Cloud remains the preview deployment. Continuous availability uses
-the paid Render web service defined in `render.yaml`, built from the repository
-`Dockerfile`. Render checks Streamlit's `/_stcore/health` endpoint and
-is deployed when application code changes; data-only snapshot commits do not
-restart the service.
-
-The web container contains only the public application and committed snapshot
-files. It does not receive `SPORTSDATAIO_API_KEY` and cannot call production
-providers. GitHub Actions remains the only production snapshot writer.
-
-### Protected manual refresh center
-
-Visitors can use **Check for latest updates** to reload the newest validated
-cloud snapshot without calling a provider. The optional admin refresh center
-securely dispatches the existing GitHub Actions workflows from the hosted app.
-Configure these protected Render environment variables:
-
-- `ADMIN_REFRESH_PASSWORD`: the private password used to unlock admin controls.
-- `GITHUB_ACTIONS_TOKEN`: a fine-grained GitHub token with Actions write access
-  to `breckengalliher/fantasy-football-decision-lab`.
-- `REFRESH_GITHUB_REPOSITORY`: optional repository override; defaults to the
-  production repository above.
-
-The password and token stay server-side. The controls reject overlapping jobs
-and enforce a 15-minute cooldown. **Run everything** dispatches the full weekly
-workflow, rebuilding both scoring formats, refreshing context, running the test
-suite and publishing only validated snapshots.
-
-## Project structure
-
-```text
-dashboard/app.py          # Streamlit decision experience
-dashboard/data.py         # live loading and feature calculations
-tests/test_live_dashboard.py
-notebooks/                # retained research and model-validation history
-src/                      # retained historical pipeline utilities
-```
-
-## Responsible use
-
-This is a fantasy-football decision aid, not a guarantee or betting product.
-Always check official player status and late news before kickoff.
+This project is a decision aid and research application, not a guarantee of player outcomes or a betting service.
